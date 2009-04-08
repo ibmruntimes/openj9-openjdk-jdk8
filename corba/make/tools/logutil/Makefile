@@ -1,5 +1,5 @@
 #
-# Copyright 2005 Sun Microsystems, Inc.  All Rights Reserved.
+# Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -24,24 +24,20 @@
 #
 
 #
-# Compiler settings for all platforms and the default compiler for each.
+# Makefile for building the idlj tool
 #
 
-# Windows uses Microsoft compilers by default
-ifeq ($(PLATFORM), windows)
-  override CC_VERSION = msvc
-endif
+BUILDDIR = ../..
+PACKAGE = com.sun.tools.corba.se.logutil
+PRODUCT = tools
+PROGRAM = MC
+include $(BUILDDIR)/common/Defs.gmk
 
-# Solaris uses Sun Studio compilers by default
-ifeq ($(PLATFORM), solaris)
-  override CC_VERSION = sun
-endif
+BUILDTOOL_SOURCE_ROOT = $(SHARE_SRC)/classes
+BUILDTOOL_MAIN        = $(PKGDIR)/MC.java
 
-# Linux uses GNU compilers by default
-ifeq ($(PLATFORM), linux)
-  override CC_VERSION = gcc
-endif
-
-# Get the compiler specific settings
-include $(JDK_MAKE_SHARED_DIR)/Compiler-$(CC_VERSION).gmk
+#
+# Build tool jar rules.
+#
+include $(BUILDDIR)/common/BuildToolJar.gmk
 

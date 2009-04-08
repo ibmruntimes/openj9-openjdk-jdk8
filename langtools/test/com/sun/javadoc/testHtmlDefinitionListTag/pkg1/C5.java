@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,8 +23,43 @@
  * have any questions.
  */
 
-package sun.misc;
+package pkg1;
 
-public interface JavaIODeleteOnExitAccess extends Runnable {
-    public void run();
+import java.io.Serializable;
+
+/**
+ * Test for Serializable
+ *
+ * @author Bhavesh Patel
+ * @deprecated This class is no longer used.
+ */
+@Deprecated
+public abstract class C5 implements Serializable {
+
+    /**
+     * The name for this class.
+     *
+     * @serial
+     */
+    private String name;
+
+    /**
+     * @serial
+     */
+    private int publicKey;
+
+    /**
+     * Constructor for serialization only.
+     */
+    protected C5() {
+
+    }
+
+    /**
+     * Prints general information.
+     *
+     */
+    public void printInfo() {
+
+    }
 }
