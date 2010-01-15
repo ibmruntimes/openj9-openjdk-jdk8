@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,18 +21,8 @@
  * have any questions.
  */
 
-package sun.dyn.empty;
-
-/**
- * An empty class in an empty package.
- * Used as a proxy for unprivileged code, since making access checks
- * against it will only succeed against public methods in public types.
- * <p>
- * This class also stands (internally to sun.dyn) for the type of a
- * value that cannot be produced, because the expression of this type
- * always returns abnormally.  (Cf. Nothing in the closures proposal.)
- * @author jrose
- */
-public class Empty {
-    private Empty() { throw new InternalError(); }
+class HelloPathWorld {
+    public static void main(String... args) {
+        System.out.println("Hello World!");
+    }
 }

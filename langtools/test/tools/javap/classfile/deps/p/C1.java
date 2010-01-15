@@ -23,18 +23,15 @@
  * have any questions.
  */
 
-package sun.dyn.empty;
+package p;
 
-/**
- * An empty class in an empty package.
- * Used as a proxy for unprivileged code, since making access checks
- * against it will only succeed against public methods in public types.
- * <p>
- * This class also stands (internally to sun.dyn) for the type of a
- * value that cannot be produced, because the expression of this type
- * always returns abnormally.  (Cf. Nothing in the closures proposal.)
- * @author jrose
- */
-public class Empty {
-    private Empty() { throw new InternalError(); }
+public class C1 {
+    C2 c2;
+}
+
+class C2 {
+    C3 c3;
+}
+
+class C3 {
 }
