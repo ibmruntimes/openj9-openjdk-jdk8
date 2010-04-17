@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2010 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,8 +21,25 @@
  * have any questions.
  */
 
-/**
- * Dummy type to compile.
+/*
+ * @test
+ * @bug 6707226
+ * @summary Tests the value updating in Expression
+ * @author Sergey Malenkov
  */
-public class Foo {
+
+import java.beans.Expression;
+
+public class Test6707226 {
+    public static void main(String[] args) throws Exception {
+        Object value = new Object();
+
+        Expression expression = new Expression(value, Object.class, "new", null);
+        if (!value.equals(expression.getValue()))
+            throw new Error("the value is updated unexpectedly");
+
+        expression.execute();
+        if (value.equals(expression.getValue()))
+            throw new Error("the value is not updated as expected");
+    }
 }
