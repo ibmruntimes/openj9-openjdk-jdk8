@@ -1,13 +1,10 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -24,28 +21,8 @@
  * questions.
  */
 
-/*
- * wrapper acosh(x)
- */
+// key: compiler.err.cannot.create.array.with.diamond
 
-#include "fdlibm.h"
-
-#ifdef __STDC__
-        double acosh(double x)          /* wrapper acosh */
-#else
-        double acosh(x)                 /* wrapper acosh */
-        double x;
-#endif
-{
-#ifdef _IEEE_LIBM
-        return __ieee754_acosh(x);
-#else
-        double z;
-        z = __ieee754_acosh(x);
-        if(_LIB_VERSION == _IEEE_ || isnan(x)) return z;
-        if(x<1.0) {
-                return __kernel_standard(x,x,29); /* acosh(x<1) */
-        } else
-            return z;
-#endif
+class CannotCreateArrayWithDiamond {
+    Object[] array = new Object<>[3];
 }

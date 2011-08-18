@@ -1,13 +1,10 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,22 +20,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+import java.io.ObjectStreamField;
+import java.io.Serializable;
 
-/* __ieee754_gamma_r(x, signgamp)
- * Reentrant version of the logarithm of the Gamma function
- * with user provide pointer for the sign of Gamma(x).
- *
- * Method: See __ieee754_lgamma_r
- */
-
-#include "fdlibm.h"
-
-#ifdef __STDC__
-        double __ieee754_gamma_r(double x, int *signgamp)
-#else
-        double __ieee754_gamma_r(x,signgamp)
-        double x; int *signgamp;
-#endif
-{
-        return __ieee754_lgamma_r(x,signgamp);
+public class SerialFieldTest implements Serializable {
+    /**
+     * @serialField
+     */
+    private static final ObjectStreamField[] serialPersistentFields = {
+        new ObjectStreamField("i", int.class),
+    };
 }
