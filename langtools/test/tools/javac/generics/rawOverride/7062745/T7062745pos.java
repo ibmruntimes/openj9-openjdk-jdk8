@@ -1,13 +1,10 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -24,22 +21,22 @@
  * questions.
  */
 
-/* __ieee754_gamma(x)
- * Return the logarithm of the Gamma function of x.
+/*
+ * @test
+ * @bug 7062745
+ * @summary  Regression: difference in overload resolution when two methods are maximally specific
  *
- * Method: call __ieee754_gamma_r
+ * @compile T7062745pos.java
  */
 
-#include "fdlibm.h"
+import java.util.*;
 
-extern int signgam;
+class T7062745pos {
+    interface A { List<Number> getList(); }
+    interface B { List getList(); }
+    interface AB extends A, B {}
 
-#ifdef __STDC__
-        double __ieee754_gamma(double x)
-#else
-        double __ieee754_gamma(x)
-        double x;
-#endif
-{
-        return __ieee754_gamma_r(x,&signgam);
+    void test(AB ab) {
+        Number n = ab.getList().get(1);
+    }
 }
