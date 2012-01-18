@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,8 +21,15 @@
  * questions.
  */
 
-// key: compiler.err.unsupported.encoding
-// options: -encoding UNSUPPORTED -doe
-// run: simple
+/*
+ * @test
+ * @bug 4881269
+ * @summary improve diagnostic for ill-formed tokens
+ * @compile/fail/ref=T4881269.out -XDrawDiagnostics T4881269.java
+ */
 
-class UnsupportedEncoding { }
+public class T4881269 {
+    java.io..PrintStream s;
+    void m() { System.err..println(); }
+    void m(Object.. o) { }
+}
