@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,16 +21,11 @@
  * questions.
  */
 
-package java.util.prefs;
-
-class MacOSXPreferencesFactory implements PreferencesFactory {
-    @Override
-    public Preferences userRoot() {
-        return MacOSXPreferences.getUserRoot();
-    }
-
-    @Override
-    public Preferences systemRoot() {
-        return MacOSXPreferences.getSystemRoot();
+// key: compiler.err.bad.initializer
+import java.util.List;
+class ForeachBadInitialization {
+    void m() {
+        List<String> s = null;
+        for (a : s) {}
     }
 }

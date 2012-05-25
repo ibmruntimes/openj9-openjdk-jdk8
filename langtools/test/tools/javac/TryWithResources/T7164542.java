@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,16 +21,24 @@
  * questions.
  */
 
-package java.util.prefs;
+/*
+ * @test
+ * @bug 7164542
+ * @summary try-with-resources: problem with intersection types
+ * @compile T7164542.java
+ */
 
-class MacOSXPreferencesFactory implements PreferencesFactory {
-    @Override
-    public Preferences userRoot() {
-        return MacOSXPreferences.getUserRoot();
-    }
-
-    @Override
-    public Preferences systemRoot() {
-        return MacOSXPreferences.getSystemRoot();
+public class T7164542 {
+    public static <S extends Readable & AutoCloseable,
+                       T extends Appendable & AutoCloseable>
+    void copy(S s, T t, int size) throws Exception {
+        /*
+         * compiler used to fail here with:
+         *     symbol:   method close()
+         *     location: interface Readable
+         *     Fatal Error: Unable to find method close
+         */
+        try (S src = s; T trg = t) {
+        }
     }
 }
