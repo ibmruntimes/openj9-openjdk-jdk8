@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2002, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,26 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.sun.corba.se.impl.orbutil;
+
+package jdk.nashorn.internal.runtime.arrays;
+
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
- * Based on feedback from bug report 4452016, all class loading
- * in the ORB is isolated here.  It is acceptable to use
- * Class.forName only when one is certain that the desired class
- * should come from the core JDK.
+ * Reverse iterator over a ScriptObjectMirror
  */
-public class ORBClassLoader
-{
-    public static Class loadClass(String className)
-        throws ClassNotFoundException
-    {
-        return ORBClassLoader.getClassLoader().loadClass(className);
+final class ReverseScriptObjectMirrorIterator extends ScriptObjectMirrorIterator {
+
+    ReverseScriptObjectMirrorIterator(final ScriptObjectMirror obj, final boolean includeUndefined) {
+        super(obj, includeUndefined);
+        this.index = JSType.toUint32(obj.containsKey("length")? obj.getMember("length") : 0) - 1;
     }
 
-    public static ClassLoader getClassLoader() {
-        if (Thread.currentThread().getContextClassLoader() != null)
-            return Thread.currentThread().getContextClassLoader();
-        else
-            return ClassLoader.getSystemClassLoader();
+    @Override
+    public boolean isReverse() {
+        return true;
+    }
+
+    @Override
+    protected boolean indexInArray() {
+        return index >= 0;
+    }
+
+    @Override
+    protected long bumpIndex() {
+        return index--;
     }
 }
+
