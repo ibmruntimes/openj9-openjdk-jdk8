@@ -25,21 +25,17 @@
 
 package jdk.nashorn.internal.runtime.arrays;
 
+import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
 /**
- * Reverse iterator over a NativeArray
+ * Reverse iterator over a map
  */
-final class ReverseArrayIterator extends ArrayIterator {
+final class ReverseScriptObjectIterator extends ScriptObjectIterator {
 
-    /**
-     * Constructor
-     * @param array array to iterate over
-     * @param includeUndefined should undefined elements be included in iteration
-     */
-    public ReverseArrayIterator(final ScriptObject array, final boolean includeUndefined) {
-        super(array, includeUndefined);
-        this.index = array.getArray().length() - 1;
+    ReverseScriptObjectIterator(final ScriptObject obj, final boolean includeUndefined) {
+        super(obj, includeUndefined);
+        this.index = JSType.toUint32(obj.getLength()) - 1;
     }
 
     @Override

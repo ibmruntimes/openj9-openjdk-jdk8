@@ -25,27 +25,42 @@
 
 package jdk.nashorn.internal.runtime.arrays;
 
-import java.util.NoSuchElementException;
-import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import java.lang.reflect.Array;
 
 /**
- * Iterator over a map
+  * Iterator over a Java List.
  */
-class MapIterator extends ArrayLikeIterator<Object> {
+class JavaArrayIterator extends ArrayLikeIterator<Object> {
 
-    protected final ScriptObject obj;
-    private final long length;
+    /** Array to iterate over */
+    protected final Object array;
 
-    MapIterator(final ScriptObject obj, final boolean includeUndefined) {
+    /** length of array */
+    protected final long length;
+
+    /**
+     * Constructor
+     * @param array array to iterate over
+     * @param includeUndefined should undefined elements be included in iteration
+     */
+    protected JavaArrayIterator(final Object array, final boolean includeUndefined) {
         super(includeUndefined);
-        this.obj    = obj;
-        this.length = JSType.toUint32(obj.getLength());
-        this.index  = 0;
+        assert array.getClass().isArray() : "expecting Java array object";
+        this.array = array;
+        this.length = Array.getLength(array);
     }
 
+    /**
+     * Is the current index still inside the array
+     * @return true if inside the array
+     */
     protected boolean indexInArray() {
         return index < length;
+    }
+
+    @Override
+    public Object next() {
+        return Array.get(array, (int)bumpIndex());
     }
 
     @Override
@@ -55,26 +70,11 @@ class MapIterator extends ArrayLikeIterator<Object> {
 
     @Override
     public boolean hasNext() {
-        if (length == 0L) {
-            return false; //return empty string if toUint32(length) == 0
-        }
-
-        while (indexInArray()) {
-            if (obj.has(index) || includeUndefined) {
-                break;
-            }
-            bumpIndex();
-        }
-
         return indexInArray();
     }
 
     @Override
-    public Object next() {
-        if (indexInArray()) {
-            return obj.get(bumpIndex());
-        }
-
-        throw new NoSuchElementException();
+    public void remove() {
+        throw new UnsupportedOperationException("remove");
     }
 }
