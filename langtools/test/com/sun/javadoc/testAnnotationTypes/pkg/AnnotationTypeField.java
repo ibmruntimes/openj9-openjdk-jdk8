@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,12 +21,15 @@
  * questions.
  */
 
-package sun.lwawt;
+package pkg;
 
-/*
- * Every time the TextField (or TextArea) change selection, every other text components
- * must immediately clear their selections.
+import java.lang.annotation.*;
+
+/**
+ * This is just a test for annotation type fields.
  */
-interface SelectionClearListener {
-   void clearSelection();
+@Documented public @interface AnnotationTypeField {
+    String DEFAULT_NAME = "test";
+
+    String name() default DEFAULT_NAME;
 }
