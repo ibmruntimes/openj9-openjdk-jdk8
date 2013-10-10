@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,23 +21,15 @@
  * questions.
  */
 
-package sun.lwawt.macosx;
+package pkg;
 
-import java.awt.Window;
-import sun.lwawt.LWMouseInfoPeer;
-import sun.lwawt.LWWindowPeer;
+import java.lang.annotation.*;
 
-public class CMouseInfoPeer extends LWMouseInfoPeer
-{
-    //If a new window is to appear under the cursor,
-    //we get wrong window.
-    //This is a workaround for macosx.
-    @Override
-    public boolean isWindowUnderMouse(Window w) {
-        if (w == null) {
-            return false;
-        }
+/**
+ * This is just a test for annotation type fields.
+ */
+@Documented public @interface AnnotationTypeField {
+    String DEFAULT_NAME = "test";
 
-        return ((LWWindowPeer)w.getPeer()).getPlatformWindow().isUnderMouse();
-    }
+    String name() default DEFAULT_NAME;
 }
