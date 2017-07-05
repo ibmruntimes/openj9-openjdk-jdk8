@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,35 +23,24 @@
  * questions.
  */
 
-/* double gamma(double x)
- * Return the logarithm of the Gamma function of x.
- *
- * Method: call gamma_r
- */
+package sun.security.krb5;
 
-#include "fdlibm.h"
+import javax.security.auth.kerberos.KeyTab;
+import sun.misc.Unsafe;
 
-extern int signgam;
+public class KerberosSecrets {
+    private static final Unsafe unsafe = Unsafe.getUnsafe();
+    private static JavaxSecurityAuthKerberosAccess javaxSecurityAuthKerberosAccess;
 
-#ifdef __STDC__
-        double gamma(double x)
-#else
-        double gamma(x)
-        double x;
-#endif
-{
-#ifdef _IEEE_LIBM
-        return __ieee754_gamma_r(x,&signgam);
-#else
-        double y;
-        y = __ieee754_gamma_r(x,&signgam);
-        if(_LIB_VERSION == _IEEE_) return y;
-        if(!finite(y)&&finite(x)) {
-            if(floor(x)==x&&x<=0.0)
-                return __kernel_standard(x,x,41); /* gamma pole */
-            else
-                return __kernel_standard(x,x,40); /* gamma overflow */
-        } else
-            return y;
-#endif
+    public static void setJavaxSecurityAuthKerberosAccess
+            (JavaxSecurityAuthKerberosAccess jsaka) {
+        javaxSecurityAuthKerberosAccess = jsaka;
+    }
+
+    public static JavaxSecurityAuthKerberosAccess
+            getJavaxSecurityAuthKerberosAccess() {
+        if (javaxSecurityAuthKerberosAccess == null)
+            unsafe.ensureClassInitialized(KeyTab.class);
+        return javaxSecurityAuthKerberosAccess;
+    }
 }

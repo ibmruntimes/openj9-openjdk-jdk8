@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,21 +21,38 @@
  * questions.
  */
 
-package sun.misc;
+/*
+ * @test
+ * @bug 7061379
+ * @summary [Kerberos] Cross-realm authentication fails, due to nameType problem
+ * @compile -XDignore.symbol.file PrincipalNameEquals.java
+ * @run main/othervm PrincipalNameEquals
+ */
 
-import javax.security.auth.kerberos.KeyTab;
-import sun.security.krb5.EncryptionKey;
+import sun.security.jgss.GSSUtil;
 import sun.security.krb5.PrincipalName;
 
-/**
- * An unsafe tunnel to get non-public access to classes in the
- * javax.security.auth.kerberos package.
- */
-public interface JavaxSecurityAuthKerberosAccess {
-    /**
-     * Returns keys for a principal in a keytab.
-     * @return the keys, never null, can be empty.
-     */
-    public EncryptionKey[] keyTabGetEncryptionKeys(
-            KeyTab ktab, PrincipalName principal);
+public class PrincipalNameEquals {
+
+    public static void main(String[] args) throws Exception {
+
+        OneKDC kdc = new OneKDC(null);
+        kdc.writeJAASConf();
+        kdc.setOption(KDC.Option.RESP_NT, PrincipalName.KRB_NT_PRINCIPAL);
+
+        Context c, s;
+        c = Context.fromJAAS("client");
+        s = Context.fromJAAS("server");
+
+        c.startAsClient(OneKDC.SERVER, GSSUtil.GSS_KRB5_MECH_OID);
+        s.startAsServer(GSSUtil.GSS_KRB5_MECH_OID);
+
+        Context.handshake(c, s);
+
+        Context.transmit("i say high --", c, s);
+        Context.transmit("   you say low", s, c);
+
+        s.dispose();
+        c.dispose();
+    }
 }

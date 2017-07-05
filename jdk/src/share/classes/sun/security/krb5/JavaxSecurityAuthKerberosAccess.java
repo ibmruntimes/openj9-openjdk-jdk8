@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,28 +23,21 @@
  * questions.
  */
 
-/*
- * wrapper acosh(x)
+package sun.security.krb5;
+
+import javax.security.auth.kerberos.KeyTab;
+import sun.security.krb5.EncryptionKey;
+import sun.security.krb5.PrincipalName;
+
+/**
+ * An unsafe tunnel to get non-public access to classes in the
+ * javax.security.auth.kerberos package.
  */
-
-#include "fdlibm.h"
-
-#ifdef __STDC__
-        double acosh(double x)          /* wrapper acosh */
-#else
-        double acosh(x)                 /* wrapper acosh */
-        double x;
-#endif
-{
-#ifdef _IEEE_LIBM
-        return __ieee754_acosh(x);
-#else
-        double z;
-        z = __ieee754_acosh(x);
-        if(_LIB_VERSION == _IEEE_ || isnan(x)) return z;
-        if(x<1.0) {
-                return __kernel_standard(x,x,29); /* acosh(x<1) */
-        } else
-            return z;
-#endif
+public interface JavaxSecurityAuthKerberosAccess {
+    /**
+     * Returns keys for a principal in a keytab.
+     * @return the keys, never null, can be empty.
+     */
+    public EncryptionKey[] keyTabGetEncryptionKeys(
+            KeyTab ktab, PrincipalName principal);
 }
