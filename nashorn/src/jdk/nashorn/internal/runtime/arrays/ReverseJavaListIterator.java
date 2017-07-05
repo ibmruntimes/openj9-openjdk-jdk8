@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,32 +23,36 @@
  * questions.
  */
 
-package java.util.jar;
+package jdk.nashorn.internal.runtime.arrays;
+
+import java.util.List;
 
 /**
- * Thrown to indicate an attempt to access a JAR file with a {@link
- * Attributes.Name#PROFILE Profile} attribute that names a profile that
- * is not supported by this runtime.
- *
- * @since   1.8
+ * Reverse iterator over a List
  */
-public class UnsupportedProfileException extends RuntimeException {
-    private static final long serialVersionUID = -1834773870678792406L;
-
+final class ReverseJavaListIterator extends JavaListIterator {
     /**
-     * Constructs an {@code UnsupportedProfileException} with no detail
-     * message.
+     * Constructor
+     * @param list list to iterate over
+     * @param includeUndefined should undefined elements be included in iteration
      */
-    public UnsupportedProfileException() {
+    public ReverseJavaListIterator(final List<?> list, final boolean includeUndefined) {
+        super(list, includeUndefined);
+        this.index = list.size() - 1;
     }
 
-    /**
-     * Constructs an {@code UnsupportedProfileException} with the
-     * specified detail message.
-     *
-     * @param message the detail message
-     */
-    public UnsupportedProfileException(String message) {
-        super(message);
+    @Override
+    public boolean isReverse() {
+        return true;
+    }
+
+    @Override
+    protected boolean indexInArray() {
+        return index >= 0;
+    }
+
+    @Override
+    protected long bumpIndex() {
+        return index--;
     }
 }

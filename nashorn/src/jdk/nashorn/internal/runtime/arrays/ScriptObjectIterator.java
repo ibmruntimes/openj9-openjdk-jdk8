@@ -25,41 +25,27 @@
 
 package jdk.nashorn.internal.runtime.arrays;
 
+import java.util.NoSuchElementException;
+import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
 /**
- * Iterator over a NativeArray
+ * Iterator over a map
  */
-class ArrayIterator extends ArrayLikeIterator<Object> {
+class ScriptObjectIterator extends ArrayLikeIterator<Object> {
 
-    /** Array {@link ScriptObject} to iterate over */
-    protected final ScriptObject array;
+    protected final ScriptObject obj;
+    private final long length;
 
-    /** length of array */
-    protected final long length;
-
-    /**
-     * Constructor
-     * @param array array to iterate over
-     * @param includeUndefined should undefined elements be included in iteration
-     */
-    protected ArrayIterator(final ScriptObject array, final boolean includeUndefined) {
+    ScriptObjectIterator(final ScriptObject obj, final boolean includeUndefined) {
         super(includeUndefined);
-        this.array = array;
-        this.length = array.getArray().length();
+        this.obj    = obj;
+        this.length = JSType.toUint32(obj.getLength());
+        this.index  = 0;
     }
 
-    /**
-     * Is the current index still inside the array
-     * @return true if inside the array
-     */
     protected boolean indexInArray() {
         return index < length;
-    }
-
-    @Override
-    public Object next() {
-        return array.get(bumpIndex());
     }
 
     @Override
@@ -69,20 +55,26 @@ class ArrayIterator extends ArrayLikeIterator<Object> {
 
     @Override
     public boolean hasNext() {
-        if (!includeUndefined) {
-            while (indexInArray()) {
-                if (array.has(index)) {
-                    break;
-                }
-                bumpIndex();
+        if (length == 0L) {
+            return false; //return empty string if toUint32(length) == 0
+        }
+
+        while (indexInArray()) {
+            if (obj.has(index) || includeUndefined) {
+                break;
             }
+            bumpIndex();
         }
 
         return indexInArray();
     }
 
     @Override
-    public void remove() {
-        array.delete(index, false);
+    public Object next() {
+        if (indexInArray()) {
+            return obj.get(bumpIndex());
+        }
+
+        throw new NoSuchElementException();
     }
 }
