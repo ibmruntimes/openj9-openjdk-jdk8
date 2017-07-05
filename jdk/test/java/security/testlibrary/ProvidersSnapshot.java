@@ -1,13 +1,10 @@
-
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -24,22 +21,28 @@
  * questions.
  */
 
-/* __ieee754_lgamma(x)
- * Return the logarithm of the Gamma function of x.
- *
- * Method: call __ieee754_lgamma_r
- */
+import java.security.Provider;
+import java.security.Security;
 
-#include "fdlibm.h"
+public class ProvidersSnapshot {
 
-extern int signgam;
+    private Provider[] oldProviders;
 
-#ifdef __STDC__
-        double __ieee754_lgamma(double x)
-#else
-        double __ieee754_lgamma(x)
-        double x;
-#endif
-{
-        return __ieee754_lgamma_r(x,&signgam);
+    private ProvidersSnapshot() {
+        oldProviders = Security.getProviders();
+    }
+
+    public static ProvidersSnapshot create() {
+        return new ProvidersSnapshot();
+    }
+
+    public void restore() {
+        Provider[] newProviders = Security.getProviders();
+        for (Provider p: newProviders) {
+            Security.removeProvider(p.getName());
+        }
+        for (Provider p: oldProviders) {
+            Security.addProvider(p);
+        }
+    }
 }
