@@ -1,5 +1,5 @@
 #
-# Copyright 2003-2005 Sun Microsystems, Inc.  All Rights Reserved.
+# Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -24,30 +24,20 @@
 #
 
 #
-# Makefile for building all of JMX
+# Makefile for building the idlj tool
 #
 
 BUILDDIR = ../..
-PACKAGE = javax.management
-PRODUCT = sun
+PACKAGE = com.sun.tools.corba.se.logutil
+PRODUCT = tools
+PROGRAM = MC
 include $(BUILDDIR)/common/Defs.gmk
 
-#
-# Files to compile
-#
-AUTO_JAVA_PRUNE = snmp
-AUTO_FILES_JAVA_DIRS = javax/management com/sun/jmx com/sun/management/jmx 
+BUILDTOOL_SOURCE_ROOT = $(SHARE_SRC)/classes
+BUILDTOOL_MAIN        = $(PKGDIR)/MC.java
 
 #
-# Rules
+# Build tool jar rules.
 #
-include $(BUILDDIR)/common/Classes.gmk
-
-#
-# Clean up internal-use-only package.
-#
-clean clobber::
-	$(RM) -r $(CLASSDESTDIR)/com/sun/jmx \
-                 $(CLASSDESTDIR)/com/sun/management/jmx \
-                 $(CLASSDESTDIR)/org/omg/stub/javax/management/remote/rmi \
+include $(BUILDDIR)/common/BuildToolJar.gmk
 
