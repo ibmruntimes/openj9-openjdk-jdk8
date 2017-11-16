@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -213,7 +217,8 @@ RT_JAR_EXCLUDES += \
     $(LOCALEDATA_INCLUDES) \
     com/oracle/jrockit/jfr \
     oracle/jrockit/jfr \
-    jdk/jfr
+    jdk/jfr \
+    com/ibm/tools/attach/attacher
 
 # Find all files in the classes dir to use as dependencies. This could be more fine granular.
 ALL_FILES_IN_CLASSES := $(call not-containing, _the., $(filter-out %javac_state, \
@@ -506,7 +511,9 @@ TOOLS_JAR_INCLUDES := \
     sun/tools/native2ascii \
     sun/tools/serialver \
     sun/tools/tree \
-    sun/tools/util
+    sun/tools/util \
+    com/ibm/tools/attach/attacher
+
 
 # The sjavac tools is not ready for public consumption.
 TOOLS_JAR_EXCLUDES = com/sun/tools/sjavac
@@ -554,7 +561,29 @@ EXCLUDE_PROPWARN_PKGS = com.sun.java.swing.plaf.windows \
 # with a new module system (being discussed for JDK 8).
 #
 EXPORTED_PRIVATE_PKGS = com.oracle.net \
-    com.oracle.nio
+    com.oracle.nio \
+    com.ibm.cuda \
+    com.ibm.cuda.internal \
+    com.ibm.dataaccess \
+    com.ibm.gpu \
+    com.ibm.java.lang.management.internal \
+    com.ibm.jit \
+    com.ibm.jvm \
+    com.ibm.lang.management \
+    com.ibm.lang.management.internal \
+    com.ibm.le.conditionhandling \
+    com.ibm.oti.lang \
+    com.ibm.oti.reflect \
+    com.ibm.oti.shared \
+    com.ibm.oti.util \
+    com.ibm.oti.vm \
+    com.ibm.virtualization.management \
+    com.ibm.virtualization.management.internal \
+    com.ibm.tools.attach.target \
+    jdk.internal.org.objectweb.asm \
+    jdk.internal.org.objectweb.asm.commons \
+    jdk.internal.org.objectweb.asm.tree \
+    jdk.internal.org.objectweb.asm.util
 
 $(IMAGES_OUTPUTDIR)/symbols/_the.symbols: $(IMAGES_OUTPUTDIR)/lib/rt.jar
 	$(RM) -r $(IMAGES_OUTPUTDIR)/symbols/META-INF/sym
@@ -704,8 +733,9 @@ $(IMAGES_OUTPUTDIR)/lib/ext/zipfs.jar: $(JDK_OUTPUTDIR)/demo/nio/zipfs/zipfs.jar
 # This file is imported from hotspot in Import.gmk. Copying it into images/lib so that
 # all jars can be found in one place when creating images in Images.gmk. It needs to be
 # done here so that clean targets can be simple and accurate.
-$(IMAGES_OUTPUTDIR)/lib/sa-jdi.jar: $(JDK_OUTPUTDIR)/lib/sa-jdi.jar
-	$(install-file)
+# Not required for J9VM
+#$(IMAGES_OUTPUTDIR)/lib/sa-jdi.jar: $(JDK_OUTPUTDIR)/lib/sa-jdi.jar
+#	$(install-file)
 
 ##########################################################################################
 #

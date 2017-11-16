@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -90,9 +94,10 @@ ALL_JARS := $(FULL_JRE_JARS) \
     $(IMAGES_OUTPUTDIR)/lib/ct.sym \
     $(IMAGES_OUTPUTDIR)/src.zip
 
-ifeq ($(INCLUDE_SA), true)
-  ALL_JARS += $(IMAGES_OUTPUTDIR)/lib/sa-jdi.jar
-endif
+# sa-jdi not required for J9VM
+#ifeq ($(INCLUDE_SA), true)
+#  ALL_JARS += $(IMAGES_OUTPUTDIR)/lib/sa-jdi.jar
+#endif
 
 ifeq ($(OPENJDK_TARGET_OS), solaris)
   ifndef OPENJDK

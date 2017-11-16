@@ -1,4 +1,8 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2000, 2017 All Rights Reserved
+ * ===========================================================================
+ *
  * Copyright (c) 1997, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -44,15 +48,24 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Vector;                                                         
 import java.util.WeakHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;                                                  
+import java.util.regex.Matcher;                                                  
+import java.util.regex.PatternSyntaxException;                                  
+import java.util.StringTokenizer;
 import sun.misc.Resource;
 import sun.misc.URLClassPath;
 import sun.net.www.ParseUtil;
 import sun.security.util.SecurityConstants;
+import com.ibm.oti.shared.Shared;                                               
+import com.ibm.oti.shared.SharedClassHelperFactory;                             
+import com.ibm.oti.shared.SharedClassURLClasspathHelper;                        
+import com.ibm.oti.shared.HelperAlreadyDefinedException;                        
 
 /**
  * This class loader is used to load classes and resources from a search
@@ -76,6 +89,111 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
 
     /* The context to be used when loading classes and resources */
     private final AccessControlContext acc;
+    /* Private member fields used for Shared classes*/                           
+    private SharedClassURLClasspathHelper sharedClassURLClasspathHelper;         
+    private SharedClassMetaDataCache sharedClassMetaDataCache;                   
+                                                                                 
+    /*                                                                           
+     * Wrapper class for maintaining the index of where the metadata (codesource and manifest)  
+     * is found - used only in Shared classes context.                           
+     */                                                                          
+    private class SharedClassIndexHolder implements SharedClassURLClasspathHelper.IndexHolder {  
+        int index;                                                               
+                                                                                 
+        public void setIndex(int index) {                                        
+            this.index = index;                                                  
+        }                                                                        
+    }                                                                            
+                                                                                 
+    /*                                                                           
+     * Wrapper class for internal storage of metadata (codesource and manifest) associated with   
+     * shared class - used only in Shared classes context.                       
+     */                                                                          
+    private class SharedClassMetaData {                                          
+        private CodeSource codeSource;                                           
+        private Manifest manifest;                                               
+                                                                                 
+        SharedClassMetaData(CodeSource codeSource, Manifest manifest) {          
+            this.codeSource = codeSource;                                        
+            this.manifest = manifest;                                            
+        }                                                                        
+        public CodeSource getCodeSource() { return codeSource; }                 
+        public Manifest getManifest() { return manifest; }                       
+    }                                                                            
+                                                                                 
+    /*                                                                           
+     * Represents a collection of SharedClassMetaData objects retrievable by     
+     * index.                                                                    
+     */                                                                          
+    private class SharedClassMetaDataCache {                                     
+        private final static int BLOCKSIZE = 10;                                 
+        private SharedClassMetaData[] store;                                     
+                                                                                 
+        public SharedClassMetaDataCache(int initialSize) {                       
+            /* Allocate space for an initial amount of metadata entries */       
+            store = new SharedClassMetaData[initialSize];                        
+        }                                                                        
+                                                                                 
+        /**                                                                      
+         * Retrieves the SharedClassMetaData stored at the given index, or null  
+         * if no SharedClassMetaData was previously stored at the given index    
+         * or the index is out of range.                                         
+         */                                                                      
+        public synchronized SharedClassMetaData getSharedClassMetaData(int index) {  
+            if (index < 0 || store.length < (index+1)) {                         
+                return null;                                                     
+            }                                                                    
+            return store[index];                                                 
+        }                                                                        
+                                                                                 
+        /**                                                                      
+         * Stores the supplied SharedClassMetaData at the given index in the     
+         * store. The store will be grown to contain the index if necessary.     
+         */                                                                      
+        public synchronized void setSharedClassMetaData(int index,               
+                                                     SharedClassMetaData data) {  
+            ensureSize(index);                                                   
+            store[index] = data;                                                 
+        }                                                                        
+                                                                                 
+        /* Ensure that the store can hold at least index number of entries */    
+        private synchronized void ensureSize(int index) {                        
+            if (store.length < (index+1)) {                                      
+                int newSize = (index+BLOCKSIZE);                                 
+                SharedClassMetaData[] newSCMDS = new SharedClassMetaData[newSize];  
+                System.arraycopy(store, 0, newSCMDS, 0, store.length);           
+                store = newSCMDS;                                                
+            }                                                                    
+        }                                                                        
+    }                                                                            
+                                                                                 
+    /*                                                                           
+     * Return true if shared classes support is active, otherwise false.         
+     */                                                                          
+    private boolean usingSharedClasses() {                                       
+        return (sharedClassURLClasspathHelper != null);                          
+    }                                                                            
+                                                                                 
+    /*                                                                           
+     * Initialize support for shared classes.                                    
+     */                                                                          
+    private void initializeSharedClassesSupport(URL[] initialClassPath) {        
+        /* get the Shared class helper and initialize the metadata store if we are sharing */  
+        SharedClassHelperFactory sharedClassHelperFactory = Shared.getSharedClassHelperFactory();  
+                                                                                 
+        if (sharedClassHelperFactory != null) {                                  
+            try {                                                                
+                this.sharedClassURLClasspathHelper = sharedClassHelperFactory.getURLClasspathHelper(this, initialClassPath);  
+            } catch (HelperAlreadyDefinedException ex) { // thrown if we get 2 types of helper for the same classloader  
+                ex.printStackTrace();                                            
+            }                                                                    
+            /* Only need to create a meta data cache if using shared classes */  
+            if (usingSharedClasses()) {                                          
+                /* Create a metadata cache */                                    
+                this.sharedClassMetaDataCache = new SharedClassMetaDataCache(initialClassPath.length);  
+            }                                                                    
+        }                                                                        
+    }                                                                            
 
     /**
      * Constructs a new URLClassLoader for the given URLs. The URLs will be
@@ -103,8 +221,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         if (security != null) {
             security.checkCreateClassLoader();
         }
+        initializeSharedClassesSupport(urls);                                
         this.acc = AccessController.getContext();
-        ucp = new URLClassPath(urls, acc);
+        ucp = new URLClassPath(urls, null, this.acc, sharedClassURLClasspathHelper);
     }
 
     URLClassLoader(URL[] urls, ClassLoader parent,
@@ -147,8 +266,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         if (security != null) {
             security.checkCreateClassLoader();
         }
+        initializeSharedClassesSupport(urls);             
         this.acc = AccessController.getContext();
-        ucp = new URLClassPath(urls, acc);
+        ucp = new URLClassPath(urls, null, this.acc, sharedClassURLClasspathHelper);
     }
 
     URLClassLoader(URL[] urls, AccessControlContext acc) {
@@ -191,8 +311,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         if (security != null) {
             security.checkCreateClassLoader();
         }
+        initializeSharedClassesSupport(urls);
         acc = AccessController.getContext();
-        ucp = new URLClassPath(urls, factory, acc);
+        ucp = new URLClassPath(urls, factory, acc, sharedClassURLClasspathHelper);
     }
 
     /* A map (used as a set) to keep track of closeable local resources
@@ -342,6 +463,84 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         return ucp.getURLs();
     }
 
+    /* Stores a list of classes for which is show detailed class loading */      
+    private static Vector showClassLoadingFor = null;                            
+    /* Caches whether the vector showClassLoadingFor is empty */                 
+    private static boolean showLoadingMessages = false;                          
+    /* Property to use to setup the detailed classloading output */              
+    private final static String showClassLoadingProperty = "ibm.cl.verbose";     
+                                                                                 
+    /*                                                                           
+     * Initializes the showClassLoadingFor vector. All expressions are precompiled  
+     */                                                                          
+    static                                                                       
+    {                                                                            
+        Vector showClassLoadingFor = new Vector();                               
+        String classes = System.getProperty(showClassLoadingProperty);           
+        /* If the property exists then process the supplied file expressions */  
+        if (classes != null) {                                                   
+            StringTokenizer classMatchers = new StringTokenizer(classes, ",");   
+            while (classMatchers.hasMoreTokens()) {                              
+                String classMatcher = classMatchers.nextToken();                 
+                /* Do the replacements to allow more readable expressions to be supplied */  
+                String classMatcherExp = classMatcher.replaceAll("\\.", "\\.");  
+                classMatcherExp = classMatcherExp.replaceAll("\\*", ".*");       
+                Pattern pattern;                                                 
+                /* Add the compiled pattern to the vector */                     
+                try {                                                            
+                    pattern = Pattern.compile(classMatcherExp);                  
+                    showClassLoadingFor.addElement(pattern);                     
+                } catch (PatternSyntaxException e) {                             
+                    /*                                                           
+                     * The user has supplied something which has is not          
+                     * a legal regular expression (or isn't now that it has been  
+                     * transformed!) Warn the user and ignore this expression    
+                     */                                                          
+                    System.err.println("Illegal class matching expression \"" + classMatcher +  
+                        "\" supplied by property " + showClassLoadingProperty);  
+                }                                                                
+            }                                                                    
+        }                                                                        
+        /*                                                                       
+         * Cache whether a check should be made to see whether to show loading messages for  
+         * a particular class                                                    
+         */                                                                      
+        if (!showClassLoadingFor.isEmpty()) {                                    
+            showLoadingMessages = true;                                          
+        }                                                                        
+        URLClassLoader.showClassLoadingFor = showClassLoadingFor;                
+    }                                                                            
+                                                                                 
+                                                                                 
+    /*                                                                           
+     * Returns whether the class loading should be explicitly shown for a        
+     * particular class. This is determined by the system property ibm.cl.verbose  
+     * which contains a comma separated list of file expressions.                
+     * A file expression being a regular expression but with .* substituted for *  
+     * and \. substituted for . to allow a more readable form to be used         
+     * If no property exists or contains no expressions then showClassLoadingFor  
+     * will be an empty vector and this will be the only test each time this function  
+     * is called. Otherwise name will be matched against each expression in the vector  
+     * and if a match is found true is returned, otherwise false                 
+     */                                                                          
+    private boolean showClassLoading(String name)                                
+    {                                                                            
+        /* If there are supplied expressions try and match this class name against them */  
+        if (URLClassLoader.showLoadingMessages) {                                
+            Enumeration patterns = URLClassLoader.showClassLoadingFor.elements();  
+            while (patterns.hasMoreElements()) {                                 
+                Pattern pattern = (Pattern)patterns.nextElement();               
+                Matcher matcher = pattern.matcher(name);                         
+                if (matcher.matches()) {                                         
+                    return true;                                                 
+                }                                                                
+            }                                                                    
+        }                                                                        
+        /* Either no expressions or no matches */                                
+        return false;                                                            
+    }                                                                            
+                                                                                
+                                                                                
     /**
      * Finds and loads the class with the specified name from the URL search
      * path. Any URLs referring to JAR files are loaded and opened as needed
@@ -358,29 +557,41 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
     {
         final Class<?> result;
         try {
-            result = AccessController.doPrivileged(
-                new PrivilegedExceptionAction<Class<?>>() {
-                    public Class<?> run() throws ClassNotFoundException {
-                        String path = name.replace('.', '/').concat(".class");
-                        Resource res = ucp.getResource(path, false);
-                        if (res != null) {
-                            try {
-                                return defineClass(name, res);
-                            } catch (IOException e) {
-                                throw new ClassNotFoundException(name, e);
-                            }
-                        } else {
-                            return null;
-                        }
-                    }
-                }, acc);
+            /* Try to find the class from the shared cache using the class name.  If we found the class  
+             * and if we have its corresponding metadata (codesource and manifest entry) already cached,  
+             * then we define the class passing in these parameters.  If however, we do not have the  
+             * metadata cached, then we define the class as normal.  Also, if we do not find the class
+             * from the shared class cache, we define the class as normal.    
+             */                                                               
+            if (usingSharedClasses()) {                                      
+                SharedClassIndexHolder sharedClassIndexHolder = new SharedClassIndexHolder();
+                byte[] sharedClazz = sharedClassURLClasspathHelper.findSharedClass(name, sharedClassIndexHolder);
+                                                                            
+                if (sharedClazz != null) {                                   
+                    int indexFoundData = sharedClassIndexHolder.index;       
+                    SharedClassMetaData metadata = sharedClassMetaDataCache.getSharedClassMetaData(indexFoundData);
+                    if (metadata != null) {                                  
+                        try {                                                
+                            Class clazz = defineClass(name,sharedClazz,       
+                                               metadata.getCodeSource(),    
+                                               metadata.getManifest());       
+                            return clazz;                                  
+                        } catch (IOException e) {                         
+                            e.printStackTrace();                        
+                        }                                                
+                   }                                                  
+               }                                                         
+           }                                                      
+            ClassFinder loader = new ClassFinder(name, this);
+            Class clazz = (Class)AccessController.doPrivileged(loader, acc);
+            if (clazz == null) {                                  
+                       throw new ClassNotFoundException(name);          
+            }                                                               
+            return clazz;                                        
+
         } catch (java.security.PrivilegedActionException pae) {
             throw (ClassNotFoundException) pae.getException();
         }
-        if (result == null) {
-            throw new ClassNotFoundException(name);
-        }
-        return result;
     }
 
     /*
@@ -441,32 +652,110 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * used.
      */
     private Class<?> defineClass(String name, Resource res) throws IOException {
+        Class clazz = null;                                                 
+        CodeSource cs = null;                                               
+        Manifest man = null;                                               
         long t0 = System.nanoTime();
         int i = name.lastIndexOf('.');
         URL url = res.getCodeSourceURL();
         if (i != -1) {
             String pkgname = name.substring(0, i);
             // Check if package already loaded.
-            Manifest man = res.getManifest();
+            man = res.getManifest();
             definePackageInternal(pkgname, man, url);
         }
         // Now read the class bytes and define the class
         java.nio.ByteBuffer bb = res.getByteBuffer();
-        if (bb != null) {
-            // Use (direct) ByteBuffer:
-            CodeSigner[] signers = res.getCodeSigners();
-            CodeSource cs = new CodeSource(url, signers);
-            sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
-            return defineClass(name, bb, cs);
-        } else {
-            byte[] b = res.getBytes();
-            // must read certificates AFTER reading bytes.
-            CodeSigner[] signers = res.getCodeSigners();
-            CodeSource cs = new CodeSource(url, signers);
-            sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
-            return defineClass(name, b, 0, b.length, cs);
+       if (bb != null) {                                                   
+	    // Use (direct) ByteBuffer:                                  
+	    CodeSigner[] signers = res.getCodeSigners();               
+	    cs = new CodeSource(url, signers);                          
+            clazz = defineClass(name, bb, cs);                           
+	} else {                                                         
+             byte[] b = res.getBytes();                                 
+	    // must read certificates AFTER reading bytes.              
+	    CodeSigner[] signers = res.getCodeSigners();                 
+	    cs = new CodeSource(url, signers);                            
+	    clazz = defineClass(name, b, 0, b.length, cs);               
+	}                                                                 
+                                                                          
+        /*                                                                
+         * Since we have already stored the class path index (of where this resource came from), we can retrieve
+         * it here.  The storing is done in getResource() in URLClassPath.java.  The index is the specified
+         * position in the URL search path (see getLoader()).  The storeSharedClass() call below, stores the
+         * class in the shared class cache for future use.                
+         */                                                              
+        if (usingSharedClasses()) {                                      
+                                                                            
+            /* Determine the index into the search path for this class */      
+            int index = res.getClasspathLoadIndex();                      
+            /* Check to see if we have already cached metadata for this index */
+            SharedClassMetaData metadata = sharedClassMetaDataCache.getSharedClassMetaData(index);
+            /* If we have not already cached the metadata for this index... */
+            if (metadata == null) {                                      
+                /* ... create a new metadata entry */                   
+                metadata = new SharedClassMetaData(cs, man);             
+                /* Cache the metadata for this index for future use */      
+                sharedClassMetaDataCache.setSharedClassMetaData(index, metadata);
+                                                                           
+            }                                                            
+            boolean storeSuccessful = false;                              
+            try {                                                        
+               /* Store class in shared class cache for future use */      
+                storeSuccessful =                                          
+                  sharedClassURLClasspathHelper.storeSharedClass(clazz, index);
+            } catch (Exception e) {                                     
+                e.printStackTrace();                                     
+            }                                                           
         }
+                                                                             
+        return clazz;                                                        
     }
+    /*                                                                        
+     * Defines a class using the class bytes, codesource and manifest           
+     * obtained from the specified shared class cache. The resulting            
+     * class must be resolved before it can be used.  This method is            
+     * used only in a Shared classes context.                                   
+     */                                                                         
+    private Class defineClass(String name, byte[] sharedClazz, CodeSource codesource, Manifest man) throws IOException { 
+	int i = name.lastIndexOf('.');                                          
+	URL url = codesource.getLocation();                                     
+	if (i != -1) {                                                          
+	    String pkgname = name.substring(0, i);                              
+	    // Check if package already loaded.                                 
+	    Package pkg = getPackage(pkgname);                                  
+            if (pkg != null) {                                                  
+		// Package found, so check package sealing.                     
+		if (pkg.isSealed()) {                                           
+		    // Verify that code source URL is the same.                 
+		    if (!pkg.isSealed(url)) {                                   
+			throw new SecurityException(                            
+			    "sealing violation: package " + pkgname + " is sealed"); 
+		    }                                                           
+		} else {                                                        
+		    // Make sure we are not attempting to seal the package      
+		    // at this code source URL.                                 
+		    if ((man != null) && isSealed(pkgname, man)) {              
+			throw new SecurityException(                            
+			    "sealing violation: can't seal package " + pkgname +  
+			    ": already loaded");                                
+		    }                                                           
+		}                                                               
+	    } else {                                                            
+		if (man != null) {                                              
+		    definePackage(pkgname, man, url);                           
+		} else {                                                        
+                    definePackage(pkgname, null, null, null, null, null, null, null); 
+                }                                                               
+	    }                                                                   
+ 	}                                                                      
+	/*                                                                      
+         * Now read the class bytes and define the class.  We don't need to call  
+         * storeSharedClass(), since its already in our shared class cache.     
+         */                                                                     
+        return defineClass(name, sharedClazz, 0, sharedClazz.length, codesource); 
+     }                                                                          
+                                                                                
 
     /**
      * Defines a new package by name in this ClassLoader. The attributes
@@ -782,8 +1071,33 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         );
         ClassLoader.registerAsParallelCapable();
     }
+                                                                                
+final class ClassFinder implements PrivilegedExceptionAction                    
+  {                                                                              
+     private String name;                                                        
+     private ClassLoader classloader;                                            
+                                                                                 
+     public ClassFinder(String name, ClassLoader loader) {                       
+        this.name = name;                                                        
+        this.classloader = loader;                                               
+     }                                                                           
+                                                                                 
+     public Object run() throws ClassNotFoundException {                         
+	String path = name.replace('.', '/').concat(".class");                   
+        try {                                                                    
+            Resource res = ucp.getResource(path, false, classloader, showClassLoading(name)); 
+            if (res != null)                                                     
+                return defineClass(name, res);                                   
+        } catch (IOException e) {                                                
+                throw new ClassNotFoundException(name, e);                       
+        }                                                                        
+        return null;                                                             
+     }                                                                           
+  }                                                                              
 }
 
+                                                                                
+                                                                                
 final class FactoryURLClassLoader extends URLClassLoader {
 
     static {
@@ -814,3 +1128,4 @@ final class FactoryURLClassLoader extends URLClassLoader {
         return super.loadClass(name, resolve);
     }
 }
+

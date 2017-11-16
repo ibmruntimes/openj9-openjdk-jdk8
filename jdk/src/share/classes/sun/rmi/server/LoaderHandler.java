@@ -1,4 +1,8 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 1996, 2017 All Rights Reserved
+ * ===========================================================================
+ *
  * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -1003,6 +1007,9 @@ public final class LoaderHandler {
 
         // createClassLoader permission needed to create loader in context
         perms.add(new RuntimePermission("createClassLoader"));
+
+        // allow the applet classloader access to shared classes.
+        perms.add(new com.ibm.oti.shared.SharedClassPermission("sun.rmi.server.LoaderHandler$Loader", "read,write"));
 
         // add permissions to read any "java.*" property
         perms.add(new java.util.PropertyPermission("java.*","read"));

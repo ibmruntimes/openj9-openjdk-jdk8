@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # This is the "master security properties file".
 #
 # An alternate java.security properties file may be specified
@@ -223,6 +227,7 @@ package.access=sun.,\
                jdk.internal.,\
                jdk.nashorn.internal.,\
                jdk.nashorn.tools.,\
+               com.ibm.oti.,\
                com.sun.activation.registries.,\
                com.sun.java.accessibility.
 

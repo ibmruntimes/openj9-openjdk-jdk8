@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -286,62 +290,6 @@ $(BUILD_LIBINSTRUMENT): $(BUILD_LIBJAVA)
 BUILD_LIBRARIES += $(BUILD_LIBINSTRUMENT)
 
 ##########################################################################################
-
-BUILD_LIBMANAGEMENT_SRC += $(JDK_TOPDIR)/src/share/native/sun/management \
-    $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/sun/management
-
-BUILD_LIBMANAGEMENT_EXCLUDES :=
-
-BUILD_LIBMANAGEMENT_CFLAGS += -I$(JDK_TOPDIR)/src/share/native/sun/management
-
-ifneq ($(OPENJDK_TARGET_OS), solaris)
-  BUILD_LIBMANAGEMENT_EXCLUDES += SolarisOperatingSystem.c
-endif
-
-ifneq ($(OPENJDK_TARGET_OS), linux)
-  BUILD_LIBMANAGEMENT_EXCLUDES += LinuxOperatingSystem.c
-endif
-
-ifneq ($(OPENJDK_TARGET_OS), macosx)
-  BUILD_LIBMANAGEMENT_EXCLUDES += MacosxOperatingSystem.c
-endif
-
-LIBMANAGEMENT_OPTIMIZATION := HIGH
-ifneq ($(findstring $(OPENJDK_TARGET_OS), solaris linux), )
-  ifeq ($(ENABLE_DEBUG_SYMBOLS), true)
-    LIBMANAGEMENT_OPTIMIZATION := LOW
-  endif
-endif
-
-# Make it possible to override this variable
-LIBMANAGEMENT_MAPFILE ?= $(JDK_TOPDIR)/make/mapfiles/libmanagement/mapfile-vers
-
-$(eval $(call SetupNativeCompilation,BUILD_LIBMANAGEMENT, \
-    LIBRARY := management, \
-    OUTPUT_DIR := $(INSTALL_LIBRARIES_HERE), \
-    SRC := $(BUILD_LIBMANAGEMENT_SRC), \
-    EXCLUDE_FILES := $(BUILD_LIBMANAGEMENT_EXCLUDES), \
-    LANG := C, \
-    OPTIMIZATION := $(LIBMANAGEMENT_OPTIMIZATION), \
-    CFLAGS := $(CFLAGS_JDKLIB) $(BUILD_LIBMANAGEMENT_CFLAGS), \
-    MAPFILE := $(LIBMANAGEMENT_MAPFILE), \
-    LDFLAGS := $(LDFLAGS_JDKLIB) \
-        $(call SET_SHARED_LIBRARY_ORIGIN), \
-    LDFLAGS_solaris := -lkstat, \
-    LDFLAGS_SUFFIX := $(LDFLAGS_JDKLIB_SUFFIX), \
-    LDFLAGS_SUFFIX_windows := jvm.lib psapi.lib $(WIN_JAVA_LIB) advapi32.lib, \
-    LDFLAGS_SUFFIX_aix := -lperfstat,\
-    VERSIONINFO_RESOURCE := $(JDK_TOPDIR)/src/windows/resource/version.rc, \
-    RC_FLAGS := $(RC_FLAGS) \
-        -D "JDK_FNAME=management.dll" \
-        -D "JDK_INTERNAL_NAME=management" \
-        -D "JDK_FTYPE=0x2L", \
-    OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libmanagement, \
-    DEBUG_SYMBOLS := true))
-
-$(BUILD_LIBMANAGEMENT): $(BUILD_LIBJAVA)
-
-BUILD_LIBRARIES += $(BUILD_LIBMANAGEMENT)
 
 ##########################################################################################
 

@@ -1,5 +1,9 @@
 #!/bin/bash
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -117,7 +121,9 @@ fi
 ###
 ### Process command-line arguments
 ###
-conf_processed_arguments=()
+# Add default OpenJ9 closed extensions
+full_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+conf_processed_arguments=("--with-custom-make-dir=$full_script_dir/../../closed/make" "--with-add-source-root=$full_script_dir/../../closed/adds")
 conf_openjdk_target=
 
 for conf_option

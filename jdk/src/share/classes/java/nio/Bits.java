@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2000, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -604,7 +610,10 @@ class Bits {                            // package-private
     static int pageCount(long size) {
         return (int)(size + (long)pageSize() - 1L) / pageSize();
     }
-
+        
+    static void keepAlive(Object o) {                                          
+       // Do nothing. This is just to ptovide a chance for JIT to optimize.    
+    }                                                                                                                                                          
     private static boolean unaligned;
     private static boolean unalignedKnown = false;
 

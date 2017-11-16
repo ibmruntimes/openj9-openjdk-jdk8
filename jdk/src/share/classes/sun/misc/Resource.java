@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 1998, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 1998, 2009, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -69,7 +75,24 @@ public abstract class Resource {
      */
     public abstract int getContentLength() throws IOException;
 
-    private InputStream cis;
+   private InputStream cis;                                                     
+    /* Stores the classpath index from which this resource was loaded from - used for Shared class support */ 
+    private int classPathLoadIndex;                                             
+                                                                                
+    /*                                                                          
+     * Sets the classpath index from which this resource was loaded from        
+     */                                                                         
+    public void setClasspathLoadIndex(int cpIndex) {                            
+        classPathLoadIndex = cpIndex;                                           
+    }                                                                           
+                                                                                
+    /*                                                                          
+     * Returns the classpath index from which this resource was loaded from     
+     */                                                                         
+    public int getClasspathLoadIndex() {                                        
+        return classPathLoadIndex;                                              
+    }                                                                           
+                                                                                
 
     /* Cache result in case getBytes is called after getByteBuffer. */
     private synchronized InputStream cachedInputStream() throws IOException {
@@ -185,3 +208,4 @@ public abstract class Resource {
         return null;
     }
 }
+

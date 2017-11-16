@@ -1,4 +1,8 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 1997, 2017 All Rights Reserved
+ * ===========================================================================
+ *
  * Copyright (c) 1997, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -55,6 +59,8 @@ import java.security.cert.Certificate;
 import sun.misc.FileURLMapper;
 import sun.net.util.URLUtil;
 import sun.security.action.GetPropertyAction;
+import com.ibm.oti.shared.CannotSetClasspathException;                          
+import com.ibm.oti.shared.SharedClassURLClasspathHelper;
 
 /**
  * This class is used to maintain a search path of URLs for loading classes
@@ -100,6 +106,22 @@ public class URLClassPath {
 
     /* The jar protocol handler to use when creating new URLs */
     private URLStreamHandler jarHandler;
+   /* Fields for shared classes support starts*/                                
+    /* Shared classes helper. Must be kept up to date with any search path      
+     * changes.                                                                 
+     */                                                                         
+    private SharedClassURLClasspathHelper sharedClassURLClasspathHelper = null; 
+                                                                                
+    /* URLs corresponding to the search path of loaders */                      
+    private ArrayList loaderURLs = null;                                        
+                                                                                
+    /* The number of entries, starting at the 0th element, into the search path 
+     * that have been updated with the shared classes helper.                   
+     */                                                                         
+    private int updatedSearchPathCount = -1;                                    
+    /* Fields for shared classes support ends*/                                 
+                                                                                
+                                                                                
 
     /* Whether this URLClassLoader has been closed yet */
     private boolean closed = false;
@@ -136,6 +158,76 @@ public class URLClassPath {
         else
             this.acc = acc;
     }
+    /* Methods for shared classes support starts*/                              
+    /* Shared classes version of URLClassPath(URL[], URLStreamHandlerFactory)   
+     */                                                                         
+    public URLClassPath(URL[] urls, URLStreamHandlerFactory factory,            
+                        AccessControlContext acc,
+                        SharedClassURLClasspathHelper helper) {                 
+        /* Call URLClassPath(URL[], URLStreamHandlerFactory) constructor */     
+        this(urls, factory, acc);                                                    
+        /* Set shared classes helper */                                         
+        sharedClassURLClasspathHelper = helper;                                 
+        if (usingSharedClasses()) {                                             
+            /* create list to hold search path URLs */                          
+            loaderURLs = new ArrayList(urls.length);                            
+        }                                                                       
+    }                                                                           
+                                                                                
+    /* Return true if shared classes support is active, otherwise false.        
+     */                                                                         
+    private boolean usingSharedClasses() {                                      
+        return (sharedClassURLClasspathHelper != null);                         
+    }                                                                           
+                                                                                
+    /* When using shared classes the shared classes helper's classpath must     
+     * match this URLClassPath's search path (i.e. the list of loaders). This   
+     * function "confirms" with the shared classes helper the search path up    
+     * to the highest index (starting from zero) from which we have loaded a    
+     * resource.                                                                
+     *                                                                          
+     * @param index the index into the search path that should be updated.      
+     *        If the search path up to the supplied index has not already been  
+     *        updated, the shared classes helper's classpath will be extended   
+     *        so that the supplied index will be contained.                     
+     *        If that index has already been updated, no action will be taken.  
+     * @throws IllegalStateException if an error occurs when updating the       
+     *        the search path with the shared classes helper or if the search   
+     *        path could not be extended to include index.                      
+     */                                                                         
+    private synchronized void updateClasspathWithSharedClassesHelper(int index) { 
+        /* do nothing if not using shared classes */                            
+        if (!usingSharedClasses()) {                                            
+            return;                                                             
+        }                                                                       
+                                                                                
+        /* Update the loader search path with the shared classes helper if      
+         * the search path has expanded since the previous update.              
+         */                                                                     
+        int searchPathSize = loaderURLs.size();                                 
+        if (updatedSearchPathCount < searchPathSize) {                          
+            URL[] newSearchPath = new URL[searchPathSize];                      
+            newSearchPath = (URL[])loaderURLs.toArray(newSearchPath);           
+            try {                                                               
+                /* update shared classes helper with the extended search path */ 
+                sharedClassURLClasspathHelper.setClasspath(newSearchPath);      
+                updatedSearchPathCount = searchPathSize;         /*ibm@96437*/ /* ibm@96499 */ 
+                                                                                
+            } catch (CannotSetClasspathException ex) {                          
+                /* The search path and the helper's classpath no longer match */ 
+                throw new IllegalStateException(                                
+                            "Unable to set shared class path", ex);             
+            }                                                                   
+        }                                                                       
+                                                                                
+        if (index >= searchPathSize) {                                          
+            /* Unable to extend the search path to contain supplied index */    
+            throw new IllegalStateException(                                    
+                        "Unable to extend shared class path to index " + index); 
+        }                                                                       
+                                                                                
+    }                                                                           
+    /* Methods for shared classes support ends*/                                
 
     /**
      * Constructs a URLClassPath with no additional security restrictions.
@@ -226,9 +318,11 @@ public class URLClassPath {
      *
      * @param name the name of the Resource
      * @param check     whether to perform a security check
+     * @param classloader the classloader
+     * @param showLoading whether to show loading info
      * @return the Resource, or null if not found
      */
-    public Resource getResource(String name, boolean check) {
+    public Resource getResource(String name, boolean check, ClassLoader classloader, boolean showLoading) { 
         if (DEBUG) {
             System.err.println("URLClassPath.getResource(\"" + name + "\")");
         }
@@ -238,6 +332,9 @@ public class URLClassPath {
         for (int i = 0; (loader = getNextLoader(cache, i)) != null; i++) {
             Resource res = loader.getResource(name, check);
             if (res != null) {
+                res.setClasspathLoadIndex(i); /* Store the classpath index that this resource came from */ 
+                /* Update the search path with shared Classes Helper, this is only if we are using Shared classes */ 
+                updateClasspathWithSharedClassesHelper(i);                       
                 return res;
             }
         }
@@ -288,8 +385,11 @@ public class URLClassPath {
         };
     }
 
+    public Resource getResource(String name, boolean check) {                    
+        return getResource(name, check, null, false);                            
+    }                                                                           
     public Resource getResource(String name) {
-        return getResource(name, true);
+        return getResource(name, true, null, false);                            
     }
 
     /**
@@ -539,6 +639,11 @@ public class URLClassPath {
             validateLookupCache(loaders.size(), urlNoFragString);
             loaders.add(loader);
             lmap.put(urlNoFragString, loader);
+           if (usingSharedClasses()) {                                          
+               /* update search path URLs */                                    
+               loaderURLs.add(url);                                             
+           }                                                                    
+                                                                                
         }
         if (DEBUG_LOOKUP_CACHE) {
             System.out.println("NOCACHE: Loading from : " + index );
@@ -562,7 +667,7 @@ public class URLClassPath {
                             return new Loader(url);
                         }
                     } else {
-                        return new JarLoader(url, jarHandler, lmap, acc);
+                        return new JarLoader(url, jarHandler, lmap, acc, usingSharedClasses()); 
                     }
                 }
             }, acc);
@@ -796,6 +901,7 @@ public class URLClassPath {
         private URLStreamHandler handler;
         private final HashMap<String, Loader> lmap;
         private final AccessControlContext acc;
+        private boolean usingSharedClasses;
         private boolean closed = false;
         private static final sun.misc.JavaUtilZipFileAccess zipAccess =
                 sun.misc.SharedSecrets.getJavaUtilZipFileAccess();
@@ -806,10 +912,12 @@ public class URLClassPath {
          */
         JarLoader(URL url, URLStreamHandler jarHandler,
                   HashMap<String, Loader> loaderMap,
-                  AccessControlContext acc)
+                  AccessControlContext acc,
+                  boolean usingSharedClasses) 
             throws IOException
         {
             super(new URL("jar", "", -1, url + "!/", jarHandler));
+            this.usingSharedClasses = usingSharedClasses;
             csu = url;
             handler = jarHandler;
             lmap = loaderMap;
@@ -874,7 +982,12 @@ public class URLClassPath {
                                 }
 
                                 jar = getJarFile(csu);
-                                index = JarIndex.getJarIndex(jar, metaIndex);
+				if (usingSharedClasses) {                       
+				/* do not use Jar indexing with shared classes */ 
+				index = null;                                   
+                               } else {                                         
+                                       index = JarIndex.getJarIndex(jar, metaIndex); 
+                               }                                                
                                 if (index != null) {
                                     String[] jarfiles = index.getJarFiles();
                                 // Add all the dependent URLs to the lmap so that loaders
@@ -1091,7 +1204,7 @@ public class URLClassPath {
                                 new PrivilegedExceptionAction<JarLoader>() {
                                     public JarLoader run() throws IOException {
                                         return new JarLoader(url, handler,
-                                            lmap, acc);
+                                            lmap, acc, usingSharedClasses); 
                                     }
                                 }, acc);
 
@@ -1297,3 +1410,4 @@ public class URLClassPath {
         }
     }
 }
+

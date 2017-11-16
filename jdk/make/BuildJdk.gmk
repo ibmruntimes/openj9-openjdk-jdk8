@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -98,7 +102,11 @@ demos:
 # into packages, or installed. Ensure PROFILE is not set
 # in these cases.
 images:
+ifeq ($(OPENJDK_TARGET_OS), aix)
+	+(export LDR_CNTRL=MAXDATA=0x40000000 && $(MAKE) PROFILE="" -f CreateJars.gmk)
+else
 	+$(MAKE) PROFILE="" -f CreateJars.gmk
+endif
 	+$(MAKE) PROFILE="" -f Images.gmk
         ifeq ($(OPENJDK_TARGET_OS), macosx)
 	  +$(MAKE) -f Bundles.gmk
@@ -110,7 +118,11 @@ overlay-images:
 
 # Create Compact Profile images
 $(ALL_PROFILES):
+ifeq ($(OPENJDK_TARGET_OS), aix)
+	+(export LDR_CNTRL=MAXDATA=0x40000000 && $(MAKE) PROFILE=$@ -f CreateJars.gmk)
+else
 	+$(MAKE) PROFILE=$@ -f CreateJars.gmk
+endif
 	+$(MAKE) PROFILE=$@ JRE_IMAGE_DIR=$(IMAGES_OUTPUTDIR)/j2re-$(word $(call profile_number,$@),$(PROFILE_NAMES))-image -f Images.gmk profile-image
 
 profiles: $(ALL_PROFILES)

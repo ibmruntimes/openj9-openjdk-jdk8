@@ -1,3 +1,6 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
+# ===========================================================================
 #
 # Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -22,13 +25,5 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
-# List all Sun provided attach providers here. If there
-# are providers that are only available on a particular OS
-# then prefix the line with #[OS] and they will automatically
-# uncommented by the build process.
 #
-#[solaris]sun.tools.attach.SolarisAttachProvider
-#[windows]sun.tools.attach.WindowsAttachProvider
-#[linux]sun.tools.attach.LinuxAttachProvider
-#[macosx]sun.tools.attach.BsdAttachProvider
-#[aix]sun.tools.attach.AixAttachProvider
+com.ibm.tools.attach.attacher.OpenJ9AttachProvider

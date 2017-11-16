@@ -1,4 +1,8 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2000, 2017 All Rights Reserved
+ * ===========================================================================
+ *
  * Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -569,6 +573,15 @@ public final class Unsafe {
      */
     public native void freeMemory(long address);
 
+    /**
+      * Disposes of a block of native memory, as obtained from {@link
+      * #allocateDBBMemory} or {@link #reallocateDBBMemory}.  The address passed
+      * to this method may be null, in which case no action is taken.
+      *
+      * @see #allocateDBBMemory
+      */
+     public native void freeDBBMemory(long address);
+
     /// random queries
 
     /**
@@ -630,6 +643,25 @@ public final class Unsafe {
         return null;
     }
 
+     /**
+      * Allocates a new block of native memory for DirectByteBuffers, of the
+      * given size in bytes.  The contents of the memory are uninitialized;
+      * they will generally be garbage.  The resulting native pointer will
+      * never be zero, and will be aligned for all value types.  Dispose of
+      * this memory by calling {@link #freeDBBMemory} or resize it with
+      * {@link #reallocateDBBMemory}.
+      *
+      * @throws IllegalArgumentException if the size is negative or too large
+      *         for the native size_t type
+      *
+      * @throws OutOfMemoryError if the allocation is refused by the system
+      *
+      * @see #getByte(long)
+      * @see #putByte(long, byte)
+      */
+     public native long allocateDBBMemory(long bytes);
+
+
     /**
      * Report the location of a given field in the storage allocation of its
      * class.  Do not expect to perform any sort of arithmetic on this offset;
@@ -688,6 +720,26 @@ public final class Unsafe {
      * @return false only if a call to {@code ensureClassInitialized} would have no effect
      */
     public native boolean shouldBeInitialized(Class<?> c);
+
+     /**
+      * Resizes a new block of native memory for DirectByteBuffers, to the
+      * given size in bytes.  The contents of the new block past the size of
+      * the old block are uninitialized; they will generally be garbage.  The
+      * resulting native pointer will be zero if and only if the requested size
+      * is zero.  The resulting native pointer will be aligned for all value
+      * types.  Dispose of this memory by calling {@link #freeDBBMemory}, or
+      * resize it with {@link #reallocateDBBMemory}.  The address passed to
+      * this method may be null, in which case an allocation will be performed.
+      *
+      * @throws IllegalArgumentException if the size is negative or too large
+      *         for the native size_t type
+      *
+      * @throws OutOfMemoryError if the allocation is refused by the system
+      *
+      * @see #allocateDBBMemory
+      */
+     public native long reallocateDBBMemory(long address, long bytes);
+
 
     /**
      * Ensure the given class has been initialized. This is often

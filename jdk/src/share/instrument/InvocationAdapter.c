@@ -1,4 +1,9 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2003, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * Copyright (c) 2003, 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -399,7 +404,7 @@ Agent_OnAttach(JavaVM* vm, char *args, void * reserved) {
         jplis_assert(success);
 
         /*
-         *  Turn on the ClassFileLoadHook.
+         *  Setup ClassFileLoadHook handler.
          */
         if (success) {
             success = setLivePhaseEventHandlers(agent);

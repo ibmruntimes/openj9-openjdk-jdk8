@@ -1,4 +1,7 @@
 #
+#
+# (c) Copyright IBM Corp. 2011, 2017 All Rights Reserved
+#
 # Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -360,6 +363,8 @@ define replace_space_with_pathsep
   $1:=$(subst $(SPACE),$(PATH_SEP),$(strip $(patsubst %,%,$2)))
 endef
 
+recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
+
 define SetupJavaCompilation
   # param 1 is for example BUILD_MYPACKAGE
   # param 2,3,4,5,6,7,8 are named args.
@@ -401,7 +406,18 @@ define SetupJavaCompilation
   $$(foreach d,$$($1_SRC), $$(if $$(wildcard $$d),,$$(error SRC specified to SetupJavaCompilation $1 contains missing directory $$d)))
   $$(eval $$(call MakeDir,$$($1_BIN)))
   # Find all files in the source trees.
+ 
+  # Add J9 generated source overrides
+  J9_OVERRIDE_SRC_ROOT := $$(JDK_OUTPUTDIR)/j9jcl_sources
+  $1_SRC += $$(wildcard $$(subst $$(SRC_ROOT),$$(J9_OVERRIDE_SRC_ROOT),$$($1_SRC)))
+
   $1_ALL_SRCS += $$(filter-out $(OVR_SRCS),$$(call CacheFind,$$($1_SRC)))
+
+  # Filter out SRC_ROOT equivalents of J9 generated source overrides
+  AllJ9JclSource   = $$(call recur_wildcard,$$(J9_OVERRIDE_SRC_ROOT),*.java)
+  J9_OVR_SRCS:=$$(subst $$(J9_OVERRIDE_SRC_ROOT),$$(SRC_ROOT),$$(AllJ9JclSource))
+  $1_ALL_SRCS := $$(filter-out $$(J9_OVR_SRCS),$$($1_ALL_SRCS))
+
   # Extract the java files.
   ifneq ($$($1_EXCLUDE_FILES),)
     $1_EXCLUDE_FILES_PATTERN:=$$(addprefix %,$$($1_EXCLUDE_FILES))

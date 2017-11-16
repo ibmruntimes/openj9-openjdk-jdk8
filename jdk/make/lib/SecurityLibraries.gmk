@@ -1,4 +1,8 @@
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# ===========================================================================
+#
 # Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -58,9 +62,9 @@ $(eval $(call SetupNativeCompilation,BUILD_LIBJAAS, \
     OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libjaas, \
     DEBUG_SYMBOLS := $(DEBUG_ALL_BINARIES)))
 
-$(BUILD_LIBJAAS): $(BUILD_LIBJAVA)
+#$(BUILD_LIBJAAS): $(BUILD_LIBJAVA)
 
-BUILD_LIBRARIES += $(BUILD_LIBJAAS)
+#BUILD_LIBRARIES += $(BUILD_LIBJAAS)
 
 ##########################################################################################
 
@@ -90,7 +94,7 @@ $(eval $(call SetupNativeCompilation,BUILD_LIBJ2PCSC, \
     OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libj2pcsc, \
     DEBUG_SYMBOLS := $(DEBUG_ALL_BINARIES)))
 
-BUILD_LIBRARIES += $(BUILD_LIBJ2PCSC)
+#BUILD_LIBRARIES += $(BUILD_LIBJ2PCSC)
 
 ##########################################################################################
 
@@ -113,7 +117,7 @@ ifneq ($(OPENJDK_TARGET_OS), windows)
       OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libj2gss, \
       DEBUG_SYMBOLS := $(DEBUG_ALL_BINARIES)))
 
-  BUILD_LIBRARIES += $(BUILD_LIBJ2GSS)
+  #BUILD_LIBRARIES += $(BUILD_LIBJ2GSS)
 endif
 
 ##########################################################################################
@@ -212,7 +216,7 @@ $(eval $(call SetupNativeCompilation,BUILD_LIBJ2PKCS11, \
     OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libj2pkcs11, \
     DEBUG_SYMBOLS := $(DEBUG_ALL_BINARIES)))
 
-BUILD_LIBRARIES += $(BUILD_LIBJ2PKCS11)
+#BUILD_LIBRARIES += $(BUILD_LIBJ2PKCS11)
 
 ##########################################################################################
 

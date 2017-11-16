@@ -1,4 +1,7 @@
 #
+#
+# (c) Copyright IBM Corp. 2011, 2017 All Rights Reserved
+#
 # Copyright (c) 2011, 2014, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -110,7 +113,7 @@ ifeq ($(BUILD_HOTSPOT),true)
 	@$(call TargetExit)
 endif
 
-jdk: langtools hotspot corba jaxp jaxws jdk-only
+jdk: langtools j9vm-compose-buildjvm corba jaxp jaxws jdk-only
 jdk-only: start-make
 	@$(call TargetEnter)
 	@($(CD) $(JDK_TOPDIR)/make && $(BUILD_LOG_WRAPPER) $(MAKE) $(MAKE_ARGS) -f BuildJdk.gmk $(JDK_TARGET))
@@ -142,7 +145,7 @@ overlay-images-only: start-make
 	@($(CD) $(JDK_TOPDIR)/make && $(BUILD_LOG_WRAPPER) $(MAKE) $(MAKE_ARGS) -f BuildJdk.gmk overlay-images)
 	@$(call TargetExit)
 
-profiles: source-tips jdk hotspot profiles-only
+profiles: source-tips jdk profiles-only
 profiles-only: start-make
 	@$(call TargetEnter)
 	@($(CD) $(JDK_TOPDIR)/make && $(BUILD_LOG_WRAPPER) $(MAKE) $(MAKE_ARGS) -f BuildJdk.gmk profiles)
@@ -187,7 +190,7 @@ $(OUTPUT_ROOT)/source_tips: FRC
 
 
 # Remove everything, except the output from configure.
-clean: clean-langtools clean-corba clean-jaxp clean-jaxws clean-hotspot clean-jdk clean-nashorn clean-images clean-overlay-images clean-bootcycle-build clean-docs clean-test
+clean: clean-langtools clean-corba clean-jaxp clean-jaxws clean-j9vm clean-jdk clean-nashorn clean-images clean-overlay-images clean-bootcycle-build clean-docs clean-test
 	@($(CD) $(OUTPUT_ROOT) && $(RM) -r tmp source_tips build.log* build-trace*.log*)
 	@$(ECHO) Cleaned all build artifacts.
 
