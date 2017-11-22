@@ -200,8 +200,8 @@ stage-j9 : \
 
 # Only update version files when the SHAs change.
 $(OUTPUT_ROOT)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
-        @$(MKDIR) -p $(@D)
-        $(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
+	@$(MKDIR) -p $(@D)
+	$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
 
 $(OUTPUT_ROOT)/vm/tr.source/jit.version : $(call DependOnVariable, OPENJ9_SHA)
 	@$(MKDIR) -p $(@D)
