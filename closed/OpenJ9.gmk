@@ -203,15 +203,11 @@ $(OUTPUT_ROOT)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
         @$(MKDIR) -p $(@D)
         $(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
 
-$(OUTPUT_ROOT)/vm/tr.source/jit.version : $(call DependOnVariable, OPENJ9_SHA)
-	@$(MKDIR) -p $(@D)
-	$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
-
 $(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9OMR_SHA)
 	@$(MKDIR) -p $(@D)
 	$(ECHO) '#define OMR_VERSION_STRING "$(OPENJ9OMR_SHA)"' > $@
 
-run-preprocessors-j9 : stage-j9 $(OUTPUT_ROOT)/vm/tr.source/jit.version $(OUTPUT_ROOT)/vm/compiler/jit.version $(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING
+run-preprocessors-j9 : stage-j9 $(OUTPUT_ROOT)/vm/compiler/jit.version $(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	(export BOOT_JDK=$(BOOT_JDK) \
 		&& cd $(OUTPUT_ROOT)/vm \
