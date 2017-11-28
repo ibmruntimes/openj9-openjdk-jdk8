@@ -42,9 +42,11 @@ OPENJ9_ALT_SHARED_LIBRARIES := \
   #
 OPENJ9_SHARED_LIBRARIES := $(filter-out $(notdir $(OPENJ9_ALT_SHARED_LIBRARIES)), $(notdir $(wildcard $(OUTPUT_ROOT)/vm/$(LIBRARY_PREFIX)*$(SHARED_LIBRARY_SUFFIX))))
 OPENJ9_PROPERTY_FILES := $(notdir $(wildcard $(OUTPUT_ROOT)/vm/java*.properties))
-OPENJ9_MISC_FILES := \
+OPENJ9_LIB_FILES := \
   J9TraceFormat.dat \
   OMRTraceFormat.dat \
+  #
+OPENJ9_VM_FILES := \
   options.default \
   #
 OPENJ9_NOTICE_FILES := openj9-notices.html
@@ -72,22 +74,25 @@ define generated_target_rules
 .PHONY : stage_openj9_$1
 $(foreach file,$(OPENJ9_SHARED_LIBRARIES),$(eval $(call openj9_copy_file,$2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/$(file),$(OUTPUT_ROOT)/vm/$(file))))
 $(foreach file,$(OPENJ9_ALT_SHARED_LIBRARIES),$(eval $(call openj9_copy_file,$2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/$(notdir $(file)),$(OUTPUT_ROOT)/vm/$(file))))
-$(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES),$(eval $(call openj9_copy_file,$2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/$(file),$(OUTPUT_ROOT)/vm/$(file))))
+$(foreach file,$(OPENJ9_VM_FILES) $(OPENJ9_PROPERTY_FILES),$(eval $(call openj9_copy_file,$2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/$(file),$(OUTPUT_ROOT)/vm/$(file))))
+$(foreach file,$(OPENJ9_LIB_FILES),$(eval $(call openj9_copy_file,$2/lib/$(file),$(OUTPUT_ROOT)/vm/$(file))))
 $(foreach file,$(OPENJ9_NOTICE_FILES),$(eval $(call openj9_copy_file,$2/$(file),$(SRC_ROOT)/$(file))))
 $(foreach file,$(OPENJ9_REDIRECTOR),$(eval $(call openj9_copy_file,$2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUT_ROOT)/vm/$(file))))
 $(eval $(call openj9_set_classlib_props,$2/lib,$(OUTPUT_ROOT)/vm))
 stage_openj9_shared_libraries_$1 := $(addprefix $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/,$(OPENJ9_SHARED_LIBRARIES))
 stage_openj9_alt_shared_libraries_$1 := $(addprefix $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/,$(notdir $(OPENJ9_ALT_SHARED_LIBRARIES)))
-stage_openj9_misc_files_$1 := $(addprefix $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/,$(OPENJ9_MISC_FILES))
+stage_openj9_lib_files_$1 := $(addprefix $2/lib/,$(OPENJ9_LIB_FILES))
 stage_openj9_notice_files_$1 := $(addprefix $2/,$(OPENJ9_NOTICE_FILES))
+stage_openj9_vm_files_$1 := $(addprefix $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/,$(OPENJ9_VM_FILES))
 stage_openj9_property_files_$1 := $(addprefix $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/compressedrefs/,$(OPENJ9_PROPERTY_FILES))
 stage_openj9_redirector_$1 := $2/lib$(OPENJDK_TARGET_CPU_LIBDIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
 stage_openj9_classlib_props_$1 := $2/lib/classlib.properties
 stage_openj9_$1 : \
 	$$(stage_openj9_shared_libraries_$1) \
 	$$(stage_openj9_alt_shared_libraries_$1) \
-	$$(stage_openj9_misc_files_$1) \
+	$$(stage_openj9_lib_files_$1) \
 	$$(stage_openj9_notice_files_$1) \
+	$$(stage_openj9_vm_files_$1) \
 	$$(stage_openj9_redirector_$1) \
 	$$(stage_openj9_property_files_$1) \
 	$$(stage_openj9_classlib_props_$1)
