@@ -411,6 +411,21 @@ $(eval $(call SetupLauncher,rmiregistry, \
 $(eval $(call SetupLauncher,jcmd, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jcmd.JCmd"$(COMMA) }'))
 
+# Include executables for OpenJ9 (jdmpview, traceformat and jextract)
+$(eval $(call SetupLauncher,jdmpview, \
+    -DEXPAND_CLASSPATH_WILDCARDS \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.dtfjview.DTFJView"$(COMMA) }'))
+
+$(eval $(call SetupLauncher,traceformat, \
+    -DEXPAND_CLASSPATH_WILDCARDS \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.traceformat.TraceFormat"$(COMMA) }'))
+
+ifneq ($(findstring $(OPENJDK_TARGET_OS),linux aix),)
+  $(eval $(call SetupLauncher,jextract, \
+    -DEXPAND_CLASSPATH_WILDCARDS \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main"$(COMMA) }'))
+endif
+
 ifeq ($(OPENJDK_TARGET_OS), windows)
   $(eval $(call SetupLauncher,kinit, \
       -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.security.krb5.internal.tools.Kinit"$(COMMA) }'))
