@@ -291,6 +291,18 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-dest $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
 			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
+	@$(BOOT_JDK)/bin/java \
+		-cp $(OUTPUT_ROOT)/vm/sourcetools/lib/jpp.jar \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-baseDir $(OPENJ9_TOPDIR)/ \
+			-config SIDECAR18-TOOLS-OPENJ9 \
+			-srcRoot jcl/ \
+			-xml jpp_configuration.xml \
+			-dest $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes \
+			-macro:define "com.ibm.oti.vm.library.version=29" \
+			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 
