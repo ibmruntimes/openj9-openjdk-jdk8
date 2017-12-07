@@ -3976,7 +3976,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1510832180
+DATE_WHEN_GENERATED=1512638435
 
 ###############################################################################
 #
@@ -36821,10 +36821,6 @@ $as_echo "$OUTPUT_DIR_IS_LOCAL" >&6; }
   ac_config_files="$ac_config_files $OUTPUT_ROOT/custom-spec.gmk:$CLOSED_AUTOCONF_DIR/custom-spec.gmk.in"
 
 
-  # Create the openj9_version_info.h
-  ac_config_files="$ac_config_files $OUTPUT_ROOT/vm/util/openj9_version_info.h:$CLOSED_AUTOCONF_DIR/openj9_version_info.h.in"
-
-
   # explicitly disable classlist generation
   ENABLE_GENERATE_CLASSLIST="false"
 
@@ -37533,7 +37529,6 @@ do
     "$OUTPUT_ROOT/spec.sh") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/spec.sh:$AUTOCONF_DIR/spec.sh.in" ;;
     "$OUTPUT_ROOT/Makefile") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/Makefile:$AUTOCONF_DIR/Makefile.in" ;;
     "$OUTPUT_ROOT/custom-spec.gmk") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/custom-spec.gmk:$CLOSED_AUTOCONF_DIR/custom-spec.gmk.in" ;;
-    "$OUTPUT_ROOT/vm/util/openj9_version_info.h") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/vm/util/openj9_version_info.h:$CLOSED_AUTOCONF_DIR/openj9_version_info.h.in" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
