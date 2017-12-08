@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2018 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -24,7 +24,12 @@ set -euo pipefail
 echo "Common defs"
 
 # shellcheck disable=SC1091
-source import-common.sh
+modules=(corba langtools jaxp jaxws nashorn jdk)
+
+# These variables needs to define in Jenkin's job pipeline
+#WORKSPACE="<Define local workspace path where clone and merge is going to take place>"
+#GITHUB_IBM="<Path for extension git repo>"
+#J9REPOSITORY="<extention repo name, where merge will be pushed>" 
 
 rm -rf $WORKSPACE/openj9
 rm -rf $WORKSPACE/openjdk
@@ -57,10 +62,10 @@ git filter-branch -f --index-filter 'git rm -r -f -q --cached --ignore-unmatch .
 cd ..
 git pull jdk8u
 git fetch --tags jdk8u
-rm -rf jdk8u.git
-
 NEWTAG=$(git describe --abbrev=0 --tags)
 echo "Latest openjdk level is $NEWTAG"
+git reset --hard $NEWTAG
+rm -rf jdk8u.git
 
 if [ $NEWTAG != $OLDTAG ]
 then
@@ -85,6 +90,8 @@ then
       cd ..
       echo "GIT pull on $module"
       git pull $module
+      git fetch --tags $module
+      git reset --hard $NEWTAG
       rm -rf $module.git
       cd $WORKSPACE/openj9/$J9REPOSITORY 
       git fetch $WORKSPACE/openjdk/$module
@@ -103,4 +110,3 @@ then
 else
   echo "No new tag. No update done"
 fi
-
