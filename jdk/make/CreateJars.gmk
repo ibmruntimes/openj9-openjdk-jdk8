@@ -56,6 +56,47 @@ $(eval $(call MakeDir, $(IMAGES_OUTPUTDIR)/lib))
 
 ##########################################################################################
 
+$(eval $(call SetupArchive,BUILD_DTFJ_JAR, , \
+    SRCS := $(JDK_OUTPUTDIR)/classes, \
+    INCLUDES := com/ibm/dtfj com/ibm/jvm/j9/dump com/ibm/java/diagnostics/utils, \
+    JAR := $(IMAGES_OUTPUTDIR)/lib/ext/dtfj.jar, \
+    SKIP_METAINF := true))
+
+
+##########################################################################################
+
+$(eval $(call SetupArchive,BUILD_DTFJVIEW_JAR, , \
+    SRCS := $(JDK_OUTPUTDIR)/classes, \
+    INCLUDES := com/ibm/jvm/dtfjview, \
+    JAR := $(IMAGES_OUTPUTDIR)/lib/ext/dtfjview.jar, \
+    SKIP_METAINF := true))
+
+
+##########################################################################################
+
+$(eval $(call SetupArchive,BUILD_TRACEFORMAT_JAR, , \
+    SRCS := $(JDK_OUTPUTDIR)/classes, \
+    INCLUDES := com/ibm/jvm/traceformat \
+                com/ibm/jvm/format \
+                com/ibm/jvm/trace, \
+    EXTRA_FILES := com/ibm/jvm/Debug.class \
+		           com/ibm/jvm/FormatTimestamp.class \
+		           com/ibm/jvm/Indent.class \
+		           com/ibm/jvm/InputFile.class \
+		           com/ibm/jvm/MessageFile.class \
+		           com/ibm/jvm/OutputFile.class \
+		           com/ibm/jvm/ProgramOption.class \
+		           com/ibm/jvm/Statistics.class \
+		           com/ibm/jvm/Summary.class \
+		           com/ibm/jvm/Threads.class \
+		           com/ibm/jvm/Timezone.class \
+		           com/ibm/jvm/TraceFormat.class \
+		           com/ibm/jvm/Verbose.class, \
+    JAR := $(IMAGES_OUTPUTDIR)/lib/ext/traceformat.jar, \
+    SKIP_METAINF := true))
+
+##########################################################################################
+
 $(eval $(call SetupArchive,BUILD_JCONSOLE_JAR, , \
     SRCS := $(JDK_OUTPUTDIR)/classes, \
     SUFFIXES := .class .gif .png .properties, \
@@ -218,7 +259,28 @@ RT_JAR_EXCLUDES += \
     com/oracle/jrockit/jfr \
     oracle/jrockit/jfr \
     jdk/jfr \
-    com/ibm/tools/attach/attacher
+    com/ibm/tools/attach/attacher \
+    com/ibm/dtfj \
+    com/ibm/java/diagnostics \
+    	com/ibm/jvm/Debug.class \
+	com/ibm/jvm/FormatTimestamp.class \
+	com/ibm/jvm/Indent.class \
+	com/ibm/jvm/InputFile.class \
+	com/ibm/jvm/MessageFile.class \
+	com/ibm/jvm/OutputFile.class \
+	com/ibm/jvm/ProgramOption.class \
+	com/ibm/jvm/Statistics.class \
+	com/ibm/jvm/Summary.class \
+	com/ibm/jvm/Threads.class \
+	com/ibm/jvm/Timezone.class \
+	com/ibm/jvm/TraceFormat.class \
+	com/ibm/jvm/Verbose.class \
+    com/ibm/jvm/j9 \
+    com/ibm/jvm/dtfjview \
+    com/ibm/jvm/TraceFormat.class  \
+    com/ibm/jvm/format  \
+    com/ibm/jvm/trace  \
+    com/ibm/jvm/traceformat
 
 # Find all files in the classes dir to use as dependencies. This could be more fine granular.
 ALL_FILES_IN_CLASSES := $(call not-containing, _the., $(filter-out %javac_state, \
