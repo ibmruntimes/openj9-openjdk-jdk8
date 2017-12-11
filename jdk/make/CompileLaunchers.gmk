@@ -414,16 +414,19 @@ $(eval $(call SetupLauncher,jcmd, \
 # Include executables for OpenJ9 (jdmpview, traceformat and jextract)
 $(eval $(call SetupLauncher,jdmpview, \
     -DEXPAND_CLASSPATH_WILDCARDS \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.dtfjview.DTFJView"$(COMMA) }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.dtfjview.DTFJView"$(COMMA) }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/classes" }'))
 
 $(eval $(call SetupLauncher,traceformat, \
     -DEXPAND_CLASSPATH_WILDCARDS \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.format.TraceFormat"$(COMMA) }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.format.TraceFormat"$(COMMA) }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/classes" }'))
 
 ifneq ($(findstring $(OPENJDK_TARGET_OS),linux aix),)
   $(eval $(call SetupLauncher,jextract, \
     -DEXPAND_CLASSPATH_WILDCARDS \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main"$(COMMA) }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main"$(COMMA) }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/classes" }'))
 endif
 
 ifeq ($(OPENJDK_TARGET_OS), windows)

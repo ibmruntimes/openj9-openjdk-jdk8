@@ -89,9 +89,6 @@ ALL_JARS := $(FULL_JRE_JARS) \
     $(IMAGES_OUTPUTDIR)/lib/rt.jar \
     $(IMAGES_OUTPUTDIR)/lib/resources.jar \
     $(IMAGES_OUTPUTDIR)/lib/jconsole.jar \
-    $(IMAGES_OUTPUTDIR)/lib/ext/dtfj.jar \
-    $(IMAGES_OUTPUTDIR)/lib/ext/dtfjview.jar \
-    $(IMAGES_OUTPUTDIR)/lib/ext/traceformat.jar \
     $(IMAGES_OUTPUTDIR)/lib/dt.jar \
     $(IMAGES_OUTPUTDIR)/lib/tools.jar \
     $(IMAGES_OUTPUTDIR)/lib/ct.sym \
