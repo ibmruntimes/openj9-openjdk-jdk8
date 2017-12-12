@@ -286,7 +286,7 @@ $(IMAGES_OUTPUTDIR)/lib$(PROFILE)/_the.jars.contents: $(BUILD_TOOLS) $(IMAGES_OU
 	($(CD) $(JDK_OUTPUTDIR)/classes && \
 	$(TOOL_JARREORDER) \
 	    -o $@.tmp $(IMAGES_OUTPUTDIR)/lib/classlist $(IMAGES_OUTPUTDIR)/lib$(PROFILE)/_the.jars.exclude . )
-	$(MV) $@.tmp $@
+	$(SED) 's/\r//g' $@.tmp > $@
 
 $(IMAGES_OUTPUTDIR)/lib$(PROFILE)/_the.rt.jar.contents: $(IMAGES_OUTPUTDIR)/lib$(PROFILE)/_the.jars.contents
 	$(MKDIR) -p $(@D)

@@ -1000,7 +1000,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -1160,7 +1159,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1413,15 +1411,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1559,7 +1548,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1712,7 +1701,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -3976,7 +3964,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1512638435
+DATE_WHEN_GENERATED=1513206870
 
 ###############################################################################
 #
@@ -8249,7 +8237,14 @@ $as_echo "$DEBUG_LEVEL" >&6; }
   OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
 
   if test "x$OPENJ9_CPU" = xx86-64; then
-    OPENJ9_PLATFORM_CODE=xa64
+    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+      OPENJ9_PLATFORM_CODE=xa64
+    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+      OPENJ9_PLATFORM_CODE=wa64
+      OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+    else
+      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
+    fi
   elif test "x$OPENJ9_CPU" = xppc-64_le; then
     OPENJ9_PLATFORM_CODE=xl64
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
@@ -8299,7 +8294,12 @@ $as_echo "$as_me: Could not find freemarker.jar" >&6;}
     as_fn_error $? "Cannot continue" "$LINENO" 5
   fi
 
-  FREEMARKER_JAR=$with_freemarker_jar
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+    FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+  else
+    FREEMARKER_JAR=$with_freemarker_jar
+  fi
+
 
 
 
@@ -36813,7 +36813,11 @@ $as_echo "$OUTPUT_DIR_IS_LOCAL" >&6; }
 # At the end, call the custom hook. (Dummy macro if no custom sources available)
 
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
+  else
+    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
+  fi
 
   CLOSED_AUTOCONF_DIR="$SRC_ROOT/jdk/make/closed/autoconf"
 

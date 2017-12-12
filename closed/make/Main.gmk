@@ -30,7 +30,7 @@ clean-j9vm:
 j9vm-build :
 	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) build-j9)
 
-j9vm-compose-buildjvm : j9vm-build $(J9JCL_GENSRC_MAKEFILE)
+j9vm-compose-buildjvm : j9vm-build
 	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_build_jdk)
 
 product-images : openj9-jdk-image openj9-jre-image

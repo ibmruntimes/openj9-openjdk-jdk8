@@ -110,7 +110,14 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
   OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
 
   if test "x$OPENJ9_CPU" = xx86-64; then
-    OPENJ9_PLATFORM_CODE=xa64
+    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+      OPENJ9_PLATFORM_CODE=xa64
+    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+      OPENJ9_PLATFORM_CODE=wa64
+      OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+    else
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
+    fi
   elif test "x$OPENJ9_CPU" = xppc-64_le; then
     OPENJ9_PLATFORM_CODE=xl64
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
@@ -119,7 +126,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
   elif test "x$OPENJ9_CPU" = xppc-64; then
     OPENJ9_PLATFORM_CODE=ap64
   else
-    AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}, contact support team!])
+    AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
 
   AC_SUBST(OPENJ9_BUILDSPEC)
@@ -159,14 +166,23 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
     AC_MSG_ERROR([Cannot continue])
   fi
 
-  FREEMARKER_JAR=$with_freemarker_jar
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+    FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+  else
+    FREEMARKER_JAR=$with_freemarker_jar
+  fi
+
   AC_SUBST(FREEMARKER_JAR)
 ])
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
+  else
+    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
+  fi
 
   CLOSED_AUTOCONF_DIR="$SRC_ROOT/jdk/make/closed/autoconf"
 
