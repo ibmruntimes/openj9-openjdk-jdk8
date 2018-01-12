@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,8 +25,8 @@
 #define J9PRODUCT_NAME            "@PRODUCT_NAME@"
 #define J9TARGET_CPU_BITS         "@OPENJDK_TARGET_CPU_BITS@"
 #define J9TARGET_CPU_OSARCH       "@OPENJDK_TARGET_CPU_OSARCH@"
-#define J9TARGET_OS               "@HOTSPOT_TARGET_OS@"
+#define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
 #define J9USERNAME                "@USERNAME@"
-#define J9VERSION_STRING          "@VERSION_STRING@"
+#define J9VERSION_STRING          "@JRE_RELEASE_VERSION@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
