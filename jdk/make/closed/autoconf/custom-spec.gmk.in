@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -52,6 +52,7 @@ endif
 
 # for constructing version output
 COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
+USERNAME                := @USERNAME@
 OPENJDK_SHA             := @OPENJDK_SHA@
 OPENJDK_TAG             := @OPENJDK_TAG@
 

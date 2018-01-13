@@ -623,6 +623,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+COMPILER_VERSION_STRING
 CCACHE
 USE_PRECOMPILED_HEADER
 SJAVAC_SERVER_DIR
@@ -861,9 +862,9 @@ FREEMARKER_JAR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
 OPENJ9_ENABLE_CUDA
+USERNAME
 OPENJDK_TAG
 OPENJDK_SHA
-COMPILER_VERSION_STRING
 OPENJ9_PLATFORM_CODE
 OPENJ9_BUILDSPEC
 OPENJ9_TOPDIR
@@ -1000,6 +1001,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -1159,6 +1161,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1411,6 +1414,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1548,7 +1560,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1701,6 +1713,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -3078,7 +3091,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 #
 
 #
-# Copyright Â© 2004 Scott James Remnant <scott@netsplit.com>.
+# Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -3930,7 +3943,7 @@ fi
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -3964,7 +3977,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1513206870
+DATE_WHEN_GENERATED=1515805807
 
 ###############################################################################
 #
@@ -8253,9 +8266,8 @@ $as_echo "$DEBUG_LEVEL" >&6; }
   elif test "x$OPENJ9_CPU" = xppc-64; then
     OPENJ9_PLATFORM_CODE=ap64
   else
-    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}, contact support team!" "$LINENO" 5
+    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
   fi
-
 
 
 
@@ -8264,6 +8276,10 @@ $as_echo "$DEBUG_LEVEL" >&6; }
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
 
+
+
+  # Outer [ ] to quote m4.
+   USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'`
 
 
 
@@ -36812,6 +36828,35 @@ $as_echo "$OUTPUT_DIR_IS_LOCAL" >&6; }
 
 # At the end, call the custom hook. (Dummy macro if no custom sources available)
 
+  COMPILER=$CXX
+  if test  "x$OPENJDK_TARGET_OS" = xaix; then
+    # xlc -qversion output typically looks like
+    #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
+    #     Version: 11.01.0000.0015
+    COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
+    # Collapse compiler output into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
+  elif test  "x$OPENJDK_TARGET_OS" = xwindows; then
+    # There is no specific version flag, but all output starts with a version string.
+    # First line typically looks something like:
+    # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
+    COMPILER_VERSION_OUTPUT=`$COMPILER 2>&1 | $HEAD -n 1 | $TR -d '\r'`
+    # Collapse compiler output into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
+  else
+    # gcc --version output typically looks like
+    #     gcc (Ubuntu/Linaro 4.8.1-10ubuntu9) 4.8.1
+    #     Copyright (C) 2013 Free Software Foundation, Inc.
+    #     This is free software; see the source for copying conditions.  There is NO
+    #     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    COMPILER_VERSION_OUTPUT=`$COMPILER --version 2>&1`
+    # Remove Copyright and legalese from version string, and
+    # collapse into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT | \
+        $SED -e 's/ *Copyright .*//'`
+  fi
+
+
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
   if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
@@ -38242,4 +38287,3 @@ $CHMOD +x $OUTPUT_ROOT/compare.sh
     printf "proper build. Failure to do so might result in strange build problems.\n"
     printf "\n"
   fi
-

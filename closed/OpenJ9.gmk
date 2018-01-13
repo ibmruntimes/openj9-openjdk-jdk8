@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -218,12 +218,12 @@ stage-j9 : \
 
 OPENJ9_VERSION_VARS := \
 	COMPILER_VERSION_STRING \
-	HOTSPOT_TARGET_OS \
+	OPENJDK_TARGET_OS \
 	OPENJDK_TARGET_CPU_BITS \
 	OPENJDK_TARGET_CPU_OSARCH \
 	PRODUCT_NAME \
 	USERNAME \
-	VERSION_STRING \
+	JRE_RELEASE_VERSION \
 	#
 
 OPENJ9_VERSION_SCRIPT := \

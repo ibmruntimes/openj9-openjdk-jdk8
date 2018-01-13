@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -131,7 +131,6 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 
   AC_SUBST(OPENJ9_BUILDSPEC)
   AC_SUBST(OPENJ9_PLATFORM_CODE)
-  AC_SUBST(COMPILER_VERSION_STRING)
 ])
 
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
@@ -140,6 +139,10 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
+  
+  # Outer [ ] to quote m4.
+  [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
+  AC_SUBST(USERNAME)
 ])
 
 AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
@@ -177,6 +180,35 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
+  COMPILER=$CXX
+  if test  "x$OPENJDK_TARGET_OS" = xaix; then
+    # xlc -qversion output typically looks like
+    #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
+    #     Version: 11.01.0000.0015
+    COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
+    # Collapse compiler output into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
+  elif test  "x$OPENJDK_TARGET_OS" = xwindows; then
+    # There is no specific version flag, but all output starts with a version string.
+    # First line typically looks something like:
+    # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
+    COMPILER_VERSION_OUTPUT=`$COMPILER 2>&1 | $HEAD -n 1 | $TR -d '\r'`
+    # Collapse compiler output into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
+  else
+    # gcc --version output typically looks like
+    #     gcc (Ubuntu/Linaro 4.8.1-10ubuntu9) 4.8.1
+    #     Copyright (C) 2013 Free Software Foundation, Inc.
+    #     This is free software; see the source for copying conditions.  There is NO
+    #     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    COMPILER_VERSION_OUTPUT=`$COMPILER --version 2>&1`
+    # Remove Copyright and legalese from version string, and
+    # collapse into a single line
+    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT | \
+        $SED -e 's/ *Copyright .*//'`
+  fi
+  AC_SUBST(COMPILER_VERSION_STRING)
+
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
   if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
