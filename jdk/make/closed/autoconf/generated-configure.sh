@@ -8276,6 +8276,12 @@ $as_echo "$DEBUG_LEVEL" >&6; }
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
 
+  if test "x$OPENJDK_TAG" = x; then
+    LAST_TAGGED_REVISION=`git -C $SRC_ROOT rev-list --tags --max-count=1`
+    OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8*" "${LAST_TAGGED_REVISION}"`
+  fi
+
+
 
 
   # Outer [ ] to quote m4.
