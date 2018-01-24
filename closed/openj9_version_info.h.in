@@ -28,5 +28,9 @@
 #define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
 #define J9USERNAME                "@USERNAME@"
 #define J9VERSION_STRING          "@JRE_RELEASE_VERSION@"
+#define OPENJDK_SHA               "@OPENJDK_SHA@"
+#define OPENJDK_TAG               "@OPENJDK_TAG@"
+#define VENDOR_SHORT_NAME         "OpenJDK"
+#define VENDOR_SHA                "@OPENJDK_SHA@ based on @OPENJDK_TAG@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
