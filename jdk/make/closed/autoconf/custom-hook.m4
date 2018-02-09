@@ -135,6 +135,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
+  # Source the closed version numbers
+  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
+
+  AC_SUBST(JDK_MOD_VERSION)
+  AC_SUBST(JDK_FIX_VERSION)
+
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
 

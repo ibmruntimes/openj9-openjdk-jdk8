@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 #
 # Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
@@ -123,7 +123,15 @@ fi
 ###
 # Add default OpenJ9 closed extensions
 full_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-conf_processed_arguments=("--with-custom-make-dir=$full_script_dir/../../closed/make" "--with-add-source-root=$full_script_dir/../../closed/adds")
+OPENJDK_TAG=`git -C $full_script_dir/../.. describe --abbrev=0 --tags`
+if test "x$OPENJDK_TAG" = x; then
+  LAST_TAGGED_REVISION=`git -C $full_script_dir/../.. rev-list --tags --max-count=1`
+  OPENJDK_TAG=`git -C $full_script_dir/../.. describe --abbrev=0 --tags --match "jdk8*" "${LAST_TAGGED_REVISION}"`
+fi
+build_update_version=`echo $OPENJDK_TAG | sed 's/jdk8u//' | awk -F'-' '{print $1}'`
+jdk_build_number=`echo $OPENJDK_TAG | awk -F'-' '{print $2}'`
+conf_milestone=
+conf_processed_arguments=("--with-custom-make-dir=$full_script_dir/../../closed/make" "--with-add-source-root=$full_script_dir/../../closed/adds" "--with-update-version=$build_update_version")
 conf_openjdk_target=
 
 for conf_option
@@ -132,6 +140,9 @@ do
     --openjdk-target=*)
       conf_openjdk_target=`expr "X$conf_option" : '[^=]*=\(.*\)'`
       continue ;;
+    --with-milestone=*)
+      conf_milestone=`expr "X$conf_option" : '[^=]*=\(.*\)'`
+      conf_processed_arguments=("${conf_processed_arguments[@]}" "$conf_option") ;;
     --debug-configure)
       if test "x$conf_debug_configure" != xrecursive; then
         conf_debug_configure=true
@@ -171,6 +182,11 @@ fi
 if test "x$conf_openjdk_target" != "x"; then
   conf_build_platform=`sh $conf_script_dir/build-aux/config.guess`
   conf_processed_arguments=("--build=$conf_build_platform" "--host=$conf_openjdk_target" "--target=$conf_openjdk_target" "${conf_processed_arguments[@]}")
+fi
+
+# If milestone "fcs" RELEASE build then set build-number
+if test "x$conf_milestone" = "xfcs"; then
+  conf_processed_arguments=("--with-build-number=$jdk_build_number" "${conf_processed_arguments[@]}")
 fi
 
 # Make configure exit with error on invalid options as default.
