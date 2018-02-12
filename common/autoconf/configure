@@ -122,16 +122,17 @@ fi
 ### Process command-line arguments
 ###
 # Add default OpenJ9 closed extensions
-full_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-OPENJDK_TAG=`git -C $full_script_dir/../.. describe --abbrev=0 --tags`
+full_src_root_dir="$( cd "${conf_script_dir}/../.." && pwd )"
+OPENJDK_SHA=`git -C $full_src_root_dir rev-parse --short HEAD`
+OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
 if test "x$OPENJDK_TAG" = x; then
-  LAST_TAGGED_REVISION=`git -C $full_script_dir/../.. rev-list --tags --max-count=1`
-  OPENJDK_TAG=`git -C $full_script_dir/../.. describe --abbrev=0 --tags --match "jdk8*" "${LAST_TAGGED_REVISION}"`
+  LAST_TAGGED_REVISION=`git -C $full_src_root_dir rev-list --tags --max-count=1`
+  OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
 fi
 build_update_version=`echo $OPENJDK_TAG | sed 's/jdk8u//' | awk -F'-' '{print $1}'`
 jdk_build_number=`echo $OPENJDK_TAG | awk -F'-' '{print $2}'`
 conf_milestone=
-conf_processed_arguments=("--with-custom-make-dir=$full_script_dir/../../closed/make" "--with-add-source-root=$full_script_dir/../../closed/adds" "--with-update-version=$build_update_version")
+conf_processed_arguments=("--with-custom-make-dir=$full_src_root_dir/closed/make" "--with-add-source-root=$full_src_root_dir/closed/adds" "--with-update-version=$build_update_version")
 conf_openjdk_target=
 
 for conf_option

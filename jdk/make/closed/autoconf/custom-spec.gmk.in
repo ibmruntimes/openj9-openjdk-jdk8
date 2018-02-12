@@ -1,10 +1,10 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
-# 
+#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # ===========================================================================
 
 # This macro is called to allow inclusion of closed source counterparts.
@@ -56,10 +56,10 @@ USERNAME                := @USERNAME@
 OPENJDK_SHA             := @OPENJDK_SHA@
 OPENJDK_TAG             := @OPENJDK_TAG@
 
-JDK_MOD_VERSION:=@JDK_MOD_VERSION@
-JDK_FIX_VERSION:=@JDK_FIX_VERSION@
-J9JDK_EXT_VERSION:=${JDK_MINOR_VERSION}.${JDK_MICRO_VERSION}.${JDK_MOD_VERSION}.${JDK_FIX_VERSION}
-J9JDK_EXT_NAME:=Extensions for OpenJDK for Eclipse OpenJ9
+JDK_MOD_VERSION         := @JDK_MOD_VERSION@
+JDK_FIX_VERSION         := @JDK_FIX_VERSION@
+J9JDK_EXT_VERSION       := ${JDK_MINOR_VERSION}.${JDK_MICRO_VERSION}.${JDK_MOD_VERSION}.${JDK_FIX_VERSION}
+J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by UMA
 FREEMARKER_JAR          := @FREEMARKER_JAR@
@@ -67,4 +67,3 @@ OPENJ9_BUILDSPEC        := @OPENJ9_BUILDSPEC@
 
 # required by JPP
 OPENJ9_PLATFORM_CODE    := @OPENJ9_PLATFORM_CODE@
-

@@ -69,7 +69,7 @@ override MAKEFLAGS := -j $(JOBS)
 ifeq ($(OPENJDK_TARGET_OS),windows)
   # set Visual Studio environment
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
-  # On Windows, the mingw compiler is used for certain files such as 
+  # On Windows, the mingw compiler is used for certain files such as
   # the bytecode interpreter.
   # Uncomment the following line to use the default compiler throughout.
   # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
@@ -250,11 +250,11 @@ OPENJ9_VERSION_SCRIPT := \
 $(OUTPUT_ROOT)/vm/include/openj9_version_info.h : $(SRC_ROOT)/closed/openj9_version_info.h.in
 	@$(MKDIR) -p $(@D)
 	@$(SED) $(OPENJ9_VERSION_SCRIPT) > $@ < $(SRC_ROOT)/closed/openj9_version_info.h.in
- 
- # update if values change
- $(OUTPUT_ROOT)/vm/include/openj9_version_info.h : \
+
+# update if values change
+$(OUTPUT_ROOT)/vm/include/openj9_version_info.h : \
  	$(foreach var,$(OPENJ9_VERSION_VARS),$(call DependOnVariable, $(var)))
- 
+
 # Only update version files when the SHAs change.
 $(OUTPUT_ROOT)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
 	@$(MKDIR) -p $(@D)
@@ -311,7 +311,7 @@ recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2)
 AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
 # FixPath
-# On Windows, convert unix path to windows path, 
+# On Windows, convert unix path to windows path,
 # on other platforms leave it unchanged
 # ----------------------
 # param 1 = The path to convert

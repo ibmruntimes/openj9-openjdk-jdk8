@@ -1,10 +1,10 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
-# 
+#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # ===========================================================================
 
 AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
@@ -142,16 +142,16 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   AC_SUBST(JDK_FIX_VERSION)
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-  OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
+  OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
 
   if test "x$OPENJDK_TAG" = x; then
     LAST_TAGGED_REVISION=`git -C $SRC_ROOT rev-list --tags --max-count=1`
-    OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8*" "${LAST_TAGGED_REVISION}"`
+    OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
   fi
 
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
-  
+
   # Outer [ ] to quote m4.
   [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
   AC_SUBST(USERNAME)
