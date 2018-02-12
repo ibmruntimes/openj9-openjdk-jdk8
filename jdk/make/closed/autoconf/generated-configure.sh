@@ -3967,7 +3967,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1518173054
+DATE_WHEN_GENERATED=1518465981
 
 ###############################################################################
 #
@@ -8270,11 +8270,11 @@ $as_echo "$DEBUG_LEVEL" >&6; }
 
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-  OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags`
+  OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
 
   if test "x$OPENJDK_TAG" = x; then
     LAST_TAGGED_REVISION=`git -C $SRC_ROOT rev-list --tags --max-count=1`
-    OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8*" "${LAST_TAGGED_REVISION}"`
+    OPENJDK_TAG=`git -C $SRC_ROOT describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
   fi
 
 
