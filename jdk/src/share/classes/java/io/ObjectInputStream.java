@@ -51,7 +51,6 @@ import static java.io.ObjectStreamClass.processQueue;
 
 import sun.misc.SharedSecrets;
 import sun.misc.ObjectInputFilter;
-import sun.misc.ObjectStreamClassValidator;
 import sun.reflect.misc.ReflectUtil;
 import sun.misc.JavaOISAccess;
 import sun.util.logging.PlatformLogger;
@@ -1854,9 +1853,6 @@ public class ObjectInputStream
             default:
                 throw new StreamCorruptedException(
                     String.format("invalid type code: %02X", tc));
-        }
-        if (descriptor != null) {
-            validateDescriptor(descriptor);
         }
         return descriptor;
     }
@@ -4001,22 +3997,5 @@ public class ObjectInputStream
         } else {
             throw new AssertionError();
         }
-    }
-
-    private void validateDescriptor(ObjectStreamClass descriptor) {
-        ObjectStreamClassValidator validating = validator;
-        if (validating != null) {
-            validating.validateDescriptor(descriptor);
-        }
-    }
-
-    // controlled access to ObjectStreamClassValidator
-    private volatile ObjectStreamClassValidator validator;
-
-    private static void setValidator(ObjectInputStream ois, ObjectStreamClassValidator validator) {
-        ois.validator = validator;
-    }
-    static {
-        SharedSecrets.setJavaObjectInputStreamAccess(ObjectInputStream::setValidator);
     }
 }
