@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -189,7 +189,7 @@ for i in "${!default_j9repos[@]}" ; do
 		echo
 
 		cd ${i}
-		git checkout ${shas[$i]} || exit $?
+		git checkout -B ${branches[$i]} ${shas[$i]} || exit $?
 		cd -
 	fi
 done
