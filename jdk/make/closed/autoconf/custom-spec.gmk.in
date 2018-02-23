@@ -1,7 +1,6 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
-#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
@@ -14,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-#
 # ===========================================================================
 
 # This macro is called to allow inclusion of closed source counterparts.
@@ -35,8 +33,6 @@ endef
 
 # Remove -R from MAKE settings as needed for omr compilation rules
 MAKE := $(filter-out -R,$(MAKE))
-
-BUILD_JDK:=$(JDK_OUTPUTDIR)
 
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
