@@ -264,27 +264,33 @@ OPENJ9_VERSION_VARS := \
 OPENJ9_VERSION_SCRIPT := \
 	$(foreach var,$(OPENJ9_VERSION_VARS),-e 's|@${var}@|$(value $(var))|g')
 
-$(OUTPUT_ROOT)/vm/include/openj9_version_info.h : $(SRC_ROOT)/closed/openj9_version_info.h.in
-	@$(MKDIR) -p $(@D)
-	@$(SED) $(OPENJ9_VERSION_SCRIPT) > $@ < $<
+# create_or_update
+# ----------------
+# Create a file or update it if necessary.
+# --
+# param 1 = command yielding desired content to stdout
+# param 2 = file to be created or updated
+define create_or_update
+	@$(MKDIR) -p $(dir $2)
+	$1 > $2.tmp
+	@if [ -f $2 ] && $(DIFF) -q $2 $2.tmp > /dev/null ; then \
+		$(RM) $2.tmp ; \
+	else \
+		$(MV) $2.tmp $2 ; \
+	fi
+endef
 
-# update if values change
-$(OUTPUT_ROOT)/vm/include/openj9_version_info.h : \
-	$(foreach var,$(OPENJ9_VERSION_VARS),$(call DependOnVariable, $(var)))
-
-# Only update version files when the SHAs change.
-$(OUTPUT_ROOT)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
-	@$(MKDIR) -p $(@D)
-	$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
-
-$(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9OMR_SHA)
-	@$(MKDIR) -p $(@D)
-	$(ECHO) '#define OMR_VERSION_STRING "$(OPENJ9OMR_SHA)"' > $@
-
-run-preprocessors-j9 : stage-j9 \
-		$(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING \
-		$(OUTPUT_ROOT)/vm/compiler/jit.version \
-		$(OUTPUT_ROOT)/vm/include/openj9_version_info.h
+run-preprocessors-j9 : stage-j9
+	@$(ECHO) Ensuring version information is up-to-date
+	$(call create_or_update, \
+		$(ECHO) '#define OMR_VERSION_STRING "$(OPENJ9OMR_SHA)"', \
+		$(OUTPUT_ROOT)/vm/omr/OMR_VERSION_STRING)
+	$(call create_or_update, \
+		$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"', \
+		$(OUTPUT_ROOT)/vm/compiler/jit.version)
+	$(call create_or_update, \
+		@$(SED) $(OPENJ9_VERSION_SCRIPT) < $(SRC_ROOT)/closed/openj9_version_info.h.in, \
+		$(OUTPUT_ROOT)/vm/include/openj9_version_info.h)
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	(export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
 		&& cd $(OUTPUT_ROOT)/vm \
