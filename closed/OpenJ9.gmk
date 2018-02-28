@@ -131,7 +131,7 @@ define openj9_set_classlib_props
 $1/classlib.properties : $2/classlib.properties
 	$(ECHO) Setting $1/classlib.properties
 	$(CP) $2/classlib.properties $1/classlib.proptmp
-	$(SED) -e 's/shape=vm.shape/shape=sun\nbootpath=rt.jar:resources.jar:jsse.jar:charsets.jar:jce.jar:tools.jar/g' -e 's/version=1.9/version=1.8/g' < $1/classlib.proptmp > $1/classlib.properties
+	$(SED) -e 's/shape=vm.shape/shape=sun_openjdk\nbootpath=rt.jar:resources.jar:jsse.jar:charsets.jar:jce.jar:tools.jar/g' -e 's/version=1.9/version=1.8/g' < $1/classlib.proptmp > $1/classlib.properties
 	$(RM) $1/classlib.proptmp
 endef
 
