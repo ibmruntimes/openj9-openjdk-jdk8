@@ -69,6 +69,10 @@ OPENJ9_VM_FILES := \
 	options.default \
 	#
 
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  OPENJ9_VM_FILES += j9ddr.dat
+endif
+
 OPENJ9_NOTICE_FILES := openj9-notices.html
 OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
 
@@ -200,7 +204,13 @@ endif
 SPEC_SED_SCRIPT := -e 's/gcc-4.6/gcc/g'
 
 # Adjust DDR enablement flags.
-SPEC_SED_SCRIPT += $(call SedDisable,module_ddr)
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_useOmrDdr)
+  SPEC_SED_SCRIPT    += $(call SedEnable,module_ddr)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_useOmrDdr)
+  SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
+endif
 
 # openj9_stage_buildspec_file
 # ---------------------------
