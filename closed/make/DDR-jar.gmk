@@ -17,7 +17,6 @@
 
 # The main target.
 all :
-	@$(ECHO) Finished building j9ddr.jar
 
 ifeq (,$(wildcard $(SPEC)))
   $(error BuildDDR.gmk needs SPEC set to a proper spec.gmk)
