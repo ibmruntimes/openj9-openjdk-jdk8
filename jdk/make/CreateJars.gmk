@@ -611,6 +611,8 @@ EXPORTED_PRIVATE_PKGS = com.oracle.net \
     com.ibm.jvm \
     com.ibm.lang.management \
     com.ibm.lang.management.internal \
+    openj9.lang.management \
+    openj9.lang.management.internal \
     com.ibm.le.conditionhandling \
     com.ibm.oti.lang \
     com.ibm.oti.reflect \
