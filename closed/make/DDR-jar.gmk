@@ -52,7 +52,7 @@ $(eval $(call SetupArchive,BUILD_DDR_MAIN, $(BUILD_DDR_CLASSES), \
 	SRCS := $(DDR_CLASSES_BIN), \
 	SUFFIXES := .class .dat .properties, \
 	EXCLUDES := com/ibm/j9ddr/vm29/structure, \
-	JAR := $(JDK_IMAGE_DIR)/lib/ddr/j9ddr.jar \
+	JAR := $(JDK_IMAGE_DIR)/jre/lib/ddr/j9ddr.jar \
 	))
 
 all : $(BUILD_DDR_MAIN_JAR)
