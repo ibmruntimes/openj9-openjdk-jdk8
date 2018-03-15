@@ -1,0 +1,107 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+$(eval $(call SetupArchive,BUILD_DTFJ_JAR, , \
+	SRCS := $(JDK_OUTPUTDIR)/classes, \
+	INCLUDES := \
+		com/ibm/dtfj \
+		com/ibm/java/diagnostics/utils \
+		com/ibm/jvm/j9/dump, \
+	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/dtfj.jar, \
+	SKIP_METAINF := true))
+
+$(eval $(call SetupArchive,BUILD_DTFJVIEW_JAR, , \
+	SRCS := $(JDK_OUTPUTDIR)/classes, \
+	INCLUDES := com/ibm/jvm/dtfjview, \
+	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/dtfjview.jar, \
+	SKIP_METAINF := true))
+
+$(eval $(call SetupArchive,BUILD_TRACEFORMAT_JAR, , \
+	SRCS := $(JDK_OUTPUTDIR)/classes, \
+	INCLUDES := \
+		com/ibm/jvm/format \
+		com/ibm/jvm/trace \
+		com/ibm/jvm/traceformat, \
+	EXTRA_FILES := \
+		com/ibm/jvm/Debug.class \
+		com/ibm/jvm/FormatTimestamp.class \
+		com/ibm/jvm/Indent.class \
+		com/ibm/jvm/InputFile.class \
+		com/ibm/jvm/MessageFile.class \
+		com/ibm/jvm/OutputFile.class \
+		com/ibm/jvm/ProgramOption.class \
+		com/ibm/jvm/Statistics.class \
+		com/ibm/jvm/Summary.class \
+		com/ibm/jvm/Threads.class \
+		com/ibm/jvm/Timezone.class \
+		com/ibm/jvm/TraceFormat.class \
+		com/ibm/jvm/Verbose.class, \
+	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/traceformat.jar, \
+	SKIP_METAINF := true))
+
+JARS += $(patsubst %,$(IMAGES_OUTPUTDIR)/lib/ext/%.jar, dtfj dtfjview traceformat)
+
+EXPORTED_PRIVATE_PKGS += \
+	com.ibm.cuda \
+	com.ibm.cuda.internal \
+	com.ibm.dataaccess \
+	com.ibm.gpu \
+	com.ibm.java.lang.management.internal \
+	com.ibm.jit \
+	com.ibm.jvm \
+	com.ibm.lang.management \
+	com.ibm.lang.management.internal \
+	com.ibm.le.conditionhandling \
+	com.ibm.oti.lang \
+	com.ibm.oti.reflect \
+	com.ibm.oti.shared \
+	com.ibm.oti.util \
+	com.ibm.oti.vm \
+	com.ibm.tools.attach.target \
+	com.ibm.virtualization.management \
+	com.ibm.virtualization.management.internal \
+	jdk.internal.org.objectweb.asm \
+	jdk.internal.org.objectweb.asm.commons \
+	jdk.internal.org.objectweb.asm.tree \
+	jdk.internal.org.objectweb.asm.util \
+	openj9.lang.management \
+	openj9.lang.management.internal \
+	#
+
+RT_JAR_EXCLUDES += \
+	com/ibm/dtfj \
+	com/ibm/java/diagnostics \
+	com/ibm/jvm/Debug.class \
+	com/ibm/jvm/dtfjview \
+	com/ibm/jvm/format \
+	com/ibm/jvm/FormatTimestamp.class \
+	com/ibm/jvm/Indent.class \
+	com/ibm/jvm/InputFile.class \
+	com/ibm/jvm/j9 \
+	com/ibm/jvm/MessageFile.class \
+	com/ibm/jvm/OutputFile.class \
+	com/ibm/jvm/ProgramOption.class \
+	com/ibm/jvm/Statistics.class \
+	com/ibm/jvm/Summary.class \
+	com/ibm/jvm/Threads.class \
+	com/ibm/jvm/Timezone.class \
+	com/ibm/jvm/trace \
+	com/ibm/jvm/traceformat \
+	com/ibm/jvm/TraceFormat.class \
+	com/ibm/jvm/Verbose.class \
+	com/ibm/tools/attach/attacher \
+	#
