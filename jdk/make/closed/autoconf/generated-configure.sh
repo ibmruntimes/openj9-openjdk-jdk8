@@ -3969,8 +3969,10 @@ fi
 
 
 
+
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1518536315
+DATE_WHEN_GENERATED=1521659022
 
 ###############################################################################
 #
@@ -8414,15 +8416,18 @@ $as_echo "yes (explicitly enabled)" >&6; }
 $as_echo "no (explicitly disabled)" >&6; }
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
-    if test "x$OPENJ9_PLATFORM_CODE" = xxa64 ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for xa64)" >&5
-$as_echo "yes (default for xa64)" >&6; }
-      OPENJ9_ENABLE_DDR=true
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
-$as_echo "no (default)" >&6; }
-      OPENJ9_ENABLE_DDR=false
-    fi
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64|xl64|xz64)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for $OPENJ9_PLATFORM_CODE)" >&5
+$as_echo "yes (default for $OPENJ9_PLATFORM_CODE)" >&6; }
+        OPENJ9_ENABLE_DDR=true
+        ;;
+      *)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default for $OPENJ9_PLATFORM_CODE)" >&5
+$as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
+        OPENJ9_ENABLE_DDR=false
+        ;;
+    esac
   else
     as_fn_error $? "--enable-ddr accepts no argument" "$LINENO" 5
   fi
