@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,34 +21,29 @@
  * questions.
  */
 
-/*
- * @ignore  until JDK-8195589 is fixed
- *
- * @test
- * @bug 6587786
- * @summary Javap throws error : "ERROR:Could not find <classname>" for JRE classes
- */
+import java.rmi.*;
+import java.rmi.server.*;
 
-import java.io.*;
-
-public class T6587786 {
-    public static void main(String[] args) throws Exception {
-        new T6587786().run();
+public class TestImpl
+    extends Object
+    implements TestIface
+{
+    public TestImpl() {
     }
 
-    public void run() throws IOException {
-        javap("com.sun.javadoc.Doc", "com.sun.crypto.provider.ai");
-        javap("com.sun.crypto.provider.ai", "com.sun.javadoc.ClassDoc");
+    public TestIface export()
+        throws RemoteException
+    {
+        return (TestIface)UnicastRemoteObject.exportObject(this, 0);
     }
 
-    void javap(String... args) {
-        StringWriter sw = new StringWriter();
-        PrintWriter out = new PrintWriter(sw);
-        //sun.tools.javap.Main.entry(args);
-        int rc = com.sun.tools.javap.Main.run(args, out);
-        if (rc != 0)
-            throw new Error("javap failed. rc=" + rc);
-        out.close();
-        System.out.println(sw.toString());
+    public void unexport()
+        throws NoSuchObjectException
+    {
+        UnicastRemoteObject.unexportObject(this, true);
+    }
+
+    public String testCall(String ign) {
+        return ("OK");
     }
 }
