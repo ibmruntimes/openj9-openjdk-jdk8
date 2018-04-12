@@ -30,19 +30,19 @@ include $(SRC_ROOT)/jdk/make/Setup.gmk
 # Supporting definitions.
 DDR_CLASSES_BIN := $(JDK_OUTPUTDIR)/ddr/classes
 
-# We depend upon class files from these modules.
-DDR_CLASSPATH := $(JDK_OUTPUTDIR)/classes
-
+# Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
 
 ifeq (,$(filter mz31 mz64,$(OPENJ9_PLATFORM_CODE)))
 DDR_SRC_EXCLUDES += com/ibm/j9ddr/corereaders/tdump
 endif
 
+# The package containing the generated structure stubs.
+DDR_STUBS_PACKAGE := com/ibm/j9ddr/vm29/structure
+
 $(eval $(call SetupJavaCompilation,BUILD_DDR_CLASSES, \
-	SETUP := GENERATE_USINGJDKBYTECODE, \
+	SETUP := GENERATE_JDKBYTECODE, \
 	BIN := $(DDR_CLASSES_BIN), \
-	CLASSPATH := $(DDR_CLASSPATH), \
 	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
 	EXCLUDES := $(DDR_SRC_EXCLUDES), \
 	COPY := com/ibm/j9ddr/StructureAliases29.dat \
@@ -51,7 +51,7 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_CLASSES, \
 $(eval $(call SetupArchive,BUILD_DDR_MAIN, $(BUILD_DDR_CLASSES), \
 	SRCS := $(DDR_CLASSES_BIN), \
 	SUFFIXES := .class .dat .properties, \
-	EXCLUDES := com/ibm/j9ddr/vm29/structure, \
+	EXCLUDES := $(DDR_STUBS_PACKAGE), \
 	JAR := $(JDK_IMAGE_DIR)/jre/lib/ddr/j9ddr.jar \
 	))
 
