@@ -38,6 +38,14 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJDK_VERSION_DETAILS
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
+
+  if test "x$OPENJDK_TARGET_OS" = "xwindows"; then
+    TOOLCHAIN_SETUP_VISUAL_STUDIO_ENV
+    TOOLCHAIN_SETUP_MSVCP_DLL
+  fi
+
+  AC_SUBST(MSVCP_DLL)
+
   OPENJ9_THIRD_PARTY_REQUIREMENTS
 ])
 
@@ -264,4 +272,113 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 
   # explicitly disable classlist generation
   ENABLE_GENERATE_CLASSLIST="false"
+])
+
+AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
+[
+  POSSIBLE_MSVCP_DLL="$1"
+  METHOD="$2"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    AC_MSG_NOTICE([Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD])
+    
+    # Need to check if the found msvcp is correct architecture
+    AC_MSG_CHECKING([found msvcp100.dll architecture])
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      AC_MSG_RESULT([ok])
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      AC_MSG_CHECKING([for msvcp100.dll])
+      AC_MSG_RESULT([$MSVCP_DLL])
+    else
+      AC_MSG_RESULT([incorrect, ignoring])
+      AC_MSG_NOTICE([The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE])
+    fi
+  fi
+])
+
+AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
+[
+  AC_ARG_WITH(msvcp-dll, [AS_HELP_STRING([--with-msvcp-dll],
+      [copy this msvcp100.dll into the built JDK (Windows only) @<:@probed@:>@])])
+
+  if test "x$with_msvcp_dll" != x; then
+    # If given explicitly by user, do not probe. If not present, fail directly.
+    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$with_msvcp_dll], [--with-msvcp-dll])
+    if test "x$MSVCP_DLL" = x; then
+      AC_MSG_ERROR([Could not find a proper msvcp100.dll as specified by --with-msvcp-dll])
+    fi
+  fi
+  
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Using well-known location from Visual Studio 10.0
+    if test "x$VCINSTALLDIR" != x; then
+      CYGWIN_VC_INSTALL_DIR="$VCINSTALLDIR"
+      BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VC_INSTALL_DIR)
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x64/Microsoft.VC100.CRT/msvcp100.dll"
+      else
+        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x86/Microsoft.VC100.CRT/msvcp100.dll"
+      fi
+      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in VCINSTALLDIR])
+    fi
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Check in the Boot JDK directory.
+    POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp100.dll"
+    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in Boot JDK])
+  fi
+  
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Look in the Windows system32 directory 
+    CYGWIN_SYSTEMROOT="$SYSTEMROOT"
+    BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_SYSTEMROOT)
+    POSSIBLE_MSVCP_DLL="$CYGWIN_SYSTEMROOT/system32/msvcp100.dll"
+    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in SYSTEMROOT])
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: If Visual Studio Express is installed, there is usually one with the debugger
+    if test "x$VS100COMNTOOLS" != x; then
+      CYGWIN_VS_TOOLS_DIR="$VS100COMNTOOLS/.."
+      BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VS_TOOLS_DIR)
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x64/ | $HEAD --lines 1`
+      else
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x86/ | $HEAD --lines 1`
+      fi
+      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VS100COMNTOOLS])
+    fi
+  fi
+      
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
+    # (This was the original behaviour; kept since it might turn up something)
+    if test "x$CYGWIN_VC_INSTALL_DIR" != x; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x64 | $HEAD --lines 1`
+      else
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x86 | $GREP -v ia64 | $GREP -v x64 | $HEAD --lines 1`
+        if test "x$POSSIBLE_MSVCP_DLL" = x; then
+          # We're grasping at straws now...
+          POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $HEAD --lines 1`
+        fi
+      fi
+      
+      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VCINSTALLDIR])
+    fi
+  fi
+  
+  if test "x$MSVCP_DLL" = x; then
+    AC_MSG_CHECKING([for msvcp100.dll])
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([Could not find msvcp100.dll. Please specify using --with-msvcp-dll.])
+  fi
+
+  BASIC_FIXUP_PATH(MSVCP_DLL)
 ])

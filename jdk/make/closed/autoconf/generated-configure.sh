@@ -775,10 +775,6 @@ BUILD_LD
 BUILD_CXX
 BUILD_CC
 MSVCR_DLL
-VS_PATH
-VS_LIB
-VS_INCLUDE
-CYGWIN_LINK
 AR_OUT_OPTION
 LD_OUT_OPTION
 EXE_OUT_OPTION
@@ -859,6 +855,11 @@ OUTPUT_ROOT
 CONF_NAME
 SPEC
 FREEMARKER_JAR
+MSVCP_DLL
+VS_PATH
+VS_LIB
+VS_INCLUDE
+CYGWIN_LINK
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -1042,6 +1043,7 @@ with_cuda
 with_gdk
 enable_cuda
 enable_ddr
+with_msvcp_dll
 with_freemarker_jar
 with_conf_name
 with_builddeps_conf
@@ -1797,6 +1799,8 @@ Optional Packages:
                           [release]
   --with-cuda             use this directory as CUDA_HOME
   --with-gdk              use this directory as GDK_HOME
+  --with-msvcp-dll        copy this msvcp100.dll into the built JDK (Windows
+                          only) [probed]
   --with-freemarker-jar   path to freemarker.jar (used to build OpenJ9 build
                           tools)
   --with-conf-name        use this as the name of the configuration [generated
@@ -3971,8 +3975,12 @@ fi
 
 
 
+
+
+
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1523293051
+DATE_WHEN_GENERATED=1524179375
 
 ###############################################################################
 #
@@ -8430,6 +8438,1240 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
     esac
   else
     as_fn_error $? "--enable-ddr accepts no argument" "$LINENO" 5
+  fi
+
+
+
+
+  if test "x$OPENJDK_TARGET_OS" = "xwindows"; then
+
+  # Store path to cygwin link.exe to help excluding it when searching for
+  # VS linker. This must be done before changing the PATH when looking for VS.
+  # Extract the first word of "link", so it can be a program name with args.
+set dummy link; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_CYGWIN_LINK+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $CYGWIN_LINK in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_CYGWIN_LINK="$CYGWIN_LINK" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_CYGWIN_LINK="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+CYGWIN_LINK=$ac_cv_path_CYGWIN_LINK
+if test -n "$CYGWIN_LINK"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CYGWIN_LINK" >&5
+$as_echo "$CYGWIN_LINK" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  if test "x$CYGWIN_LINK" != x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the first found link.exe is actually the Cygwin link tool" >&5
+$as_echo_n "checking if the first found link.exe is actually the Cygwin link tool... " >&6; }
+    "$CYGWIN_LINK" --version > /dev/null
+    if test $? -eq 0 ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      # This might be the VS linker. Don't exclude it later on.
+      CYGWIN_LINK=""
+    fi
+  fi
+
+  # First-hand choice is to locate and run the vsvars bat file.
+
+  if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    VCVARSFILE="vc/bin/vcvars32.bat"
+  else
+    VCVARSFILE="vc/bin/amd64/vcvars64.bat"
+  fi
+
+  VS_ENV_CMD=""
+  VS_ENV_ARGS=""
+  if test "x$with_toolsdir" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    VS100BASE="$with_toolsdir/../.."
+    METHOD="--with-tools-dir"
+
+  windows_path="$VS100BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    VS100BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    VS100BASE="$unix_path"
+  fi
+
+    if test -d "$VS100BASE"; then
+      if test -f "$VS100BASE/$VCVARSFILE"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$VS100BASE/$VCVARSFILE"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&5
+$as_echo "$as_me: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+
+  if test "x$with_toolsdir" != x && test "x$VS_ENV_CMD" = x; then
+    # Having specified an argument which is incorrect will produce an instant failure;
+    # we should not go on looking
+    { $as_echo "$as_me:${as_lineno-$LINENO}: The path given by --with-tools-dir does not contain a valid Visual Studio installation" >&5
+$as_echo "$as_me: The path given by --with-tools-dir does not contain a valid Visual Studio installation" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Please point to the VC/bin directory within the Visual Studio installation" >&5
+$as_echo "$as_me: Please point to the VC/bin directory within the Visual Studio installation" >&6;}
+    as_fn_error $? "Cannot locate a valid Visual Studio installation" "$LINENO" 5
+  fi
+
+  if test "x$VS100COMNTOOLS" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    VS100BASE="$VS100COMNTOOLS/../.."
+    METHOD="VS100COMNTOOLS variable"
+
+  windows_path="$VS100BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    VS100BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    VS100BASE="$unix_path"
+  fi
+
+    if test -d "$VS100BASE"; then
+      if test -f "$VS100BASE/$VCVARSFILE"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$VS100BASE/$VCVARSFILE"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&5
+$as_echo "$as_me: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+  if test "x$PROGRAMFILES" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    VS100BASE="$PROGRAMFILES/Microsoft Visual Studio 10.0"
+    METHOD="well-known name"
+
+  windows_path="$VS100BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    VS100BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    VS100BASE="$unix_path"
+  fi
+
+    if test -d "$VS100BASE"; then
+      if test -f "$VS100BASE/$VCVARSFILE"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$VS100BASE/$VCVARSFILE"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&5
+$as_echo "$as_me: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+
+  if test "x$VS_ENV_CMD" = x; then
+    VS100BASE="C:/Program Files/Microsoft Visual Studio 10.0"
+    METHOD="well-known name"
+
+  windows_path="$VS100BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    VS100BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    VS100BASE="$unix_path"
+  fi
+
+    if test -d "$VS100BASE"; then
+      if test -f "$VS100BASE/$VCVARSFILE"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$VS100BASE/$VCVARSFILE"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&5
+$as_echo "$as_me: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+
+  if test "x$VS_ENV_CMD" = x; then
+    VS100BASE="C:/Program Files (x86)/Microsoft Visual Studio 10.0"
+    METHOD="well-known name"
+
+  windows_path="$VS100BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    VS100BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    VS100BASE="$unix_path"
+  fi
+
+    if test -d "$VS100BASE"; then
+      if test -f "$VS100BASE/$VCVARSFILE"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$VS100BASE/$VCVARSFILE"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Visual Studio installation at $VS100BASE using $METHOD" >&5
+$as_echo "$as_me: Found Visual Studio installation at $VS100BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&5
+$as_echo "$as_me: Warning: $VCVARSFILE is missing, this is probably Visual Studio Express. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+
+  if test "x$ProgramW6432" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    WIN_SDK_BASE="$ProgramW6432/Microsoft SDKs/Windows/v7.1/Bin"
+    METHOD="well-known name"
+
+  windows_path="$WIN_SDK_BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    WIN_SDK_BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    WIN_SDK_BASE="$unix_path"
+  fi
+
+    if test -d "$WIN_SDK_BASE"; then
+      # There have been cases of partial or broken SDK installations. A missing
+      # lib dir is not going to work.
+      if test ! -d "$WIN_SDK_BASE/../lib"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, lib dir is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, lib dir is missing. Ignoring" >&6;}
+      elif test -f "$WIN_SDK_BASE/SetEnv.Cmd"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$WIN_SDK_BASE/SetEnv.Cmd"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          VS_ENV_ARGS="/x86"
+        else
+          VS_ENV_ARGS="/x64"
+        fi
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+  if test "x$PROGRAMW6432" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    WIN_SDK_BASE="$PROGRAMW6432/Microsoft SDKs/Windows/v7.1/Bin"
+    METHOD="well-known name"
+
+  windows_path="$WIN_SDK_BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    WIN_SDK_BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    WIN_SDK_BASE="$unix_path"
+  fi
+
+    if test -d "$WIN_SDK_BASE"; then
+      # There have been cases of partial or broken SDK installations. A missing
+      # lib dir is not going to work.
+      if test ! -d "$WIN_SDK_BASE/../lib"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, lib dir is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, lib dir is missing. Ignoring" >&6;}
+      elif test -f "$WIN_SDK_BASE/SetEnv.Cmd"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$WIN_SDK_BASE/SetEnv.Cmd"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          VS_ENV_ARGS="/x86"
+        else
+          VS_ENV_ARGS="/x64"
+        fi
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+  if test "x$PROGRAMFILES" != x; then
+
+  if test "x$VS_ENV_CMD" = x; then
+    WIN_SDK_BASE="$PROGRAMFILES/Microsoft SDKs/Windows/v7.1/Bin"
+    METHOD="well-known name"
+
+  windows_path="$WIN_SDK_BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    WIN_SDK_BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    WIN_SDK_BASE="$unix_path"
+  fi
+
+    if test -d "$WIN_SDK_BASE"; then
+      # There have been cases of partial or broken SDK installations. A missing
+      # lib dir is not going to work.
+      if test ! -d "$WIN_SDK_BASE/../lib"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, lib dir is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, lib dir is missing. Ignoring" >&6;}
+      elif test -f "$WIN_SDK_BASE/SetEnv.Cmd"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$WIN_SDK_BASE/SetEnv.Cmd"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          VS_ENV_ARGS="/x86"
+        else
+          VS_ENV_ARGS="/x64"
+        fi
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+  fi
+
+  if test "x$VS_ENV_CMD" = x; then
+    WIN_SDK_BASE="C:/Program Files/Microsoft SDKs/Windows/v7.1/Bin"
+    METHOD="well-known name"
+
+  windows_path="$WIN_SDK_BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    WIN_SDK_BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    WIN_SDK_BASE="$unix_path"
+  fi
+
+    if test -d "$WIN_SDK_BASE"; then
+      # There have been cases of partial or broken SDK installations. A missing
+      # lib dir is not going to work.
+      if test ! -d "$WIN_SDK_BASE/../lib"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, lib dir is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, lib dir is missing. Ignoring" >&6;}
+      elif test -f "$WIN_SDK_BASE/SetEnv.Cmd"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$WIN_SDK_BASE/SetEnv.Cmd"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          VS_ENV_ARGS="/x86"
+        else
+          VS_ENV_ARGS="/x64"
+        fi
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+
+  if test "x$VS_ENV_CMD" = x; then
+    WIN_SDK_BASE="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1/Bin"
+    METHOD="well-known name"
+
+  windows_path="$WIN_SDK_BASE"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    WIN_SDK_BASE="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    WIN_SDK_BASE="$unix_path"
+  fi
+
+    if test -d "$WIN_SDK_BASE"; then
+      # There have been cases of partial or broken SDK installations. A missing
+      # lib dir is not going to work.
+      if test ! -d "$WIN_SDK_BASE/../lib"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, lib dir is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, lib dir is missing. Ignoring" >&6;}
+      elif test -f "$WIN_SDK_BASE/SetEnv.Cmd"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        VS_ENV_CMD="$WIN_SDK_BASE/SetEnv.Cmd"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          VS_ENV_ARGS="/x86"
+        else
+          VS_ENV_ARGS="/x64"
+        fi
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&5
+$as_echo "$as_me: Found Windows SDK installation at $WIN_SDK_BASE using $METHOD" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&5
+$as_echo "$as_me: Warning: Installation is broken, SetEnv.Cmd is missing. Ignoring" >&6;}
+      fi
+    fi
+  fi
+
+
+  if test "x$VS_ENV_CMD" != x; then
+    # We have found a Visual Studio environment on disk, let's extract variables from the vsvars bat file.
+
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+
+  # First separate the path from the arguments. This will split at the first
+  # space.
+  complete="$VS_ENV_CMD"
+  path="${complete%% *}"
+  tmp="$complete EOL"
+  arguments="${tmp#* }"
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  new_path=`$CYGPATH -u "$path"`
+
+  # Now try to locate executable using which
+  new_path=`$WHICH "$new_path" 2> /dev/null`
+  # bat and cmd files are not always considered executable in cygwin causing which
+  # to not find them
+  if test "x$new_path" = x \
+      && test "x`$ECHO \"$path\" | $GREP -i -e \"\\.bat$\" -e \"\\.cmd$\"`" != x \
+      && test "x`$LS \"$path\" 2>/dev/null`" != x; then
+    new_path=`$CYGPATH -u "$path"`
+  fi
+  if test "x$new_path" = x; then
+    # Oops. Which didn't find the executable.
+    # The splitting of arguments from the executable at a space might have been incorrect,
+    # since paths with space are more likely in Windows. Give it another try with the whole
+    # argument.
+    path="$complete"
+    arguments="EOL"
+    new_path=`$CYGPATH -u "$path"`
+    new_path=`$WHICH "$new_path" 2> /dev/null`
+    # bat and cmd files are not always considered executable in cygwin causing which
+    # to not find them
+    if test "x$new_path" = x \
+        && test "x`$ECHO \"$path\" | $GREP -i -e \"\\.bat$\" -e \"\\.cmd$\"`" != x \
+        && test "x`$LS \"$path\" 2>/dev/null`" != x; then
+      new_path=`$CYGPATH -u "$path"`
+    fi
+    if test "x$new_path" = x; then
+      # It's still not found. Now this is an unrecoverable error.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&5
+$as_echo "$as_me: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&6;}
+      has_space=`$ECHO "$complete" | $GREP " "`
+      if test "x$has_space" != x; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: You might be mixing spaces in the path and extra arguments, which is not allowed." >&5
+$as_echo "$as_me: You might be mixing spaces in the path and extra arguments, which is not allowed." >&6;}
+      fi
+      as_fn_error $? "Cannot locate the the path of VS_ENV_CMD" "$LINENO" 5
+    fi
+  fi
+
+  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
+  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
+  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
+  # "foo.exe" is OK but "foo" is an error.
+  #
+  # This test is therefore slightly more accurate than "test -f" to check for file presence.
+  # It is also a way to make sure we got the proper file name for the real test later on.
+  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
+  if test "x$test_shortpath" = x; then
+    # Short path failed, file does not exist as specified.
+    # Try adding .exe or .cmd
+    if test -f "${new_path}.exe"; then
+      input_to_shortpath="${new_path}.exe"
+    elif test -f "${new_path}.cmd"; then
+      input_to_shortpath="${new_path}.cmd"
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of VS_ENV_CMD, which resolves as \"$new_path\", is invalid." >&5
+$as_echo "$as_me: The path of VS_ENV_CMD, which resolves as \"$new_path\", is invalid." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Neither \"$new_path\" nor \"$new_path.exe/cmd\" can be found" >&5
+$as_echo "$as_me: Neither \"$new_path\" nor \"$new_path.exe/cmd\" can be found" >&6;}
+      as_fn_error $? "Cannot locate the the path of VS_ENV_CMD" "$LINENO" 5
+    fi
+  else
+    input_to_shortpath="$new_path"
+  fi
+
+  # Call helper function which possibly converts this using DOS-style short mode.
+  # If so, the updated path is stored in $new_path.
+  new_path="$input_to_shortpath"
+
+  input_path="$input_to_shortpath"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
+    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
+    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
+      # Going to short mode and back again did indeed matter. Since short mode is
+      # case insensitive, let's make it lowercase to improve readability.
+      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+      # Now convert it back to Unix-stile (cygpath)
+      input_path=`$CYGPATH -u "$shortmode_path"`
+      new_path="$input_path"
+    fi
+  fi
+
+  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
+  if test "x$test_cygdrive_prefix" = x; then
+    # As a simple fix, exclude /usr/bin since it's not a real path.
+    if test "x`$ECHO $input_to_shortpath | $GREP ^/usr/bin/`" = x; then
+      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
+      # a path prefixed by /cygdrive for fixpath to work.
+      new_path="$CYGWIN_ROOT_PATH$input_path"
+    fi
+  fi
+
+  # remove trailing .exe if any
+  new_path="${new_path/%.exe/}"
+
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+
+  # First separate the path from the arguments. This will split at the first
+  # space.
+  complete="$VS_ENV_CMD"
+  path="${complete%% *}"
+  tmp="$complete EOL"
+  arguments="${tmp#* }"
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  new_path="$path"
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+
+  # Now try to locate executable using which
+  new_path=`$WHICH "$new_path" 2> /dev/null`
+
+  if test "x$new_path" = x; then
+    # Oops. Which didn't find the executable.
+    # The splitting of arguments from the executable at a space might have been incorrect,
+    # since paths with space are more likely in Windows. Give it another try with the whole
+    # argument.
+    path="$complete"
+    arguments="EOL"
+    new_path="$path"
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+
+    new_path=`$WHICH "$new_path" 2> /dev/null`
+
+    if test "x$new_path" = x; then
+      # It's still not found. Now this is an unrecoverable error.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&5
+$as_echo "$as_me: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&6;}
+      has_space=`$ECHO "$complete" | $GREP " "`
+      if test "x$has_space" != x; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: You might be mixing spaces in the path and extra arguments, which is not allowed." >&5
+$as_echo "$as_me: You might be mixing spaces in the path and extra arguments, which is not allowed." >&6;}
+      fi
+      as_fn_error $? "Cannot locate the the path of VS_ENV_CMD" "$LINENO" 5
+    fi
+  fi
+
+  # Now new_path has a complete unix path to the binary
+  if test "x`$ECHO $new_path | $GREP ^/bin/`" != x; then
+    # Keep paths in /bin as-is, but remove trailing .exe if any
+    new_path="${new_path/%.exe/}"
+    # Do not save /bin paths to all_fixpath_prefixes!
+  else
+    # Not in mixed or Windows style, start by that.
+    new_path=`cmd //c echo $new_path`
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+  fi
+
+    # Output is in $new_path
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+    # remove trailing .exe if any
+    new_path="${new_path/%.exe/}"
+
+    # Save the first 10 bytes of this path to the storage, so fixpath can work.
+    all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
+  fi
+
+  else
+    # We're on a posix platform. Hooray! :)
+    # First separate the path from the arguments. This will split at the first
+    # space.
+    complete="$VS_ENV_CMD"
+    path="${complete%% *}"
+    tmp="$complete EOL"
+    arguments="${tmp#* }"
+
+    # Cannot rely on the command "which" here since it doesn't always work.
+    is_absolute_path=`$ECHO "$path" | $GREP ^/`
+    if test -z "$is_absolute_path"; then
+      # Path to executable is not absolute. Find it.
+      IFS_save="$IFS"
+      IFS=:
+      for p in $PATH; do
+        if test -f "$p/$path" && test -x "$p/$path"; then
+          new_path="$p/$path"
+          break
+        fi
+      done
+      IFS="$IFS_save"
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Resolving VS_ENV_CMD (as $path) failed, using $path directly." >&5
+$as_echo "$as_me: Resolving VS_ENV_CMD (as $path) failed, using $path directly." >&6;}
+      new_path="$path"
+    fi
+
+    if test "x$new_path" = x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&5
+$as_echo "$as_me: The path of VS_ENV_CMD, which resolves as \"$complete\", is not found." >&6;}
+      has_space=`$ECHO "$complete" | $GREP " "`
+      if test "x$has_space" != x; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: This might be caused by spaces in the path, which is not allowed." >&5
+$as_echo "$as_me: This might be caused by spaces in the path, which is not allowed." >&6;}
+      fi
+      as_fn_error $? "Cannot locate the the path of VS_ENV_CMD" "$LINENO" 5
+    fi
+  fi
+
+  # Now join together the path and the arguments once again
+  if test "x$arguments" != xEOL; then
+    new_complete="$new_path ${arguments% *}"
+  else
+    new_complete="$new_path"
+  fi
+
+  if test "x$complete" != "x$new_complete"; then
+    VS_ENV_CMD="$new_complete"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting VS_ENV_CMD to \"$new_complete\"" >&5
+$as_echo "$as_me: Rewriting VS_ENV_CMD to \"$new_complete\"" >&6;}
+  fi
+
+
+    # Lets extract the variables that are set by vcvarsall.bat/vsvars32.bat/vsvars64.bat
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Trying to extract Visual Studio environment variables" >&5
+$as_echo "$as_me: Trying to extract Visual Studio environment variables" >&6;}
+    cd $OUTPUT_ROOT
+    # FIXME: The code betweeen ---- was inlined from a separate script and is not properly adapted
+    # to autoconf standards.
+
+    #----
+
+    # Cannot use the VS10 setup script directly (since it only updates the DOS subshell environment)
+    # but calculate the difference in Cygwin environment before/after running it and then
+    # apply the diff.
+
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+      _vs10varsall=`cygpath -a -m -s "$VS_ENV_CMD"`
+      _dosvs10varsall=`cygpath -a -w -s $_vs10varsall`
+      _dosbash=`cygpath -a -w -s \`which bash\`.*`
+    else
+      _dosvs10varsall=`cmd //c echo $VS_ENV_CMD`
+      _dosbash=`cmd //c echo \`which bash\``
+    fi
+
+    # generate the set of exported vars before/after the vs10 setup
+    $ECHO "@echo off"                                           >  localdevenvtmp.bat
+    $ECHO "$_dosbash -c \"export -p\" > localdevenvtmp.export0" >> localdevenvtmp.bat
+    $ECHO "call $_dosvs10varsall $VS_ENV_ARGS"                  >> localdevenvtmp.bat
+    $ECHO "$_dosbash -c \"export -p\" > localdevenvtmp.export1" >> localdevenvtmp.bat
+
+    # Now execute the newly created bat file.
+    # The | cat is to stop SetEnv.Cmd to mess with system colors on msys
+    cmd /c localdevenvtmp.bat | cat
+
+    # apply the diff (less some non-vs10 vars named by "!")
+    $SORT localdevenvtmp.export0 | $GREP -v "!" > localdevenvtmp.export0.sort
+    $SORT localdevenvtmp.export1 | $GREP -v "!" > localdevenvtmp.export1.sort
+    $COMM -1 -3 localdevenvtmp.export0.sort localdevenvtmp.export1.sort > localdevenv.sh
+
+    # cleanup
+    $RM localdevenvtmp*
+    #----
+    cd $CURDIR
+    if test ! -s $OUTPUT_ROOT/localdevenv.sh; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Could not succesfully extract the envionment variables needed for the VS setup." >&5
+$as_echo "$as_me: Could not succesfully extract the envionment variables needed for the VS setup." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Try setting --with-tools-dir to the VC/bin directory within the VS installation" >&5
+$as_echo "$as_me: Try setting --with-tools-dir to the VC/bin directory within the VS installation" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: or run \"bash.exe -l\" from a VS command prompt and then run configure from there." >&5
+$as_echo "$as_me: or run \"bash.exe -l\" from a VS command prompt and then run configure from there." >&6;}
+      as_fn_error $? "Cannot continue" "$LINENO" 5
+    fi
+
+    # Now set all paths and other env variables. This will allow the rest of
+    # the configure script to find and run the compiler in the proper way.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Setting extracted environment variables" >&5
+$as_echo "$as_me: Setting extracted environment variables" >&6;}
+    . $OUTPUT_ROOT/localdevenv.sh
+  else
+    # We did not find a vsvars bat file, let's hope we are run from a VS command prompt.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot locate a valid Visual Studio installation, checking current environment" >&5
+$as_echo "$as_me: Cannot locate a valid Visual Studio installation, checking current environment" >&6;}
+  fi
+
+  # At this point, we should have corrent variables in the environment, or we can't continue.
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Visual Studio variables" >&5
+$as_echo_n "checking for Visual Studio variables... " >&6; }
+
+  if test "x$VCINSTALLDIR" != x || test "x$WindowsSDKDir" != x || test "x$WINDOWSSDKDIR" != x; then
+    if test "x$INCLUDE" = x || test "x$LIB" = x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: present but broken" >&5
+$as_echo "present but broken" >&6; }
+      as_fn_error $? "Your VC command prompt seems broken, INCLUDE and/or LIB is missing." "$LINENO" 5
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      # Remove any trailing \ from INCLUDE and LIB to avoid trouble in spec.gmk.
+      VS_INCLUDE=`$ECHO "$INCLUDE" | $SED 's/\\\\$//'`
+      VS_LIB=`$ECHO "$LIB" | $SED 's/\\\\$//'`
+      # Remove any paths containing # (typically F#) as that messes up make
+      PATH=`$ECHO "$PATH" | $SED 's/[^:#]*#[^:]*://g'`
+      VS_PATH="$PATH"
+
+
+
+    fi
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+
+    if test "x$VS_ENV_CMD" = x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot locate a valid Visual Studio or Windows SDK installation on disk," >&5
+$as_echo "$as_me: Cannot locate a valid Visual Studio or Windows SDK installation on disk," >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: nor is this script run from a Visual Studio command prompt." >&5
+$as_echo "$as_me: nor is this script run from a Visual Studio command prompt." >&6;}
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Running the extraction script failed." >&5
+$as_echo "$as_me: Running the extraction script failed." >&6;}
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Try setting --with-tools-dir to the VC/bin directory within the VS installation" >&5
+$as_echo "$as_me: Try setting --with-tools-dir to the VC/bin directory within the VS installation" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: or run \"bash.exe -l\" from a VS command prompt and then run configure from there." >&5
+$as_echo "$as_me: or run \"bash.exe -l\" from a VS command prompt and then run configure from there." >&6;}
+    as_fn_error $? "Cannot continue" "$LINENO" 5
+  fi
+
+
+
+# Check whether --with-msvcp-dll was given.
+if test "${with_msvcp_dll+set}" = set; then :
+  withval=$with_msvcp_dll;
+fi
+
+
+  if test "x$with_msvcp_dll" != x; then
+    # If given explicitly by user, do not probe. If not present, fail directly.
+
+  POSSIBLE_MSVCP_DLL="$with_msvcp_dll"
+  METHOD="--with-msvcp-dll"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+    if test "x$MSVCP_DLL" = x; then
+      as_fn_error $? "Could not find a proper msvcp100.dll as specified by --with-msvcp-dll" "$LINENO" 5
+    fi
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Using well-known location from Visual Studio 10.0
+    if test "x$VCINSTALLDIR" != x; then
+      CYGWIN_VC_INSTALL_DIR="$VCINSTALLDIR"
+
+  windows_path="$CYGWIN_VC_INSTALL_DIR"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    CYGWIN_VC_INSTALL_DIR="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    CYGWIN_VC_INSTALL_DIR="$unix_path"
+  fi
+
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x64/Microsoft.VC100.CRT/msvcp100.dll"
+      else
+        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x86/Microsoft.VC100.CRT/msvcp100.dll"
+      fi
+
+  POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+  METHOD="well-known location in VCINSTALLDIR"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+    fi
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Check in the Boot JDK directory.
+    POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp100.dll"
+
+  POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+  METHOD="well-known location in Boot JDK"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Look in the Windows system32 directory
+    CYGWIN_SYSTEMROOT="$SYSTEMROOT"
+
+  windows_path="$CYGWIN_SYSTEMROOT"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    CYGWIN_SYSTEMROOT="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    CYGWIN_SYSTEMROOT="$unix_path"
+  fi
+
+    POSSIBLE_MSVCP_DLL="$CYGWIN_SYSTEMROOT/system32/msvcp100.dll"
+
+  POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+  METHOD="well-known location in SYSTEMROOT"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: If Visual Studio Express is installed, there is usually one with the debugger
+    if test "x$VS100COMNTOOLS" != x; then
+      CYGWIN_VS_TOOLS_DIR="$VS100COMNTOOLS/.."
+
+  windows_path="$CYGWIN_VS_TOOLS_DIR"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    CYGWIN_VS_TOOLS_DIR="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    CYGWIN_VS_TOOLS_DIR="$unix_path"
+  fi
+
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x64/ | $HEAD --lines 1`
+      else
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x86/ | $HEAD --lines 1`
+      fi
+
+  POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+  METHOD="search of VS100COMNTOOLS"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+    fi
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
+    # (This was the original behaviour; kept since it might turn up something)
+    if test "x$CYGWIN_VC_INSTALL_DIR" != x; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x64 | $HEAD --lines 1`
+      else
+        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x86 | $GREP -v ia64 | $GREP -v x64 | $HEAD --lines 1`
+        if test "x$POSSIBLE_MSVCP_DLL" = x; then
+          # We're grasping at straws now...
+          POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $HEAD --lines 1`
+        fi
+      fi
+
+
+  POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+  METHOD="search of VCINSTALLDIR"
+  if test -e "$POSSIBLE_MSVCP_DLL"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
+$as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
+
+    # Need to check if the found msvcp is correct architecture
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
+$as_echo_n "checking found msvcp100.dll architecture... " >&6; }
+    MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      CORRECT_MSVCP_ARCH=386
+    else
+      CORRECT_MSVCP_ARCH=x86-64
+    fi
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+      MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSVCP_DLL" >&5
+$as_echo "$MSVCP_DLL" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: incorrect, ignoring" >&5
+$as_echo "incorrect, ignoring" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&5
+$as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETYPE" >&6;}
+    fi
+  fi
+
+    fi
+  fi
+
+  if test "x$MSVCP_DLL" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
+$as_echo_n "checking for msvcp100.dll... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    as_fn_error $? "Could not find msvcp100.dll. Please specify using --with-msvcp-dll." "$LINENO" 5
+  fi
+
+
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  path="$MSVCP_DLL"
+  new_path=`$CYGPATH -u "$path"`
+
+  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
+  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
+  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
+  # "foo.exe" is OK but "foo" is an error.
+  #
+  # This test is therefore slightly more accurate than "test -f" to check for file precense.
+  # It is also a way to make sure we got the proper file name for the real test later on.
+  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
+  if test "x$test_shortpath" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: The path of MSVCP_DLL, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of MSVCP_DLL, which resolves as \"$path\", is invalid." >&6;}
+    as_fn_error $? "Cannot locate the the path of MSVCP_DLL" "$LINENO" 5
+  fi
+
+  # Call helper function which possibly converts this using DOS-style short mode.
+  # If so, the updated path is stored in $new_path.
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
+    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
+    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
+      # Going to short mode and back again did indeed matter. Since short mode is
+      # case insensitive, let's make it lowercase to improve readability.
+      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+      # Now convert it back to Unix-stile (cygpath)
+      input_path=`$CYGPATH -u "$shortmode_path"`
+      new_path="$input_path"
+    fi
+  fi
+
+  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
+  if test "x$test_cygdrive_prefix" = x; then
+    # As a simple fix, exclude /usr/bin since it's not a real path.
+    if test "x`$ECHO $new_path | $GREP ^/usr/bin/`" = x; then
+      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
+      # a path prefixed by /cygdrive for fixpath to work.
+      new_path="$CYGWIN_ROOT_PATH$input_path"
+    fi
+  fi
+
+
+  if test "x$path" != "x$new_path"; then
+    MSVCP_DLL="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting MSVCP_DLL to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting MSVCP_DLL to \"$new_path\"" >&6;}
+  fi
+
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+
+  path="$MSVCP_DLL"
+  has_colon=`$ECHO $path | $GREP ^.:`
+  new_path="$path"
+  if test "x$has_colon" = x; then
+    # Not in mixed or Windows style, start by that.
+    new_path=`cmd //c echo $path`
+  fi
+
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+  fi
+
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+  if test "x$path" != "x$new_path"; then
+    MSVCP_DLL="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting MSVCP_DLL to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting MSVCP_DLL to \"$new_path\"" >&6;}
+  fi
+
+  # Save the first 10 bytes of this path to the storage, so fixpath can work.
+  all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
+
+  else
+    # We're on a posix platform. Hooray! :)
+    path="$MSVCP_DLL"
+    has_space=`$ECHO "$path" | $GREP " "`
+    if test "x$has_space" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of MSVCP_DLL, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of MSVCP_DLL, which resolves as \"$path\", is invalid." >&6;}
+      as_fn_error $? "Spaces are not allowed in this path." "$LINENO" 5
+    fi
+
+    # Use eval to expand a potential ~
+    eval path="$path"
+    if test ! -f "$path" && test ! -d "$path"; then
+      as_fn_error $? "The path of MSVCP_DLL, which resolves as \"$path\", is not found." "$LINENO" 5
+    fi
+
+    MSVCP_DLL="`cd "$path"; $THEPWDCMD -L`"
+  fi
+
+
   fi
 
 
