@@ -15,6 +15,24 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
+ifeq ($(OPENJDK_TARGET_OS), windows)
+  MSVCP_BIN_LIST := $(call CacheFind, $(JDK_OUTPUTDIR)/bin)
+  MSVCP_BIN_LIST := $(filter %$(notdir $(MSVCP_DLL)), $(MSVCP_BIN_LIST))
+  $(foreach f,$(MSVCP_BIN_LIST), \
+    $(eval $(call AddFileToCopy,$(JDK_OUTPUTDIR),$(JDK_IMAGE_DIR),$f,JDK_BIN_TARGETS)))
+ 
+  MSVCP_PATTERN = %$(notdir $(MSVCP_DLL))
+  ifneq ($(POST_STRIP_CMD), )
+    JRE_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JRE_STRIP_LIST))
+    JDKJRE_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDKJRE_STRIP_LIST))
+    JDK_BIN_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDK_BIN_STRIP_LIST))
+    JRE_OVERLAY_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JRE_OVERLAY_STRIP_LIST))
+    JDKJRE_OVERLAY_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDKJRE_OVERLAY_STRIP_LIST))
+    JDK_OVERLAY_BIN_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDK_OVERLAY_BIN_STRIP_LIST))
+  endif
+endif
+
+
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
 .PHONY : openj9.ddr-gensrc openj9.ddr-jar
