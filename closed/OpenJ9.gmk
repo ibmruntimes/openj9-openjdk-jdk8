@@ -94,8 +94,6 @@ else
   OPENJ9_LIBS_OUTPUT_DIR := lib$(OPENJDK_TARGET_CPU_LIBDIR)
 endif
 
-OPENJ9_LIBS_SUBDIR := compressedrefs
-
 .PHONY : \
 	build-j9 \
 	clean-j9 \
