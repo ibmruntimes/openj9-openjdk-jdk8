@@ -869,6 +869,7 @@ OPENJDK_TAG
 OPENJDK_SHA
 JDK_FIX_VERSION
 JDK_MOD_VERSION
+OPENJ9_LIBS_SUBDIR
 OPENJ9_PLATFORM_CODE
 OPENJ9_BUILDSPEC
 OPENJ9_TOPDIR
@@ -1039,6 +1040,7 @@ with_jvm_interpreter
 with_jvm_variants
 enable_debug
 with_debug_level
+with_noncompressedrefs
 with_cuda
 with_gdk
 enable_cuda
@@ -1797,6 +1799,8 @@ Optional Packages:
                           [server]
   --with-debug-level      set the debug level (release, fastdebug, slowdebug)
                           [release]
+  --with-noncompressedrefs
+                          build non-compressedrefs vm (large heap)
   --with-cuda             use this directory as CUDA_HOME
   --with-gdk              use this directory as GDK_HOME
   --with-conf-name        use this as the name of the configuration [generated
@@ -3980,7 +3984,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1524572072
+DATE_WHEN_GENERATED=1525094851
 
 ###############################################################################
 #
@@ -8231,6 +8235,13 @@ $as_echo "$DEBUG_LEVEL" >&6; }
 # With basic setup done, call the custom early hook.
 
 
+# Check whether --with-noncompressedrefs was given.
+if test "${with_noncompressedrefs+set}" = set; then :
+  withval=$with_noncompressedrefs;
+fi
+
+
+
   # Convert openjdk cpu names to openj9 names
   case "$build_cpu" in
     x86_64)
@@ -8250,20 +8261,34 @@ $as_echo "$DEBUG_LEVEL" >&6; }
       ;;
   esac
 
-  OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+  if test "x$with_noncompressedrefs" = x; then
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
+  else
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+    OPENJ9_LIBS_SUBDIR=default
+  fi
 
   if test "x$OPENJ9_CPU" = xx86-64; then
     if test "x$OPENJDK_BUILD_OS" = xlinux; then
       OPENJ9_PLATFORM_CODE=xa64
     elif test "x$OPENJDK_BUILD_OS" = xwindows; then
       OPENJ9_PLATFORM_CODE=wa64
-      OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+        OPENJ9_BUILDSPEC="win_x86-64"
+      else
+        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      fi
     else
       as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le; then
     OPENJ9_PLATFORM_CODE=xl64
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
+    else
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
+    fi
   elif test "x$OPENJ9_CPU" = x390-64; then
     OPENJ9_PLATFORM_CODE=xz64
   elif test "x$OPENJ9_CPU" = xppc-64; then
@@ -8271,6 +8296,7 @@ $as_echo "$DEBUG_LEVEL" >&6; }
   else
     as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
   fi
+
 
 
 
