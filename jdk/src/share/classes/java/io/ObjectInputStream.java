@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 1996, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -51,6 +51,8 @@ import static java.io.ObjectStreamClass.processQueue;
 
 import sun.misc.SharedSecrets;
 import sun.misc.ObjectInputFilter;
+import sun.misc.ObjectStreamClassValidator;
+import sun.misc.SharedSecrets;
 import sun.reflect.misc.ReflectUtil;
 import sun.misc.JavaOISAccess;
 import sun.util.logging.PlatformLogger;
@@ -251,7 +253,7 @@ public class ObjectInputStream
 
     static {
         /* Setup access so sun.misc can invoke package private functions. */
-        sun.misc.SharedSecrets.setJavaOISAccess(new JavaOISAccess() {
+        JavaOISAccess javaOISAccess = new JavaOISAccess() {
             public void setObjectInputFilter(ObjectInputStream stream, ObjectInputFilter filter) {
                 stream.setInternalObjectInputFilter(filter);
             }
@@ -265,7 +267,9 @@ public class ObjectInputStream
             {
                 stream.checkArray(arrayType, arrayLength);
             }
-        });
+        };
+
+        sun.misc.SharedSecrets.setJavaOISAccess(javaOISAccess);
     }
 
     /*
@@ -1854,6 +1858,9 @@ public class ObjectInputStream
                 throw new StreamCorruptedException(
                     String.format("invalid type code: %02X", tc));
         }
+        if (descriptor != null) {
+            validateDescriptor(descriptor);
+        }
         return descriptor;
     }
 
@@ -2435,10 +2442,11 @@ public class ObjectInputStream
                                               int ndoubles);
 
     /**
-     * Returns the first non-null class loader (not counting class loaders of
-     * generated reflection implementation classes) up the execution stack, or
-     * null if only code from the null class loader is on the stack.  This
-     * method is also called via reflection by the following RMI-IIOP class:
+     * Returns first non-privileged class loader on the stack (excluding
+     * reflection generated frames) or the extension class loader if only
+     * class loaded by the boot class loader and extension class loader are
+     * found on the stack. This method is also called via reflection by the
+     * following RMI-IIOP class:
      *
      *     com.sun.corba.se.internal.util.JDKClassLoader
      *
@@ -3997,5 +4005,22 @@ public class ObjectInputStream
         } else {
             throw new AssertionError();
         }
+    }
+
+    private void validateDescriptor(ObjectStreamClass descriptor) {
+        ObjectStreamClassValidator validating = validator;
+        if (validating != null) {
+            validating.validateDescriptor(descriptor);
+        }
+    }
+
+    // controlled access to ObjectStreamClassValidator
+    private volatile ObjectStreamClassValidator validator;
+
+    private static void setValidator(ObjectInputStream ois, ObjectStreamClassValidator validator) {
+        ois.validator = validator;
+    }
+    static {
+        SharedSecrets.setJavaObjectInputStreamAccess(ObjectInputStream::setValidator);
     }
 }
