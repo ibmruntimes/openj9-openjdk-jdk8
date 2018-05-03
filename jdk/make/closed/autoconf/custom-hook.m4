@@ -1,7 +1,6 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
-#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
@@ -14,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-#
 # ===========================================================================
 
 AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
@@ -104,7 +102,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xz64)
+      wa64|xa64|xl64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -146,12 +144,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 [
   AC_ARG_WITH(noncompressedrefs, [AS_HELP_STRING([--with-noncompressedrefs],
     [build non-compressedrefs vm (large heap)])])
-  
+
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
   if test "x$with_noncompressedrefs" = x; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
-  else 
+  else
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   fi
@@ -299,7 +297,7 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
   METHOD="$2"
   if test -e "$POSSIBLE_MSVCP_DLL"; then
     AC_MSG_NOTICE([Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD])
-    
+
     # Need to check if the found msvcp is correct architecture
     AC_MSG_CHECKING([found msvcp100.dll architecture])
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
@@ -332,7 +330,7 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
       AC_MSG_ERROR([Could not find a proper msvcp100.dll as specified by --with-msvcp-dll])
     fi
   fi
-  
+
   if test "x$MSVCP_DLL" = x; then
     # Probe: Using well-known location from Visual Studio 10.0
     if test "x$VCINSTALLDIR" != x; then
@@ -352,9 +350,9 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
     POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp100.dll"
     TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in Boot JDK])
   fi
-  
+
   if test "x$MSVCP_DLL" = x; then
-    # Probe: Look in the Windows system32 directory 
+    # Probe: Look in the Windows system32 directory
     CYGWIN_SYSTEMROOT="$SYSTEMROOT"
     BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_SYSTEMROOT)
     POSSIBLE_MSVCP_DLL="$CYGWIN_SYSTEMROOT/system32/msvcp100.dll"
@@ -374,7 +372,7 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
       TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VS100COMNTOOLS])
     fi
   fi
-      
+
   if test "x$MSVCP_DLL" = x; then
     # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
     # (This was the original behaviour; kept since it might turn up something)
@@ -388,11 +386,11 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
           POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $HEAD --lines 1`
         fi
       fi
-      
+
       TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VCINSTALLDIR])
     fi
   fi
-  
+
   if test "x$MSVCP_DLL" = x; then
     AC_MSG_CHECKING([for msvcp100.dll])
     AC_MSG_RESULT([no])
