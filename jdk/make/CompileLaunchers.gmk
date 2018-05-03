@@ -307,27 +307,27 @@ $(eval $(call SetupLauncher,jdb, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.sun.tools.example.debug.tty.TTY"$(COMMA) }' \
     -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }'))
 
-$(eval $(call SetupLauncher,jhat, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.sun.tools.hat.Main"$(COMMA) }'))
+#$(eval $(call SetupLauncher,jhat, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.sun.tools.hat.Main"$(COMMA) }'))
 
-$(eval $(call SetupLauncher,jinfo, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
-        "sun.tools.jinfo.JInfo"$(COMMA) }' \
-    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
-    ,,,,,,,,,Info-privileged.plist))
+#$(eval $(call SetupLauncher,jinfo, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
+#        "sun.tools.jinfo.JInfo"$(COMMA) }' \
+#    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
+#    ,,,,,,,,,Info-privileged.plist))
 
-$(eval $(call SetupLauncher,jmap, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
-        "sun.tools.jmap.JMap"$(COMMA) }' \
-    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
-    ,,,,,,,,,Info-privileged.plist))
+#$(eval $(call SetupLauncher,jmap, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
+#        "sun.tools.jmap.JMap"$(COMMA) }' \
+#    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
+#    ,,,,,,,,,Info-privileged.plist))
 
-$(eval $(call SetupLauncher,jps, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jps.Jps"$(COMMA) }'))
+#$(eval $(call SetupLauncher,jps, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jps.Jps"$(COMMA) }'))
 
 $(eval $(call SetupLauncher,jrunscript, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.sun.tools.script.shell.Main"$(COMMA) }'))
@@ -340,19 +340,19 @@ $(eval $(call SetupLauncher,jsadebugd, \
     -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
     ,,,,,,,,,Info-privileged.plist))
 
-$(eval $(call SetupLauncher,jstack, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
-        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
-        "sun.tools.jstack.JStack"$(COMMA) }' \
-    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
-    ,,,,,,,,,Info-privileged.plist))
+#$(eval $(call SetupLauncher,jstack, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useProcDebugger"$(COMMA) \
+#        "-J-Dsun.jvm.hotspot.debugger.useWindbgDebugger"$(COMMA) \
+#        "sun.tools.jstack.JStack"$(COMMA) }' \
+#    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }' \
+#    ,,,,,,,,,Info-privileged.plist))
 
-$(eval $(call SetupLauncher,jstat, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jstat.Jstat"$(COMMA) }'))
+#$(eval $(call SetupLauncher,jstat, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jstat.Jstat"$(COMMA) }'))
 
-$(eval $(call SetupLauncher,jstatd, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jstatd.Jstatd"$(COMMA) }'))
+#$(eval $(call SetupLauncher,jstatd, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jstatd.Jstatd"$(COMMA) }'))
 
 $(eval $(call SetupLauncher,keytool, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.security.tools.keytool.Main"$(COMMA) }'))
@@ -412,8 +412,8 @@ $(eval $(call SetupLauncher,rmid, \
 $(eval $(call SetupLauncher,rmiregistry, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.rmi.registry.RegistryImpl"$(COMMA) }'))
 
-$(eval $(call SetupLauncher,jcmd, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jcmd.JCmd"$(COMMA) }'))
+#$(eval $(call SetupLauncher,jcmd, \
+#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jcmd.JCmd"$(COMMA) }'))
 
 # Include executables for OpenJ9 (jdmpview, traceformat and jextract).
 $(eval $(call SetupLauncher,jdmpview, \
