@@ -146,12 +146,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     [build non-compressedrefs vm (large heap)])])
 
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
-  if test "x$with_noncompressedrefs" = x; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
-    OPENJ9_LIBS_SUBDIR=compressedrefs
-  else
+  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
+  else
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64; then
@@ -160,7 +160,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     elif test "x$OPENJDK_BUILD_OS" = xwindows; then
       OPENJ9_PLATFORM_CODE=wa64
       if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        OPENJ9_BUILDSPEC="win_x86-64"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          OPENJ9_PLATFORM_CODE=wi32
+          OPENJ9_BUILDSPEC="win_x86"
+        else
+          OPENJ9_BUILDSPEC="win_x86-64"
+        fi
       else
         OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
       fi

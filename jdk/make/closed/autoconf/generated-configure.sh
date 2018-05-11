@@ -3982,7 +3982,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1525362336
+DATE_WHEN_GENERATED=1526493779
 
 ###############################################################################
 #
@@ -8259,12 +8259,12 @@ fi
       ;;
   esac
 
-  if test "x$with_noncompressedrefs" = x; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
-    OPENJ9_LIBS_SUBDIR=compressedrefs
-  else
+  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
+  else
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64; then
@@ -8273,7 +8273,12 @@ fi
     elif test "x$OPENJDK_BUILD_OS" = xwindows; then
       OPENJ9_PLATFORM_CODE=wa64
       if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        OPENJ9_BUILDSPEC="win_x86-64"
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+          OPENJ9_PLATFORM_CODE=wi32
+          OPENJ9_BUILDSPEC="win_x86"
+        else
+          OPENJ9_BUILDSPEC="win_x86-64"
+        fi
       else
         OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
       fi
