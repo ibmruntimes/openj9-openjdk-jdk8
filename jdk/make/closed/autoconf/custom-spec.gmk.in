@@ -72,3 +72,5 @@ OPENJ9_LIBS_SUBDIR      := @OPENJ9_LIBS_SUBDIR@
 
 # Windows
 MSVCP_DLL               := @MSVCP_DLL@
+
+COPY_JVM_CFG_FILE       := true
