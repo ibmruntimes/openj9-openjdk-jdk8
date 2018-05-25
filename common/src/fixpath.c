@@ -1,4 +1,23 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+ *
+ * ===========================================================================
+ *
  * Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -28,6 +47,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 void report_error()
 {
@@ -200,6 +221,11 @@ char*(*replace_cygdrive)(char *in) = NULL;
 char *files_to_delete[1024];
 int num_files_to_delete = 0;
 
+int check_dir_exists(char *in) {
+  struct stat buf;
+  return ((stat(in, &buf) == 0) && (buf.st_mode & S_IFDIR != 0));
+}
+
 char *fix_at_file(char *in)
 {
   char *tmpdir;
@@ -224,7 +250,15 @@ char *fix_at_file(char *in)
 
   tmpdir = getenv("TMP");
   if (tmpdir == NULL) {
+    // Set temporary directory to the cygwin TMP variable
     tmpdir = "c:/cygwin/tmp";
+    if (!check_dir_exists(tmpdir)) {
+      tmpdir = "c:/cygwin64/tmp";
+      if (!check_dir_exists(tmpdir)) {
+        fprintf(stderr, "Could not set temporary directory to c:/cygwin/tmp nor c:/cygwin64/tmp (cygwin TMP variable is null)!\n");
+        exit(-1);
+      }
+    }
   }
   _snprintf(name, sizeof(name), "%s\\atfile_XXXXXX", tmpdir);
 
