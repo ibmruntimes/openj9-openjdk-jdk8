@@ -653,6 +653,15 @@ signalVMInitComplete(void)
 }
 
 /*
+ * Determine if VM initialization is complete.
+ */
+jboolean
+debugInit_isVMInitComplete(void)
+{
+    return VMInitComplete;
+}
+
+/*
  * Wait for VM initialization to complete.
  */
 void
@@ -830,6 +839,7 @@ debugInit_reset(JNIEnv *env)
 
     currentSessionID++;
     initComplete = JNI_FALSE;
+	VMInitComplete = JNI_TRUE; /* The VM Is already initialized */
 
     eventHandler_reset(currentSessionID);
     transport_reset();
