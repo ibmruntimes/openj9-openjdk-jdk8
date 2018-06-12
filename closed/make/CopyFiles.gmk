@@ -33,3 +33,9 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
 
   COPY_FILES += $(MSVCP_TARGET)
 endif
+
+# Copy ibmjvmti.h
+$(JDK_OUTPUTDIR)/include/ibmjvmti.h: $(SRC_ROOT)/openj9/runtime/include/ibmjvmti.h
+	$(call install-file)
+
+COPY_FILES += $(JDK_OUTPUTDIR)/include/ibmjvmti.h
