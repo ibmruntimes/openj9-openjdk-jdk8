@@ -872,6 +872,7 @@ JDK_MOD_VERSION
 OPENJ9_LIBS_SUBDIR
 OPENJ9_PLATFORM_CODE
 OPENJ9_BUILDSPEC
+CONFIG_SHELL
 OPENJ9_TOPDIR
 OPENJ9OMR_TOPDIR
 BUILD_VARIANT_RELEASE
@@ -3982,7 +3983,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1526493779
+DATE_WHEN_GENERATED=1529097799
 
 ###############################################################################
 #
