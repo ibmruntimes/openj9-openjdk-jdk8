@@ -1,4 +1,8 @@
 #
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved.
+#
+
+#
 # Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -183,6 +187,7 @@ else
   FULL_VERSION=$(RELEASE)-$(JDK_BUILD_NUMBER)
 endif
 JRE_RELEASE_VERSION:=$(FULL_VERSION)
+VERSION_NUMBER_FOUR_POSITIONS:=$(JDK_MINOR_VERSION).$(JDK_MICRO_VERSION).$(COOKED_JDK_UPDATE_VERSION).$(COOKED_BUILD_NUMBER)
 
 # How to compile the code: release, fastdebug or slowdebug
 DEBUG_LEVEL:=@DEBUG_LEVEL@
