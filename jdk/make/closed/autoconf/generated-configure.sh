@@ -3983,7 +3983,7 @@ fi
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1529097799
+DATE_WHEN_GENERATED=1530195532
 
 ###############################################################################
 #
@@ -8608,6 +8608,7 @@ $as_echo "$as_me: Could not find freemarker.jar" >&6;}
 
 
 
+
 # Check whether --with-cuda was given.
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda;
@@ -8680,7 +8681,7 @@ $as_echo "no (explicitly disabled)" >&6; }
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      wa64|xa64|xl64|xz64)
+      wa64|wi32|xa64|xl64|xz64)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for $OPENJ9_PLATFORM_CODE)" >&5
 $as_echo "yes (default for $OPENJ9_PLATFORM_CODE)" >&6; }
         OPENJ9_ENABLE_DDR=true
