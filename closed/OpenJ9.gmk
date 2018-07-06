@@ -70,6 +70,16 @@ OPENJ9_VM_FILES := \
 	#
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
+  .PHONY : run-ddrgen
+  $(OUTPUT_ROOT)/vm/j9ddr.dat : run-ddrgen
+  run-ddrgen :
+	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+		VERSION_MAJOR=8 \
+		$(EXPORT_MSVS_ENV_VARS) \
+	&& $(MAKE) -C $(OUTPUT_ROOT)/vm/ddr -f run_omrddrgen.mk \
+		CC="$(CC)" \
+		CXX="$(CXX)"
+
   OPENJ9_VM_FILES += j9ddr.dat
 endif
 
