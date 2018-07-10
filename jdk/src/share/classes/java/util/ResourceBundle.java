@@ -25,7 +25,7 @@
 
 /*
  * (C) Copyright Taligent, Inc. 1996, 1997 - All Rights Reserved
- * (C) Copyright IBM Corp. 1996 - 1999 - All Rights Reserved
+ * (C) Copyright IBM Corp. 1996 - 2018 - All Rights Reserved
  *
  * The original version of this source code and documentation
  * is copyrighted and owned by Taligent, Inc., a wholly-owned
@@ -1320,6 +1320,13 @@ public abstract class ResourceBundle {
         return Control.INSTANCE;
     }
 
+    /**
+     * volatile reference object to guard the ClassLoader object
+     * being garbage collected before getBundleImpl() method completes
+     * the caching and retrieving of requested Resourcebundle object
+     */
+    private static volatile Object vo = new Object();
+
     private static ResourceBundle getBundleImpl(String baseName, Locale locale,
                                                 ClassLoader loader, Control control) {
         if (locale == null || control == null) {
@@ -1398,7 +1405,13 @@ public abstract class ResourceBundle {
             bundle = baseBundle;
         }
 
-        return bundle;
+        //The OpenJ9 GC might collect the loader before we return here. This prevents that.
+        try {
+            return bundle;
+        } finally {
+            //Should never be true. Using the loader here prevents it being GC'd.
+            if (loader == vo) throw new Error("Unexpected error.");
+        }
     }
 
     /**
