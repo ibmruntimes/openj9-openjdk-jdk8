@@ -61,6 +61,10 @@ JDK_FIX_VERSION         := @JDK_FIX_VERSION@
 J9JDK_EXT_VERSION       := HEAD
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
+# required by CMake
+CMAKE                       := @CMAKE@
+export OPENJ9_ENABLE_CMAKE  := @OPENJ9_ENABLE_CMAKE@
+
 # required by UMA
 FREEMARKER_JAR          := @FREEMARKER_JAR@
 OPENJ9_BUILDSPEC        := @OPENJ9_BUILDSPEC@

@@ -314,6 +314,7 @@ run-preprocessors-j9 : stage-j9
 		&& cd $(OUTPUT_ROOT)/vm \
 		&& $(MAKE) $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
+			CMAKE=$(CMAKE) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
 			J9VM_SHA=$(OPENJ9_SHA) \
 			JAVA_HOME=$(BOOT_JDK) \
@@ -324,14 +325,19 @@ run-preprocessors-j9 : stage-j9
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
 			tools \
 	)
-	@$(SED) -i -e 's/^\s*VERSION_MAJOR\s*.*=.*/VERSION_MAJOR:=8/' $(OUTPUT_ROOT)/vm/makelib/mkconstants.mk
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUT_ROOT)/vm
+ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) \
+		&& $(MAKE) -C  $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
+	)
+else
 	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) \
 		&& cd $(OUTPUT_ROOT)/vm \
 		&& $(MAKE) $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all \
 	)
+endif
 	@$(ECHO) OpenJ9 compile complete
 	@$(MKDIR) -p $(JDK_IMAGE_DIR)/
 	@$(MKDIR) -p $(JRE_IMAGE_DIR)/
