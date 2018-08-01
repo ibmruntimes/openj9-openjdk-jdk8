@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -51,11 +57,14 @@ static void dll_build_name(char* buffer, size_t buflen,
     path = strtok_s(paths_copy, PATH_SEPARATOR, &next_token);
 
     while (path != NULL) {
-        _snprintf(buffer, buflen, "%s\\%s.dll", path, fname);
-        if (_access(buffer, 0) == 0) {
-            break;
+        /* If the path will cause a buffer overflow skip it. This path is invalid. */
+        if (path + (int)strlen(fname) + 10 <= buflen) {
+            _snprintf(buffer, buflen, "%s\\%s.dll", path, fname);
+            if (_access(buffer, 0) == 0) {
+                break;
+            }
+            *buffer = '\0';
         }
-        *buffer = '\0';
         path = strtok_s(NULL, PATH_SEPARATOR, &next_token);
     }
 
@@ -100,6 +109,8 @@ dbgsysGetLastErrorString(char *buf, int len)
 
 /*
  * Build a machine dependent library name out of a path and file name.
+ * pname may include multiple paths. A successful path will include a
+ * fname.dll in its directory.
  */
 void
 dbgsysBuildLibName(char *holder, int holderlen, const char *pname, const char *fname)
@@ -107,12 +118,8 @@ dbgsysBuildLibName(char *holder, int holderlen, const char *pname, const char *f
     const int pnamelen = pname ? (int)strlen(pname) : 0;
 
     *holder = '\0';
-    /* Quietly truncates on buffer overflow. Should be an error. */
-    if (pnamelen + (int)strlen(fname) + 10 > holderlen) {
-        return;
-    }
 
-    if (pnamelen == 0) {
+    if ((pnamelen == 0) && ((int)strlen(fname) + 10 <= holderlen)) {
         sprintf(holder, "%s.dll", fname);
     } else {
       dll_build_name(holder, holderlen, pname, fname);
