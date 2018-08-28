@@ -27,7 +27,12 @@ clean-j9vm :
 
 OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
 
-j9vm-build :
+OPENSSL_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/openssl.gmk SPEC=$(SPEC)
+
+openssl-build:
+	+$(OPENSSL_MAKE)
+
+j9vm-build : openssl-build
 	+$(OPENJ9_MAKE) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) build-j9
 
 j9vm-compose-buildjvm : j9vm-build

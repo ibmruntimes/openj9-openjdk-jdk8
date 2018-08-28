@@ -1,3 +1,6 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
 #
 # Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -286,4 +289,28 @@ ifeq ($(OPENJDK_TARGET_OS), solaris)
     BUILD_LIBRARIES += $(BUILD_LIBJ2UCRYPTO)
 
   endif
+endif
+
+##########################################################################################
+
+ifeq ($(WITH_OPENSSL), yes)
+    $(eval $(call SetupNativeCompilation,BUILD_JNCRYPTO, \
+        LIBRARY := jncrypto, \
+        OUTPUT_DIR := $(INSTALL_LIBRARIES_HERE), \
+        SRC := $(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider, \
+        LANG := C, \
+        OPTIMIZATION := LOW, \
+        CFLAGS := $(CFLAGS_JDKLIB) -c $(OPENSSL_CFLAGS), \
+        MAPFILE := $(SRC_ROOT)/closed/make/mapfiles/libjncrypto/mapfile-vers, \
+        LDFLAGS := $(SHARED_LIBRARY_FLAGS) $(LDFLAGS_JDKLIB), \
+        LDFLAGS_SUFFIX := $(OPENSSL_LIBS), \
+        VERSIONINFO_RESOURCE := $(JDK_TOPDIR)/src/windows/resource/version.rc, \
+        RC_FLAGS := $(RC_FLAGS) \
+            -D "JDK_FNAME=jncrypto.dll" \
+            -D "JDK_INTERNAL_NAME=jncrypto" \
+            -D "JDK_FTYPE=0x2L", \
+        OBJECT_DIR := $(JDK_OUTPUTDIR)/objs/libjncrypto, \
+        DEBUG_SYMBOLS := $(DEBUG_ALL_BINARIES)))
+
+    BUILD_LIBRARIES += $(BUILD_JNCRYPTO)
 endif
