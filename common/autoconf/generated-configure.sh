@@ -4336,7 +4336,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1532014782
+DATE_WHEN_GENERATED=1536246611
 
 ###############################################################################
 #
@@ -8104,34 +8104,8 @@ fi
   test -n "$MKTEMP" && break
 done
 
-    CYGWIN_VERSION_OLD=`$ECHO $CYGWIN_VERSION | $GREP -e '^1\.0-6'`
-    if test "x$CYGWIN_VERSION_OLD" != x; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Your cygwin is too old. You are running $CYGWIN_VERSION, but at least cygwin 1.7 is required. Please upgrade." >&5
-$as_echo "$as_me: Your cygwin is too old. You are running $CYGWIN_VERSION, but at least cygwin 1.7 is required. Please upgrade." >&6;}
-      as_fn_error $? "Cannot continue" "$LINENO" 5
-    fi
-    if test "x$CYGPATH" = x; then
-      as_fn_error $? "Something is wrong with your cygwin installation since I cannot find cygpath.exe in your path" "$LINENO" 5
-    fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking cygwin root directory as unix-style path" >&5
-$as_echo_n "checking cygwin root directory as unix-style path... " >&6; }
-    # The cmd output ends with Windows line endings (CR/LF)
-    cygwin_winpath_root=`cd / ; cmd /c cd | $TR -d '\r\n'`
-    # Force cygpath to report the proper root by including a trailing space, and then stripping it off again.
-    CYGWIN_ROOT_PATH=`$CYGPATH -u "$cygwin_winpath_root " | $CUT -f 1 -d " "`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CYGWIN_ROOT_PATH" >&5
-$as_echo "$CYGWIN_ROOT_PATH" >&6; }
-    WINDOWS_ENV_ROOT_PATH="$CYGWIN_ROOT_PATH"
-    test_cygdrive_prefix=`$ECHO $CYGWIN_ROOT_PATH | $GREP ^/cygdrive/`
-    if test "x$test_cygdrive_prefix" = x; then
-      as_fn_error $? "Your cygdrive prefix is not /cygdrive. This is currently not supported. Change with mount -c." "$LINENO" 5
-    fi
-  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking msys release" >&5
-$as_echo_n "checking msys release... " >&6; }
-    MSYS_VERSION=`$UNAME -r`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MSYS_VERSION" >&5
-$as_echo "$MSYS_VERSION" >&6; }
+  else
+    # The variable is set, but is it from the command line or the environment?
 
     # Try to remove the string !MKTEMP! from our list.
     try_remove_var=${CONFIGURE_OVERRIDDEN_VARIABLES//!MKTEMP!/}
