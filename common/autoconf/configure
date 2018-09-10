@@ -153,11 +153,11 @@ function shell_quote() {
 
 # Add default OpenJ9 closed extensions
 full_src_root_dir="$( cd "${conf_script_dir}/../.." && pwd )"
-OPENJDK_SHA=`git -C $full_src_root_dir rev-parse --short HEAD`
-OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
+OPENJDK_SHA=`cd $full_src_root_dir && git rev-parse --short HEAD`
+OPENJDK_TAG=`cd $full_src_root_dir && git describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
 if test "x$OPENJDK_TAG" = x; then
-  LAST_TAGGED_REVISION=`git -C $full_src_root_dir rev-list --tags --max-count=1`
-  OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
+  LAST_TAGGED_REVISION=`cd $full_src_root_dir && git rev-list --tags --max-count=1`
+  OPENJDK_TAG=`cd $full_src_root_dir && git describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
 fi
 build_update_version=`echo $OPENJDK_TAG | sed 's/jdk8u//' | awk -F'-' '{print $1}'`
 jdk_build_number=`echo $OPENJDK_TAG | awk -F'-' '{print $2}'`

@@ -224,10 +224,10 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   AC_SUBST(JDK_MOD_VERSION)
   AC_SUBST(JDK_FIX_VERSION)
 
-  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-  LAST_TAGGED_SHA=`git -C $SRC_ROOT rev-list --tags="jdk8u*" --topo-order --max-count=1 2>/dev/null`
+  OPENJDK_SHA=`cd $SRC_ROOT && git rev-parse --short HEAD`
+  LAST_TAGGED_SHA=`cd $SRC_ROOT && git rev-list --tags="jdk8u*" --topo-order --max-count=1 2>/dev/null`
   if test "x$LAST_TAGGED_SHA" != x; then
-    OPENJDK_TAG=`git -C $SRC_ROOT describe --tags "$LAST_TAGGED_SHA"`
+    OPENJDK_TAG=`cd $SRC_ROOT && git describe --tags "$LAST_TAGGED_SHA"`
   else
     OPENJDK_TAG=
   fi

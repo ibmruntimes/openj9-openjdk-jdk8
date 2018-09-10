@@ -25,16 +25,16 @@ ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
 endif
 
-OPENJ9_SHA := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
+OPENJ9_SHA := $(shell cd $(OPENJ9_TOPDIR) && git rev-parse --short HEAD)
 ifeq (,$(OPENJ9_SHA))
   $(error Could not determine OpenJ9 SHA)
 endif
 
 # Find OpenJ9 tag associated with current commit specified by OPENJ9_SHA
 # (suppressing stderr in case there is no such tag).
-OPENJ9_TAG := $(shell git -C $(OPENJ9_TOPDIR) describe --exact-match $(OPENJ9_SHA) 2>/dev/null)
+OPENJ9_TAG := $(shell cd $(OPENJ9_TOPDIR) && git describe --exact-match $(OPENJ9_SHA) 2>/dev/null)
 ifeq (,$(OPENJ9_TAG))
-  OPENJ9_BRANCH := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --abbrev-ref HEAD)
+  OPENJ9_BRANCH := $(shell cd $(OPENJ9_TOPDIR) && git rev-parse --abbrev-ref HEAD)
   ifeq (,$(OPENJ9_BRANCH))
     $(error Could not determine OpenJ9 Branch)
   endif
@@ -43,7 +43,7 @@ else
   OPENJ9_VERSION_STRING := $(OPENJ9_TAG)
 endif
 
-OPENJ9OMR_SHA := $(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
+OPENJ9OMR_SHA := $(shell cd $(OPENJ9OMR_TOPDIR) && git rev-parse --short HEAD)
 ifeq (,$(OPENJ9OMR_SHA))
   $(error Could not determine OMR SHA)
 endif
