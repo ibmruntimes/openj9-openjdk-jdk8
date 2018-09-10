@@ -14799,7 +14799,7 @@ fi
 
 
   # Convert openjdk cpu names to openj9 names
-  case "$build_cpu" in
+  case "$host_cpu" in
     x86_64)
       OPENJ9_CPU=x86-64
       ;;
@@ -14818,17 +14818,17 @@ fi
   esac
 
   if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+    OPENJ9_BUILDSPEC="${OPENJDK_TARGET_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_BUILDSPEC="${OPENJDK_TARGET_OS}_${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+    if test "x$OPENJDK_TARGET_OS" = xlinux; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+    elif test "x$OPENJDK_TARGET_OS" = xwindows; then
       OPENJ9_PLATFORM_CODE=wa64
       if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
         if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
@@ -14841,14 +14841,14 @@ fi
         OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
       fi
     else
-      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
+      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_TARGET_OS}!" "$LINENO" 5
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le; then
     OPENJ9_PLATFORM_CODE=xl64
     if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
+      OPENJ9_BUILDSPEC="${OPENJDK_TARGET_OS}_ppc-64_le_gcc"
     else
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
+      OPENJ9_BUILDSPEC="${OPENJDK_TARGET_OS}_ppc-64_cmprssptrs_le_gcc"
     fi
   elif test "x$OPENJ9_CPU" = x390-64; then
     OPENJ9_PLATFORM_CODE=xz64
