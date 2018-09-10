@@ -155,6 +155,9 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
     s390x)
       OPENJ9_CPU=390-64
       ;;
+    powerpc)
+      OPENJ9_CPU=ppc
+      ;;
     powerpc64)
       OPENJ9_CPU=ppc-64
       ;;
@@ -205,6 +208,9 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     fi
   elif test "x$OPENJ9_CPU" = x390-64; then
     OPENJ9_PLATFORM_CODE=xz64
+  elif test "x$OPENJ9_CPU" = xppc; then
+    OPENJ9_BUILDSPEC=${OPENJDK_TARGET_OS}_${OPENJ9_CPU}_gcc
+    OPENJ9_PLATFORM_CODE=xp32
   elif test "x$OPENJ9_CPU" = xppc-64; then
     OPENJ9_PLATFORM_CODE=ap64
   else
