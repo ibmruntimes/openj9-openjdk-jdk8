@@ -21,6 +21,8 @@ clean-j9vm :
 .PHONY : \
 	j9vm-build \
 	j9vm-compose-buildjvm \
+	openj9-test-image \
+	test-image \
 	#
 
 OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
@@ -30,6 +32,13 @@ j9vm-build :
 
 j9vm-compose-buildjvm : j9vm-build
 	+$(OPENJ9_MAKE) stage_openj9_build_jdk
+
+images :: test-image
+
+test-image : openj9-test-image
+
+openj9-test-image : j9vm-build
+	+$(OPENJ9_MAKE) openj9_test_image
 
 # Shortly after this makefile fragment is included, Main.gmk computes the list
 # of Java source files. Unless a goal is for 'help' or to 'clean' something, we
