@@ -186,8 +186,6 @@ define openj9_copy_tree_impl
 endef
 
 $(eval $(call generated_target_rules,build_jdk,$(JDK_OUTPUTDIR)))
-$(eval $(call generated_target_rules,jdk_image,$(JDK_IMAGE_DIR)))
-$(eval $(call generated_target_rules,jre_image,$(JRE_IMAGE_DIR)))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
@@ -340,7 +338,7 @@ build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUT_ROOT)/vm
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) \
-		&& $(MAKE) -C  $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
 	)
 else
 	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) \

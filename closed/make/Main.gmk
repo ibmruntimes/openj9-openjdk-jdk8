@@ -21,25 +21,15 @@ clean-j9vm :
 .PHONY : \
 	j9vm-build \
 	j9vm-compose-buildjvm \
-	openj9-jdk-image \
-	openj9-jre-image \
 	#
 
+OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
+
 j9vm-build :
-	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) build-j9)
+	+$(OPENJ9_MAKE) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) build-j9
 
 j9vm-compose-buildjvm : j9vm-build
-	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_build_jdk)
-
-product-images : openj9-jdk-image openj9-jre-image
-
-openj9-jdk-image : jdk-image j9vm-build
-	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_jdk_image)
-
-openj9-jre-image : jre-image j9vm-build
-	+($(CD) $(SRC_ROOT)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_jre_image)
-
-ALL_TARGETS += openj9-jdk-image openj9-jre-image
+	+$(OPENJ9_MAKE) stage_openj9_build_jdk
 
 # Shortly after this makefile fragment is included, Main.gmk computes the list
 # of Java source files. Unless a goal is for 'help' or to 'clean' something, we
