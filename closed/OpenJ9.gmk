@@ -20,6 +20,7 @@ ifeq (,$(wildcard $(SPEC)))
   $(error OpenJ9.gmk needs SPEC set to a proper spec.gmk)
 endif
 include $(SPEC)
+include $(SRC_ROOT)/make/common/MakeBase.gmk
 
 ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
@@ -186,8 +187,67 @@ define openj9_copy_tree_impl
 endef
 
 $(eval $(call generated_target_rules,build_jdk,$(JDK_OUTPUTDIR)))
-$(eval $(call generated_target_rules,jdk_image,$(JDK_IMAGE_DIR)))
-$(eval $(call generated_target_rules,jre_image,$(JRE_IMAGE_DIR)))
+
+OPENJ9_TEST_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/test/openj9
+
+# openj9_test_image_rules
+# -----------------------
+# $1 = absolute library path
+define openj9_test_image_rules
+openj9_test_image : $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1))
+$(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1)) : $(strip $1)
+	$$(call install-file)
+endef
+
+$(foreach file, \
+	$(patsubst %, $(OUTPUT_ROOT)/vm/%$(EXE_SUFFIX), \
+		algotest \
+		bcvunit \
+		cfdump \
+		ctest \
+		dyntest \
+		gc_rwlocktest \
+		glaunch \
+		invtest \
+		jsigjnitest \
+		pltest \
+		propstest \
+		shrtest \
+		testjep178_dynamic \
+		testjep178_static \
+		thrstatetest \
+		vmLifecyleTests \
+		vmtest \
+		) \
+	$(patsubst %, $(OUTPUT_ROOT)/vm/$(call SHARED_LIBRARY,%), \
+		balloon29 \
+		bcuwhite \
+		bcvwhite \
+		gptest \
+		hooktests \
+		j9ben \
+		j9lazyClassLoad \
+		j9thrnumanatives29 \
+		j9thrtestnatives29 \
+		j9unresolved \
+		j9vmtest \
+		jcoregen29 \
+		jlmagent29 \
+		jniargtests \
+		jvmtitest \
+		memorywatcher29 \
+		migration \
+		osmemory29 \
+		SharedClassesNativeAgent \
+		softmxtest \
+		testjvmtiA \
+		testjvmtiB \
+		testlibA \
+		testlibB \
+		vmruntimestateagent29 \
+		), \
+	$(if $(wildcard $(file)), \
+		$(eval $(call openj9_test_image_rules, $(file)))))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
@@ -340,7 +400,7 @@ build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUT_ROOT)/vm
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) \
-		&& $(MAKE) -C  $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
 	)
 else
 	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) \
