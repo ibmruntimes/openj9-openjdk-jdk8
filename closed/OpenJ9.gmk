@@ -88,6 +88,8 @@ OPENJ9_NOTICE_FILE := openj9/longabout.html
 OPENJ9_NOTICE_FILE_RENAME := openj9-notices.html
 OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
 
+OPENJ9_OPENJDK_NOTICE_FILE := openj9-openjdk-notices
+
 # openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
 override MAKEFLAGS := -j $(JOBS)
 
@@ -138,6 +140,8 @@ $(foreach file,$(OPENJ9_MISC_FILES), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/lib/$(file),$(OUTPUT_ROOT)/vm/$(file))))
 
 $(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(SRC_ROOT)/$(OPENJ9_NOTICE_FILE)))
+
+$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_OPENJDK_NOTICE_FILE),$(SRC_ROOT)/$(OPENJ9_OPENJDK_NOTICE_FILE)))
 
 $(foreach file,$(OPENJ9_REDIRECTOR), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUT_ROOT)/vm/$(file))))
@@ -413,6 +417,8 @@ endif
 	@$(MKDIR) -p $(JRE_IMAGE_DIR)/
 	@$(CP) -p $(SRC_ROOT)/$(OPENJ9_NOTICE_FILE) $(JDK_IMAGE_DIR)/$(OPENJ9_NOTICE_FILE_RENAME)
 	@$(CP) -p $(SRC_ROOT)/$(OPENJ9_NOTICE_FILE) $(JRE_IMAGE_DIR)/$(OPENJ9_NOTICE_FILE_RENAME)
+	@$(CP) -p $(SRC_ROOT)/$(OPENJ9_OPENJDK_NOTICE_FILE) $(JDK_IMAGE_DIR)/$(OPENJ9_OPENJDK_NOTICE_FILE)
+	@$(CP) -p $(SRC_ROOT)/$(OPENJ9_OPENJDK_NOTICE_FILE) $(JRE_IMAGE_DIR)/$(OPENJ9_OPENJDK_NOTICE_FILE)
 
 J9JCL_SOURCES_DONEFILE := $(JDK_OUTPUTDIR)/j9jcl_sources/j9jcl_sources.done
 
