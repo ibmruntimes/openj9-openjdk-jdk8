@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2000, 2017 All Rights Reserved
+ * (c) Copyright IBM Corp. 2000, 2018 All Rights Reserved
  * ===========================================================================
  *
  * Copyright (c) 1997, 2015, Oracle and/or its affiliates. All rights reserved.
@@ -717,44 +717,53 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * class must be resolved before it can be used.  This method is            
      * used only in a Shared classes context.                                   
      */                                                                         
-    private Class defineClass(String name, byte[] sharedClazz, CodeSource codesource, Manifest man) throws IOException { 
-	int i = name.lastIndexOf('.');                                          
-	URL url = codesource.getLocation();                                     
-	if (i != -1) {                                                          
-	    String pkgname = name.substring(0, i);                              
-	    // Check if package already loaded.                                 
-	    Package pkg = getPackage(pkgname);                                  
-            if (pkg != null) {                                                  
-		// Package found, so check package sealing.                     
-		if (pkg.isSealed()) {                                           
-		    // Verify that code source URL is the same.                 
-		    if (!pkg.isSealed(url)) {                                   
-			throw new SecurityException(                            
-			    "sealing violation: package " + pkgname + " is sealed"); 
-		    }                                                           
-		} else {                                                        
-		    // Make sure we are not attempting to seal the package      
-		    // at this code source URL.                                 
-		    if ((man != null) && isSealed(pkgname, man)) {              
-			throw new SecurityException(                            
-			    "sealing violation: can't seal package " + pkgname +  
-			    ": already loaded");                                
-		    }                                                           
-		}                                                               
-	    } else {                                                            
-		if (man != null) {                                              
-		    definePackage(pkgname, man, url);                           
-		} else {                                                        
-                    definePackage(pkgname, null, null, null, null, null, null, null); 
-                }                                                               
-	    }                                                                   
- 	}                                                                      
-	/*                                                                      
-         * Now read the class bytes and define the class.  We don't need to call  
-         * storeSharedClass(), since its already in our shared class cache.     
-         */                                                                     
-        return defineClass(name, sharedClazz, 0, sharedClazz.length, codesource); 
-     }                                                                          
+	private Class defineClass(String name, byte[] sharedClazz, CodeSource codesource, Manifest man) throws IOException {
+		int i = name.lastIndexOf('.');
+		URL url = codesource.getLocation();
+		if (i != -1) {
+			String pkgname = name.substring(0, i);
+			// Check if package already loaded.
+			Package pkg = getPackage(pkgname);
+			if (pkg != null) {
+				// Package found, so check package sealing.
+				if (pkg.isSealed()) {
+					// Verify that code source URL is the same.
+					if (!pkg.isSealed(url)) {
+						throw new SecurityException(
+								"sealing violation: package " + pkgname + " is sealed");
+					}
+				} else {
+					// Make sure we are not attempting to seal the package
+					// at this code source URL.
+					if ((man != null) && isSealed(pkgname, man)) {
+						throw new SecurityException(
+								"sealing violation: can't seal package " + pkgname +
+								": already loaded");
+					}
+				}
+			} else {
+				try {
+					if (null != man) {
+						definePackage(pkgname, man, url);
+					} else {
+						definePackage(pkgname, null, null, null, null, null, null, null);
+					}
+				} catch (IllegalArgumentException iae) {
+					// https://github.com/eclipse/openj9/issues/3038
+					// Detect and ignore race between two threads defining different classes in the same package.
+					if (getAndVerifyPackage(pkgname, man, url) == null) {
+						// Should never happen
+						throw new AssertionError("Cannot find package " + pkgname);
+					}
+				}
+			}
+		}
+		/*
+		 * Now read the class bytes and define the class.  We don't need to call
+		 * storeSharedClass(), since its already in our shared class cache.
+		 */
+		return defineClass(name, sharedClazz, 0, sharedClazz.length, codesource);
+	}
                                                                                 
 
     /**
