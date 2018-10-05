@@ -1,0 +1,35 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+#
+# Define public interface.
+
+SUNWprivate_1.1 {
+	global:
+            handleErrors;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateContext;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAndReset;
+            Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext;
+            Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContext;
+            Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit;
+            Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate;
+            Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt;
+            Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt;
+            Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt;
+        local:
+	    *;
+};

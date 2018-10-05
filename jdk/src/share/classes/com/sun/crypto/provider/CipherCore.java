@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2002, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -33,6 +39,8 @@ import java.security.spec.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.crypto.BadPaddingException;
+import sun.security.action.GetPropertyAction;
+import jdk.crypto.jniprovider.NativeCrypto;
 
 /**
  * This class represents the symmetric algorithms in its various modes
@@ -53,6 +61,20 @@ import javax.crypto.BadPaddingException;
  */
 
 final class CipherCore {
+
+    /*
+     * Check whether native crypto is enabled with property.
+     * By default, the native crypto is disabled and use sun cipher cryptos.
+     * The property 'jdk.nativeCBC' is used to enable Native CBC alone,
+     * 'jdk.nativeGCM' is used to enable Native GCM alone and
+     * 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
+     * CBC and GCM).
+     */
+    private static boolean useNativeCrypto = false;
+
+    private static boolean useNativeCBC = false;
+
+    private static boolean useNativeGCM = false;
 
     /*
      * internal buffer
@@ -185,7 +207,17 @@ final class CipherCore {
         SymmetricCipher rawImpl = cipher.getEmbeddedCipher();
         if (modeUpperCase.equals("CBC")) {
             cipherMode = CBC_MODE;
-            cipher = new CipherBlockChaining(rawImpl);
+
+            /*
+             * Check whether native CBC is enabled and instantiate
+             * the NativeCipherBlockChaining class.
+             */
+            if ((useNativeCrypto || useNativeCBC) && blockSize == 16) {
+                cipher = new NativeCipherBlockChaining(rawImpl);
+            } else {
+                cipher = new CipherBlockChaining(rawImpl);
+            }
+
         } else if (modeUpperCase.equals("CTS")) {
             cipherMode = CTS_MODE;
             cipher = new CipherTextStealing(rawImpl);
@@ -203,7 +235,17 @@ final class CipherCore {
                     ("GCM mode can only be used for AES cipher");
             }
             cipherMode = GCM_MODE;
-            cipher = new GaloisCounterMode(rawImpl);
+
+            /*
+             * Check whether native GCM is enabled and instantiate
+             * the NativeGaloisCounterMode class.
+             */
+            if (useNativeCrypto || useNativeGCM) {
+                cipher = new NativeGaloisCounterMode(rawImpl);
+            } else {
+                cipher = new GaloisCounterMode(rawImpl);
+            }
+
             padding = null;
         } else if (modeUpperCase.startsWith("CFB")) {
             cipherMode = CFB_MODE;
@@ -329,7 +371,14 @@ final class CipherCore {
         switch (cipherMode) {
         case GCM_MODE:
             if (isDoFinal) {
-                int tagLen = ((GaloisCounterMode) cipher).getTagLen();
+                int tagLen = 0;
+
+                if (useNativeCrypto || useNativeGCM) {
+                    tagLen = ((NativeGaloisCounterMode) cipher).getTagLen();
+                } else {
+                    tagLen = ((GaloisCounterMode) cipher).getTagLen();
+                }
+
                 if (!decrypting) {
                     totalLen = Math.addExact(totalLen, tagLen);
                 } else {
@@ -406,8 +455,15 @@ final class CipherCore {
         }
         if (cipherMode == GCM_MODE) {
             algName = "GCM";
-            spec = new GCMParameterSpec
-                (((GaloisCounterMode) cipher).getTagLen()*8, iv);
+
+            if (useNativeCrypto || useNativeGCM) {
+                spec = new GCMParameterSpec
+                        (((NativeGaloisCounterMode) cipher).getTagLen()*8, iv);
+            } else {
+                spec = new GCMParameterSpec
+                        (((GaloisCounterMode) cipher).getTagLen()*8, iv);
+            }
+
         } else {
            if (algName.equals("RC2")) {
                RC2Crypt rawImpl = (RC2Crypt) cipher.getEmbeddedCipher();
@@ -586,8 +642,15 @@ final class CipherCore {
                 lastEncIv = ivBytes;
                 lastEncKey = keyBytes;
             }
-            ((GaloisCounterMode) cipher).init
-                (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+
+            if (useNativeCrypto || useNativeGCM) {
+                ((NativeGaloisCounterMode) cipher).init
+                        (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+            } else {
+                ((GaloisCounterMode) cipher).init
+                        (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+            }
+
         } else {
             cipher.init(decrypting, algorithm, keyBytes, ivBytes);
         }
@@ -1158,5 +1221,16 @@ final class CipherCore {
                 ("Must use either different key or iv for GCM encryption");
         }
         cipher.updateAAD(src, offset, len);
+    }
+
+    static {
+        if(NativeCrypto.isLoaded) {
+            useNativeCrypto = Boolean.parseBoolean(
+                      GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto"));
+            useNativeCBC = Boolean.parseBoolean(
+                      GetPropertyAction.privilegedGetProperty("jdk.nativeCBC"));
+            useNativeGCM = Boolean.parseBoolean(
+                      GetPropertyAction.privilegedGetProperty("jdk.nativeGCM"));
+        }
     }
 }
