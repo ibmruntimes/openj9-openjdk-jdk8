@@ -472,7 +472,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         OPENSSL_DIR=$SRC_ROOT/openssl
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
         if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1; then
           BUILD_OPENSSL=no
         else
@@ -516,13 +516,13 @@ AC_DEFUN([CONFIGURE_OPENSSL],
           if test -s "$OPENSSL_DIR/lib/libcrypto.lib"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libssl.lib libcrypto.lib"
+            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
           fi
         else
           if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
           fi
         fi
       fi
