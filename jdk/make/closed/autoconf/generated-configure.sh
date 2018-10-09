@@ -4432,7 +4432,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1538754016
+DATE_WHEN_GENERATED=1539007666
 
 ###############################################################################
 #
@@ -15481,7 +15481,7 @@ $as_echo "no" >&6; }
         OPENSSL_DIR=$SRC_ROOT/openssl
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
         if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1; then
           BUILD_OPENSSL=no
         else
@@ -15715,13 +15715,13 @@ $as_echo "$as_me: The path of OPENSSL_DIR, which resolves as \"$path\", is inval
           if test -s "$OPENSSL_DIR/lib/libcrypto.lib"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libssl.lib libcrypto.lib"
+            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
           fi
         else
           if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
           fi
         fi
       fi
