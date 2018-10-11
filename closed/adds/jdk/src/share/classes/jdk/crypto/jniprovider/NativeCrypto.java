@@ -25,21 +25,25 @@ import java.security.*;
 
 public class NativeCrypto {
 
-    public static boolean isLoaded = false;
+    private static boolean loaded = false;
 
     static {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 try {
                     System.loadLibrary("jncrypto"); // check for native library
-                    isLoaded = true;
+                    loaded = true;
                 } catch (UnsatisfiedLinkError usle) {
-                    isLoaded = false;
+                    loaded = false;
                 }
                 return null;
             }
         });
 
+    }
+
+    public static final boolean isLoaded() {
+        return loaded;
     }
 
     /* Native digest interfaces */

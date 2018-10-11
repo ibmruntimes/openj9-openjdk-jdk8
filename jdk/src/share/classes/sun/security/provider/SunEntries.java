@@ -420,11 +420,23 @@ final class SunEntries {
     }
 
     static {
-        if(NativeCrypto.isLoaded) {
-            useNativeDigest = Boolean.parseBoolean(
-                    GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto")) ||
-                        Boolean.parseBoolean(
-                            GetPropertyAction.privilegedGetProperty ("jdk.nativeDigest"));
+        useNativeDigest = Boolean.parseBoolean(
+                              GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto")) ||
+                          Boolean.parseBoolean(
+                              GetPropertyAction.privilegedGetProperty ("jdk.nativeDigest"));
+
+        if (useNativeDigest) {
+            /*
+             * User want to use native crypto implementation.
+             * Make sure the native crypto libraries are loaded successfully.
+             * Otherwise, throw a warning message and fall back to the in-built
+             * java crypto implementation.
+             */
+            if (!NativeCrypto.isLoaded()) {
+                System.err.println("Warning: Native crypto library load failed." +
+                                   " Using Java crypto implementation");
+                useNativeDigest = false;
+            }
         }
     }
 }
