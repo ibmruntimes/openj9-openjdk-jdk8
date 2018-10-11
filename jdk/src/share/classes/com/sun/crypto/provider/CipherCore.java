@@ -64,7 +64,10 @@ final class CipherCore {
 
     /*
      * Check whether native crypto is enabled with property.
-     * By default, the native crypto is disabled and use sun cipher cryptos.
+     *
+     * By default, the native crypto is disabled and use java crypto
+     * implementation.
+     *
      * The property 'jdk.nativeCBC' is used to enable Native CBC alone,
      * 'jdk.nativeGCM' is used to enable Native GCM alone and
      * 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
@@ -212,7 +215,7 @@ final class CipherCore {
              * Check whether native CBC is enabled and instantiate
              * the NativeCipherBlockChaining class.
              */
-            if ((useNativeCrypto || useNativeCBC) && blockSize == 16) {
+            if (useNativeCBC && blockSize == 16) {
                 cipher = new NativeCipherBlockChaining(rawImpl);
             } else {
                 cipher = new CipherBlockChaining(rawImpl);
@@ -240,7 +243,7 @@ final class CipherCore {
              * Check whether native GCM is enabled and instantiate
              * the NativeGaloisCounterMode class.
              */
-            if (useNativeCrypto || useNativeGCM) {
+            if (useNativeGCM) {
                 cipher = new NativeGaloisCounterMode(rawImpl);
             } else {
                 cipher = new GaloisCounterMode(rawImpl);
@@ -373,7 +376,7 @@ final class CipherCore {
             if (isDoFinal) {
                 int tagLen = 0;
 
-                if (useNativeCrypto || useNativeGCM) {
+                if (useNativeGCM) {
                     tagLen = ((NativeGaloisCounterMode) cipher).getTagLen();
                 } else {
                     tagLen = ((GaloisCounterMode) cipher).getTagLen();
@@ -456,7 +459,7 @@ final class CipherCore {
         if (cipherMode == GCM_MODE) {
             algName = "GCM";
 
-            if (useNativeCrypto || useNativeGCM) {
+            if (useNativeGCM) {
                 spec = new GCMParameterSpec
                         (((NativeGaloisCounterMode) cipher).getTagLen()*8, iv);
             } else {
@@ -643,7 +646,7 @@ final class CipherCore {
                 lastEncKey = keyBytes;
             }
 
-            if (useNativeCrypto || useNativeGCM) {
+            if (useNativeGCM) {
                 ((NativeGaloisCounterMode) cipher).init
                         (decrypting, algorithm, keyBytes, ivBytes, tagLen);
             } else {
@@ -1224,13 +1227,32 @@ final class CipherCore {
     }
 
     static {
-        if(NativeCrypto.isLoaded) {
-            useNativeCrypto = Boolean.parseBoolean(
-                      GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto"));
+        useNativeCrypto = Boolean.parseBoolean(
+                GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto"));
+
+        if (useNativeCrypto) {
+            useNativeCBC = true;
+            useNativeGCM = true;
+        } else {
             useNativeCBC = Boolean.parseBoolean(
-                      GetPropertyAction.privilegedGetProperty("jdk.nativeCBC"));
+                    GetPropertyAction.privilegedGetProperty("jdk.nativeCBC"));
             useNativeGCM = Boolean.parseBoolean(
-                      GetPropertyAction.privilegedGetProperty("jdk.nativeGCM"));
+                    GetPropertyAction.privilegedGetProperty("jdk.nativeGCM"));
+        }
+
+        if (useNativeCBC || useNativeGCM) {
+            /*
+             * User want to use native crypto implementation.
+             * Make sure the native crypto libraries are loaded successfully.
+             * Otherwise, throw a warning message and fall back to the in-built
+             * java crypto implementation.
+             */
+            if (!NativeCrypto.isLoaded()) {
+                System.err.println("Warning: Native crypto library load failed." +
+                                   " Using Java crypto implementation");
+                useNativeCBC = false;
+                useNativeGCM = false;
+            }
         }
     }
 }
