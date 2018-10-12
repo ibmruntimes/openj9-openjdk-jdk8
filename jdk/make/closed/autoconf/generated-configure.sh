@@ -4432,7 +4432,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1539348366
+DATE_WHEN_GENERATED=1539368198
 
 ###############################################################################
 #
@@ -53980,6 +53980,9 @@ $as_echo "no" >&6; }
         else
           BUILD_OPENSSL=yes
         fi
+        if test "x$BUNDLE_OPENSSL" = xyes; then
+          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+        fi
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
       else
@@ -54209,33 +54212,8 @@ $as_echo "$as_me: The path of OPENSSL_DIR, which resolves as \"$path\", is inval
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
-          fi
-        else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
-          fi
-        fi
-      fi
-
-
-      #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-        as_fn_error $? "Unable to find openssl in specified location $OPENSSL_DIR" "$LINENO" 5
-      fi
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    fi
-
-    if test "x$OPENSSL_DIR" != x; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
-$as_echo_n "checking if we should bundle openssl... " >&6; }
-      if test "x$BUNDLE_OPENSSL" = xyes; then
-         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
-           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
 
   if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
 
@@ -54358,10 +54336,41 @@ $as_echo "$as_me: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path
     OPENSSL_BUNDLE_LIB_PATH="`cd "$path"; $THEPWDCMD -L`"
   fi
 
-         else
-           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
-         fi
+            fi
+          fi
+        else
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+            FOUND_OPENSSL=yes
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
+            fi
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+            FOUND_OPENSSL=yes
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+            fi
+          fi
+        fi
       fi
+
+
+      #openssl is not found in user specified location. Abort.
+      if test "x$FOUND_OPENSSL" != xyes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        as_fn_error $? "Unable to find openssl in specified location $OPENSSL_DIR" "$LINENO" 5
+      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    fi
+
+    if test "x$OPENSSL_DIR" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
+$as_echo_n "checking if we should bundle openssl... " >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
 $as_echo "$BUNDLE_OPENSSL" >&6; }
     fi

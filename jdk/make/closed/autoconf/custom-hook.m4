@@ -479,6 +479,9 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         else
           BUILD_OPENSSL=yes
         fi
+        if test "x$BUNDLE_OPENSSL" = xyes; then
+          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+        fi
         AC_MSG_RESULT([yes])
       else
         AC_MSG_RESULT([no])
@@ -518,12 +521,26 @@ AC_DEFUN([CONFIGURE_OPENSSL],
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
+              BASIC_FIXUP_PATH(OPENSSL_BUNDLE_LIB_PATH)
+            fi
           fi
         else
           if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
+            fi
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+            FOUND_OPENSSL=yes
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+            fi
           fi
         fi
       fi
@@ -539,14 +556,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 
     if test "x$OPENSSL_DIR" != x; then
       AC_MSG_CHECKING([if we should bundle openssl])
-      if test "x$BUNDLE_OPENSSL" = xyes; then
-         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
-           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
-           BASIC_FIXUP_PATH(OPENSSL_BUNDLE_LIB_PATH)
-         else
-           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
-         fi
-      fi
       AC_MSG_RESULT([$BUNDLE_OPENSSL])
     fi
   fi
