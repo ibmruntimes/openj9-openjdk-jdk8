@@ -39,7 +39,7 @@ import java.security.spec.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.crypto.BadPaddingException;
-import sun.security.action.GetPropertyAction;
+
 import jdk.crypto.jniprovider.NativeCrypto;
 
 /**
@@ -73,8 +73,6 @@ final class CipherCore {
      * 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
      * CBC and GCM).
      */
-    private static boolean useNativeCrypto = false;
-
     private static boolean useNativeCBC = false;
 
     private static boolean useNativeGCM = false;
@@ -1225,19 +1223,36 @@ final class CipherCore {
         }
         cipher.updateAAD(src, offset, len);
     }
-
+    /* Read the native crypto properties. The value can be YES or NO and case
+     * insensitive.
+     *
+     * User can specify enable all native crypto and disable specific crypto.
+     * For example -Djdk.nativeCrypto=YES -Djdk.nativeCBC=NO.
+     */
     static {
-        useNativeCrypto = Boolean.parseBoolean(
-                GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto"));
+        if (System.getProperty("jdk.nativeCrypto","NO").toUpperCase() == "YES") {
+            String prop;
+            if ((prop = System.getProperty("jdk.nativeCBC") != null) &&
+                prop.toUpperCase() == "NO") {
+                useNativeCBC = false;
+            } else {
+                useNativeCBC = true;
+            }
 
-        if (useNativeCrypto) {
-            useNativeCBC = true;
-            useNativeGCM = true;
+            if ((prop = System.getProperty("jdk.nativeGCM") |= null &&
+                prop.toUpperCase() == "NO") {
+                useNativeGCM = false;
+            } else {
+                useNativeGCM = true;
+            }
         } else {
-            useNativeCBC = Boolean.parseBoolean(
-                    GetPropertyAction.privilegedGetProperty("jdk.nativeCBC"));
-            useNativeGCM = Boolean.parseBoolean(
-                    GetPropertyAction.privilegedGetProperty("jdk.nativeGCM"));
+            if (System.getProperty("jdk.nativeCBC","NO").toUpperCase() == "YES") {
+                useNativeCBC = true;
+            }
+
+            if (System.getProperty("jdk.nativeGCM","NO").toUpperCase() == "YES") {
+                useNativeCBC = true;
+            }
         }
 
         if (useNativeCBC || useNativeGCM) {
