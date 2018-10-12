@@ -519,10 +519,10 @@ AC_DEFUN([CONFIGURE_OPENSSL],
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
           fi
         else
-          if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
+            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
           fi
         fi
       fi
