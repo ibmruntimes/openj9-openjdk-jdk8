@@ -15340,7 +15340,7 @@ $as_echo "no (explicitly disabled)" >&6; }
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|wa64|wi32|xa64|xl64|xz64)
+      wa64|wi32|xa64|xl64|xz64)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for $OPENJ9_PLATFORM_CODE)" >&5
 $as_echo "yes (default for $OPENJ9_PLATFORM_CODE)" >&6; }
         OPENJ9_ENABLE_DDR=true
