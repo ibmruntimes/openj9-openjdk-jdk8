@@ -373,6 +373,16 @@ define create_or_update
 	fi
 endef
 
+ifeq (1,$(OPENJ9_USE_CUSTOM_COMPILER))
+  SETUP_CUSTOM_COMPILER_ENV_VARS := \
+	DEVELOPER_DIR="$(OPENJ9_DEVELOPER_DIR)" \
+	CC="$(OPENJ9_CC)" \
+	CXX="$(OPENJ9_CXX)" \
+	#
+else
+  SETUP_CUSTOM_COMPILER_ENV_VARS :=
+endif
+
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Ensuring version information is up-to-date
 	$(call create_or_update, \
@@ -404,11 +414,11 @@ run-preprocessors-j9 : stage-j9
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUT_ROOT)/vm
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) \
+	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(SETUP_CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
 	)
 else
-	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) \
+	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(SETUP_CUSTOM_COMPILER_ENV_VARS) \
 		&& cd $(OUTPUT_ROOT)/vm \
 		&& $(MAKE) $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all \
 	)
