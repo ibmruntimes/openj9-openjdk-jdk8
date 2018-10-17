@@ -419,11 +419,26 @@ final class SunEntries {
         }
     }
 
+    /* Read the native crypto properties. The value can be YES or NO and case
+     * insensitive.
+     *
+     * User can specify enable all native crypto and disable specific crypto.
+     * For example -Djdk.nativeCrypto=YES -Djdk.nativeDigest=NO.
+     */
     static {
-        useNativeDigest = Boolean.parseBoolean(
-                              GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto")) ||
-                          Boolean.parseBoolean(
-                              GetPropertyAction.privilegedGetProperty ("jdk.nativeDigest"));
+        if (System.getProperty("jdk.nativeCrypto","NO").toUpperCase() == "YES") {
+            String prop;
+            if ((prop = System.getProperty("jdk.nativeDigest") != null) &&
+                prop.toUpperCase() == "NO") {
+                useNativeDigest = false;
+            } else {
+                useNativeDigest = true;
+            }
+        } else {
+            if (System.getProperty("jdk.nativeDigest","NO").toUpperCase() == "YES") {
+                useNativeDigest = true;
+            }
+        }
 
         if (useNativeDigest) {
             /*
