@@ -39,6 +39,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_PLATFORM_SETUP
   OPENJDK_VERSION_DETAILS
   OPENJ9_CONFIGURE_CMAKE
+  OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
 
@@ -73,6 +74,25 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     OPENJ9_ENABLE_CMAKE=false
   fi
   AC_SUBST(OPENJ9_ENABLE_CMAKE)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
+[
+  AC_ARG_WITH(openj9-cc, [AS_HELP_STRING([--with-openj9-cc], [build OpenJ9 with a specific C compiler])],
+    [OPENJ9_CC=$with_openj9_cc],
+    [OPENJ9_CC=])
+
+  AC_ARG_WITH(openj9-cxx, [AS_HELP_STRING([--with-openj9-cxx], [build OpenJ9 with a specific C++ compiler])],
+    [OPENJ9_CXX=$with_openj9_cxx],
+    [OPENJ9_CXX=])
+
+  AC_ARG_WITH(openj9-developer-dir, [AS_HELP_STRING([--with-openj9-developer-dir], [build OpenJ9 with a specific Xcode version])],
+    [OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir],
+    [OPENJ9_DEVELOPER_DIR=])
+
+  AC_SUBST(OPENJ9_CC)
+  AC_SUBST(OPENJ9_CXX)
+  AC_SUBST(OPENJ9_DEVELOPER_DIR)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
