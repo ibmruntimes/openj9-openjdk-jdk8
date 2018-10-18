@@ -39,8 +39,9 @@ import java.security.spec.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.crypto.BadPaddingException;
-import sun.security.action.GetPropertyAction;
 import jdk.crypto.jniprovider.NativeCrypto;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * This class represents the symmetric algorithms in its various modes
@@ -65,19 +66,19 @@ final class CipherCore {
     /*
      * Check whether native crypto is enabled with property.
      *
-     * By default, the native crypto is disabled and use java crypto
-     * implementation.
+     * By default, the native crypto is enabled and uses the native 
+     * crypto library implementation.
      *
      * The property 'jdk.nativeCBC' is used to enable Native CBC alone,
      * 'jdk.nativeGCM' is used to enable Native GCM alone and
      * 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
      * CBC and GCM).
      */
-    private static boolean useNativeCrypto = false;
+    private static boolean useNativeCrypto = true;
 
-    private static boolean useNativeCBC = false;
+    private static boolean useNativeCBC = true;
 
-    private static boolean useNativeGCM = false;
+    private static boolean useNativeGCM = true;
 
     /*
      * internal buffer
@@ -1226,18 +1227,28 @@ final class CipherCore {
         cipher.updateAAD(src, offset, len);
     }
 
-    static {
-        useNativeCrypto = Boolean.parseBoolean(
-                GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto"));
+    private static String privilegedGetProperty(final String property) {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty(property);
+            }
+        });
+    }
 
-        if (useNativeCrypto) {
-            useNativeCBC = true;
-            useNativeGCM = true;
+    static {
+        String nativeCryptTrace = privilegedGetProperty("jdk.nativeCryptoTrace");
+        String nativeCryptStr   = privilegedGetProperty("jdk.nativeCrypto");
+        String nativeCBCStr     = privilegedGetProperty("jdk.nativeCBC");
+        String nativeGCMStr     = privilegedGetProperty("jdk.nativeGCM");
+
+        useNativeCrypto = Boolean.parseBoolean(nativeCryptStr) || (nativeCryptStr == null);
+
+        if (!useNativeCrypto) {
+            useNativeCBC = false;
+            useNativeGCM = false;
         } else {
-            useNativeCBC = Boolean.parseBoolean(
-                    GetPropertyAction.privilegedGetProperty("jdk.nativeCBC"));
-            useNativeGCM = Boolean.parseBoolean(
-                    GetPropertyAction.privilegedGetProperty("jdk.nativeGCM"));
+            useNativeCBC = Boolean.parseBoolean(nativeCBCStr) || (nativeCBCStr == null);
+            useNativeGCM = Boolean.parseBoolean(nativeGCMStr) || (nativeGCMStr == null);
         }
 
         if (useNativeCBC || useNativeGCM) {
@@ -1248,11 +1259,22 @@ final class CipherCore {
              * java crypto implementation.
              */
             if (!NativeCrypto.isLoaded()) {
-                System.err.println("Warning: Native crypto library load failed." +
-                                   " Using Java crypto implementation");
                 useNativeCBC = false;
                 useNativeGCM = false;
+
+		if (nativeCryptTrace != null) {
+                   System.err.println("Warning: Native crypto library load failed." +
+                                   " Using Java crypto implementation");
+		}
+            } else {
+                if (nativeCryptTrace != null) {
+                   System.err.println("CipherCore Load - using native crypto library.");
+                }
             }
-        }
+        } else {
+                if (nativeCryptTrace != null) {
+                   System.err.println("CipherCore Load - native crypto library disabled.");
+                }
+	}
     }
 }
