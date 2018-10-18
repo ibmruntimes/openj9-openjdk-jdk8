@@ -85,9 +85,9 @@ OPENJ9_PLATFORM_CODE    := @OPENJ9_PLATFORM_CODE@
 
 OPENJ9_LIBS_SUBDIR      := @OPENJ9_LIBS_SUBDIR@
 
-# Export autoconf cache variables for CC/CXX
-# This is for the case where ccache is enabled
-# It ensures that OMR autoconf uses the compiler, not ccache
+# Export autoconf cache variables for CC/CXX.
+# This is for the case where ccache is enabled.
+# It ensures that OMR autoconf uses the compiler, not ccache.
 export ac_cv_prog_CC    := @CC@
 export ac_cv_prog_CXX   := @CXX@
 

@@ -42,7 +42,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
 
-  if test "x$OPENJDK_TARGET_OS" = "xwindows"; then
+  if test "x$OPENJDK_TARGET_OS" = xwindows ; then
     BASIC_SETUP_OUTPUT_DIR
     TOOLCHAIN_SETUP_VISUAL_STUDIO_ENV
     TOOLCHAIN_SETUP_MSVCP_DLL
@@ -55,24 +55,24 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
 
 AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
-	AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
-		[
-			if test "x$with_cmake" != "x"; then
-				CMAKE=$with_cmake
-			fi
-			with_cmake=yes
-		],
-		[with_cmake=no])
-	if test "$with_cmake" == "yes"; then
-		AC_PATH_PROG([CMAKE], [cmake])
-		if test "x$CMAKE" == x; then
-			AC_MSG_ERROR([Could not find CMake])
-		fi
-		OPENJ9_ENABLE_CMAKE=true
-	else
-		OPENJ9_ENABLE_CMAKE=false
-	fi
-	AC_SUBST(OPENJ9_ENABLE_CMAKE)
+  AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
+    [
+      if test "x$with_cmake" != x ; then
+        CMAKE=$with_cmake
+      fi
+      with_cmake=yes
+    ],
+    [with_cmake=no])
+  if test "$with_cmake" == yes ; then
+    AC_PATH_PROG([CMAKE], [cmake])
+    if test "x$CMAKE" == x ; then
+      AC_MSG_ERROR([Could not find CMake])
+    fi
+    OPENJ9_ENABLE_CMAKE=true
+  else
+    OPENJ9_ENABLE_CMAKE=false
+  fi
+  AC_SUBST(OPENJ9_ENABLE_CMAKE)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
@@ -173,7 +173,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     [build non-compressedrefs vm (large heap)])])
 
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
-  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
@@ -181,13 +181,13 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
-  if test "x$OPENJ9_CPU" = xx86-64; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
           OPENJ9_PLATFORM_CODE=wi32
           OPENJ9_BUILDSPEC="win_x86"
         else
@@ -196,26 +196,26 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
       else
         OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx; then
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
         OPENJ9_BUILDSPEC="osx_x86-64"
-      else 
+      else
         OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
       fi
     else
       AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
     fi
-  elif test "x$OPENJ9_CPU" = xppc-64_le; then
+  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
     else
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
     fi
-  elif test "x$OPENJ9_CPU" = x390-64; then
+  elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
-  elif test "x$OPENJ9_CPU" = xppc-64; then
+  elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
   else
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
@@ -236,7 +236,7 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $SRC_ROOT rev-list --tags="jdk8u*" --topo-order --max-count=1 2>/dev/null`
-  if test "x$LAST_TAGGED_SHA" != x; then
+  if test "x$LAST_TAGGED_SHA" != x ; then
     OPENJDK_TAG=`git -C $SRC_ROOT describe --tags "$LAST_TAGGED_SHA"`
   else
     OPENJDK_TAG=
@@ -254,9 +254,9 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 [
   # check 3rd party library requirement for UMA
   AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
-      [path to freemarker.jar (used to build OpenJ9 build tools)])])
+    [path to freemarker.jar (used to build OpenJ9 build tools)])])
 
-  if test "x$with_freemarker_jar" == x; then
+  if test "x$with_freemarker_jar" == x ; then
     printf "\n"
     printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
     printf "and has to be provided during configure process.\n"
@@ -274,7 +274,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
     AC_MSG_ERROR([Cannot continue])
   fi
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
   else
     FREEMARKER_JAR=$with_freemarker_jar
@@ -288,14 +288,14 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   CONFIGURE_OPENSSL
 
   COMPILER=$CXX
-  if test  "x$OPENJDK_TARGET_OS" = xaix; then
+  if test  "x$OPENJDK_TARGET_OS" = xaix ; then
     # xlc -qversion output typically looks like
     #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
     #     Version: 11.01.0000.0015
     COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
     # Collapse compiler output into a single line
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  elif test  "x$OPENJDK_TARGET_OS" = xwindows; then
+  elif test  "x$OPENJDK_TARGET_OS" = xwindows ; then
     # There is no specific version flag, but all output starts with a version string.
     # First line typically looks something like:
     # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
@@ -317,7 +317,7 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   AC_SUBST(COMPILER_VERSION_STRING)
 
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
   else
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
@@ -336,18 +336,18 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
 [
   POSSIBLE_MSVCP_DLL="$1"
   METHOD="$2"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     AC_MSG_NOTICE([Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD])
 
     # Need to check if the found msvcp is correct architecture
     AC_MSG_CHECKING([found msvcp100.dll architecture])
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       AC_MSG_RESULT([ok])
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
       AC_MSG_CHECKING([for msvcp100.dll])
@@ -364,20 +364,20 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
   AC_ARG_WITH(msvcp-dll, [AS_HELP_STRING([--with-msvcp-dll],
       [copy this msvcp100.dll into the built JDK (Windows only) @<:@probed@:>@])])
 
-  if test "x$with_msvcp_dll" != x; then
+  if test "x$with_msvcp_dll" != x ; then
     # If given explicitly by user, do not probe. If not present, fail directly.
     TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$with_msvcp_dll], [--with-msvcp-dll])
-    if test "x$MSVCP_DLL" = x; then
+    if test "x$MSVCP_DLL" = x ; then
       AC_MSG_ERROR([Could not find a proper msvcp100.dll as specified by --with-msvcp-dll])
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Using well-known location from Visual Studio 10.0
-    if test "x$VCINSTALLDIR" != x; then
+    if test "x$VCINSTALLDIR" != x ; then
       CYGWIN_VC_INSTALL_DIR="$VCINSTALLDIR"
       BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VC_INSTALL_DIR)
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x64/Microsoft.VC100.CRT/msvcp100.dll"
       else
         POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x86/Microsoft.VC100.CRT/msvcp100.dll"
@@ -386,13 +386,13 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Check in the Boot JDK directory.
     POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp100.dll"
     TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in Boot JDK])
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Look in the Windows system32 directory
     CYGWIN_SYSTEMROOT="$SYSTEMROOT"
     BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_SYSTEMROOT)
@@ -400,12 +400,12 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
     TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in SYSTEMROOT])
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: If Visual Studio Express is installed, there is usually one with the debugger
-    if test "x$VS100COMNTOOLS" != x; then
+    if test "x$VS100COMNTOOLS" != x ; then
       CYGWIN_VS_TOOLS_DIR="$VS100COMNTOOLS/.."
       BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VS_TOOLS_DIR)
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x64/ | $HEAD --lines 1`
       else
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x86/ | $HEAD --lines 1`
@@ -414,15 +414,15 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
-    # (This was the original behaviour; kept since it might turn up something)
-    if test "x$CYGWIN_VC_INSTALL_DIR" != x; then
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+    # (This was the original behaviour ; kept since it might turn up something)
+    if test "x$CYGWIN_VC_INSTALL_DIR" != x ; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x64 | $HEAD --lines 1`
       else
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x86 | $GREP -v ia64 | $GREP -v x64 | $HEAD --lines 1`
-        if test "x$POSSIBLE_MSVCP_DLL" = x; then
+        if test "x$POSSIBLE_MSVCP_DLL" = x ; then
           # We're grasping at straws now...
           POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $HEAD --lines 1`
         fi
@@ -432,7 +432,7 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     AC_MSG_CHECKING([for msvcp100.dll])
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([Could not find msvcp100.dll. Please specify using --with-msvcp-dll.])
@@ -451,7 +451,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 
   WITH_OPENSSL=yes
 
-  if test "x$with_openssl" = x; then
+  if test "x$with_openssl" = x ; then
     # User doesn't want to build with OpenSSL.. Ensure that jncrypto library is not built
     WITH_OPENSSL=no
   else
@@ -460,13 +460,13 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     BUILD_OPENSSL=no
 
     # If not specified, default is to not bundle openssl
-    if test "x$BUNDLE_OPENSSL" = x; then
+    if test "x$BUNDLE_OPENSSL" = x ; then
       BUNDLE_OPENSSL=no
     fi
 
     # if --with-openssl=fetched
-    if test "x$with_openssl" = xfetched; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows; then
+    if test "x$with_openssl" = xfetched ; then
+      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         AC_MSG_RESULT([no])
         printf "On Windows, value of \"fetched\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
         AC_MSG_ERROR([Cannot continue])
@@ -477,12 +477,12 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1; then
+        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1 ; then
           BUILD_OPENSSL=no
         else
           BUILD_OPENSSL=yes
         fi
-        if test "x$BUNDLE_OPENSSL" = xyes; then
+        if test "x$BUNDLE_OPENSSL" = xyes ; then
           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
         fi
         AC_MSG_RESULT([yes])
@@ -496,8 +496,8 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     fi
 
     # if --with-openssl=system
-    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows; then
+    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem ; then
+      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         AC_MSG_RESULT([no])
         printf "On Windows, value of \"system\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
         AC_MSG_ERROR([Cannot continue])
@@ -506,69 +506,65 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       # Check modules using pkg-config, but only if we have it
       PKG_CHECK_MODULES(OPENSSL, openssl >= 1.1.0, [FOUND_OPENSSL=yes], [FOUND_OPENSSL=no])
 
-      if test "x$FOUND_OPENSSL" != xyes; then
+      if test "x$FOUND_OPENSSL" != xyes ; then
         AC_MSG_ERROR([Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'])
       fi
     fi
 
-
     # if --with-openssl=/custom/path/where/openssl/is/present
-    if test "x$FOUND_OPENSSL" != xyes; then
+    if test "x$FOUND_OPENSSL" != xyes ; then
       # User specified path where openssl is installed
       OPENSSL_DIR=$with_openssl
       BASIC_FIXUP_PATH(OPENSSL_DIR)
-      if test -s "$OPENSSL_DIR/include/openssl/evp.h"; then
-        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+      if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
           # On Windows, check for libcrypto.lib
-          if test -s "$OPENSSL_DIR/lib/libcrypto.lib"; then
+          if test -s "$OPENSSL_DIR/lib/libcrypto.lib" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
               BASIC_FIXUP_PATH(OPENSSL_BUNDLE_LIB_PATH)
             fi
           fi
         else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
             fi
-          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
             fi
           fi
         fi
       fi
 
-
       #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes; then
+      if test "x$FOUND_OPENSSL" != xyes ; then
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([Unable to find openssl in specified location $OPENSSL_DIR])
       fi
       AC_MSG_RESULT([yes])
     fi
 
-    if test "x$OPENSSL_DIR" != x; then
+    if test "x$OPENSSL_DIR" != x ; then
       AC_MSG_CHECKING([if we should bundle openssl])
       AC_MSG_RESULT([$BUNDLE_OPENSSL])
     fi
   fi
 
-
-  AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)
-  AC_SUBST(OPENSSL_DIR)
-  AC_SUBST(WITH_OPENSSL)
   AC_SUBST(BUILD_OPENSSL)
+  AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)
   AC_SUBST(OPENSSL_CFLAGS)
+  AC_SUBST(OPENSSL_DIR)
   AC_SUBST(OPENSSL_LIBS)
-
+  AC_SUBST(WITH_OPENSSL)
 ])
