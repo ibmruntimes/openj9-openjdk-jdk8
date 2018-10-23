@@ -19,7 +19,7 @@
 all :
 
 ifeq (,$(wildcard $(SPEC)))
-  $(error BuildDDR.gmk needs SPEC set to a proper spec.gmk)
+  $(error DDR-jar.gmk needs SPEC set to a proper spec.gmk)
 endif
 
 include $(SPEC)
@@ -27,8 +27,17 @@ include $(SRC_ROOT)/make/common/MakeBase.gmk
 include $(SRC_ROOT)/make/common/JavaCompilation.gmk
 include $(SRC_ROOT)/jdk/make/Setup.gmk
 
-# Supporting definitions.
-DDR_CLASSES_BIN := $(JDK_OUTPUTDIR)/ddr/classes
+# The main source directory.
+DDR_SOURCE_DIR := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+
+# A marker file to detect when compilation is needed.
+DDR_COMPILE_MARKER := $(JDK_OUTPUTDIR)/ddr/compile.done
+
+# Where to write the class files.
+DDR_CLASSES_BIN := $(JDK_OUTPUTDIR)/ddr/bin
+
+# This file will contain the list of Java source files to be compiled.
+DDR_SRC_LIST_FILE := $(JDK_OUTPUTDIR)/ddr/src.list
 
 # Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
@@ -40,17 +49,40 @@ endif
 # The package containing the generated structure stubs.
 DDR_STUBS_PACKAGE := com/ibm/j9ddr/vm29/structure
 
-$(eval $(call SetupJavaCompilation,BUILD_DDR_CLASSES, \
-	SETUP := GENERATE_JDKBYTECODE, \
-	BIN := $(DDR_CLASSES_BIN), \
-	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
-	EXCLUDES := $(DDR_SRC_EXCLUDES), \
-	COPY := com/ibm/j9ddr/StructureAliases29.dat \
-	))
+# The list of structure alias files that must be included in the jar.
+DDR_ALIAS_FILES := \
+	com/ibm/j9ddr/StructureAliases29.dat \
+	#
 
-$(eval $(call SetupArchive,BUILD_DDR_MAIN, $(BUILD_DDR_CLASSES), \
+# Generate the list of all Java source files to be compiled
+# and capture it in a variable for make.
+DDR_SOURCE_FILES := $(shell \
+	$(FIND) $(DDR_SOURCE_DIR) -name "*.java" -type f -print \
+		$(foreach package, $(DDR_SRC_EXCLUDES), | $(GREP) -F -v $(DDR_SOURCE_DIR)/$(package)/) \
+		> $(DDR_SRC_LIST_FILE) \
+		&& $(CAT) $(DDR_SRC_LIST_FILE) \
+	)
+
+# Compile the Java sources. We can't use SetupJavaCompilation
+# because it doesn't properly handle source file names with '$'.
+$(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
+	$(RM) -rf $(DDR_CLASSES_BIN)
+	$(MKDIR) -p $(DDR_CLASSES_BIN) $(addprefix $(DDR_CLASSES_BIN)/, $(dir $(DDR_ALIAS_FILES)))
+	@$(ECHO) "Compiling $(words $(DDR_SOURCE_FILES)) files for j9ddr.jar"
+	$(GENERATE_JDKBYTECODE_JVM) $(GENERATE_JDKBYTECODE_JAVAC) \
+		$(GENERATE_JDKBYTECODE_FLAGS) \
+		$(JAVAC_FLAGS) \
+		-d $(DDR_CLASSES_BIN) \
+		-implicit:none \
+		-sourcepath $(DDR_SOURCE_DIR) \
+		@$(DDR_SRC_LIST_FILE)
+	$(foreach file, $(DDR_ALIAS_FILES), \
+		$(CP) $(DDR_SOURCE_DIR)/$(file) $(DDR_CLASSES_BIN)/$(file) ;)
+	$(TOUCH) $@
+
+$(eval $(call SetupArchive,BUILD_DDR_MAIN, $(DDR_COMPILE_MARKER), \
 	SRCS := $(DDR_CLASSES_BIN), \
-	SUFFIXES := .class .dat .properties, \
+	SUFFIXES := .class .dat, \
 	EXCLUDES := $(DDR_STUBS_PACKAGE), \
 	JAR := $(JDK_IMAGE_DIR)/jre/lib/ddr/j9ddr.jar \
 	))
