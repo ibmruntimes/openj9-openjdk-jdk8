@@ -20,7 +20,7 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   MSVCP_BIN_LIST := $(filter %$(notdir $(MSVCP_DLL)), $(MSVCP_BIN_LIST))
   $(foreach f,$(MSVCP_BIN_LIST), \
     $(eval $(call AddFileToCopy,$(JDK_OUTPUTDIR),$(JDK_IMAGE_DIR),$f,JDK_BIN_TARGETS)))
- 
+
   MSVCP_PATTERN = %$(notdir $(MSVCP_DLL))
   ifneq ($(POST_STRIP_CMD), )
     JRE_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JRE_STRIP_LIST))
@@ -31,7 +31,6 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
     JDK_OVERLAY_BIN_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDK_OVERLAY_BIN_STRIP_LIST))
   endif
 endif
-
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 

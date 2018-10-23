@@ -30,6 +30,22 @@ $(eval $(call SetupArchive,BUILD_DTFJVIEW_JAR, , \
 	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/dtfjview.jar, \
 	SKIP_METAINF := true))
 
+TRACEFORMAT_TYPES := \
+	com/ibm/jvm/Debug.class \
+	com/ibm/jvm/FormatTimestamp.class \
+	com/ibm/jvm/Indent.class \
+	com/ibm/jvm/InputFile.class \
+	com/ibm/jvm/MessageFile.class \
+	com/ibm/jvm/OutputFile.class \
+	com/ibm/jvm/ProgramOption.class \
+	com/ibm/jvm/Statistics.class \
+	com/ibm/jvm/Summary.class \
+	com/ibm/jvm/Threads.class \
+	com/ibm/jvm/Timezone.class \
+	com/ibm/jvm/TraceFormat.class \
+	com/ibm/jvm/Verbose.class \
+	#
+
 $(eval $(call SetupArchive,BUILD_TRACEFORMAT_JAR, , \
 	SRCS := $(JDK_OUTPUTDIR)/classes, \
 	INCLUDES := \
@@ -37,19 +53,7 @@ $(eval $(call SetupArchive,BUILD_TRACEFORMAT_JAR, , \
 		com/ibm/jvm/trace \
 		com/ibm/jvm/traceformat, \
 	EXTRA_FILES := \
-		com/ibm/jvm/Debug.class \
-		com/ibm/jvm/FormatTimestamp.class \
-		com/ibm/jvm/Indent.class \
-		com/ibm/jvm/InputFile.class \
-		com/ibm/jvm/MessageFile.class \
-		com/ibm/jvm/OutputFile.class \
-		com/ibm/jvm/ProgramOption.class \
-		com/ibm/jvm/Statistics.class \
-		com/ibm/jvm/Summary.class \
-		com/ibm/jvm/Threads.class \
-		com/ibm/jvm/Timezone.class \
-		com/ibm/jvm/TraceFormat.class \
-		com/ibm/jvm/Verbose.class, \
+		$(TRACEFORMAT_TYPES), \
 	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/traceformat.jar, \
 	SKIP_METAINF := true))
 
@@ -85,23 +89,31 @@ EXPORTED_PRIVATE_PKGS += \
 RT_JAR_EXCLUDES += \
 	com/ibm/dtfj \
 	com/ibm/java/diagnostics \
-	com/ibm/jvm/Debug.class \
+	$(TRACEFORMAT_TYPES) \
 	com/ibm/jvm/dtfjview \
 	com/ibm/jvm/format \
-	com/ibm/jvm/FormatTimestamp.class \
-	com/ibm/jvm/Indent.class \
-	com/ibm/jvm/InputFile.class \
 	com/ibm/jvm/j9 \
-	com/ibm/jvm/MessageFile.class \
-	com/ibm/jvm/OutputFile.class \
-	com/ibm/jvm/ProgramOption.class \
-	com/ibm/jvm/Statistics.class \
-	com/ibm/jvm/Summary.class \
-	com/ibm/jvm/Threads.class \
-	com/ibm/jvm/Timezone.class \
 	com/ibm/jvm/trace \
 	com/ibm/jvm/traceformat \
-	com/ibm/jvm/TraceFormat.class \
-	com/ibm/jvm/Verbose.class \
 	com/ibm/tools/attach/attacher \
 	#
+
+OPENJ9_MANAGEMENT_PACKAGES := \
+	com/ibm/java/lang/management/internal \
+	com/ibm/lang/management \
+	com/ibm/lang/management/internal \
+	com/ibm/virtualization/management \
+	com/ibm/virtualization/management/internal \
+	openj9/lang/management \
+	openj9/lang/management/internal \
+	#
+
+OPENJ9_MANAGEMENT_TYPES := \
+	$(patsubst $(JDK_OUTPUTDIR)/classes/%, %, \
+		$(foreach package, $(OPENJ9_MANAGEMENT_PACKAGES), \
+			$(wildcard $(JDK_OUTPUTDIR)/classes/$(package)/*.class) \
+	))
+
+PROFILE_1_RTJAR_EXCLUDE_TYPES += $(OPENJ9_MANAGEMENT_TYPES)
+PROFILE_2_RTJAR_EXCLUDE_TYPES += $(OPENJ9_MANAGEMENT_TYPES)
+PROFILE_3_RTJAR_EXCLUDE_TYPES += # no extra exclusions
