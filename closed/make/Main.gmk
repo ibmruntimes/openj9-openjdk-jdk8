@@ -29,7 +29,7 @@ OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
 
 OPENSSL_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/openssl.gmk SPEC=$(SPEC)
 
-openssl-build:
+openssl-build :
 	+$(OPENSSL_MAKE)
 
 j9vm-build : openssl-build
