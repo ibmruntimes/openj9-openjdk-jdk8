@@ -1,10 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2003, 2017 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * Copyright (c) 2003, 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -27,6 +21,12 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2003, 2018 All Rights Reserved
+ * ===========================================================================
  */
 
 #include    <jni.h>

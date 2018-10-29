@@ -1,10 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2012, 2017 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -28,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2012, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util.stream;
 
 import java.util.Comparator;
