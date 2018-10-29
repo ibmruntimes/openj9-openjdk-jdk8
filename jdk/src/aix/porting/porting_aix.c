@@ -1,10 +1,13 @@
 /*
- * Copyright 2012, 2013 SAP AG. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
  * published by the Free Software Foundation.
+ *
+ * IBM designates this particular file as subject to the "Classpath" exception
+ * as provided by IBM in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -13,74 +16,66 @@
  * accompanied this code).
  *
  * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- *
+ * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+ * ===========================================================================
  */
-
-#include <stdio.h>
-#include <sys/ldr.h>
-#include <errno.h>
 
 #include "porting_aix.h"
 
-static unsigned char dladdr_buffer[0x4000];
+#include <stdint.h>
+#include <string.h>
+#include <sys/ldr.h>
 
-static void fill_dll_info(void) {
-  int rc = loadquery(L_GETINFO,dladdr_buffer, sizeof(dladdr_buffer));
-  if (rc == -1) {
-    fprintf(stderr, "loadquery failed (%d %s)", errno, strerror(errno));
-    fflush(stderr);
-  }
-}
+int
+dladdr(void *addr, Dl_info *info)
+{
+	/*
+	 * The filename returned in info->dli_fname will point within this array.
+	 * As such, this implementation is not thread-safe.
+	 */
+	static struct ld_info infoBuffers[200];
 
-static int dladdr_dont_reload(void* addr, Dl_info* info) {
-  const struct ld_info* p = (struct ld_info*) dladdr_buffer;
-  info->dli_fbase = 0; info->dli_fname = 0;
-  info->dli_sname = 0; info->dli_saddr = 0;
-  for (;;) {
-    if (addr >= p->ldinfo_textorg &&
-        addr < (((char*)p->ldinfo_textorg) + p->ldinfo_textsize)) {
-      info->dli_fname = p->ldinfo_filename;
-      info->dli_fbase = p->ldinfo_textorg;
-      return 1; /* [sic] */
-    }
-    if (!p->ldinfo_next) {
-      break;
-    }
-    p = (struct ld_info*)(((char*)p) + p->ldinfo_next);
-  }
-  return 0; /* [sic] */
-}
+	memset(info, 0, sizeof(*info));
 
-#ifdef __cplusplus
-extern "C"
-#endif
-int dladdr(void *addr, Dl_info *info) {
-  static int loaded = 0;
-  if (!loaded) {
-    fill_dll_info();
-    loaded = 1;
-  }
-  if (!addr) {
-    return 0;  /* [sic] */
-  }
-  /* Address could be AIX function descriptor? */
-  void* const addr0 = *( (void**) addr );
-  int rc = dladdr_dont_reload(addr, info);
-  if (rc == 0) {
-    rc = dladdr_dont_reload(addr0, info);
-    if (rc == 0) { /* [sic] */
-      fill_dll_info(); /* refill, maybe loadquery info is outdated */
-      rc = dladdr_dont_reload(addr, info);
-      if (rc == 0) {
-        rc = dladdr_dont_reload(addr0, info);
-      }
-    }
-  }
-  return rc;
+	if ((NULL != addr) && (-1 != loadquery(L_GETINFO, infoBuffers, sizeof(infoBuffers)))) {
+		int32_t pass = 1;
+		struct ld_info *module = infoBuffers;
+		uintptr_t textaddr = (uintptr_t)addr;
+
+		/* find the module in the list */
+		for (;;) {
+			uintptr_t textorg = (uintptr_t)module->ldinfo_textorg;
+			uintptr_t textend = textorg + (uintptr_t)module->ldinfo_textsize;
+
+			if ((textorg <= textaddr) && (textaddr < textend)) {
+				/* found it */
+				info->dli_fname = module->ldinfo_filename;
+				return 1;
+			} else {
+				uintptr_t nextoffset = (uintptr_t)module->ldinfo_next;
+
+				if (0 != nextoffset) {
+					module = (struct ld_info *)((char *)module + nextoffset);
+				} else {
+					/* end of the module list */
+					if (pass < 2) {
+						/*
+						 * This function is commonly called where the first parameter is
+						 * specified using the name of a function. On PPC, this yields
+						 * the address of function descriptor which must be dereferenced.
+						 * We now dereference the given address and make a second pass
+						 * through the module list.
+						 */
+						pass += 1;
+						module = infoBuffers;
+						textaddr = (uintptr_t)*(void **)addr;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
 }
