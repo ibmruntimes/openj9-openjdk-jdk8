@@ -1,7 +1,7 @@
 /*
-* ===========================================================================
-* (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
-* ===========================================================================
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+ * ===========================================================================
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -20,7 +20,7 @@
  * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
  * 
  * ===========================================================================
-*/
+ */
 
 package java.io;
 

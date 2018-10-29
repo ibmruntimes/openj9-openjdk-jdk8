@@ -18,6 +18,7 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 #
+
 # This is the "master security properties file".
 #
 # An alternate java.security properties file may be specified
