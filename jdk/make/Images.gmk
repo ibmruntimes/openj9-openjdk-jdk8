@@ -25,7 +25,6 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
 # ===========================================================================
-#
 
 include $(SPEC)
 include MakeBase.gmk
@@ -130,7 +129,6 @@ ifeq ($(PROFILE), )
       schemagen$(EXE_SUFFIX) \
       jsadebugd$(EXE_SUFFIX) \
       jhat$(EXE_SUFFIX) \
-      jextract$(EXE_SUFFIX) \
       jdmpview$(EXE_SUFFIX) \
       traceformat$(EXE_SUFFIX)
 endif
@@ -730,7 +728,7 @@ endif
 ################################################################################
 
 # Include the custom makefile right here, after all variables have been defined
-# so that they may be overridden, but before the main targets are declared, so 
+# so that they may be overridden, but before the main targets are declared, so
 # that overriding has an effect.
 -include $(CUSTOM_MAKE_DIR)/Images.gmk
 
@@ -783,4 +781,3 @@ endif # Profile
 ################################################################################
 
 .PHONY: default images jre-image jdk-image
-
