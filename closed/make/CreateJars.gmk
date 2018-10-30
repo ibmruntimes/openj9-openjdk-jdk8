@@ -53,8 +53,7 @@ $(eval $(call SetupArchive,BUILD_TRACEFORMAT_JAR, , \
 	SRCS := $(JDK_OUTPUTDIR)/classes, \
 	INCLUDES := \
 		com/ibm/jvm/format \
-		com/ibm/jvm/trace \
-		com/ibm/jvm/traceformat, \
+		com/ibm/jvm/trace, \
 	EXTRA_FILES := \
 		$(TRACEFORMAT_TYPES), \
 	JAR := $(IMAGES_OUTPUTDIR)/lib/ext/traceformat.jar, \
@@ -97,7 +96,6 @@ RT_JAR_EXCLUDES += \
 	com/ibm/jvm/format \
 	com/ibm/jvm/j9 \
 	com/ibm/jvm/trace \
-	com/ibm/jvm/traceformat \
 	com/ibm/tools/attach/attacher \
 	#
 
