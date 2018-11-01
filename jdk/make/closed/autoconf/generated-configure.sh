@@ -4396,6 +4396,9 @@ VS_SDK_PLATFORM_NAME_2017=
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
 # This code is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
@@ -4432,7 +4435,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1539765540
+DATE_WHEN_GENERATED=1540928303
 
 ###############################################################################
 #
