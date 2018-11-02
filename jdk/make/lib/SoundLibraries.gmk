@@ -22,9 +22,9 @@
 # questions.
 #
 
-#
+# ===========================================================================
 # (c) Copyright IBM Corp. 2011, 2018 All Rights Reserved
-#
+# ===========================================================================
 
 LIBJSOUND_SRC_DIRS := \
     $(JDK_TOPDIR)/src/share/native/com/sun/media/sound \

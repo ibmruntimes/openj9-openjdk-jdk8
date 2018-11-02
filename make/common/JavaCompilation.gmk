@@ -23,9 +23,9 @@
 # questions.
 #
 
-#
+# ===========================================================================
 # (c) Copyright IBM Corp. 2011, 2018 All Rights Reserved
-#
+# ===========================================================================
 
 # This makefile is much simpler now that it can use the smart javac wrapper
 # for dependency tracking between java packages and incremental compiles.
