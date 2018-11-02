@@ -630,10 +630,10 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 COMPILER_VERSION_STRING
-BUILD_OPENSSL
 WITH_OPENSSL
 OPENSSL_DIR
 OPENSSL_BUNDLE_LIB_PATH
+BUILD_OPENSSL
 OPENSSL_LIBS
 OPENSSL_CFLAGS
 CCACHE
@@ -883,6 +883,9 @@ OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
 OPENJ9_ENABLE_CUDA
+OPENJ9_DEVELOPER_DIR
+OPENJ9_CXX
+OPENJ9_CC
 OPENJ9_ENABLE_CMAKE
 CMAKE
 USERNAME
@@ -1061,6 +1064,9 @@ enable_debug
 with_debug_level
 with_noncompressedrefs
 with_cmake
+with_openj9_cc
+with_openj9_cxx
+with_openj9_developer_dir
 with_cuda
 with_gdk
 enable_cuda
@@ -1902,6 +1908,10 @@ Optional Packages:
   --with-noncompressedrefs
                           build non-compressedrefs vm (large heap)
   --with-cmake            enable building openJ9 with CMake
+  --with-openj9-cc        build OpenJ9 with a specific C compiler
+  --with-openj9-cxx       build OpenJ9 with a specific C++ compiler
+  --with-openj9-developer-dir
+                          build OpenJ9 with a specific Xcode version
   --with-cuda             use this directory as CUDA_HOME
   --with-gdk              use this directory as GDK_HOME
   --with-conf-name        use this as the name of the configuration [generated
@@ -4434,8 +4444,10 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1540901408
+DATE_WHEN_GENERATED=1541112610
 
 ###############################################################################
 #
@@ -14841,7 +14853,7 @@ fi
       ;;
   esac
 
-  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
@@ -14849,13 +14861,13 @@ fi
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
-  if test "x$OPENJ9_CPU" = xx86-64; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
           OPENJ9_PLATFORM_CODE=wi32
           OPENJ9_BUILDSPEC="win_x86"
         else
@@ -14864,9 +14876,9 @@ fi
       else
         OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx; then
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
         OPENJ9_BUILDSPEC="osx_x86-64"
       else
         OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
@@ -14874,16 +14886,16 @@ fi
     else
       as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
     fi
-  elif test "x$OPENJ9_CPU" = xppc-64_le; then
+  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
     else
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
     fi
-  elif test "x$OPENJ9_CPU" = x390-64; then
+  elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
-  elif test "x$OPENJ9_CPU" = xppc-64; then
+  elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
   else
     as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
@@ -14902,7 +14914,7 @@ fi
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $SRC_ROOT rev-list --tags="jdk8u*" --topo-order --max-count=1 2>/dev/null`
-  if test "x$LAST_TAGGED_SHA" != x; then
+  if test "x$LAST_TAGGED_SHA" != x ; then
     OPENJDK_TAG=`git -C $SRC_ROOT describe --tags "$LAST_TAGGED_SHA"`
   else
     OPENJDK_TAG=
@@ -15159,7 +15171,7 @@ if test "${with_freemarker_jar+set}" = set; then :
 fi
 
 
-  if test "x$with_freemarker_jar" == x; then
+  if test "x$with_freemarker_jar" == x ; then
     printf "\n"
     printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
     printf "and has to be provided during configure process.\n"
@@ -15178,7 +15190,7 @@ $as_echo "$as_me: Could not find freemarker.jar" >&6;}
     as_fn_error $? "Cannot continue" "$LINENO" 5
   fi
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
   else
     FREEMARKER_JAR=$with_freemarker_jar
@@ -15210,17 +15222,17 @@ $as_echo "$as_me: Could not find freemarker.jar" >&6;}
 # Check whether --with-cmake was given.
 if test "${with_cmake+set}" = set; then :
   withval=$with_cmake;
-			if test "x$with_cmake" != "x"; then
-				CMAKE=$with_cmake
-			fi
-			with_cmake=yes
+      if test "x$with_cmake" != x ; then
+        CMAKE=$with_cmake
+      fi
+      with_cmake=yes
 
 else
   with_cmake=no
 fi
 
-	if test "$with_cmake" == "yes"; then
-		# Extract the first word of "cmake", so it can be a program name with args.
+  if test "$with_cmake" == yes ; then
+    # Extract the first word of "cmake", so it can be a program name with args.
 set dummy cmake; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
@@ -15260,13 +15272,45 @@ $as_echo "no" >&6; }
 fi
 
 
-		if test "x$CMAKE" == x; then
-			as_fn_error $? "Could not find CMake" "$LINENO" 5
-		fi
-		OPENJ9_ENABLE_CMAKE=true
-	else
-		OPENJ9_ENABLE_CMAKE=false
-	fi
+    if test "x$CMAKE" == x ; then
+      as_fn_error $? "Could not find CMake" "$LINENO" 5
+    fi
+    OPENJ9_ENABLE_CMAKE=true
+  else
+    OPENJ9_ENABLE_CMAKE=false
+  fi
+
+
+
+
+# Check whether --with-openj9-cc was given.
+if test "${with_openj9_cc+set}" = set; then :
+  withval=$with_openj9_cc; OPENJ9_CC=$with_openj9_cc
+else
+  OPENJ9_CC=
+fi
+
+
+
+# Check whether --with-openj9-cxx was given.
+if test "${with_openj9_cxx+set}" = set; then :
+  withval=$with_openj9_cxx; OPENJ9_CXX=$with_openj9_cxx
+else
+  OPENJ9_CXX=
+fi
+
+
+
+# Check whether --with-openj9-developer-dir was given.
+if test "${with_openj9_developer_dir+set}" = set; then :
+  withval=$with_openj9_developer_dir; OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir
+else
+  OPENJ9_DEVELOPER_DIR=
+fi
+
+
+
+
 
 
 
@@ -15361,7 +15405,7 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
 
 
 
-  if test "x$OPENJDK_TARGET_OS" = "xwindows"; then
+  if test "x$OPENJDK_TARGET_OS" = xwindows ; then
 
 
   # Store path to cygwin link.exe to help excluding it when searching for
@@ -16631,12 +16675,12 @@ if test "${with_msvcp_dll+set}" = set; then :
 fi
 
 
-  if test "x$with_msvcp_dll" != x; then
+  if test "x$with_msvcp_dll" != x ; then
     # If given explicitly by user, do not probe. If not present, fail directly.
 
   POSSIBLE_MSVCP_DLL="$with_msvcp_dll"
   METHOD="--with-msvcp-dll"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16644,12 +16688,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16665,14 +16709,14 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     fi
   fi
 
-    if test "x$MSVCP_DLL" = x; then
+    if test "x$MSVCP_DLL" = x ; then
       as_fn_error $? "Could not find a proper msvcp100.dll as specified by --with-msvcp-dll" "$LINENO" 5
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Using well-known location from Visual Studio 10.0
-    if test "x$VCINSTALLDIR" != x; then
+    if test "x$VCINSTALLDIR" != x ; then
       CYGWIN_VC_INSTALL_DIR="$VCINSTALLDIR"
 
   windows_path="$CYGWIN_VC_INSTALL_DIR"
@@ -16684,7 +16728,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     CYGWIN_VC_INSTALL_DIR="$unix_path"
   fi
 
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x64/Microsoft.VC100.CRT/msvcp100.dll"
       else
         POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x86/Microsoft.VC100.CRT/msvcp100.dll"
@@ -16692,7 +16736,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
   METHOD="well-known location in VCINSTALLDIR"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16700,12 +16744,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16724,13 +16768,13 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Check in the Boot JDK directory.
     POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp100.dll"
 
   POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
   METHOD="well-known location in Boot JDK"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16738,12 +16782,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16761,7 +16805,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Look in the Windows system32 directory
     CYGWIN_SYSTEMROOT="$SYSTEMROOT"
 
@@ -16778,7 +16822,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
   METHOD="well-known location in SYSTEMROOT"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16786,12 +16830,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16809,9 +16853,9 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: If Visual Studio Express is installed, there is usually one with the debugger
-    if test "x$VS100COMNTOOLS" != x; then
+    if test "x$VS100COMNTOOLS" != x ; then
       CYGWIN_VS_TOOLS_DIR="$VS100COMNTOOLS/.."
 
   windows_path="$CYGWIN_VS_TOOLS_DIR"
@@ -16823,7 +16867,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     CYGWIN_VS_TOOLS_DIR="$unix_path"
   fi
 
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x64/ | $HEAD --lines 1`
       else
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp100.dll | $GREP -i /x86/ | $HEAD --lines 1`
@@ -16831,7 +16875,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
   METHOD="search of VS100COMNTOOLS"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16839,12 +16883,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16863,15 +16907,15 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
-    # (This was the original behaviour; kept since it might turn up something)
-    if test "x$CYGWIN_VC_INSTALL_DIR" != x; then
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64; then
+    # (This was the original behaviour ; kept since it might turn up something)
+    if test "x$CYGWIN_VC_INSTALL_DIR" != x ; then
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x64 | $HEAD --lines 1`
       else
         POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $GREP x86 | $GREP -v ia64 | $GREP -v x64 | $HEAD --lines 1`
-        if test "x$POSSIBLE_MSVCP_DLL" = x; then
+        if test "x$POSSIBLE_MSVCP_DLL" = x ; then
           # We're grasping at straws now...
           POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp100.dll | $HEAD --lines 1`
         fi
@@ -16880,7 +16924,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
 
   POSSIBLE_MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
   METHOD="search of VCINSTALLDIR"
-  if test -e "$POSSIBLE_MSVCP_DLL"; then
+  if test -e "$POSSIBLE_MSVCP_DLL" ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&5
 $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
 
@@ -16888,12 +16932,12 @@ $as_echo "$as_me: Found msvcp100.dll at $POSSIBLE_MSVCP_DLL using $METHOD" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking found msvcp100.dll architecture" >&5
 $as_echo_n "checking found msvcp100.dll architecture... " >&6; }
     MSVCP_DLL_FILETYPE=`$FILE -b "$POSSIBLE_MSVCP_DLL"`
-    if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
       CORRECT_MSVCP_ARCH=386
     else
       CORRECT_MSVCP_ARCH=x86-64
     fi
-    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null; then
+    if $ECHO "$MSVCP_DLL_FILETYPE" | $GREP $CORRECT_MSVCP_ARCH 2>&1 > /dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
       MSVCP_DLL="$POSSIBLE_MSVCP_DLL"
@@ -16912,7 +16956,7 @@ $as_echo "$as_me: The file type of the located msvcp100.dll is $MSVCP_DLL_FILETY
     fi
   fi
 
-  if test "x$MSVCP_DLL" = x; then
+  if test "x$MSVCP_DLL" = x ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for msvcp100.dll" >&5
 $as_echo_n "checking for msvcp100.dll... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -53950,7 +53994,7 @@ fi
 
   WITH_OPENSSL=yes
 
-  if test "x$with_openssl" = x; then
+  if test "x$with_openssl" = x ; then
     # User doesn't want to build with OpenSSL.. Ensure that jncrypto library is not built
     WITH_OPENSSL=no
   else
@@ -53960,13 +54004,13 @@ $as_echo_n "checking for OPENSSL... " >&6; }
     BUILD_OPENSSL=no
 
     # If not specified, default is to not bundle openssl
-    if test "x$BUNDLE_OPENSSL" = x; then
+    if test "x$BUNDLE_OPENSSL" = x ; then
       BUNDLE_OPENSSL=no
     fi
 
     # if --with-openssl=fetched
-    if test "x$with_openssl" = xfetched; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows; then
+    if test "x$with_openssl" = xfetched ; then
+      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         printf "On Windows, value of \"fetched\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
@@ -53978,12 +54022,12 @@ $as_echo "no" >&6; }
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1; then
+        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1 ; then
           BUILD_OPENSSL=no
         else
           BUILD_OPENSSL=yes
         fi
-        if test "x$BUNDLE_OPENSSL" = xyes; then
+        if test "x$BUNDLE_OPENSSL" = xyes ; then
           OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
         fi
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -53999,8 +54043,8 @@ $as_echo "no" >&6; }
     fi
 
     # if --with-openssl=system
-    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows; then
+    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem ; then
+      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         printf "On Windows, value of \"system\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
@@ -54076,14 +54120,13 @@ $as_echo "yes" >&6; }
 	FOUND_OPENSSL=yes
 fi
 
-      if test "x$FOUND_OPENSSL" != xyes; then
+      if test "x$FOUND_OPENSSL" != xyes ; then
         as_fn_error $? "Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'" "$LINENO" 5
       fi
     fi
 
-
     # if --with-openssl=/custom/path/where/openssl/is/present
-    if test "x$FOUND_OPENSSL" != xyes; then
+    if test "x$FOUND_OPENSSL" != xyes ; then
       # User specified path where openssl is installed
       OPENSSL_DIR=$with_openssl
 
@@ -54208,14 +54251,14 @@ $as_echo "$as_me: The path of OPENSSL_DIR, which resolves as \"$path\", is inval
     OPENSSL_DIR="`cd "$path"; $THEPWDCMD -L`"
   fi
 
-      if test -s "$OPENSSL_DIR/include/openssl/evp.h"; then
-        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+      if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
           # On Windows, check for libcrypto.lib
-          if test -s "$OPENSSL_DIR/lib/libcrypto.lib"; then
+          if test -s "$OPENSSL_DIR/lib/libcrypto.lib" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
 
   if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
@@ -54342,27 +54385,26 @@ $as_echo "$as_me: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path
             fi
           fi
         else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
             fi
-          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes; then
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
               OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
             fi
           fi
         fi
       fi
 
-
       #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes; then
+      if test "x$FOUND_OPENSSL" != xyes ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         as_fn_error $? "Unable to find openssl in specified location $OPENSSL_DIR" "$LINENO" 5
@@ -54371,7 +54413,7 @@ $as_echo "no" >&6; }
 $as_echo "yes" >&6; }
     fi
 
-    if test "x$OPENSSL_DIR" != x; then
+    if test "x$OPENSSL_DIR" != x ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
 $as_echo_n "checking if we should bundle openssl... " >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
@@ -54387,17 +54429,15 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
 
 
 
-
-
   COMPILER=$CXX
-  if test  "x$OPENJDK_TARGET_OS" = xaix; then
+  if test  "x$OPENJDK_TARGET_OS" = xaix ; then
     # xlc -qversion output typically looks like
     #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
     #     Version: 11.01.0000.0015
     COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
     # Collapse compiler output into a single line
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  elif test  "x$OPENJDK_TARGET_OS" = xwindows; then
+  elif test  "x$OPENJDK_TARGET_OS" = xwindows ; then
     # There is no specific version flag, but all output starts with a version string.
     # First line typically looks something like:
     # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
@@ -54419,7 +54459,7 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
 
 
   # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
   else
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
