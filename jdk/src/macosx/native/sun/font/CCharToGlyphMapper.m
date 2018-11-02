@@ -23,6 +23,10 @@
  * questions.
  */
 
+/*
+ * This file is backported from OpenJDK11
+ */
+
 #import <JavaNativeFoundation/JavaNativeFoundation.h>
 
 #import "AWTFont.h"
