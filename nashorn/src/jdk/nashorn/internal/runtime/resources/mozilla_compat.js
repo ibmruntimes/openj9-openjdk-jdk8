@@ -23,6 +23,10 @@
  * questions.
  */
 
+/*
+ * This file is backported from OpenJDK11
+ */
+
 /**
  * This script contains non-standard, Mozilla compatibility functionality on
  * the standard global objects. Please note that it is incomplete. Only the most
