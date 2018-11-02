@@ -23,6 +23,10 @@
  * questions.
  */
 
+/*
+ * This file is backported from OpenJDK10
+ */
+
 package sun.security.ssl;
 
 import java.io.IOException;
