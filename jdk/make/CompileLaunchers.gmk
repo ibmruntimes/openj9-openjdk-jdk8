@@ -422,7 +422,7 @@ $(eval $(call SetupLauncher,jdmpview, \
 
 $(eval $(call SetupLauncher,traceformat, \
     -DEXPAND_CLASSPATH_WILDCARDS \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.format.TraceFormat" }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.TraceFormat" }'))
 
 ifneq ($(findstring $(OPENJDK_TARGET_OS),aix linux),)
   $(eval $(call SetupLauncher,jextract, \
