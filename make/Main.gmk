@@ -23,9 +23,9 @@
 # questions.
 #
 
-#
+# ===========================================================================
 # (c) Copyright IBM Corp. 2011, 2018 All Rights Reserved
-#
+# ===========================================================================
 
 ### This is the main part of the Makefile, for the normal case with SPEC specifying a single existing spec.gmk file.
 

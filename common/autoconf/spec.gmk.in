@@ -23,9 +23,9 @@
 # questions.
 #
 
-#
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved.
-#
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
 
 # Configured @DATE_WHEN_CONFIGURED@ to build
 # for target system @OPENJDK_TARGET_OS@-@OPENJDK_TARGET_CPU@
