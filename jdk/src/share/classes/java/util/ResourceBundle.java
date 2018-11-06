@@ -24,9 +24,11 @@
  */
 
 /*
- * (C) Copyright Taligent, Inc. 1996, 1997 - All Rights Reserved
- * (C) Copyright IBM Corp. 1996 - 2018 - All Rights Reserved
- *
+ * ===========================================================================
+ * (c) Copyright Taligent, Inc. 1996, 1997 All Rights Reserved
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 1996, 2018 All Rights Reserved
+ * ===========================================================================
  * The original version of this source code and documentation
  * is copyrighted and owned by Taligent, Inc., a wholly-owned
  * subsidiary of IBM. These materials are provided under terms
@@ -35,12 +37,6 @@
  *
  * This notice and attribution to Taligent may not be removed.
  * Taligent is a registered trademark of Taligent, Inc.
- *
- */
-
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
  * ===========================================================================
  */
 
