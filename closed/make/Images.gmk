@@ -35,6 +35,11 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   endif
 endif
 
+# only include jextract in jre/bin
+NOT_JDK_BIN_FILES  := jextract$(EXE_SUFFIX)
+JDK_BIN_STRIP_LIST := $(filter-out $(addprefix %, $(addsuffix .stripped, $(NOT_JDK_BIN_FILES))), $(JDK_BIN_STRIP_LIST))
+JDK_BIN_TARGETS    := $(filter-out $(addprefix %, $(NOT_JDK_BIN_FILES)), $(JDK_BIN_TARGETS))
+
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
 .PHONY : openj9.ddr-gensrc openj9.ddr-jar
