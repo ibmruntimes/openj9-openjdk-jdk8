@@ -23,6 +23,12 @@
 # questions.
 #
 
+#
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+#
+
 AC_DEFUN_ONCE([FLAGS_SETUP_INIT_FLAGS],
 [
   # Option used to tell the compiler whether to create 32- or 64-bit executables
@@ -574,7 +580,7 @@ AC_DEFUN_ONCE([FLAGS_SETUP_COMPILER_FLAGS_FOR_JDK],
       # newer than the given OS version and makes the linked binaries compatible 
       # even if built on a newer version of the OS.
       # The expected format is X.Y.Z
-      MACOSX_VERSION_MIN=10.7.0
+      MACOSX_VERSION_MIN=10.9.0
       AC_SUBST(MACOSX_VERSION_MIN)
     
       # The macro takes the version with no dots, ex: 1070
