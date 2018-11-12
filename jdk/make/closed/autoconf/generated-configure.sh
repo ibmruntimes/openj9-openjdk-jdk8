@@ -4079,6 +4079,9 @@ fi
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
 
 # Support macro for PLATFORM_EXTRACT_TARGET_AND_BUILD.
 # Converts autoconf style CPU name to OpenJDK style, into
@@ -4453,7 +4456,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1542039989
+DATE_WHEN_GENERATED=1542058707
 
 ###############################################################################
 #
@@ -13728,7 +13731,7 @@ test -n "$target_alias" &&
       VAR_CPU_ENDIAN=big
       ;;
     powerpc64le)
-      VAR_CPU=ppc64
+      VAR_CPU=ppc64le
       VAR_CPU_ARCH=ppc
       VAR_CPU_BITS=64
       VAR_CPU_ENDIAN=little
@@ -13866,7 +13869,7 @@ $as_echo "$OPENJDK_BUILD_OS-$OPENJDK_BUILD_CPU" >&6; }
       VAR_CPU_ENDIAN=big
       ;;
     powerpc64le)
-      VAR_CPU=ppc64
+      VAR_CPU=ppc64le
       VAR_CPU_ARCH=ppc
       VAR_CPU_BITS=64
       VAR_CPU_ENDIAN=little
