@@ -52,45 +52,8 @@ ifeq (,$(OPENJ9OMR_SHA))
   $(error Could not determine OMR SHA)
 endif
 
-OPENJ9_ALT_SHARED_LIBRARIES := \
-	$(LIBRARY_PREFIX)jclse7b_29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) \
-	#
-
-OPENJ9_SHARED_LIBRARIES := \
-	$(filter-out $(notdir $(OPENJ9_ALT_SHARED_LIBRARIES)), \
-	$(notdir $(wildcard $(OUTPUT_ROOT)/vm/$(LIBRARY_PREFIX)*$(SHARED_LIBRARY_SUFFIX))))
-
-OPENJ9_PROPERTY_FILES := \
-	$(notdir $(wildcard $(OUTPUT_ROOT)/vm/java*.properties))
-
-OPENJ9_MISC_FILES := \
-	J9TraceFormat.dat \
-	OMRTraceFormat.dat \
-	#
-
-OPENJ9_VM_FILES := \
-	options.default \
-	#
-
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-  .PHONY : run-ddrgen
-  $(OUTPUT_ROOT)/vm/j9ddr.dat : run-ddrgen
-  run-ddrgen :
-	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		VERSION_MAJOR=8 \
-		$(EXPORT_MSVS_ENV_VARS) \
-	&& $(MAKE) -C $(OUTPUT_ROOT)/vm/ddr -f run_omrddrgen.mk \
-		CC="$(CC)" \
-		CXX="$(CXX)"
-
-  OPENJ9_VM_FILES += j9ddr.dat
-endif
-
 OPENJ9_NOTICE_FILE := openj9/longabout.html
 OPENJ9_NOTICE_FILE_RENAME := openj9-notices.html
-OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
-
 OPENJ9_OPENJDK_NOTICE_FILE := openj9-openjdk-notices
 
 # openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
@@ -120,62 +83,102 @@ endif
 	run-preprocessors-j9 \
 	stage-j9 \
 	stage-openj9-tools \
+	stage_openj9_build_jdk \
 	#
 
-# generated_target_rules
-# ----------------------
-# param 1 = The jdk/jre directory name
-# param 2 = The jdk/jre directory to add openj9 content
-define generated_target_rules
+# redirector
 
-.PHONY : stage_openj9_$1
+$(foreach subdir, j9vm server, \
+	$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+		DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(subdir), \
+		SRC := $(OUTPUT_ROOT)/vm/redirector, \
+		FILES := $(call SHARED_LIBRARY,jvm) \
+		)))
 
-$(foreach file,$(OPENJ9_SHARED_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUT_ROOT)/vm/$(file))))
+# regular shared libraries
 
-$(foreach file,$(OPENJ9_ALT_SHARED_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(notdir $(file)),$(OUTPUT_ROOT)/vm/$(file))))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	SRC := $(OUTPUT_ROOT)/vm, \
+	FILES := $(patsubst %, $(call SHARED_LIBRARY,%), \
+		cuda4j29 \
+		j9dmp29 \
+		j9jextract \
+		j9gc29 \
+		j9gcchk29 \
+		j9hookable29 \
+		j9jit29 \
+		j9jnichk29 \
+		j9jvmti29 \
+		j9prt29 \
+		j9shr29 \
+		j9thr29 \
+		j9trc29 \
+		j9vm29 \
+		j9vmchk29 \
+		j9vrb29 \
+		j9zlib29 \
+		jclse7b_29 \
+		jsig \
+		jvm \
+		management \
+		management_ext \
+		omrsig) \
+	))
 
-$(foreach file,$(OPENJ9_VM_FILES) $(OPENJ9_PROPERTY_FILES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUT_ROOT)/vm/$(file))))
+ifeq (windows,$(OPENJDK_TARGET_OS))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/lib, \
+	SRC := $(OUTPUT_ROOT)/vm/lib, \
+	FILES := $(call STATIC_LIBRARY,jvm) \
+	))
+endif # windows
 
-$(foreach file,$(OPENJ9_MISC_FILES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/lib/$(file),$(OUTPUT_ROOT)/vm/$(file))))
+# classlib.properties
 
-$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(SRC_ROOT)/$(OPENJ9_NOTICE_FILE)))
+$(JDK_OUTPUTDIR)/lib/classlib.properties : $(OUTPUT_ROOT)/vm/classlib.properties
+	$(ECHO) Setting classlib.properties
+	$(SED) > $@ < $< \
+		-e 's/shape=vm.shape/shape=sun_openjdk\nbootpath=rt.jar:resources.jar:jsse.jar:charsets.jar:jce.jar/g' \
+		-e 's/version=1.9/version=1.8/g'
 
-$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_OPENJDK_NOTICE_FILE),$(SRC_ROOT)/$(OPENJ9_OPENJDK_NOTICE_FILE)))
+OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/classlib.properties
 
-$(foreach file,$(OPENJ9_REDIRECTOR), \
-	$(foreach subdir, j9vm server, \
-		$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(subdir)/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUT_ROOT)/vm/$(file)))))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	SRC := $(OUTPUT_ROOT)/vm, \
+	FILES := \
+		$(notdir $(wildcard $(OUTPUT_ROOT)/vm/java*.properties)) \
+		options.default \
+	))
 
-$(eval $(call openj9_set_classlib_props,stage_openj9_$1,$2/lib,$(OUTPUT_ROOT)/vm))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/lib, \
+	SRC := $(OUTPUT_ROOT)/vm, \
+	FILES := \
+		J9TraceFormat.dat \
+		OMRTraceFormat.dat \
+	))
 
-endef
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+.PHONY : run-ddrgen
+$(OUTPUT_ROOT)/vm/j9ddr.dat : run-ddrgen
+run-ddrgen :
+	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+		VERSION_MAJOR=8 \
+		$(EXPORT_MSVS_ENV_VARS) \
+	&& $(MAKE) -C $(OUTPUT_ROOT)/vm/ddr -f run_omrddrgen.mk \
+		CC="$(CC)" \
+		CXX="$(CXX)"
 
-# Configure the vm classlib.properties file
-# param 1 = The make goal.
-# param 1 = target directory
-# param 2 = source directory
-define openj9_set_classlib_props
-$1 : $2/classlib.properties
-$2/classlib.properties : $3/classlib.properties
-	$(ECHO) Setting $1/classlib.properties
-	$(SED) -e 's/shape=vm.shape/shape=sun_openjdk\nbootpath=rt.jar:resources.jar:jsse.jar:charsets.jar:jce.jar/g' -e 's/version=1.9/version=1.8/g' < $$< > $$@
-endef
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	SRC := $(OUTPUT_ROOT)/vm, \
+	FILES := j9ddr.dat \
+	))
+endif # ddr
 
-# openj9_copy_prereq
-# ------------------
-# param 1 = The make goal.
-# param 2 = The target file to create or update.
-# parma 3 = The source file to copy.
-define openj9_copy_prereq
-$1 : $2
-$2 : $3
-	@$(MKDIR) -p $$(@D)
-	@$(CP) $$< $$@
-endef
+stage_openj9_build_jdk : $(OPENJ9_STAGED_FILES)
 
 # openj9_copy_tree
 # ----------------
@@ -194,8 +197,6 @@ define openj9_copy_tree_impl
 		| $(TAR) --extract --directory=$1 -m
 	@$(TOUCH) $1/$(OPENJ9_MARKER_FILE)
 endef
-
-$(eval $(call generated_target_rules,build_jdk,$(JDK_OUTPUTDIR)))
 
 OPENJ9_TEST_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/test/openj9
 
@@ -401,8 +402,7 @@ run-preprocessors-j9 : stage-j9
 		$(OUTPUT_ROOT)/vm/include/openj9_version_info.h)
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
-		&& cd $(OUTPUT_ROOT)/vm \
-		&& $(MAKE) $(MAKEFLAGS) -f buildtools.mk \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
 			CMAKE=$(CMAKE) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
@@ -422,8 +422,7 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install
 else
 	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
-		&& cd $(OUTPUT_ROOT)/vm \
-		&& $(MAKE) $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
 endif
 	@$(ECHO) OpenJ9 compile complete
 	@$(MKDIR) -p $(JDK_IMAGE_DIR)/
