@@ -113,13 +113,13 @@ endif
 
 .PHONY : \
 	build-j9 \
+	build-openj9-tools \
 	clean-j9 \
 	clean-j9-dist \
 	generate-j9jcl-sources \
 	run-preprocessors-j9 \
 	stage-j9 \
 	stage-openj9-tools \
-	build-openj9-tools \
 	#
 
 # generated_target_rules
@@ -147,7 +147,8 @@ $(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_NOTICE_FILE_RENAME)
 $(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_OPENJDK_NOTICE_FILE),$(SRC_ROOT)/$(OPENJ9_OPENJDK_NOTICE_FILE)))
 
 $(foreach file,$(OPENJ9_REDIRECTOR), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUT_ROOT)/vm/$(file))))
+	$(foreach subdir, j9vm server, \
+		$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(subdir)/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUT_ROOT)/vm/$(file)))))
 
 $(eval $(call openj9_set_classlib_props,stage_openj9_$1,$2/lib,$(OUTPUT_ROOT)/vm))
 
@@ -324,9 +325,8 @@ stage-openj9-tools :
 
 build-openj9-tools : stage-openj9-tools
 	@$(ECHO) Building OpenJ9 tools
-	($(MAKE) $(MAKEFLAGS) -C $(OUTPUT_ROOT)/vm/sourcetools -f buildj9tools.mk \
-		JAVA_HOME=$(BOOT_JDK) lib/jpp.jar \
-	)
+	$(MAKE) $(MAKEFLAGS) -C $(OUTPUT_ROOT)/vm/sourcetools -f buildj9tools.mk \
+		JAVA_HOME=$(BOOT_JDK) lib/jpp.jar
 
 stage-j9 : stage-openj9-tools
 	@$(ECHO) Staging OpenJ9 debugtools in $(OUTPUT_ROOT)/vm
@@ -400,7 +400,7 @@ run-preprocessors-j9 : stage-j9
 		@$(SED) $(OPENJ9_VERSION_SCRIPT) < $(SRC_ROOT)/closed/openj9_version_info.h.in, \
 		$(OUTPUT_ROOT)/vm/include/openj9_version_info.h)
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
-	(export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
+	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
 		&& cd $(OUTPUT_ROOT)/vm \
 		&& $(MAKE) $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
@@ -413,20 +413,17 @@ run-preprocessors-j9 : stage-j9
 			OMR_DIR=$(OUTPUT_ROOT)/vm/omr \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
-			tools \
-	)
+			tools
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUT_ROOT)/vm
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-	(export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
-		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install \
-	)
+	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/build $(MAKEFLAGS) install
 else
-	(export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& cd $(OUTPUT_ROOT)/vm \
-		&& $(MAKE) $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all \
-	)
+		&& $(MAKE) $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
 endif
 	@$(ECHO) OpenJ9 compile complete
 	@$(MKDIR) -p $(JDK_IMAGE_DIR)/
