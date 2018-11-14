@@ -134,14 +134,15 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate
         if (1 != EVP_DigestUpdate(context->ctx, context->nativeBuffer, messageLen))
             handleErrors();
     } else {
-        jboolean isCopy;
-        unsigned char* messageNative = (*env)->GetPrimitiveArrayCritical(env, message, &isCopy);
-        messageNative = messageNative + messageOffset;
+        unsigned char* messageNative = (*env)->GetPrimitiveArrayCritical(env, message, 0);
+        if (messageNative == NULL) {
+            return -1;
+        }
 
-        if (1 != EVP_DigestUpdate(context->ctx, messageNative, messageLen))
+        if (1 != EVP_DigestUpdate(context->ctx, (messageNative + messageOffset), messageLen))
             handleErrors();
 
-        (*env)->ReleasePrimitiveArrayCritical(env, message,  NULL, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, message, messageNative, 0);
     }
 
     return 0;
@@ -160,24 +161,29 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
     OpenSSLMDContext *context = (OpenSSLMDContext*) c;
 
     unsigned int size;
-    jboolean isCopy;
     unsigned char* messageNative;
     unsigned char* digestNative;
 
     if (message != NULL) {
-       messageNative = (*env)->GetPrimitiveArrayCritical(env, message, &isCopy);
-       messageNative = messageNative + messageOffset;
-       if (1 != EVP_DigestUpdate(context->ctx, messageNative, messageLen)) handleErrors();
-           (*env)->ReleasePrimitiveArrayCritical(env, message, NULL, 0);
+        messageNative = (*env)->GetPrimitiveArrayCritical(env, message, 0);
+        if (messageNative == NULL) {
+            return -1;
+        }
+
+        if (1 != EVP_DigestUpdate(context->ctx, (messageNative + messageOffset), messageLen))
+            handleErrors();
+        (*env)->ReleasePrimitiveArrayCritical(env, message, messageNative, 0);
     }
 
-    digestNative = (*env)->GetPrimitiveArrayCritical(env, digest , &isCopy);
-    digestNative = digestNative + digestOffset;
+    digestNative = (*env)->GetPrimitiveArrayCritical(env, digest, 0);
+    if (digestNative == NULL) {
+        return -1;
+    }
 
-    if (1 != EVP_DigestFinal_ex(context->ctx, digestNative, &size))
+    if (1 != EVP_DigestFinal_ex(context->ctx, (digestNative + digestOffset), &size))
         handleErrors();
 
-    (*env)->ReleasePrimitiveArrayCritical(env, digest,  NULL, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, digest, digestNative, 0);
 
     EVP_MD_CTX_reset(context->ctx);
 
@@ -207,7 +213,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
         handleErrors();
 
     context = malloc(sizeof(OpenSSLCipherContext));
-    context->nativeBuffer  = (unsigned char*)nativeBuffer;
+    context->nativeBuffer = (unsigned char*)nativeBuffer;
     context->nativeBuffer2 = (unsigned char*)nativeBuffer2;
     context->ctx = ctx;
 
@@ -243,7 +249,6 @@ JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
     EVP_CIPHER_CTX *ctx = ((OpenSSLCipherContext*)c)->ctx;
     unsigned char* ivNative;
     unsigned char* keyNative;
-    jboolean isCopy;
     const EVP_CIPHER * evp_cipher1 = NULL;
 
     switch(key_len) {
@@ -258,16 +263,23 @@ JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
             break;
     }
 
-    ivNative  = (unsigned char*)((*env)->GetByteArrayElements(env, iv,  &isCopy));
-    keyNative = (unsigned char*)((*env)->GetByteArrayElements(env, key, &isCopy));
+    ivNative = (unsigned char*)((*env)->GetByteArrayElements(env, iv, 0));
+    if (ivNative == NULL)
+        return;
+
+    keyNative = (unsigned char*)((*env)->GetByteArrayElements(env, key, 0));
+    if (keyNative == NULL) {
+        (*env)->ReleaseByteArrayElements(env, iv, (jbyte*)ivNative, JNI_ABORT);
+        return;
+    }
 
     if (1 != EVP_CipherInit_ex(ctx, evp_cipher1, NULL, keyNative, ivNative, mode))
         handleErrors();
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
-    (*env)->ReleaseByteArrayElements(env, iv,  ivNative,  JNI_ABORT);
-    (*env)->ReleaseByteArrayElements(env, key, keyNative, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, iv, (jbyte*)ivNative, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, key, (jbyte*)keyNative, JNI_ABORT);
 }
 
 /* Update CBC context
@@ -283,18 +295,24 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate
     EVP_CIPHER_CTX *ctx = (((OpenSSLCipherContext*)c)->ctx);
     int outputLen = -1;
 
-    jboolean isCopy;
-    unsigned char* inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input , &isCopy));
-    unsigned char* outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, &isCopy));
+    unsigned char* inputNative;
+    unsigned char* outputNative;
 
-    inputNative = inputNative + inputOffset;
-    outputNative = outputNative + outputOffset;
+    inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+    if (inputNative == NULL)
+        return -1;
 
-    if(1 != EVP_CipherUpdate(ctx, outputNative, &outputLen, inputNative, inputLen))
+    outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, 0));
+    if (outputNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
+        return -1;
+    }
+
+    if(1 != EVP_CipherUpdate(ctx, (outputNative + outputOffset), &outputLen, (inputNative + inputOffset), inputLen))
         handleErrors();
 
-    (*env)->ReleasePrimitiveArrayCritical(env, input , NULL, 0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, NULL, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     return outputLen;
 }
@@ -316,21 +334,27 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt
     int outputLen = -1;
     int outputLen1 = -1;
 
-    jboolean isCopy;
-    unsigned char* inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input , &isCopy));
-    unsigned char* outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, &isCopy));
+    unsigned char* inputNative;
+    unsigned char* outputNative;
 
-    inputNative    = inputNative  + inputOffset;
-    outputNative   = outputNative + outputOffset;
+    inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+    if (inputNative == NULL)
+        return -1;
 
-    if (1 != EVP_CipherUpdate(ctx, outputNative, &outputLen, inputNative, inputLen))
+    outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, 0));
+    if (outputNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
+        return -1;
+    }
+
+    if (1 != EVP_CipherUpdate(ctx, (outputNative + outputOffset), &outputLen, (inputNative + inputOffset), inputLen))
         handleErrors();
 
     if (1 != EVP_CipherFinal_ex(ctx, buf, &outputLen1))
         handleErrors();
 
-    (*env)->ReleasePrimitiveArrayCritical(env, input , NULL, 0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, NULL, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     return outputLen+outputLen1;
 }
@@ -349,17 +373,50 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
   jbyteArray input, jint inOffset, jint inLen, jbyteArray output, jint outOffset,
   jbyteArray aad, jint aadLen, jint tagLen) {
 
-    jboolean isCopy;
     unsigned char* inputNative;
     int len, len_cipher = 0;
-    unsigned char* keyNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key,   &isCopy));
-    unsigned char* ivNative     = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, iv,    &isCopy));
-    unsigned char* outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output,&isCopy));
-    unsigned char* aadNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, aad,   &isCopy));
+    unsigned char* keyNative;
+    unsigned char* ivNative;
+    unsigned char* outputNative;
+    unsigned char* aadNative;
 
     EVP_CIPHER_CTX* ctx = NULL;
+
+    keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
+    if (keyNative == NULL) {
+        return -1;
+    }
+
+    ivNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, iv, 0));
+    if (ivNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+        return -1;
+    }
+
+    aadNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, aad, 0));
+    if (aadNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+        return -1;
+    }
+
+    outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, 0));
+    if (outputNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
+        return -1;
+    }
+
     if (inLen > 0) {
-        inputNative  = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, &isCopy));
+        inputNative  = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+        if (inputNative == NULL) {
+            (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
+            return -1;
+        }
     }
 
     if (first_time_gcm == 0) {
@@ -423,22 +480,51 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
   jbyteArray input, jint inOffset, jint inLen, jbyteArray output, jint outOffset,
   jbyteArray aad, jint aadLen, jint tagLen) {
 
-    jboolean isCopy;
     unsigned char* inputNative;
     unsigned char* aadNative;
     int ret, len, plaintext_len = 0;
-    unsigned char* keyNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key,   &isCopy));
-    unsigned char* ivNative     = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, iv,    &isCopy));
-    unsigned char* outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output,&isCopy));
-
+    unsigned char* keyNative;
+    unsigned char* ivNative;
+    unsigned char* outputNative;
     EVP_CIPHER_CTX* ctx = NULL;
 
+    keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
+    if (keyNative == NULL)
+        return -1;
+
+    ivNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, iv, 0));
+    if (ivNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+        return -1;
+    }
+
+    outputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, output, 0));
+    if (outputNative == NULL) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+        return -1;
+    }
+
     if (inLen > 0) {
-        inputNative  = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, &isCopy));
+        inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+        if (inputNative == NULL) {
+            (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
+            return -1;
+        }
     }
 
     if (aadLen > 0) {
-        aadNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, aad,   &isCopy));
+        aadNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, aad, 0));
+        if (aadNative == NULL) {
+            (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+            (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
+            if (inLen > 0)
+                (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
+            return -1;
+        }
     }
 
     if (first_time_gcm == 0) {
