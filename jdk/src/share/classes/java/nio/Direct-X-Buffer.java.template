@@ -251,16 +251,28 @@ class Direct$Type$Buffer$RW$$BO$
     }
 
     public $type$ get() {
-        return $fromBits$($swap$(unsafe.get$Swaptype$(ix(nextGetIndex()))));
+        try {
+            return $fromBits$($swap$(unsafe.get$Swaptype$(ix(nextGetIndex()))));
+        } finally {
+            Bits.keepAlive(this);
+        }
     }
 
     public $type$ get(int i) {
-        return $fromBits$($swap$(unsafe.get$Swaptype$(ix(checkIndex(i)))));
+        try {
+            return $fromBits$($swap$(unsafe.get$Swaptype$(ix(checkIndex(i)))));
+        } finally {
+            Bits.keepAlive(this);
+        }
     }
 
 #if[streamableType]
     $type$ getUnchecked(int i) {
-        return $fromBits$($swap$(unsafe.get$Swaptype$(ix(i))));
+        try {
+            return $fromBits$($swap$(unsafe.get$Swaptype$(ix(i))));
+        } finally {
+            Bits.keepAlive(this);
+        }
     }
 #end[streamableType]
 
@@ -273,18 +285,22 @@ class Direct$Type$Buffer$RW$$BO$
             assert (pos <= lim);
             int rem = (pos <= lim ? lim - pos : 0);
             if (length > rem)
-                throw new BufferUnderflowException();
+               throw new BufferUnderflowException();
 
+            try {
 #if[!byte]
-            if (order() != ByteOrder.nativeOrder())
-                Bits.copyTo$Memtype$Array(ix(pos), dst,
-                                          (long)offset << $LG_BYTES_PER_VALUE$,
-                                          (long)length << $LG_BYTES_PER_VALUE$);
-            else
+                if (order() != ByteOrder.nativeOrder())
+                    Bits.copyTo$Memtype$Array(ix(pos), dst,
+                                             (long)offset << $LG_BYTES_PER_VALUE$,
+                                             (long)length << $LG_BYTES_PER_VALUE$);
+                else
 #end[!byte]
-                Bits.copyToArray(ix(pos), dst, arrayBaseOffset,
-                                 (long)offset << $LG_BYTES_PER_VALUE$,
-                                 (long)length << $LG_BYTES_PER_VALUE$);
+                    Bits.copyToArray(ix(pos), dst, arrayBaseOffset,
+                                    (long)offset << $LG_BYTES_PER_VALUE$,
+                                    (long)length << $LG_BYTES_PER_VALUE$);
+            } finally {
+                Bits.keepAlive(this);
+            }
             position(pos + length);
         } else {
             super.get(dst, offset, length);
@@ -369,7 +385,7 @@ class Direct$Type$Buffer$RW$$BO$
             int rem = (pos <= lim ? lim - pos : 0);
             if (length > rem)
                 throw new BufferOverflowException();
-
+            try {
 #if[!byte]
             if (order() != ByteOrder.nativeOrder())
                 Bits.copyFrom$Memtype$Array(src,
@@ -382,6 +398,9 @@ class Direct$Type$Buffer$RW$$BO$
                                    (long)offset << $LG_BYTES_PER_VALUE$,
                                    ix(pos),
                                    (long)length << $LG_BYTES_PER_VALUE$);
+            } finally {
+                Bits.keepAlive(this);
+            }
             position(pos + length);
         } else {
             super.put(src, offset, length);
@@ -482,7 +501,11 @@ class Direct$Type$Buffer$RW$$BO$
 #if[byte]
 
     byte _get(int i) {                          // package-private
-        return unsafe.getByte(address + i);
+        try {
+            return unsafe.getByte(address + i);
+        } finally {
+            Bits.keepAlive(this);
+        }
     }
 
     void _put(int i, byte b) {                  // package-private
