@@ -359,7 +359,6 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt
     return outputLen+outputLen1;
 }
 
-const EVP_CIPHER* evp_gcm_cipher;
 int first_time_gcm = 0;
 
 /* GCM Encryption
@@ -381,6 +380,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
     unsigned char* aadNative;
 
     EVP_CIPHER_CTX* ctx = NULL;
+    EVP_CIPHER* evp_gcm_cipher = NULL;
 
     keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
     if (keyNative == NULL) {
@@ -423,9 +423,19 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
         OpenSSL_add_all_algorithms();
         ERR_load_crypto_strings();
         first_time_gcm = 1;
-
-        evp_gcm_cipher = EVP_aes_128_gcm();
-    } 
+    }
+    
+    switch(keyLen) {
+        case 16:
+            evp_gcm_cipher = EVP_aes_128_gcm();
+            break;
+        case 24:
+            evp_gcm_cipher = EVP_aes_192_gcm();
+            break;
+        case 32:
+            evp_gcm_cipher = EVP_aes_256_gcm();
+            break;
+    }
 
     ctx = EVP_CIPHER_CTX_new();
     if(1 != EVP_CipherInit_ex(ctx, evp_gcm_cipher, NULL, NULL, NULL, 1 )) /* 1 - Encrypt mode 0 Decrypt Mode*/
@@ -487,6 +497,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
     unsigned char* ivNative;
     unsigned char* outputNative;
     EVP_CIPHER_CTX* ctx = NULL;
+    EVP_CIPHER* evp_gcm_cipher = NULL;
 
     keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
     if (keyNative == NULL)
@@ -532,8 +543,19 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
         OpenSSL_add_all_algorithms();
         ERR_load_crypto_strings();
         first_time_gcm = 1;
-        evp_gcm_cipher = EVP_aes_128_gcm();
-    } 
+    }
+
+    switch(keyLen) {
+        case 16:
+            evp_gcm_cipher = EVP_aes_128_gcm();
+            break;
+        case 24:
+            evp_gcm_cipher = EVP_aes_192_gcm();
+            break;
+        case 32:
+            evp_gcm_cipher = EVP_aes_256_gcm();
+            break;
+    }
 
     ctx = EVP_CIPHER_CTX_new();
 
