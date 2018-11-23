@@ -41,7 +41,11 @@ j9vm-build : openssl-build
 j9vm-compose-buildjvm : j9vm-build
 	+$(OPENJ9_MAKE) stage_openj9_build_jdk
 
-images :: test-image
+java-version-file: source-tips demos nashorn images-only test-image
+	# create file with build information in native libraries folder to identify which build the libraries belong to
+	$(JDK_IMAGE_DIR)/bin/java -version > $(IMAGES_OUTPUTDIR)/test/openj9/java-version.txt 2>&1
+
+images :: java-version-file
 
 test-image : openj9-test-image
 
