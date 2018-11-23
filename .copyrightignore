@@ -1,0 +1,50 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception 
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+#
+# ===========================================================================
+#
+#  THE FOLLOWING ARE EXAMPLES OF SYNTAXES copyrightCheck SUPPORTS:
+#  1.**/jobs/** # path contains "jobs" folder, but not root directory
+#  2./doc#root root level directory and file named "doc"
+#  3./debugtools/**/*.ignore # all .ignore file in the root directory debugtools
+#  4./*.ignore #all root directory .ignore files
+#  5.**/jobs/pipelines/ #pipeline folder follows closely with jobs not in root directory
+#  6.*.ignore #all ignore files only
+#  7.**/jobs/**/pipelines/ #directory path contains both jobs and pipelines not root directory
+#  8.*job*  #all things at contains characters in between stars
+# ===========================================================================
+
+src/bsd/doc
+src/jdk.crypto.ec/share/native/libsunec/impl
+src/linux/doc
+src/solaris/doc
+/test
+
+*.gif
+*.ini
+.copyrightignore
+*.jpg
+*.ico
+*.bmp
+*.wav
+/*LICENSE
+/*README
+*.md
+*.icu
