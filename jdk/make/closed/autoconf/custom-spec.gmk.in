@@ -94,8 +94,7 @@ ifeq ($(OPENJDK_BUILD_OS), macosx)
   # variable is defined to support dependencies where the compiler option
   # is not applied.
   export MACOSX_DEPLOYMENT_TARGET := @MACOSX_VERSION_MIN@
-  ifeq ($(OPENJ9_LIBS_SUBDIR), compressedrefs)
-    # Set page zero size to 4KB for mapping memory below 4GB.
-    LDFLAGS_JDKEXE += -pagezero_size 0x1000
-  endif
+    
+  # Set page zero size to 4KB for mapping memory below 4GB.
+  LDFLAGS_JDKEXE += -pagezero_size 0x1000
 endif
