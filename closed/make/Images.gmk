@@ -53,3 +53,13 @@ openj9.ddr-jar : openj9.ddr-gensrc
 jdk-image : openj9.ddr-jar
 
 endif # OPENJ9_ENABLE_DDR
+
+# ensure jre/jdk binary LICENSE file content is correctly sourced
+$(JRE_IMAGE_DIR)/LICENSE: $(SRC_ROOT)/LICENSE
+	$(process-doc-file)
+
+$(JDK_IMAGE_DIR)/jre/LICENSE: $(SRC_ROOT)/LICENSE
+	$(process-doc-file)
+
+$(JDK_IMAGE_DIR)/LICENSE: $(SRC_ROOT)/LICENSE
+	$(process-doc-file)
