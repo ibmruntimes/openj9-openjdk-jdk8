@@ -39,7 +39,6 @@ src/solaris/doc
 
 *.gif
 *.ini
-.copyrightignore
 *.jpg
 *.ico
 *.bmp
@@ -48,3 +47,4 @@ src/solaris/doc
 /*README
 *.md
 *.icu
+**/autoconf/generated-configure.sh
