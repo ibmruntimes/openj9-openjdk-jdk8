@@ -4,10 +4,10 @@
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
-# 
+#
 # IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
-# 
+#
 # This code is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
@@ -335,13 +335,6 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
         $SED -e 's/ *Copyright .*//'`
   fi
   AC_SUBST(COMPILER_VERSION_STRING)
-
-  # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
-  else
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
-  fi
 
   CLOSED_AUTOCONF_DIR="$SRC_ROOT/jdk/make/closed/autoconf"
 

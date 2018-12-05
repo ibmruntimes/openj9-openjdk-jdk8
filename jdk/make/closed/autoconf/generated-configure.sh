@@ -4456,7 +4456,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1542058707
+DATE_WHEN_GENERATED=1543947652
 
 ###############################################################################
 #
@@ -54466,13 +54466,6 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
         $SED -e 's/ *Copyright .*//'`
   fi
 
-
-  # Add the J9VM vm lib directory into native LDFLAGS_JDKLIB path
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:${JDK_OUTPUTDIR}/../vm/lib"
-  else
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L${JDK_OUTPUTDIR}/../vm"
-  fi
 
   CLOSED_AUTOCONF_DIR="$SRC_ROOT/jdk/make/closed/autoconf"
 
