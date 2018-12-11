@@ -4456,7 +4456,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1543947652
+DATE_WHEN_GENERATED=1544546386
 
 ###############################################################################
 #
@@ -14862,7 +14862,7 @@ fi
       ;;
   esac
 
-  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
@@ -15396,7 +15396,7 @@ $as_echo "no (explicitly disabled)" >&6; }
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      wa64|wi32|xa64|xl64|xz64)
+      ap64|wa64|wi32|xa64|xl64|xz64)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for $OPENJ9_PLATFORM_CODE)" >&5
 $as_echo "yes (default for $OPENJ9_PLATFORM_CODE)" >&6; }
         OPENJ9_ENABLE_DDR=true
@@ -54439,14 +54439,14 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
 
 
   COMPILER=$CXX
-  if test  "x$OPENJDK_TARGET_OS" = xaix ; then
+  if test "x$OPENJDK_TARGET_OS" = xaix ; then
     # xlc -qversion output typically looks like
     #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
     #     Version: 11.01.0000.0015
     COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
     # Collapse compiler output into a single line
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  elif test  "x$OPENJDK_TARGET_OS" = xwindows ; then
+  elif test "x$OPENJDK_TARGET_OS" = xwindows ; then
     # There is no specific version flag, but all output starts with a version string.
     # First line typically looks something like:
     # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86

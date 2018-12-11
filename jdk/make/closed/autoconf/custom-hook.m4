@@ -149,7 +149,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      wa64|wi32|xa64|xl64|xz64)
+      ap64|wa64|wi32|xa64|xl64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -193,7 +193,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     [build non-compressedrefs vm (large heap)])])
 
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
-  if test "x$with_noncompressedrefs" != x  -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
@@ -308,14 +308,14 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   CONFIGURE_OPENSSL
 
   COMPILER=$CXX
-  if test  "x$OPENJDK_TARGET_OS" = xaix ; then
+  if test "x$OPENJDK_TARGET_OS" = xaix ; then
     # xlc -qversion output typically looks like
     #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
     #     Version: 11.01.0000.0015
     COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
     # Collapse compiler output into a single line
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  elif test  "x$OPENJDK_TARGET_OS" = xwindows ; then
+  elif test "x$OPENJDK_TARGET_OS" = xwindows ; then
     # There is no specific version flag, but all output starts with a version string.
     # First line typically looks something like:
     # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
