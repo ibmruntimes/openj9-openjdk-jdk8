@@ -33,20 +33,13 @@ include $(SPEC)
 #     For Linux ppc64le, it is linux-ppc64le
 #     For Linux s390x, it is linux64-s390x
 #     For Linux x64, it is linux-x86_64
+#     For Mac OSX, it is darwin64-x86_64-cc
 #     For Windows x64, it is VC-WIN64A
 #     For Windows x32, it is VC-WIN32
 build_openssl:
 ifeq ($(BUILD_OPENSSL), yes)
 	$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR)
-  ifeq ($(OPENJDK_TARGET_OS), aix)
-	($(CD) $(OPENSSL_DIR) && ./Configure aix64-cc && $(MAKE))
-  else ifeq ($(OPENJDK_TARGET_OS), windows)
-    ifeq ($(OPENJDK_TARGET_CPU), x86_64)
-	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN64A && $(MAKE))
-    else
-	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN32 && $(MAKE))
-    endif
-  else ifeq ($(OPENJDK_TARGET_OS), linux)
+  ifeq ($(OPENJDK_TARGET_OS), linux)
     ifeq ($(OPENJDK_TARGET_CPU), x86_64)
 	($(CD) $(OPENSSL_DIR) && ./Configure linux-x86_64 && $(MAKE))
     else ifeq ($(OPENJDK_TARGET_CPU), s390x)
@@ -56,6 +49,18 @@ ifeq ($(BUILD_OPENSSL), yes)
     else
 	($(CD) $(OPENSSL_DIR) && ./config && $(MAKE))
     endif
+  else ifeq ($(OPENJDK_TARGET_OS), macosx)
+	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-x86_64-cc -shared  && $(MAKE))
+  else ifeq ($(OPENJDK_TARGET_OS), windows)
+    ifeq ($(OPENJDK_TARGET_CPU), x86_64)
+	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN64A && $(MAKE))
+    else
+	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN32 && $(MAKE))
+    endif
+  else ifeq ($(OPENJDK_TARGET_OS), aix)
+	($(CD) $(OPENSSL_DIR) && ./Configure aix64-cc && $(MAKE))
+  else
+	($(CD) $(OPENSSL_DIR) && ./config && $(MAKE))
   endif
 endif
 
