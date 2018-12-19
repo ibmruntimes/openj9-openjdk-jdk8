@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -42,7 +42,6 @@ endif
 OPENSSL_DIR             := @OPENSSL_DIR@
 BUILD_OPENSSL           := @BUILD_OPENSSL@
 OPENSSL_CFLAGS          := @OPENSSL_CFLAGS@
-OPENSSL_LIBS            := @OPENSSL_LIBS@
 OPENSSL_BUNDLE_LIB_PATH := @OPENSSL_BUNDLE_LIB_PATH@
 WITH_OPENSSL            := @WITH_OPENSSL@
 

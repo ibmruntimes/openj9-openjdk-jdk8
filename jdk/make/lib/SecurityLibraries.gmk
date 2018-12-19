@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 #
 
@@ -298,13 +298,16 @@ ifeq ($(WITH_OPENSSL), yes)
     $(eval $(call SetupNativeCompilation,BUILD_JNCRYPTO, \
         LIBRARY := jncrypto, \
         OUTPUT_DIR := $(INSTALL_LIBRARIES_HERE), \
-        SRC := $(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider, \
+        SRC := $(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider \
+               $(SRC_ROOT)/closed/adds/jdk/src/$(OPENJDK_TARGET_OS_API_DIR)/native/jdk/crypto/jniprovider, \
         LANG := C, \
         OPTIMIZATION := LOW, \
-        CFLAGS := $(CFLAGS_JDKLIB) -c $(OPENSSL_CFLAGS), \
+        CFLAGS := $(CFLAGS_JDKLIB) \
+            -I$(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider \
+            -c $(OPENSSL_CFLAGS), \
         MAPFILE := $(SRC_ROOT)/closed/make/mapfiles/libjncrypto/mapfile-vers, \
-        LDFLAGS := $(SHARED_LIBRARY_FLAGS) $(LDFLAGS_JDKLIB) $(call SET_SHARED_LIBRARY_ORIGIN), \
-        LDFLAGS_SUFFIX := $(OPENSSL_LIBS), \
+        LDFLAGS := $(LDFLAGS_JDKLIB) $(call SET_SHARED_LIBRARY_ORIGIN), \
+        LDFLAGS_SUFFIX_posix := $(LIBDL), \
         VERSIONINFO_RESOURCE := $(JDK_TOPDIR)/src/windows/resource/version.rc, \
         RC_FLAGS := $(RC_FLAGS) \
             -D "JDK_FNAME=jncrypto.dll" \
