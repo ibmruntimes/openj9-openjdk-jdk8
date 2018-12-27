@@ -726,25 +726,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
 	if (i != -1) {                                                          
 	    String pkgname = name.substring(0, i);                              
 	    // Check if package already loaded.                                 
-	    Package pkg = getPackage(pkgname);                                  
-            if (pkg != null) {                                                  
-		// Package found, so check package sealing.                     
-		if (pkg.isSealed()) {                                           
-		    // Verify that code source URL is the same.                 
-		    if (!pkg.isSealed(url)) {                                   
-			throw new SecurityException(                            
-			    "sealing violation: package " + pkgname + " is sealed"); 
-		    }                                                           
-		} else {                                                        
-		    // Make sure we are not attempting to seal the package      
-		    // at this code source URL.                                 
-		    if ((man != null) && isSealed(pkgname, man)) {              
-			throw new SecurityException(                            
-			    "sealing violation: can't seal package " + pkgname +  
-			    ": already loaded");                                
-		    }                                                           
-		}                                                               
-	    } else {                                                            
+	    if (getAndVerifyPackage(pkgname, man, url) == null) {                                                            
             try {
                if (null != man) {
                   definePackage(pkgname, man, url);
