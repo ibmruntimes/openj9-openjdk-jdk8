@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -85,6 +85,14 @@ MSVCP_DLL               := @MSVCP_DLL@
 
 COPY_JVM_CFG_FILE       := true
 
+ifeq ($(OPENJDK_BUILD_OS), aix)
+  ifneq ($(POST_STRIP_CMD),)
+    # On AIX, the VM libraries have already been stripped and strip
+    # will fail when invoked a second time: ignore such failures.
+    POST_STRIP_CMD := - $(POST_STRIP_CMD)
+  endif
+endif
+
 ifeq ($(OPENJDK_BUILD_OS), macosx)
   # MACOSX_DEPLOYMENT_TARGET acts similar to -mmacosx-version-min=version
   # compiler option. If both the compiler option is specified and the
@@ -94,7 +102,7 @@ ifeq ($(OPENJDK_BUILD_OS), macosx)
   # variable is defined to support dependencies where the compiler option
   # is not applied.
   export MACOSX_DEPLOYMENT_TARGET := @MACOSX_VERSION_MIN@
-    
-  # Set page zero size to 4KB for mapping memory below 4GB.
+
+  # Set page zero size to 4kB for mapping memory below 4GB.
   LDFLAGS_JDKEXE += -pagezero_size 0x1000
 endif
