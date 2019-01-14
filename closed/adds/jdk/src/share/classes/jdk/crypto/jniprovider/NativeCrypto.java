@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,9 +35,16 @@ public class NativeCrypto {
             public Void run() {
                 try {
                     System.loadLibrary("jncrypto"); // check for native library
-                    loaded = true;
+
+                    // load OpenSSL crypto library dynamically.
+                    if (loadCrypto() == 0) { 
+                        loaded = true;
+                    } else {
+                        loaded = false;
+                    }
                 } catch (UnsatisfiedLinkError usle) {
                     loaded = false;
+                    usle.printStackTrace();
                 }
                 return null;
             }
@@ -50,6 +57,8 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
+    public static final native int loadCrypto();
+
     public static final native long DigestCreateContext(long nativeBuffer,
                                                         int algoIndex);
 
@@ -120,4 +129,39 @@ public class NativeCrypto {
                                               int aadLen,
                                               int tagLen);
 
+    /* Native RSA interfaces */
+    public static final native long createRSAPublicKey(byte[] n,
+                                                       int nLen,
+                                                       byte[] e,
+                                                       int eLen);
+
+    public static final native long createRSAPrivateCrtKey(byte[] n,
+                                                           int nLen,
+                                                           byte[] d,
+                                                           int dLen,
+                                                           byte[] e,
+                                                           int eLen,
+                                                           byte[] p,
+                                                           int pLen,
+                                                           byte[] q,
+                                                           int qLen,
+                                                           byte[] dp,
+                                                           int dpLen,
+                                                           byte[] dq,
+                                                           int dqLen,
+                                                           byte[] qinv,
+                                                           int qinvLen);
+
+    public static final native void destroyRSAKey(long key);
+
+    public static final native int RSADP(byte[] k,
+                                         int kLen,
+                                         byte[] m,
+                                         int verify,
+                                         long RSAPrivateCrtKey);
+    
+    public static final native int RSAEP(byte[] k,
+                                         int kLen,
+                                         byte[] m,
+                                         long RSAPublicKey);
 }

@@ -35,6 +35,7 @@ import sun.security.util.*;
 import sun.security.x509.AlgorithmId;
 import sun.security.pkcs.PKCS8Key;
 
+import jdk.crypto.jniprovider.NativeCrypto;
 /**
  * Key implementation for RSA private keys, CRT form. For non-CRT private
  * keys, see RSAPrivateKeyImpl. We need separate classes to ensure
@@ -174,6 +175,50 @@ public final class RSAPrivateCrtKeyImpl
     // see JCA doc
     public BigInteger getCrtCoefficient() {
         return coeff;
+    }
+
+    private long nativeRSAKey = 0x0;
+
+    /**
+     * Get native RSA Public Key context pointer. 
+     * Create native context if uninitialized.
+     */
+    protected long getNativePtr() { 
+        if (nativeRSAKey != 0x0) {
+            return nativeRSAKey;
+        }
+
+        BigInteger n =    this.getModulus();
+        BigInteger d =    this.getPrivateExponent();
+        BigInteger e =    this.getPublicExponent();
+        BigInteger p =    this.getPrimeP();
+        BigInteger q =    this.getPrimeQ();
+        BigInteger dP =   this.getPrimeExponentP();
+        BigInteger dQ =   this.getPrimeExponentQ();
+        BigInteger qInv = this.getCrtCoefficient();
+
+        byte[] n_2c = n.toByteArray();
+        byte[] d_2c = d.toByteArray();
+        byte[] e_2c = e.toByteArray();
+
+        byte[] p_2c = p.toByteArray();
+        byte[] q_2c = q.toByteArray();
+
+        byte[] dP_2c   = dP.toByteArray();
+        byte[] dQ_2c   = dQ.toByteArray();
+        byte[] qInv_2c = qInv.toByteArray();
+
+        nativeRSAKey = NativeCrypto.createRSAPrivateCrtKey(n_2c,n_2c.length, d_2c, d_2c.length, e_2c, e_2c.length,
+                p_2c, p_2c.length, q_2c, q_2c.length,
+                dP_2c, dP_2c.length, dQ_2c, dQ_2c.length, qInv_2c, qInv_2c.length);
+        return nativeRSAKey;
+    }
+
+    @Override
+    public void finalize() {
+        if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
+            NativeCrypto.destroyRSAKey(nativeRSAKey);
+        }
     }
 
     /**

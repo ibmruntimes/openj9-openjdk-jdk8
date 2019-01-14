@@ -34,6 +34,7 @@ import java.security.interfaces.*;
 import sun.security.util.*;
 import sun.security.x509.X509Key;
 
+import jdk.crypto.jniprovider.NativeCrypto;
 /**
  * Key implementation for RSA public keys.
  *
@@ -147,5 +148,33 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
                         getAlgorithm(),
                         getFormat(),
                         getEncoded());
+    }
+
+    private long nativeRSAKey = 0x0;
+
+    /**
+     * Get native RSA Public Key context pointer.
+     * Create native context if uninitialized.
+     */
+    protected long getNativePtr() {
+        if (nativeRSAKey != 0x0) {
+            return nativeRSAKey;
+        }
+
+        BigInteger n = this.getModulus();
+        BigInteger e = this.getPublicExponent();
+
+        byte[] n_2c = n.toByteArray();
+        byte[] e_2c = e.toByteArray();
+
+        nativeRSAKey = NativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
+        return nativeRSAKey;
+    }
+
+    @Override
+    public void finalize() {
+        if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
+           NativeCrypto.destroyRSAKey(nativeRSAKey);
+        }
     }
 }
