@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,13 +35,7 @@ public class NativeCrypto {
             public Void run() {
                 try {
                     System.loadLibrary("jncrypto"); // check for native library
-
-                    // load OpenSSL crypto library dynamically.
-                    if (loadCrypto() == 0) { 
-                        loaded = true;
-                    } else {
-                        loaded = false;
-                    }
+                    loaded = true;
                 } catch (UnsatisfiedLinkError usle) {
                     loaded = false;
                 }
@@ -56,8 +50,6 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
-    public static final native int loadCrypto();
-
     public static final native long DigestCreateContext(long nativeBuffer,
                                                         int algoIndex);
 
