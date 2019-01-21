@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -52,7 +52,6 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
     // number of bytes processed so far. subclasses should not modify
     // this value.
     // also used as a flag to indicate reset status
-    // -1: need to call engineReset() before next call to update()
     //  0: is already reset
     private long bytesProcessed;
 
@@ -93,10 +92,6 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
             throw new ArrayIndexOutOfBoundsException();
         }
 
-        if (bytesProcessed < 0) {
-            engineReset();
-        }
-
         bytesProcessed += len;
 
         NativeCrypto.DigestUpdate(context, b, ofs, len);
@@ -109,6 +104,7 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
             return;
         }
 
+        NativeCrypto.DigestReset(context);
         bytesProcessed = 0;
     }
 
@@ -139,13 +135,9 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
             throw new DigestException("Buffer too short to store digest");
         }
 
-        if (bytesProcessed < 0) {
-            engineReset();
-        }
-
         NativeCrypto.DigestComputeAndReset(context, null, 0, 0, out, ofs, len);
 
-        bytesProcessed = -1;
+        bytesProcessed = 0;
         return digestLength;
     }
 
@@ -155,4 +147,11 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
         return copy;
     }
 
+    /*
+     * Finalize method to release the Digest contexts.
+     */
+    @Override
+    public void finalize() {
+        NativeCrypto.DigestDestroyContext(context);
+    }
 }
