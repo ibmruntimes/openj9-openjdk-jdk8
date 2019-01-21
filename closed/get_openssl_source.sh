@@ -1,7 +1,7 @@
 #!/bin/sh
   
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 # ===========================================================================
 
 usage() {
-	echo "Usage: $0 [-h|--help] [--openssl-version=<openssl version 1.1.0 and above to download>]"
+	echo "Usage: $0 [-h|--help] [--openssl-version=<openssl version 1.0.2 and above to download>]"
 	echo "where:"
 	echo "  -h|--help             print this help, then exit"
 	echo "  --openssl-version     OpenSSL version to download. For example, 1.1.1"
@@ -59,7 +59,8 @@ do
 	esac
 done
 
-if [ ${OPENSSL_VERSION:0:4} != "1.1." ]; then
+if [ [${OPENSSL_VERSION:0:5} != "1.0.2" ] &&
+     [${OPENSSL_VERSION:0:4} != "1.1." ]]; then
 	usage
 fi
 

@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -41,26 +41,26 @@ ifeq ($(BUILD_OPENSSL), yes)
 	$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR)
   ifeq ($(OPENJDK_TARGET_OS), linux)
     ifeq ($(OPENJDK_TARGET_CPU), x86_64)
-	($(CD) $(OPENSSL_DIR) && ./Configure linux-x86_64 && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure linux-x86_64 shared && $(MAKE))
     else ifeq ($(OPENJDK_TARGET_CPU), s390x)
-	($(CD) $(OPENSSL_DIR) && ./Configure linux64-s390x && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure linux64-s390x shared && $(MAKE))
     else ifeq ($(OPENJDK_TARGET_CPU), ppc64le)
-	($(CD) $(OPENSSL_DIR) && ./Configure linux-ppc64le && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure linux-ppc64le shared && $(MAKE))
     else
-	($(CD) $(OPENSSL_DIR) && ./config && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./config shared && $(MAKE))
     endif
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
-	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-x86_64-cc -shared  && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-x86_64-cc shared  && $(MAKE))
   else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU), x86_64)
-	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN64A && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN64A shared && $(MAKE))
     else
-	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN32 && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN32 shared && $(MAKE))
     endif
   else ifeq ($(OPENJDK_TARGET_OS), aix)
-	($(CD) $(OPENSSL_DIR) && ./Configure aix64-cc && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./Configure aix64-cc shared && $(MAKE))
   else
-	($(CD) $(OPENSSL_DIR) && ./config && $(MAKE))
+	($(CD) $(OPENSSL_DIR) && ./config shared && $(MAKE))
   endif
 endif
 
