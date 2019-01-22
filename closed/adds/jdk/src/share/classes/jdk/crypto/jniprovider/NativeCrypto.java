@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,10 +53,14 @@ public class NativeCrypto {
     public static final native long DigestCreateContext(long nativeBuffer,
                                                         int algoIndex);
 
+    public static final native int DigestDestroyContext(long context);
+
     public static final native int DigestUpdate(long context,
                                                 byte[] message,
                                                 int messageOffset,
                                                 int messageLen);
+
+    public static final native void DigestReset(long context);
 
     public static final native int DigestComputeAndReset(long context,
                                                          byte[] message,

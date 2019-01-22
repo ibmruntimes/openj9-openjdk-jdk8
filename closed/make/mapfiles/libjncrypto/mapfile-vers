@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -26,7 +26,9 @@ SUNWprivate_1.1 {
             handleErrors;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAndReset;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset;
             Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit;
