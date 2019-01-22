@@ -4427,7 +4427,7 @@ VS_SDK_PLATFORM_NAME_2017=
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -4474,7 +4474,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1548081041
+DATE_WHEN_GENERATED=1548184646
 
 ###############################################################################
 #
@@ -54592,7 +54592,7 @@ $as_echo_n "checking for OPENSSL... " >&6; }
       BUNDLE_OPENSSL=no
     fi
 
-    # if --with-openssl=fetched
+    # Process --with-openssl=fetched
     if test "x$with_openssl" = xfetched ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -54602,17 +54602,15 @@ $as_echo "no" >&6; }
       fi
 
       if test -d "$SRC_ROOT/openssl" ; then
-        OPENSSL_DIR=$SRC_ROOT/openssl
-        FOUND_OPENSSL=yes
+        OPENSSL_DIR="$SRC_ROOT/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1 ; then
+        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}; then
           BUILD_OPENSSL=no
         else
           BUILD_OPENSSL=yes
         fi
         if test "x$BUNDLE_OPENSSL" = xyes ; then
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+          OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
         fi
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -54620,22 +54618,16 @@ $as_echo "yes" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         printf "$SRC_ROOT/openssl is not found.\n"
-        printf "  run get_source.sh --openssl-version=1.1.0h\n"
+        printf "  run get_source.sh --openssl-version=<version as 1.0.2p or later>\n"
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         as_fn_error $? "Cannot continue" "$LINENO" 5
       fi
-    fi
 
-    # if --with-openssl=system
-    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem ; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-        printf "On Windows, value of \"system\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
-        as_fn_error $? "Cannot continue" "$LINENO" 5
-      fi
-
-      # Check modules using pkg-config, but only if we have it
+    # Process --with-openssl=system
+    elif test "x$with_openssl" = xsystem ; then
+      # We can use the system installed openssl only when it is package installed.
+      # If not package installed, fail with an error message.
+      # PKG_CHECK_MODULES will setup the variable OPENSSL_CFLAGS and OPENSSL_LIB when successful.
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
@@ -54645,12 +54637,12 @@ if test -n "$OPENSSL_CFLAGS"; then
     pkg_cv_OPENSSL_CFLAGS="$OPENSSL_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.1.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "openssl >= 1.1.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.0.2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl >= 1.0.2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl >= 1.1.0" 2>/dev/null`
+  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl >= 1.0.2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -54661,12 +54653,12 @@ if test -n "$OPENSSL_LIBS"; then
     pkg_cv_OPENSSL_LIBS="$OPENSSL_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.1.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "openssl >= 1.1.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.0.2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl >= 1.0.2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl >= 1.1.0" 2>/dev/null`
+  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl >= 1.0.2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -54684,9 +54676,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl >= 1.1.0" 2>&1`
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl >= 1.0.2" 2>&1`
         else
-	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl >= 1.1.0" 2>&1`
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl >= 1.0.2" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$OPENSSL_PKG_ERRORS" >&5
@@ -54703,16 +54695,23 @@ else
 $as_echo "yes" >&6; }
 	FOUND_OPENSSL=yes
 fi
-
-      if test "x$FOUND_OPENSSL" != xyes ; then
-        as_fn_error $? "Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'" "$LINENO" 5
+      if test "x$FOUND_OPENSSL" != xyes; then
+        as_fn_error $? "Unable to find openssl 1.0.2(and above) installed on System. Please use other options for '--with-openssl'" "$LINENO" 5
       fi
-    fi
 
-    # if --with-openssl=/custom/path/where/openssl/is/present
-    if test "x$FOUND_OPENSSL" != xyes ; then
-      # User specified path where openssl is installed
-      OPENSSL_DIR=$with_openssl
+      # The crypto library bundling option is not available when --with-openssl=system.
+      if test "x$BUNDLE_OPENSSL" = xyes ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl path to bundle crypto library\n"
+        as_fn_error $? "Cannot continue" "$LINENO" 5
+      fi
+
+    # Process --with-openssl=/custom/path/where/openssl/is/present
+    # As the value is not fetched or system, assume user specified the
+    # path where openssl is installed
+    else
+      OPENSSL_DIR="$with_openssl"
 
   if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
 
@@ -54836,159 +54835,28 @@ $as_echo "$as_me: The path of OPENSSL_DIR, which resolves as \"$path\", is inval
   fi
 
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
-        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-          # On Windows, check for libcrypto.lib
-          if test -s "$OPENSSL_DIR/lib/libcrypto.lib" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
-
-  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
-
-  # Input might be given as Windows format, start by converting to
-  # unix format.
-  path="$OPENSSL_BUNDLE_LIB_PATH"
-  new_path=`$CYGPATH -u "$path"`
-
-  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
-  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
-  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
-  # "foo.exe" is OK but "foo" is an error.
-  #
-  # This test is therefore slightly more accurate than "test -f" to check for file precense.
-  # It is also a way to make sure we got the proper file name for the real test later on.
-  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
-  if test "x$test_shortpath" = x; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path\", is invalid." >&5
-$as_echo "$as_me: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path\", is invalid." >&6;}
-    as_fn_error $? "Cannot locate the the path of OPENSSL_BUNDLE_LIB_PATH" "$LINENO" 5
-  fi
-
-  # Call helper function which possibly converts this using DOS-style short mode.
-  # If so, the updated path is stored in $new_path.
-
-  input_path="$new_path"
-  # Check if we need to convert this using DOS-style short mode. If the path
-  # contains just simple characters, use it. Otherwise (spaces, weird characters),
-  # take no chances and rewrite it.
-  # Note: m4 eats our [], so we need to use [ and ] instead.
-  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
-  if test "x$has_forbidden_chars" != x; then
-    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
-    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
-    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
-    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
-      # Going to short mode and back again did indeed matter. Since short mode is
-      # case insensitive, let's make it lowercase to improve readability.
-      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
-      # Now convert it back to Unix-style (cygpath)
-      input_path=`$CYGPATH -u "$shortmode_path"`
-      new_path="$input_path"
-    fi
-  fi
-
-  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
-  if test "x$test_cygdrive_prefix" = x; then
-    # As a simple fix, exclude /usr/bin since it's not a real path.
-    if test "x`$ECHO $new_path | $GREP ^/usr/bin/`" = x; then
-      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
-      # a path prefixed by /cygdrive for fixpath to work.
-      new_path="$CYGWIN_ROOT_PATH$input_path"
-    fi
-  fi
-
-
-  if test "x$path" != "x$new_path"; then
-    OPENSSL_BUNDLE_LIB_PATH="$new_path"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting OPENSSL_BUNDLE_LIB_PATH to \"$new_path\"" >&5
-$as_echo "$as_me: Rewriting OPENSSL_BUNDLE_LIB_PATH to \"$new_path\"" >&6;}
-  fi
-
-  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
-
-  path="$OPENSSL_BUNDLE_LIB_PATH"
-  has_colon=`$ECHO $path | $GREP ^.:`
-  new_path="$path"
-  if test "x$has_colon" = x; then
-    # Not in mixed or Windows style, start by that.
-    new_path=`cmd //c echo $path`
-  fi
-
-
-  input_path="$new_path"
-  # Check if we need to convert this using DOS-style short mode. If the path
-  # contains just simple characters, use it. Otherwise (spaces, weird characters),
-  # take no chances and rewrite it.
-  # Note: m4 eats our [], so we need to use [ and ] instead.
-  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
-  if test "x$has_forbidden_chars" != x; then
-    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
-    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
-  fi
-
-
-  windows_path="$new_path"
-  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
-    unix_path=`$CYGPATH -u "$windows_path"`
-    new_path="$unix_path"
-  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
-    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
-    new_path="$unix_path"
-  fi
-
-  if test "x$path" != "x$new_path"; then
-    OPENSSL_BUNDLE_LIB_PATH="$new_path"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting OPENSSL_BUNDLE_LIB_PATH to \"$new_path\"" >&5
-$as_echo "$as_me: Rewriting OPENSSL_BUNDLE_LIB_PATH to \"$new_path\"" >&6;}
-  fi
-
-  # Save the first 10 bytes of this path to the storage, so fixpath can work.
-  all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
-
-  else
-    # We're on a posix platform. Hooray! :)
-    path="$OPENSSL_BUNDLE_LIB_PATH"
-    has_space=`$ECHO "$path" | $GREP " "`
-    if test "x$has_space" != x; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path\", is invalid." >&5
-$as_echo "$as_me: The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path\", is invalid." >&6;}
-      as_fn_error $? "Spaces are not allowed in this path." "$LINENO" 5
-    fi
-
-    # Use eval to expand a potential ~
-    eval path="$path"
-    if test ! -f "$path" && test ! -d "$path"; then
-      as_fn_error $? "The path of OPENSSL_BUNDLE_LIB_PATH, which resolves as \"$path\", is not found." "$LINENO" 5
-    fi
-
-    OPENSSL_BUNDLE_LIB_PATH="`cd "$path"; $THEPWDCMD -L`"
-  fi
-
+        OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+        if test "x$BUNDLE_OPENSSL" = xyes ; then
+          if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+            if test -d "$OPENSSL_DIR/bin" ; then
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/bin"
+            else
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
             fi
-          fi
-        else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
-            fi
-          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+          else
+            if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/lib"
+            elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
+            else
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+              as_fn_error $? "Unable to find crypto library to bundle in specified location $OPENSSL_DIR" "$LINENO" 5
             fi
           fi
         fi
-      fi
-
-      #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes ; then
+      else
+        # openssl is not found in user specified location. Abort.
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         as_fn_error $? "Unable to find openssl in specified location $OPENSSL_DIR" "$LINENO" 5
@@ -54997,14 +54865,11 @@ $as_echo "no" >&6; }
 $as_echo "yes" >&6; }
     fi
 
-    if test "x$OPENSSL_DIR" != x ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
 $as_echo_n "checking if we should bundle openssl... " >&6; }
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
 $as_echo "$BUNDLE_OPENSSL" >&6; }
-    fi
   fi
-
 
 
 
