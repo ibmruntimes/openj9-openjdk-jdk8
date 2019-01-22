@@ -486,7 +486,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       fi
 
       if test -d "$SRC_ROOT/openssl" ; then
-        OPENSSL_DIR=$SRC_ROOT/openssl
+        OPENSSL_DIR="$SRC_ROOT/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}; then
           BUILD_OPENSSL=no
@@ -494,7 +494,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
           BUILD_OPENSSL=yes
         fi
         if test "x$BUNDLE_OPENSSL" = xyes ; then
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+          OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
         fi
         AC_MSG_RESULT([yes])
       else
@@ -526,22 +526,22 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     # As the value is not fetched or system, assume user specified the
     # path where openssl is installed
     else
-      OPENSSL_DIR=$with_openssl
+      OPENSSL_DIR="$with_openssl"
       BASIC_FIXUP_PATH(OPENSSL_DIR)
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test "x$BUNDLE_OPENSSL" = xyes ; then
           if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-            if test -s "$OPENSSL_DIR/bin" ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
+            if test -d "$OPENSSL_DIR/bin" ; then
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/bin"
             else
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
             fi
           else
             if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/lib"
             elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
             else
               AC_MSG_RESULT([no])
               AC_MSG_ERROR([Unable to find crypto library to bundle in specified location $OPENSSL_DIR])

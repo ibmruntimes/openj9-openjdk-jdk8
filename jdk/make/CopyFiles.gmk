@@ -257,11 +257,17 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     OPENSSL_LIB_NAME = libcrypto.so.1.1
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libcrypto.so.1.0.0
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+        OPENSSL_LIB_NAME = ""
+      endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
     OPENSSL_LIB_NAME = libcrypto.1.1.dylib
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libcrypto.1.0.0.dylib
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+        OPENSSL_LIB_NAME = ""
+      endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
@@ -271,6 +277,9 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     endif
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libeay32.dll
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+        OPENSSL_LIB_NAME = ""
+      endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), aix)
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
@@ -282,16 +291,20 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       # For OpenSSL v1.1.1, bundle libcrypto.a library with JDK
       OPENSSL_LIB_NAME = libcrypto.a
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+        OPENSSL_LIB_NAME = ""
+      endif
     endif
   else
-    OPENSSL_LIB_NAME = libcrypto.so
+    OPENSSL_LIB_NAME = ""
   endif
 
-  ifeq ($(OPENJDK_TARGET_OS), windows)
-    OPENSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/bin/$(OPENSSL_LIB_NAME)
-  else
-    OPENSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(OPENSSL_LIB_NAME)
-  endif
+  ifneq ($(OPENSSL_LIB_NAME), )
+    ifeq ($(OPENJDK_TARGET_OS), windows)
+      OPENSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/bin/$(OPENSSL_LIB_NAME)
+    else
+      OPENSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(OPENSSL_LIB_NAME)
+    endif
 
   $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
 	$(CP) $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME) $@
@@ -299,7 +312,8 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
 	$(CHMOD) +rx $@
     endif
 
-  COPY_FILES += $(OPENSSL_TARGET_LIB)
+    COPY_FILES += $(OPENSSL_TARGET_LIB)
+  endif
 endif
 
 ##########################################################################################
