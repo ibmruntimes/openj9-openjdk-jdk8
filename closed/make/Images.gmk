@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -24,7 +24,7 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   $(foreach f,$(MSVCP_BIN_LIST), \
     $(eval $(call AddFileToCopy,$(JDK_OUTPUTDIR),$(JDK_IMAGE_DIR),$f,JDK_BIN_TARGETS)))
 
-  MSVCP_PATTERN = %$(notdir $(MSVCP_DLL))
+  MSVCP_PATTERN := %$(notdir $(MSVCP_DLL))
   ifneq ($(POST_STRIP_CMD), )
     JRE_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JRE_STRIP_LIST))
     JDKJRE_STRIP_LIST := $(filter-out $(MSVCP_PATTERN), $(JDKJRE_STRIP_LIST))
@@ -55,11 +55,5 @@ jdk-image : openj9.ddr-jar
 endif # OPENJ9_ENABLE_DDR
 
 # ensure jre/jdk binary LICENSE file content is correctly sourced
-$(JRE_IMAGE_DIR)/LICENSE: $(SRC_ROOT)/LICENSE
-	$(process-doc-file)
-
-$(JDK_IMAGE_DIR)/jre/LICENSE: $(SRC_ROOT)/LICENSE
-	$(process-doc-file)
-
-$(JDK_IMAGE_DIR)/LICENSE: $(SRC_ROOT)/LICENSE
+$(addsuffix /LICENSE, $(JDK_IMAGE_DIR) $(JDK_IMAGE_DIR)/jre $(JRE_IMAGE_DIR)) : $(SRC_ROOT)/LICENSE
 	$(process-doc-file)
