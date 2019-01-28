@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -97,6 +97,12 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
     private byte[] ibufferSave = null;
     private byte[] ibufferSave_enc = null;
     private int processedSave = 0;
+
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = NativeCrypto.getNativeCrypto();
+    }
 
     // value must be 16-byte long; used by GCTR and GHASH as well
     static void increment32(byte[] value) {
@@ -449,7 +455,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
 
         byte[] aad = ((aadBuffer == null || aadBuffer.size() == 0) ? emptyAAD : aadBuffer.toByteArray());
 
-        NativeCrypto.GCMEncrypt(key, key.length,
+        nativeCrypto.GCMEncrypt(key, key.length,
               iv, iv.length,
               in, inOfs, len,
               out, outOfs,
@@ -539,7 +545,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
         len = in.length;
         ibuffer.reset();
 
-        int ret = NativeCrypto.GCMDecrypt(key, key.length,
+        int ret = nativeCrypto.GCMDecrypt(key, key.length,
                 iv, iv.length,
                 in, inOfs, len,
                 out, outOfs,
