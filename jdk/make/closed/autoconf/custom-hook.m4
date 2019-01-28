@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -486,17 +486,17 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       fi
 
       if test -d "$SRC_ROOT/openssl" ; then
-        OPENSSL_DIR=$SRC_ROOT/openssl
+        OPENSSL_DIR="$SRC_ROOT/openssl"
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1 ; then
+        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX} ; then
           BUILD_OPENSSL=no
         else
           BUILD_OPENSSL=yes
         fi
         if test "x$BUNDLE_OPENSSL" = xyes ; then
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+          OPENSSL_BUNDLE_LIB_PATH=${OPENSSL_DIR}
         fi
         AC_MSG_RESULT([yes])
       else
@@ -522,6 +522,13 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       if test "x$FOUND_OPENSSL" != xyes ; then
         AC_MSG_ERROR([Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'])
       fi
+
+      # The crypto library bundling option is not available when --with-openssl=system.
+      if test "x$BUNDLE_OPENSSL" = xyes ; then
+        AC_MSG_RESULT([no])
+        printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl-custom-path to bundle crypto library\n"
+        AC_MSG_ERROR([Cannot continue])
+      fi
     fi
 
     # if --with-openssl=/custom/path/where/openssl/is/present
@@ -537,24 +544,49 @@ AC_DEFUN([CONFIGURE_OPENSSL],
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
-              BASIC_FIXUP_PATH(OPENSSL_BUNDLE_LIB_PATH)
+              if test -d "$OPENSSL_DIR/bin" ; then
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/bin"
+              else
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
+              fi
             fi
           fi
         else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
+              # On Mac OSX, create local copy of the crypto library to update @rpath
+              # as the default is /usr/local/lib.
+              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                LOCAL_CRYPTO="$SRC_ROOT/openssl"
+                $MKDIR -p "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
+                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+              else
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
+              fi
             fi
-          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
             OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
-              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+              # On Mac OSX, create local copy of the crypto library to update @rpath
+              # as the default is /usr/local/lib.
+              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                LOCAL_CRYPTO="$SRC_ROOT/openssl"
+                $MKDIR -p "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
+                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+              else
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
+              fi
             fi
           fi
         fi
