@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -64,15 +64,15 @@ import java.security.PrivilegedAction;
 final class CipherCore {
 
     /*
-     * Check whether native crypto is enabled with property.
+     * Check whether native crypto is disabled with property.
      *
-     * By default, the native crypto is enabled and uses the native 
+     * By default, the native crypto is enabled and uses the native
      * crypto library implementation.
      *
-     * The property 'jdk.nativeCBC' is used to enable Native CBC alone,
-     * 'jdk.nativeGCM' is used to enable Native GCM alone and
-     * 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
-     * CBC and GCM).
+     * The property 'jdk.nativeCBC' is used to disable Native CBC alone,
+     * 'jdk.nativeGCM' is used to disable Native GCM alone and
+     * 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
+     * CBC, GCM, and RSA).
      */
     private static boolean useNativeCrypto = true;
 
