@@ -111,11 +111,10 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
 
     if (copyContext != 0) {
         EVP_MD_CTX *contextToCopy = ((OpenSSLMDContext*) copyContext)->ctx;
-        EVP_MD_CTX_copy_ex(ctx,contextToCopy);
+        EVP_MD_CTX_copy_ex(ctx, contextToCopy);
     }
 
-
-    return (long)context;
+    return (jlong)(intptr_t)context;
 }
 
 /*
@@ -209,7 +208,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
     if (1 != EVP_DigestInit_ex(context->ctx, context->digestAlg, NULL))
         handleErrors();
 
-    return size;
+    return (jint)size;
 }
 
 /* Reset Digest
@@ -253,7 +252,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
     context->nativeBuffer2 = (unsigned char*)nativeBuffer2;
     context->ctx = ctx;
 
-    return (long)context;
+    return (jlong)(intptr_t)context;
 }
 
 /* Destroy Cipher context
@@ -270,6 +269,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyConte
      EVP_CIPHER_CTX_free(context->ctx);
      free(context);
 
+     return 0;
 }
 
 /* Initialize CBC context
@@ -350,7 +350,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate
     (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
-    return outputLen;
+    return (jint)outputLen;
 }
 
 /* CBC Final Encryption
@@ -392,7 +392,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt
     (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
-    return outputLen+outputLen1;
+    return (jint)(outputLen + outputLen1);
 }
 
 int first_time_gcm = 0;
@@ -408,15 +408,15 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
   jbyteArray input, jint inOffset, jint inLen, jbyteArray output, jint outOffset,
   jbyteArray aad, jint aadLen, jint tagLen) {
 
-    unsigned char* inputNative;
-    int len, len_cipher = 0;
-    unsigned char* keyNative;
-    unsigned char* ivNative;
-    unsigned char* outputNative;
-    unsigned char* aadNative;
+    unsigned char* inputNative = NULL;
+    int len = 0, len_cipher = 0;
+    unsigned char* keyNative = NULL;
+    unsigned char* ivNative = NULL;
+    unsigned char* outputNative = NULL;
+    unsigned char* aadNative = NULL;
 
     EVP_CIPHER_CTX* ctx = NULL;
-    EVP_CIPHER* evp_gcm_cipher = NULL;
+    const EVP_CIPHER* evp_gcm_cipher = NULL;
 
     keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
     if (keyNative == NULL) {
@@ -445,7 +445,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
     }
 
     if (inLen > 0) {
-        inputNative  = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+        inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
         if (inputNative == NULL) {
             (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
             (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
@@ -460,7 +460,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
         ERR_load_crypto_strings();
         first_time_gcm = 1;
     }
-    
+
     switch(keyLen) {
         case 16:
             evp_gcm_cipher = EVP_aes_128_gcm();
@@ -504,15 +504,17 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
 
     EVP_CIPHER_CTX_free(ctx);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative,   0);
-    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative,    0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative,0);
+    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     if (inLen > 0) {
         (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     }
 
-    (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative,  0);
+    (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
+
+    return 0;
 }
 
 /* GCM Decryption
@@ -526,14 +528,14 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
   jbyteArray input, jint inOffset, jint inLen, jbyteArray output, jint outOffset,
   jbyteArray aad, jint aadLen, jint tagLen) {
 
-    unsigned char* inputNative;
-    unsigned char* aadNative;
-    int ret, len, plaintext_len = 0;
-    unsigned char* keyNative;
-    unsigned char* ivNative;
-    unsigned char* outputNative;
+    unsigned char* inputNative = NULL;
+    unsigned char* aadNative = NULL;
+    int ret = 0, len = 0, plaintext_len = 0;
+    unsigned char* keyNative = NULL;
+    unsigned char* ivNative = NULL;
+    unsigned char* outputNative = NULL;
     EVP_CIPHER_CTX* ctx = NULL;
-    EVP_CIPHER* evp_gcm_cipher = NULL;
+    const EVP_CIPHER* evp_gcm_cipher = NULL;
 
     keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
     if (keyNative == NULL)
@@ -624,22 +626,22 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
 
     EVP_CIPHER_CTX_free(ctx);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative,   0);
-    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative,    0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative,0);
+    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     if (inLen > 0) {
         (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     }
 
     if (aadLen > 0) {
-        (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
     }
 
     if (ret > 0) {
         /* Successful Decryption */
         plaintext_len += len;
-        return plaintext_len;
+        return (jint)plaintext_len;
     } else {
         /* Tag Mismatch */
         return -1;
