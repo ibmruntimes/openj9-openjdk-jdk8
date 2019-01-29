@@ -80,8 +80,6 @@ public class NativeCrypto {
                                          int messageOffset,
                                          int messageLen);
 
-    public final native void DigestReset(long context);
-
     public final native int DigestComputeAndReset(long context,
                                                   byte[] message,
                                                   int messageOffset,
@@ -89,6 +87,8 @@ public class NativeCrypto {
                                                   byte[] digest,
                                                   int digestOffset,
                                                   int digestLen);
+
+    public final native void DigestReset(long context);
 
     /* Native CBC interfaces */
     public final native long CBCCreateContext(long nativeBuffer,
@@ -143,5 +143,41 @@ public class NativeCrypto {
                                        byte[] aad,
                                        int aadLen,
                                        int tagLen);
+
+    /* Native RSA interfaces */
+    public final native long createRSAPublicKey(byte[] n,
+                                                int nLen,
+                                                byte[] e,
+                                                int eLen);
+
+    public final native long createRSAPrivateCrtKey(byte[] n,
+                                                    int nLen,
+                                                    byte[] d,
+                                                    int dLen,
+                                                    byte[] e,
+                                                    int eLen,
+                                                    byte[] p,
+                                                    int pLen,
+                                                    byte[] q,
+                                                    int qLen,
+                                                    byte[] dp,
+                                                    int dpLen,
+                                                    byte[] dq,
+                                                    int dqLen,
+                                                    byte[] qinv,
+                                                    int qinvLen);
+
+    public final native void destroyRSAKey(long key);
+
+    public final native int RSADP(byte[] k,
+                                  int kLen,
+                                  byte[] m,
+                                  int verify,
+                                  long RSAPrivateCrtKey);
+
+    public final native int RSAEP(byte[] k,
+                                  int kLen,
+                                  byte[] m,
+                                  long RSAPublicKey);
 
 }

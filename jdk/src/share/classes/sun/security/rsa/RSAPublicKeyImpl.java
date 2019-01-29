@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package sun.security.rsa;
 
@@ -34,6 +39,7 @@ import java.security.interfaces.*;
 import sun.security.util.*;
 import sun.security.x509.X509Key;
 
+import jdk.crypto.jniprovider.NativeCrypto;
 /**
  * Key implementation for RSA public keys.
  *
@@ -52,6 +58,13 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
 
     private BigInteger n;       // modulus
     private BigInteger e;       // public exponent
+
+
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = nativeCrypto.getNativeCrypto();
+    }
 
     /**
      * Construct a key from its components. Used by the
@@ -147,5 +160,33 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
                         getAlgorithm(),
                         getFormat(),
                         getEncoded());
+    }
+
+    private long nativeRSAKey = 0x0;
+
+    /**
+     * Get native RSA Public Key context pointer.
+     * Create native context if uninitialized.
+     */
+    protected long getNativePtr() {
+        if (nativeRSAKey != 0x0) {
+            return nativeRSAKey;
+        }
+
+        BigInteger n = this.getModulus();
+        BigInteger e = this.getPublicExponent();
+
+        byte[] n_2c = n.toByteArray();
+        byte[] e_2c = e.toByteArray();
+
+        nativeRSAKey = nativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
+        return nativeRSAKey;
+    }
+
+    @Override
+    public void finalize() {
+        if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
+           nativeCrypto.destroyRSAKey(nativeRSAKey);
+        }
     }
 }

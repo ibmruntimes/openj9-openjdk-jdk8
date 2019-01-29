@@ -25,8 +25,8 @@ SUNWprivate_1.1 {
 	global:
             handleErrors;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateContext;
-            Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext;
+            Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAndReset;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset;
             Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext;
@@ -36,6 +36,11 @@ SUNWprivate_1.1 {
             Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt;
             Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt;
             Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt;
+            Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPublicKey;
+            Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivateCrtKey;
+            Java_jdk_crypto_jniprovider_NativeCrypto_destroyRSAKey;
+            Java_jdk_crypto_jniprovider_NativeCrypto_RSADP;
+            Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP;
         local:
 	    *;
 };
