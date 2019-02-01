@@ -97,7 +97,7 @@ final class SunEntries {
      * and 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
      * CBC and GCM).
      */
-    private static boolean useNativeDigest = true;
+    private static boolean useNativeDigest = false;
 
     private SunEntries() {
         // empty
