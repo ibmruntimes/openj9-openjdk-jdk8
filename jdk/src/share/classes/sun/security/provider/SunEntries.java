@@ -100,7 +100,7 @@ final class SunEntries {
      * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
      * CBC, GCM, and RSA).
      */
-    private static boolean useNativeDigest = false;
+    private static boolean useNativeDigest = true;
 
     private SunEntries() {
         // empty
