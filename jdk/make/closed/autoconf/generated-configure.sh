@@ -4462,7 +4462,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1548571943
+DATE_WHEN_GENERATED=1549028451
 
 ###############################################################################
 #
@@ -14930,7 +14930,8 @@ fi
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $SRC_ROOT rev-list --tags="jdk8u*" --topo-order --max-count=1 2>/dev/null`
   if test "x$LAST_TAGGED_SHA" != x ; then
-    OPENJDK_TAG=`git -C $SRC_ROOT describe --tags "$LAST_TAGGED_SHA"`
+    # Choose the latest tag when there is more than one for the same SHA.
+    OPENJDK_TAG=`git -C $TOPDIR tag --points-at "$LAST_TAGGED_SHA" | grep '+' | sort -V | tail -1`
   else
     OPENJDK_TAG=
   fi
