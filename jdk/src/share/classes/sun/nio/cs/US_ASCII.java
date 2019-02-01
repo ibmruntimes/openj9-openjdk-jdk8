@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2000, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2000, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -87,23 +87,23 @@ public class US_ASCII
 
             try {
             	
-                if((dl-dp) >= (sl-sp)) {                                             //IBM-perf_converter
+                if((dl-dp) >= (sl-sp)) {                                             //OpenJ9-perf_converter
                     
                     int n = decodeASCII(sa, sp, sl-sp, da, dp);
                     sp = sp + n;
                     dp = dp + n;
                     if (sp<sl)
                      	return CoderResult.malformedForLength(1);
-                    return CoderResult.UNDERFLOW;                            //IBM-perf_converter
-                }                                                               //IBM-perf_converter
-                else {                                                           //IBM-perf_converter
+                    return CoderResult.UNDERFLOW;                            //OpenJ9-perf_converter
+                }                                                               //OpenJ9-perf_converter
+                else {                                                           //OpenJ9-perf_converter
                     int n = decodeASCII(sa, sp, dl-dp, da, dp);
                     sp = sp + n;
                     dp = dp + n;
                     if (dp<dl)
                     	return CoderResult.malformedForLength(1);
-                    return CoderResult.OVERFLOW;                         //IBM-perf_converter
-                }                                                                //IBM-perf_converter
+                    return CoderResult.OVERFLOW;                         //OpenJ9-perf_converter
+                }                                                                //OpenJ9-perf_converter
             } finally {
                 src.position(sp - src.arrayOffset());
                 dst.position(dp - dst.arrayOffset());
@@ -214,7 +214,7 @@ public class US_ASCII
             dp = (dp <= dl ? dp : dl);
 
             try {
-                if((dl-dp) >= (sl-sp)) {                                             //IBM-perf_converter
+                if((dl-dp) >= (sl-sp)) {                                             //OpenJ9-perf_converter
                     
                     int n = encodeASCII(sa,sp,sl-sp,da,dp);
                     sp = sp+n;
@@ -223,28 +223,28 @@ public class US_ASCII
                     if (sp<sl)
                     {
                         char c = sa[sp];
-                        if (sgp.parse(c, sa, sp, sl) < 0) {                 //IBM-perf_converter
-                            return sgp.error();                                  //IBM-perf_converter
-                        }                                                //IBM-perf_converter
-                        else return sgp.unmappableResult();              //IBM-perf_converter
+                        if (sgp.parse(c, sa, sp, sl) < 0) {                 //OpenJ9-perf_converter
+                            return sgp.error();                                  //OpenJ9-perf_converter
+                        }                                                //OpenJ9-perf_converter
+                        else return sgp.unmappableResult();              //OpenJ9-perf_converter
                     }
 
-                    return CoderResult.UNDERFLOW;                            //IBM-perf_converter
-                }                                                                        //IBM-perf_converter
-                else {                                                               //IBM-perf_converter
+                    return CoderResult.UNDERFLOW;                            //OpenJ9-perf_converter
+                }                                                                        //OpenJ9-perf_converter
+                else {                                                               //OpenJ9-perf_converter
                     int n = encodeASCII(sa,sp,dl-dp,da,dp);
                     sp = sp+n;
                     dp = dp+n;
                     if (dp<dl)
                     {
                         char c = sa[sp];
-                        if (sgp.parse(c, sa, sp, sl) < 0) {                 //IBM-perf_converter
-                               return sgp.error();                              //IBM-perf_converter
-                           }                                                        //IBM-perf_converter
-                        else return sgp.unmappableResult();                  //IBM-perf_converter
+                        if (sgp.parse(c, sa, sp, sl) < 0) {                 //OpenJ9-perf_converter
+                               return sgp.error();                              //OpenJ9-perf_converter
+                           }                                                        //OpenJ9-perf_converter
+                        else return sgp.unmappableResult();                  //OpenJ9-perf_converter
                     }
 
-                    return CoderResult.OVERFLOW;                                     //IBM-perf_converter
+                    return CoderResult.OVERFLOW;                                     //OpenJ9-perf_converter
                 }
             } finally {
                 src.position(sp - src.arrayOffset());
