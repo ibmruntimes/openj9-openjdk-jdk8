@@ -133,7 +133,7 @@ $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
 		j9vmchk29 \
 		j9vrb29 \
 		j9zlib29 \
-		jclse7b_29 \
+		jclse29 \
 		jvm \
 		management \
 		management_ext \
