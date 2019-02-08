@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 #
 
@@ -516,7 +516,8 @@ TOOLS_JAR_INCLUDES := \
     sun/tools/native2ascii \
     sun/tools/serialver \
     sun/tools/tree \
-    sun/tools/util
+    sun/tools/util \
+    openj9/tools/attach/diagnostics
 
 # Contributions from OpenJ9:
 TOOLS_JAR_INCLUDES += com/ibm/tools/attach/attacher 

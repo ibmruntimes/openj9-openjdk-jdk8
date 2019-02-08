@@ -1,3 +1,5 @@
+# ===========================================================================
+#
 # Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -23,7 +25,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 #
 
@@ -440,6 +442,10 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   $(eval $(call SetupLauncher,ktab, \
       -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.security.krb5.internal.tools.Ktab"$(COMMA) }'))
 endif
+
+$(eval $(call SetupLauncher,jps, \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.Jps"$(COMMA) }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) }'))
 
 ##########################################################################################
 # The order of the object files on the link command line affects the size of the resulting
