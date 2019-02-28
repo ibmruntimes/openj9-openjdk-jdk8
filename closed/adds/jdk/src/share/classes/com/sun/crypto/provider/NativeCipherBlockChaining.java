@@ -62,7 +62,11 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         contexts = new long[numContexts];
 
         for (int i = 0; i < numContexts; i++) {
-            contexts[i] = nativeCrypto.CBCCreateContext(0/*nativeBuffer*/, 0/*nativeBuffer2*/);
+            long context = nativeCrypto.CBCCreateContext();
+            if (context == -1) {
+                throw new ProviderException("Error in Native CipherBlockChaining");
+            }
+            contexts[i] = context;
             avStack.push(i);
         }
     }
@@ -75,7 +79,11 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         if (avStack.isEmpty()) {
             cipher.ctxIndx = -1;
-            cipher.nativeContext = nativeCrypto.CBCCreateContext(0/*nativeBuffer*/, 0/*nativeBuffer2*/);
+            long context = nativeCrypto.CBCCreateContext();
+            if (context == -1) {
+                throw new ProviderException("Error in Native CipherBlockChaining");
+            }
+            cipher.nativeContext = context;
         } else {
             cipher.ctxIndx = avStack.pop();
             cipher.nativeContext = contexts[cipher.ctxIndx];
@@ -90,7 +98,10 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
     synchronized static void releaseContext(NativeCipherBlockChaining cipher /*int indx*/) {
 
         if(cipher.ctxIndx == -1) {
-            nativeCrypto.CBCDestroyContext(cipher.nativeContext);
+            long ret = nativeCrypto.CBCDestroyContext(cipher.nativeContext);
+            if (ret == -1) {
+                throw new ProviderException("Error in Native CipherBlockChaining");
+            }
         } else {
             avStack.push(cipher.ctxIndx);
         }
@@ -152,7 +163,11 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         mode = (decrypting) ? 0 : 1;
 
-        nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+        int ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+        if (ret == -1) {
+            throw new ProviderException("Error in Native CipherBlockChaining");
+        }
+
     }
 
     /**
@@ -162,7 +177,10 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
      */
     void reset() {
         System.arraycopy(iv, 0, r, 0, blockSize);
-        nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+        int ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+        if (ret == -1) {
+            throw new ProviderException("Error in Native CipherBlockChaining");
+        }
     }
 
     /**
@@ -180,7 +198,10 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
      */
     void restore() {
         System.arraycopy(rSave, 0, r, 0, blockSize);
-        nativeCrypto.CBCInit(nativeContext, mode, r, r.length, key, key.length);
+        int ret = nativeCrypto.CBCInit(nativeContext, mode, r, r.length, key, key.length);
+        if (ret == -1) {
+            throw new ProviderException("Error in Native CipherBlockChaining");
+        }
     }
 
     /**
@@ -214,6 +235,9 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         int ret = nativeCrypto.CBCUpdate(nativeContext, plain, plainOffset,
                                           plainLen, cipher, cipherOffset);
+        if (ret == -1) {
+            throw new ProviderException("Error in Native CipherBlockChaining");
+        }
 
         // saving current running state
         System.arraycopy(cipher, cipherOffset+plainLen-blockSize, r, 0, blockSize);
@@ -277,6 +301,10 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         } else {
             ret = nativeCrypto.CBCFinalEncrypt(nativeContext, plain, plainOffset,
                                                 plainLen, cipher, cipherOffset);
+        }
+
+        if (ret == -1) {
+            throw new ProviderException("Error in Native CipherBlockChaining");
         }
 
         return ret;

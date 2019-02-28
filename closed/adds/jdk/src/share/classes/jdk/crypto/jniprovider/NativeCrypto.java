@@ -91,12 +91,11 @@ public class NativeCrypto {
     public final native void DigestReset(long context);
 
     /* Native CBC interfaces */
-    public final native long CBCCreateContext(long nativeBuffer,
-                                              long nativeBuffer2);
+    public final native long CBCCreateContext();
 
     public final native long CBCDestroyContext(long context);
 
-    public final native void CBCInit(long context,
+    public final native int CBCInit(long context,
                                     int mode,
                                     byte[] iv,
                                     int ivlen,
