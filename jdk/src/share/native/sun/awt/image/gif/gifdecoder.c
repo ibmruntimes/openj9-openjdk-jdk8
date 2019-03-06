@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <stdio.h>
 #include "jni.h"
@@ -117,7 +122,7 @@ Java_sun_awt_image_GifImageDecoder_parseImage(JNIEnv *env,
                                               jobject this,
                                               jint relx, jint rely,
                                               jint width, jint height,
-                                              jint interlace,
+                                              jboolean interlace,
                                               jint initCodeSize,
                                               jbyteArray blockh,
                                               jbyteArray raslineh,
