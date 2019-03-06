@@ -459,7 +459,11 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
 endif
 
 $(eval $(call SetupLauncher,jps, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.Jps" }' \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jps" }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
+
+$(eval $(call SetupLauncher,jstack, \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jstack" }' \
     -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
 
 ##########################################################################################

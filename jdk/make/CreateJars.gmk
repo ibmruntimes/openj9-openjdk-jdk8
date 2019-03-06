@@ -516,11 +516,13 @@ TOOLS_JAR_INCLUDES := \
     sun/tools/native2ascii \
     sun/tools/serialver \
     sun/tools/tree \
-    sun/tools/util \
-    openj9/tools/attach/diagnostics
+    sun/tools/util
 
 # Contributions from OpenJ9:
-TOOLS_JAR_INCLUDES += com/ibm/tools/attach/attacher 
+TOOLS_JAR_INCLUDES += \
+    com/ibm/tools/attach/attacher \
+    openj9/tools/attach/diagnostics/attacher \
+    openj9/tools/attach/diagnostics/tools
 
 # The sjavac tools is not ready for public consumption.
 TOOLS_JAR_EXCLUDES = com/sun/tools/sjavac
