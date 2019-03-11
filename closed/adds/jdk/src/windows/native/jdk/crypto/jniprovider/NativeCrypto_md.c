@@ -32,12 +32,11 @@ void * load_crypto_library() {
     const char *libname;
     const char *oldname = "libeay32.dll";
 
-#ifdef WIN32
-    libname = "libcrypto-1_1.dll";
+#if defined (_WIN64)
+    libname = "libcrypto-1_1-x64.dll";
 #else
-    libname = "libcrypto-1_1-x64.dll"
+    libname = "libcrypto-1_1.dll";
 #endif
-
 
     result = LoadLibrary(libname);
     

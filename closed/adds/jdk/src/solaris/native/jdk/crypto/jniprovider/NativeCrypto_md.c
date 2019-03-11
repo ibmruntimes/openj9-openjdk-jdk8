@@ -36,13 +36,13 @@ void * load_crypto_library() {
     size_t i = 0;
 
     // Library names for OpenSSL 1.1.1, 1.1.0, 1.0.2 and symbolic links
-    const char *libNames[] = {
-#ifdef AIX
+    static const char *libNames[] = {
+#if defined(AIX)
     "libcrypto.a(libcrypto64.so.1.1)",
     "libcrypto.so.1.1",
     "libcrypto.so.1.0.0",
     "libcrypto.a(libcrypto64.so)",
-#elif MACOSX
+#elif defined(MACOSX)
     "libcrypto.1.1.dylib",
     "libcrypto.1.0.0.dylib",
     "libcrypto.dylib"
@@ -58,7 +58,7 @@ void * load_crypto_library() {
         const char * libName = libNames[i];
         flags = RTLD_NOW;
 
-# ifdef _AIX
+#if defined(AIX)
         if (NULL != strrchr(libName, '('))
             flags |= RTLD_MEMBER;
 # endif

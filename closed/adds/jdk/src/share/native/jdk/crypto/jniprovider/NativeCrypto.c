@@ -203,8 +203,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     } else {
         openssl_version = (*OSSL_version)(0); //get OPENSSL_VERSION
         //Ensure the OpenSSL version is "OpenSSL 1.1.0" or "OpenSSL 1.1.0".
-        if (0 != strncmp(openssl_version, "OpenSSL 1.1.0", 13) &&
-            0 != strncmp(openssl_version, "OpenSSL 1.1.1", 13)) {
+        if ((0 != strncmp(openssl_version, "OpenSSL 1.1.0", 13)) &&
+            (0 != strncmp(openssl_version, "OpenSSL 1.1.1", 13))) {
             //fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
             //fflush(stderr);
             unload_crypto_library(handle);
@@ -214,6 +214,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     }
 
     // Load the function symbols for OpenSSL errors.
+    OSSL_error_string_n = (OSSL_error_string_n_t*)find_crypto_symbol(handle, "ERR_error_string_n");
     OSSL_error_string = (OSSL_error_string_t*)find_crypto_symbol(handle, "ERR_error_string");
     OSSL_get_error = (OSSL_get_error_t*)find_crypto_symbol(handle, "ERR_get_error");
 
@@ -277,6 +278,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_BN_free = (OSSL_BN_free_t *)find_crypto_symbol(handle, "BN_free");
 
     if ((NULL == OSSL_error_string) ||
+        (NULL == OSSL_error_string_n) ||
         (NULL == OSSL_get_error) ||
         (NULL == OSSL_sha1) ||
         (NULL == OSSL_sha256) ||
@@ -535,7 +537,7 @@ JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCCreateContext
- * Signature: (JJ)J
+ * Signature: ()J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext
   (JNIEnv *env, jclass thisObj) {
@@ -555,7 +557,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCDestroyContext
- * Signature: (J)J
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContext
   (JNIEnv *env, jclass thisObj, jlong c) {
@@ -573,7 +575,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContex
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCInit
- * Signature: (JI[BI[BI)V
+ * Signature: (JI[BI[BI)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
   (JNIEnv *env, jclass thisObj, jlong c, jint mode, jbyteArray iv, jint iv_len,
@@ -949,8 +951,9 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
     const EVP_CIPHER* evp_gcm_cipher = NULL;
 
     keyNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
-    if (NULL == keyNative)
+    if (NULL == keyNative) {
         return -1;
+    }
 
     ivNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, iv, 0));
     if (NULL == ivNative) {
@@ -1388,7 +1391,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
         return -1;
     }
 
-    rsaKey = (RSA*)publicRSAKey;
+    rsaKey = (RSA*)(intptr_t)publicRSAKey;
 
     // OSSL_RSA_public_decrypt returns -1 on error
     msg_len = (*OSSL_RSA_public_decrypt)(kLen, kNative, mNative, rsaKey, RSA_NO_PADDING);
@@ -1540,8 +1543,9 @@ int OSSL102_RSA_set0_key(RSA *r2, BIGNUM *n, BIGNUM *e, BIGNUM *d)
      * left NULL (in case only the public key is used).
      */
     if ((NULL == r->n && NULL == n)
-        || (NULL == r->e && NULL == e))
+        || (NULL == r->e && NULL == e)) {
         return 0;
+    }
 
     if (NULL != n) {
         (*OSSL_BN_free)(r->n);
@@ -1566,8 +1570,9 @@ int OSSL102_RSA_set0_factors(RSA *r2, BIGNUM *p, BIGNUM *q)
      * parameters MUST be non-NULL.
      */
     if ((NULL == r->p && NULL == p)
-        || (NULL == r->q && NULL == q))
+        || (NULL == r->q && NULL == q)) {
         return 0;
+    }
 
     if (NULL != p) {
         (*OSSL_BN_free)(r->p);
@@ -1589,8 +1594,9 @@ int OSSL102_RSA_set0_crt_params(RSA *r2, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqm
      */
     if ((NULL == r->dmp1 && NULL == dmp1)
         || (NULL == r->dmq1 && NULL == dmq1)
-        || (NULL == r->iqmp && NULL == iqmp))
+        || (NULL == r->iqmp && NULL == iqmp)) {
         return 0;
+    }
 
     if (NULL != dmp1) {
         (*OSSL_BN_free)(r->dmp1);

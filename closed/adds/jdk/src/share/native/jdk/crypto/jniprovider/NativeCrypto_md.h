@@ -29,5 +29,4 @@ void * load_crypto_library();
 void   unload_crypto_library(void *handle);
 void * find_crypto_symbol(void *handle, const char *symname);
 
-#endif
-
+#endif /* NATIVECRYPTO_MD_H */

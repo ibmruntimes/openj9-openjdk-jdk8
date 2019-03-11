@@ -70,7 +70,7 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
-    public static final native int loadCrypto();
+    static final native int loadCrypto();
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);

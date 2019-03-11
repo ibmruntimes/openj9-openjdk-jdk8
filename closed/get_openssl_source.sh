@@ -61,7 +61,7 @@ done
 
 if [ "${OPENSSL_VERSION:0:5}" != "1.0.2" -a "${OPENSSL_VERSION:0:4}" != "1.1." ] ; 
 then
-        usage
+	usage
 fi
 
 OPENSSL_SOURCE_TAG=$(echo "OpenSSL.${OPENSSL_VERSION}" | sed -e 's/\./_/g' )

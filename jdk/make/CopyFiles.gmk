@@ -258,7 +258,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libcrypto.so.1.0.0
       ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-        OPENSSL_LIB_NAME = ""
+        OPENSSL_LIB_NAME = 
       endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
@@ -266,7 +266,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libcrypto.1.0.0.dylib
       ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-        OPENSSL_LIB_NAME = ""
+        OPENSSL_LIB_NAME = 
       endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), windows)
@@ -278,7 +278,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
       OPENSSL_LIB_NAME = libeay32.dll
       ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-        OPENSSL_LIB_NAME = ""
+        OPENSSL_LIB_NAME = 
       endif
     endif
   else ifeq ($(OPENJDK_TARGET_OS), aix)
@@ -292,11 +292,11 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
       # For OpenSSL v1.1.1, bundle libcrypto.a library with JDK
       OPENSSL_LIB_NAME = libcrypto.a
       ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-        OPENSSL_LIB_NAME = ""
+        OPENSSL_LIB_NAME = 
       endif
     endif
   else
-    OPENSSL_LIB_NAME = ""
+    OPENSSL_LIB_NAME = 
   endif
 
   ifneq ($(OPENSSL_LIB_NAME), )
@@ -306,15 +306,15 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
       OPENSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(OPENSSL_LIB_NAME)
     endif
 
-  # On Mac OS, update the crypto library path to @rpath as the default is /usr/local/lib/
-  ifeq ($(OPENJDK_BUILD_OS), macosx)
-    .PHONY : RPATH_CRYPTO_LIB
-    COPY_FILES += RPATH_CRYPTO_LIB
-    RPATH_CRYPTO_LIB :
+    # On Mac OS, update the crypto library path to @rpath as the default is /usr/local/lib/
+    ifeq ($(OPENJDK_BUILD_OS), macosx)
+      .PHONY : RPATH_CRYPTO_LIB
+      COPY_FILES += RPATH_CRYPTO_LIB
+      RPATH_CRYPTO_LIB :
 	install_name_tool -id "@rpath/$(OPENSSL_LIB_NAME)" "$(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)"
-  endif
+    endif
 
-  $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
+    $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
 	$(CP) $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME) $@
     ifeq ($(OPENJDK_BUILD_OS), windows)
 	$(CHMOD) +rx $@
