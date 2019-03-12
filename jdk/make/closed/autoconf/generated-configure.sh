@@ -4475,7 +4475,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1551953039
+DATE_WHEN_GENERATED=1552415908
 
 ###############################################################################
 #
@@ -54607,10 +54607,10 @@ $as_echo "no" >&6; }
       if test -d "$SRC_ROOT/openssl" ; then
         OPENSSL_DIR="$SRC_ROOT/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-          BUILD_OPENSSL=no
-        else
-          BUILD_OPENSSL=yes
+        if test "x$BUNDLE_OPENSSL" != x ; then
+          if ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+            BUILD_OPENSSL=yes
+          fi
         fi
 
         if test "x$BUNDLE_OPENSSL" = xyes ; then
