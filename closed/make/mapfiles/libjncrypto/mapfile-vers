@@ -23,7 +23,7 @@
 
 SUNWprivate_1.1 {
 	global:
-            handleErrors;
+            Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext;
             Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;

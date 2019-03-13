@@ -630,10 +630,10 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 COMPILER_VERSION_STRING
+BUILD_OPENSSL
 WITH_OPENSSL
 OPENSSL_DIR
 OPENSSL_BUNDLE_LIB_PATH
-BUILD_OPENSSL
 OPENSSL_LIBS
 OPENSSL_CFLAGS
 CCACHE
@@ -1034,6 +1034,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -1282,6 +1283,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1534,6 +1536,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1671,7 +1682,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1824,6 +1835,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -2036,7 +2048,7 @@ Optional Packages:
                           use this java binary for running the sjavac
                           background server [Boot JDK java]
   --with-ccache-dir       where to store ccache files [~/.ccache]
-  --with-openssl          Use either fetched | system | <path to openssl 1.1.0
+  --with-openssl          Use either fetched | system | <path to openssl 1.0.2
                           (and above)
 
 Some influential environment variables:
@@ -4461,8 +4473,9 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1549641052
+DATE_WHEN_GENERATED=1552415908
 
 ###############################################################################
 #
@@ -54569,7 +54582,7 @@ fi
   WITH_OPENSSL=yes
 
   if test "x$with_openssl" = x ; then
-    # User doesn't want to build with OpenSSL.. Ensure that jncrypto library is not built
+    # User doesn't want to build with OpenSSL. No need to build openssl libraries
     WITH_OPENSSL=no
   else
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
@@ -54582,7 +54595,7 @@ $as_echo_n "checking for OPENSSL... " >&6; }
       BUNDLE_OPENSSL=no
     fi
 
-    # if --with-openssl=fetched
+    # Process --with-openssl=fetched
     if test "x$with_openssl" = xfetched ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -54593,16 +54606,15 @@ $as_echo "no" >&6; }
 
       if test -d "$SRC_ROOT/openssl" ; then
         OPENSSL_DIR="$SRC_ROOT/openssl"
-        FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-        if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX} ; then
-          BUILD_OPENSSL=no
-        else
-          BUILD_OPENSSL=yes
+        if test "x$BUNDLE_OPENSSL" != x ; then
+          if ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+            BUILD_OPENSSL=yes
+          fi
         fi
+
         if test "x$BUNDLE_OPENSSL" = xyes ; then
-          OPENSSL_BUNDLE_LIB_PATH=${OPENSSL_DIR}
+          OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
         fi
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -54610,14 +54622,13 @@ $as_echo "yes" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         printf "$SRC_ROOT/openssl is not found.\n"
-        printf "  run get_source.sh --openssl-version=1.1.0h\n"
+        printf "  run get_source.sh --openssl-version=<version as 1.0.2 or later>\n"
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         as_fn_error $? "Cannot continue" "$LINENO" 5
       fi
-    fi
 
-    # if --with-openssl=system
-    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem ; then
+    # Process --with-openssl=system
+    elif test "x$with_openssl" = xsystem ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -54625,7 +54636,9 @@ $as_echo "no" >&6; }
         as_fn_error $? "Cannot continue" "$LINENO" 5
       fi
 
-      # Check modules using pkg-config, but only if we have it
+      # We can use the system installed openssl only when it is package installed.
+      # If not package installed, fail with an error message.
+      # PKG_CHECK_MODULES will setup the variable OPENSSL_CFLAGS and OPENSSL_LIB when successful.
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
@@ -54635,12 +54648,12 @@ if test -n "$OPENSSL_CFLAGS"; then
     pkg_cv_OPENSSL_CFLAGS="$OPENSSL_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.1.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "openssl >= 1.1.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.0.2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl >= 1.0.2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl >= 1.1.0" 2>/dev/null`
+  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl >= 1.0.2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -54651,12 +54664,12 @@ if test -n "$OPENSSL_LIBS"; then
     pkg_cv_OPENSSL_LIBS="$OPENSSL_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.1.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "openssl >= 1.1.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl >= 1.0.2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl >= 1.0.2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl >= 1.1.0" 2>/dev/null`
+  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl >= 1.0.2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -54674,9 +54687,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl >= 1.1.0" 2>&1`
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl >= 1.0.2" 2>&1`
         else
-	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl >= 1.1.0" 2>&1`
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl >= 1.0.2" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$OPENSSL_PKG_ERRORS" >&5
@@ -54694,23 +54707,23 @@ $as_echo "yes" >&6; }
 	FOUND_OPENSSL=yes
 fi
 
-      if test "x$FOUND_OPENSSL" != xyes ; then
-        as_fn_error $? "Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'" "$LINENO" 5
+      if test "x$FOUND_OPENSSL" != xyes; then
+        as_fn_error $? "Unable to find openssl 1.0.2(and above) installed on System. Please use other options for '--with-openssl'" "$LINENO" 5
       fi
 
       # The crypto library bundling option is not available when --with-openssl=system.
       if test "x$BUNDLE_OPENSSL" = xyes ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-        printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl-custom-path to bundle crypto library\n"
+        printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl path to bundle crypto library\n"
         as_fn_error $? "Cannot continue" "$LINENO" 5
       fi
-    fi
 
-    # if --with-openssl=/custom/path/where/openssl/is/present
-    if test "x$FOUND_OPENSSL" != xyes ; then
-      # User specified path where openssl is installed
-      OPENSSL_DIR=$with_openssl
+    # Process --with-openssl=/custom/path/where/openssl/is/present
+    # As the value is not fetched or system, assume user specified the
+    # path where openssl is installed
+    else
+      OPENSSL_DIR="$with_openssl"
 
   if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
 
@@ -54834,63 +54847,54 @@ $as_echo "$as_me: The path of OPENSSL_DIR, which resolves as \"$path\", is inval
   fi
 
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
-        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-          # On Windows, check for libcrypto.lib
-          if test -s "$OPENSSL_DIR/lib/libcrypto.lib" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              if test -d "$OPENSSL_DIR/bin" ; then
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/bin"
-              else
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
-              fi
+        OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+        if test "x$BUNDLE_OPENSSL" = xyes ; then
+          if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+            if test -d "$OPENSSL_DIR/bin" ; then
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/bin"
+            else
+              OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
             fi
-          fi
-        else
-          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              # On Mac OSX, create local copy of the crypto library to update @rpath
-              # as the default is /usr/local/lib.
-              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
-                LOCAL_CRYPTO="$SRC_ROOT/openssl"
-                $MKDIR -p "${LOCAL_CRYPTO}"
-                $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
-                $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
-                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
-                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
-              else
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
+          else
+            if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+              if test "x$BUNDLE_OPENSSL" = xyes ; then
+                # On Mac OSX, create local copy of the crypto library to update @rpath
+                # as the default is /usr/local/lib.
+                if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                  LOCAL_CRYPTO="$TOPDIR/openssl"
+                  $MKDIR -p "${LOCAL_CRYPTO}"
+                  $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                  $CP "${OPENSSL_DIR}/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
+                  $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                  OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+                else
+                  OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
+                fi
               fi
-            fi
-          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              # On Mac OSX, create local copy of the crypto library to update @rpath
-              # as the default is /usr/local/lib.
-              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
-                LOCAL_CRYPTO="$SRC_ROOT/openssl"
-                $MKDIR -p "${LOCAL_CRYPTO}"
-                $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
-                $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
-                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
-                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
-              else
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
+            elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+              if test "x$BUNDLE_OPENSSL" = xyes ; then
+                # On Mac OSX, create local copy of the crypto library to update @rpath
+                # as the default is /usr/local/lib.
+                if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                  LOCAL_CRYPTO="$TOPDIR/openssl"
+                  $MKDIR -p "${LOCAL_CRYPTO}"
+                  $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                  $CP "${OPENSSL_DIR}/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
+                  $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                  OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+                else
+                  OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
+                fi
               fi
+            else
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+              as_fn_error $? "Unable to find crypto library to bundle in specified location $OPENSSL_DIR" "$LINENO" 5
             fi
           fi
         fi
-      fi
-
-      #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes ; then
+      else
+        # openssl is not found in user specified location. Abort.
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         as_fn_error $? "Unable to find openssl in specified location $OPENSSL_DIR" "$LINENO" 5
@@ -54899,14 +54903,11 @@ $as_echo "no" >&6; }
 $as_echo "yes" >&6; }
     fi
 
-    if test "x$OPENSSL_DIR" != x ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should bundle openssl" >&5
 $as_echo_n "checking if we should bundle openssl... " >&6; }
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
 $as_echo "$BUNDLE_OPENSSL" >&6; }
-    fi
   fi
-
 
 
 
