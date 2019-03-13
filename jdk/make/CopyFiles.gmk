@@ -286,13 +286,14 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     # instead of 'libcrypto.so' files.
     # For reference, corresponding OpenSSL PR is
     #     https://github.com/openssl/openssl/pull/6487
-    # For OpenSSL v1.0.0, bundle libcrypto.so library with JDK
-    OPENSSL_LIB_NAME = libcrypto.so.1.1
+    # For OpenSSL v1.0.0, bundle libcrypto.so.1.0.0 library with JDK
+    OPENSSL_LIB_NAME = libcrypto.so.1.0.0
     ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-      # For OpenSSL v1.1.1, bundle libcrypto.a library with JDK
-      OPENSSL_LIB_NAME = libcrypto.a
+      # For OpenSSL v1.1.0, bundle libcrypto.so.1.1 library with JDK
+      OPENSSL_LIB_NAME = libcrypto.so.1.1
       ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
-        OPENSSL_LIB_NAME = 
+        # For OpenSSL v1.1.1, bundle libcrypto.a library with JDK
+        OPENSSL_LIB_NAME = libcrypto.a
       endif
     endif
   else
