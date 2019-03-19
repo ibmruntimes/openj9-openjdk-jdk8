@@ -156,12 +156,8 @@ OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/$(call STATIC_LIBRARY,jvm)
 endif # windows
 
 # classlib.properties
-
-$(JDK_OUTPUTDIR)/lib/classlib.properties : $(OUTPUT_ROOT)/vm/classlib.properties
-	$(ECHO) Setting classlib.properties
-	$(SED) > $@ < $< \
-		-e 's/shape=vm.shape/shape=sun_openjdk\nbootpath=rt.jar:resources.jar:jsse.jar:charsets.jar:jce.jar/g' \
-		-e 's/version=1.9/version=1.8/g'
+$(JDK_OUTPUTDIR)/lib/classlib.properties : $(SRC_ROOT)/closed/classlib.properties
+	$(install-file)
 
 OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/classlib.properties
 
