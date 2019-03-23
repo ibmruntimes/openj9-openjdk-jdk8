@@ -1,4 +1,3 @@
-# ===========================================================================
 #
 # Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -418,9 +417,15 @@ $(eval $(call SetupLauncher,rmiregistry, \
 #    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.tools.jcmd.JCmd"$(COMMA) }'))
 
 # Include executables for OpenJ9 (jdmpview, traceformat and jextract).
+ifeq ($(OPENJDK_TARGET_OS),macosx)
+  # Required because of the use of ImageInputStream?
+  JDMPVIEW_EXTRA_ARGS := "-J-XstartOnFirstThread" $(COMMA)
+else
+  JDMPVIEW_EXTRA_ARGS :=
+endif
 $(eval $(call SetupLauncher,jdmpview, \
     -DEXPAND_CLASSPATH_WILDCARDS \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.dtfjview.DTFJView" }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) $(JDMPVIEW_EXTRA_ARGS) "com.ibm.jvm.dtfjview.DTFJView" }'))
 
 $(eval $(call SetupLauncher,traceformat, \
     -DEXPAND_CLASSPATH_WILDCARDS \
@@ -444,8 +449,8 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
 endif
 
 $(eval $(call SetupLauncher,jps, \
-    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.Jps"$(COMMA) }' \
-    -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.Jps" }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
 
 ##########################################################################################
 # The order of the object files on the link command line affects the size of the resulting
