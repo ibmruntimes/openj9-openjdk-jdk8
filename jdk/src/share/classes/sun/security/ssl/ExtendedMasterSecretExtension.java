@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2017, Red Hat, Inc.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,10 +21,6 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- */
-
-/*
- * This file is backported from OpenJDK10
  */
 
 package sun.security.ssl;
@@ -72,5 +68,4 @@ final class ExtendedMasterSecretExtension extends HelloExtension {
         return "Extension " + type;
     }
 }
-
 
