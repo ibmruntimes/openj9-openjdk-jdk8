@@ -86,6 +86,9 @@ EXPORTED_PRIVATE_PKGS += \
 	jdk.internal.org.objectweb.asm.util \
 	openj9.lang.management \
 	openj9.lang.management.internal \
+	openj9.tools.attach.diagnostics.base \
+	openj9.tools.attach.diagnostics.info \
+	openj9.tools.attach.diagnostics.spi \
 	#
 
 RT_JAR_EXCLUDES += \
@@ -97,7 +100,8 @@ RT_JAR_EXCLUDES += \
 	com/ibm/jvm/j9 \
 	com/ibm/jvm/trace \
 	com/ibm/tools/attach/attacher \
-	openj9/tools/attach/diagnostics \
+	openj9/tools/attach/diagnostics/attacher \
+	openj9/tools/attach/diagnostics/tools \
 	#
 
 OPENJ9_MANAGEMENT_PACKAGES := \
