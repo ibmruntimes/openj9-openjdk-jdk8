@@ -1,4 +1,6 @@
-/*
+/*******************************************************************************
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ *
  * Copyright (c) 1998, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -98,6 +100,16 @@ debugLoop_run(void)
     standardHandlers_onConnect();
     threadControl_onConnect();
 
+    /*
+     * On startup, handleReportVMInitCommand() (called by the JDWP Event Helper Thread)
+     * suspends all threads (until told to resume by the debugger).
+     * Then, the debug loop (JDWP Transport Listener)
+     * receives the "resume" command and resumes the threads.
+     * If the "resume" is received before handleReportVMInitCommand() completes
+     * the system deadlocks.
+     * Ensure the debug loop waits until the VM is initialized before processing commands.
+     */
+    debugInit_waitVMInitComplete();
     /* Okay, start reading cmds! */
     while (shouldListen) {
         if (!dequeue(&p)) {

@@ -1,4 +1,6 @@
-/*
+/*******************************************************************************
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ *
  * Copyright (c) 1998, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -574,6 +576,7 @@ handleReportVMInitCommand(JNIEnv* env, ReportVMInitCommand *command)
         (void)threadControl_suspendThread(command->thread, JNI_FALSE);
     }
 
+    debugInit_setVMInitComplete();
     outStream_initCommand(&out, uniqueID(), 0x0,
                           JDWP_COMMAND_SET(Event),
                           JDWP_COMMAND(Event, Composite));

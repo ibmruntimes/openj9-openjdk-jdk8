@@ -1,4 +1,6 @@
-/*
+/*******************************************************************************
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ *
  * Copyright (c) 1998, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -38,6 +40,7 @@
 #include "bag.h"
 #include "invoker.h"
 #include "sys.h"
+#include <time.h>
 
 /* How the options get to OnLoad: */
 #define XDEBUG "-Xdebug"
@@ -79,6 +82,7 @@ static jboolean dopause = JNI_FALSE;        /* pause for debugger attach */
 static jboolean docoredump = JNI_FALSE;     /* core dump on exit */
 static char *logfile = NULL;                /* Name of logfile (if logging) */
 static unsigned logflags = 0;               /* Log flags */
+static volatile jboolean VMInitComplete = JNI_FALSE; /* prevent the debug loop from processing commands until init complete */
 
 static char *names;                         /* strings derived from OnLoad options */
 
@@ -101,6 +105,35 @@ static void JNICALL cbEarlyException(jvmtiEnv*, JNIEnv *,
 
 static void initialize(JNIEnv *env, jthread thread, EventIndex triggering_ei);
 static jboolean parseOptions(char *str);
+
+/*
+ * Wait for VM initialization to complete.
+ * This will probably exit on the the first iteration,
+ * almost certainly the second, so don't bother
+ * with heavyweight synchronization.
+ */
+void
+debugInit_waitVMInitComplete(void)
+{
+	struct timespec time = {0, 100 * 1000L * 1000L };
+	int timeout = 100;
+    while (!VMInitComplete && (timeout > 0)) {
+        LOG_MISC(("debugInit_waitVMInitComplete iterate"));
+    	nanosleep(&time, NULL);
+    	timeout -= 1;
+    }
+    LOG_MISC(("debugInit_waitVMInitComplete exit"));
+
+}
+
+/*
+ * Indicate initialization to complete.
+ */
+void
+debugInit_setVMInitComplete(void)
+{
+	VMInitComplete = JNI_TRUE;
+}
 
 /*
  * Phase 1: Initial load.

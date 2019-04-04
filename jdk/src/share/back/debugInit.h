@@ -1,4 +1,6 @@
-/*
+/*******************************************************************************
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ *
  * Copyright (c) 1998, 2005, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -28,7 +30,8 @@
 
 void debugInit_waitInitComplete(void);
 jboolean debugInit_isInitComplete(void);
-
+void debugInit_waitVMInitComplete(void);
+void debugInit_setVMInitComplete(void);
 /*
  * Access to debug options
  */
