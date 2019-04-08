@@ -319,6 +319,11 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
             throw new InvalidKeyException("Internal error");
         }
 
+        if (!AESCrypt.isKeySizeValid(keyValue.length)) {
+            throw new InvalidKeyException("Invalid AES key length: " +
+                keyValue.length + " bytes");
+        }
+
         //// always encrypt mode for embedded cipher
         //this.embeddedCipher.init(false, algorithm, keyValue);
         //this.subkeyH = new byte[AES_BLOCK_SIZE];
