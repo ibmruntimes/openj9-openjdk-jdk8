@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
