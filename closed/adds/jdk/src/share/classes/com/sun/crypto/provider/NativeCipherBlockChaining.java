@@ -33,6 +33,7 @@ package com.sun.crypto.provider;
 
 import java.security.InvalidKeyException;
 import java.security.ProviderException;
+import com.sun.crypto.provider.AESCrypt;
 
 import java.util.ArrayDeque;
 import jdk.crypto.jniprovider.NativeCrypto;
@@ -155,6 +156,11 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         if ((key == null) || (iv == null) || (iv.length != blockSize)) {
             throw new InvalidKeyException("Internal error");
+        }
+
+        if (!AESCrypt.isKeySizeValid(key.length)) {
+            throw new InvalidKeyException("Invalid AES key length: " +
+                key.length + " bytes");
         }
 
         this.iv = iv.clone();
