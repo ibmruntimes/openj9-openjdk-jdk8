@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -49,7 +49,7 @@ fi
 declare -A j9repos
 declare -A branches
 declare -A default_j9repos=( [openj9]=eclipse/openj9 [omr]=eclipse/openj9-omr )
-declare -A default_branches=( [openj9]=master [omr]=openj9 )
+declare -A default_branches=( [openj9]=v0.14.0-release [omr]=v0.14.0-release )
 declare -A commands
 declare -A shas
 
