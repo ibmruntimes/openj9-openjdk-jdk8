@@ -4491,7 +4491,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1553686818
+DATE_WHEN_GENERATED=1555095065
 
 ###############################################################################
 #
@@ -14957,18 +14957,21 @@ fi
 
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-  # Iterate over the tags with acceptable names, then select the nearest ancestor.
-  OPENJDK_TAG=
-  for tag in `git -C $TOPDIR tag --list "jdk8u*" | sed -e "/_openj9/d" -e "s:^:refs/tags/:"` ; do
-    if git -C $TOPDIR merge-base --is-ancestor $tag HEAD ; then
-      if test x$OPENJDK_TAG = x || git -C $TOPDIR merge-base --is-ancestor $OPENJDK_TAG $tag ; then
-        OPENJDK_TAG=$tag
-      fi
+
+  # We use sort and tail to choose the latest tag in case more than one refers the same commit.
+  OPENJDK_TAG=`git -C $SRC_ROOT tag --points-at HEAD | $GREP jdk8u | $GREP -v _openj9 | $SORT | $TAIL -1`
+
+  # If there's no tag for HEAD, find the SHA of most recent ancestor that is tagged.
+  if test x$OPENJDK_TAG = x ; then
+    # For precision, get the full SHA for HEAD.
+    head_sha=`git -C $SRC_ROOT rev-parse HEAD`
+    # We insert 'filler' here so $head_sha will never be on the first line, which would break the sed filter.
+    tagged_sha=`($ECHO filler ; git -C $SRC_ROOT rev-list '--tags=*jdk8u*' '--exclude=*_openj9*' --topo-order --no-walk HEAD) | $SED -e "1,/$head_sha/d" | $HEAD -1`
+
+    if test x$tagged_sha != x ; then
+      # Select the latest tag, like above.
+      OPENJDK_TAG=`git -C $TOPDIR tag --points-at $tagged_sha | $GREP jdk8u | $GREP -v _openj9 | $SORT | $TAIL -1`
     fi
-  done
-  if test x$OPENJDK_TAG != x ; then
-    # Choose the latest tag when there is more than one for the same commit.
-    OPENJDK_TAG=`git -C $TOPDIR tag --points-at $OPENJDK_TAG | grep jdk8u | grep -v _openj9 | sort | tail -1`
   fi
 
 
