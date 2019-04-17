@@ -4508,7 +4508,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1555495624
+DATE_WHEN_GENERATED=1555537440
 
 ###############################################################################
 #
