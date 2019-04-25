@@ -36,6 +36,8 @@
 #include "jdk_crypto_jniprovider_NativeCrypto.h"
 #include "NativeCrypto_md.h"
 
+#define OPENSSL_VERSION_1_0 "OpenSSL 1.0."
+#define OPENSSL_VERSION_1_1 "OpenSSL 1.1."
 
 //Header for RSA algorithm using 1.0.2 OpenSSL
 int OSSL102_RSA_set0_key(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
@@ -178,21 +180,21 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     // Different symbols are used by OpenSSL with 1.0 and 1.1.
     // The symbol 'OpenSSL_version' is used by OpenSSL 1.1 where as
     // the symbol "SSLeay_version" is used by OpenSSL 1.0.
-    // Currently only openssl 1.0.2 and 1.1.x are supported.
+    // Currently only openssl 1.0.x and 1.1.x are supported.
     OSSL_version = (OSSL_version_t*)find_crypto_symbol(handle, "OpenSSL_version");
 
     if (NULL == OSSL_version)  {
         OSSL_version = (OSSL_version_t*)find_crypto_symbol(handle, "SSLeay_version");
 
         if (NULL == OSSL_version)  {
-            //fprintf(stderr, "Only openssl 1.0.2 and 1.1.x are supported\n");
+            //fprintf(stderr, "Only openssl 1.0.x and 1.1.x are supported\n");
             //fflush(stderr);
             unload_crypto_library(handle);
             return -1;
         } else {
             openssl_version = (*OSSL_version)(0); //get OPENSSL_VERSION
-            //Ensure the OpenSSL version is "OpenSSL 1.0.2"
-            if (0 != strncmp(openssl_version, "OpenSSL 1.0.2", 13)) {
+            //Ensure the OpenSSL version is "OpenSSL 1.0.x"
+            if (0 != strncmp(openssl_version, OPENSSL_VERSION_1_0, strlen(OPENSSL_VERSION_1_0))) {
                 //fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
                 //fflush(stderr);
                 unload_crypto_library(handle);
@@ -203,7 +205,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     } else {
         openssl_version = (*OSSL_version)(0); //get OPENSSL_VERSION
         //Ensure the OpenSSL version is "OpenSSL 1.1.x".
-        if (0 != strncmp(openssl_version, "OpenSSL 1.1.", 12)) {
+        if (0 != strncmp(openssl_version,OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1))) {
             //fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
             //fflush(stderr);
             unload_crypto_library(handle);
