@@ -40,10 +40,9 @@ usage() {
 }
 
 # require bash 4.0 or later to support associative arrays
-bash_version=`bash --version | sed -n 1p`
-if [[ $bash_version != *"ersion 4."* ]] ; then
-	echo "Bash version 4.0 or later is required!"
-	exit 1
+if [ “0${BASH_VERSINFO[0]}” -lt 4 ] ; then
+        echo “Bash version 4.0 or later is required!”
+        exit 1
 fi
 
 declare -A j9repos
