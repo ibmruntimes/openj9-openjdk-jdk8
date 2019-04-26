@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -41,7 +41,7 @@ usage() {
 
 # require bash 4.0 or later to support associative arrays
 bash_version=`bash --version | sed -n 1p`
-if [[ $bash_version != *"version 4."* ]] ; then
+if [[ $bash_version != *"ersion 4."* ]] ; then
 	echo "Bash version 4.0 or later is required!"
 	exit 1
 fi
