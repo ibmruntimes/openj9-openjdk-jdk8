@@ -52,6 +52,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   AC_SUBST(MSVCP_DLL)
 
   OPENJ9_THIRD_PARTY_REQUIREMENTS
+  OPENJ9_CHECK_NASM_VERSION
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
@@ -244,6 +245,44 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
   AC_SUBST(OPENJ9_BUILDSPEC)
   AC_SUBST(OPENJ9_PLATFORM_CODE)
   AC_SUBST(OPENJ9_LIBS_SUBDIR)
+])
+
+AC_DEFUN_ONCE([OPENJ9_CHECK_NASM_VERSION],
+[
+  OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
+
+  # OPENJ9_CPU == x86-64 even for win32 builds
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    AC_CHECK_PROG(NASM_INSTALLED,nasm,yes,no)
+    if test "x$NASM_INSTALLED" = xyes ; then
+      AC_MSG_CHECKING([whether nasm version requirement is met])
+
+      # Require NASM v2.13+. This is checked by trying to build conftest.c
+      # containing an AVX512 instruction that is supported in v2.13+
+      AC_LANG_CONFTEST([AC_LANG_SOURCE([vinserti32x8 zmm0, ymm1, 1;])])
+
+      # the following hack is needed because conftest.c contains C preprocessor
+      # directives defined in confdefs.h that would cause nasm to error out
+      $SED -i -e '/vinsert/!d' conftest.c
+
+      if nasm -f elf64 conftest.c 2> /dev/null ; then
+        AC_MSG_RESULT([yes])
+      else
+        # NASM version string is of the following format:
+        #  ---
+        #  NASM version 2.14.02 compiled on Dec 27 2018
+        #  ---
+        # Some builds may not contain any text after the version number
+        #
+        # NASM_VERSION is set within square brackets so that the sed expression would not
+        # require quadrigraps to represent square brackets
+        [NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`]
+        AC_MSG_ERROR([nasm version detected: $NASM_VERSION; required version 2.13+])
+      fi
+    else
+      AC_MSG_ERROR([nasm not found])
+    fi
+  fi
 ])
 
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],

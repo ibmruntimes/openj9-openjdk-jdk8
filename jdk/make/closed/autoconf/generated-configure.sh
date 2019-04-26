@@ -876,6 +876,7 @@ CHECK_MAKE
 CHECK_GMAKE
 PKGHANDLER
 DEVKIT_LIB_DIR
+NASM_INSTALLED
 FREEMARKER_JAR
 MSVCP_DLL
 VS_LIB
@@ -1038,7 +1039,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -1293,7 +1293,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1546,15 +1545,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1692,7 +1682,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1845,7 +1835,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -4508,7 +4497,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1555491912
+DATE_WHEN_GENERATED=1556287488
 
 ###############################################################################
 #
@@ -15268,6 +15257,103 @@ $as_echo "$as_me: Could not find freemarker.jar" >&6;}
   fi
 
 
+
+
+
+  # Convert openjdk cpu names to openj9 names
+  case "$host_cpu" in
+    x86_64)
+      OPENJ9_CPU=x86-64
+      ;;
+    powerpc64le)
+      OPENJ9_CPU=ppc-64_le
+      ;;
+    s390x)
+      OPENJ9_CPU=390-64
+      ;;
+    powerpc64)
+      OPENJ9_CPU=ppc-64
+      ;;
+    *)
+      as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
+      ;;
+  esac
+
+
+  # OPENJ9_CPU == x86-64 even for win32 builds
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    # Extract the first word of "nasm", so it can be a program name with args.
+set dummy nasm; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$NASM_INSTALLED"; then
+  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_NASM_INSTALLED="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
+fi
+fi
+NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
+if test -n "$NASM_INSTALLED"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
+$as_echo "$NASM_INSTALLED" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    if test "x$NASM_INSTALLED" = xyes ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
+$as_echo_n "checking whether nasm version requirement is met... " >&6; }
+
+      # Require NASM v2.13+. This is checked by trying to build conftest.c
+      # containing an AVX512 instruction that is supported in v2.13+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+vinserti32x8 zmm0, ymm1, 1;
+_ACEOF
+
+      # the following hack is needed because conftest.c contains C preprocessor
+      # directives defined in confdefs.h that would cause nasm to error out
+      $SED -i -e '/vinsert/!d' conftest.c
+
+      if nasm -f elf64 conftest.c 2> /dev/null ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      else
+        # NASM version string is of the following format:
+        #  ---
+        #  NASM version 2.14.02 compiled on Dec 27 2018
+        #  ---
+        # Some builds may not contain any text after the version number
+        #
+        # NASM_VERSION is set within square brackets so that the sed expression would not
+        # require quadrigraps to represent square brackets
+        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
+        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.13+" "$LINENO" 5
+      fi
+    else
+      as_fn_error $? "nasm not found" "$LINENO" 5
+    fi
+  fi
 
 
   # Where are the OpenJ9 sources.
