@@ -4496,8 +4496,10 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1556287488
+DATE_WHEN_GENERATED=1556562367
 
 ###############################################################################
 #
@@ -15324,16 +15326,17 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
 $as_echo_n "checking whether nasm version requirement is met... " >&6; }
 
-      # Require NASM v2.13+. This is checked by trying to build conftest.c
-      # containing an AVX512 instruction that is supported in v2.13+
+      # Require NASM v2.11+. This is checked by trying to build conftest.c
+      # containing an instruction that makes use of zmm registers that are
+      # supported on NASM v2.11+
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-vinserti32x8 zmm0, ymm1, 1;
+vdivpd zmm0, zmm1, zmm3;
 _ACEOF
 
       # the following hack is needed because conftest.c contains C preprocessor
       # directives defined in confdefs.h that would cause nasm to error out
-      $SED -i -e '/vinsert/!d' conftest.c
+      $SED -i -e '/vdivpd/!d' conftest.c
 
       if nasm -f elf64 conftest.c 2> /dev/null ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -15348,7 +15351,7 @@ $as_echo "yes" >&6; }
         # NASM_VERSION is set within square brackets so that the sed expression would not
         # require quadrigraps to represent square brackets
         NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
-        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.13+" "$LINENO" 5
+        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
       fi
     else
       as_fn_error $? "nasm not found" "$LINENO" 5
@@ -17250,6 +17253,7 @@ $as_echo "$as_me: The path of MSVCP_DLL, which resolves as \"$path\", is invalid
 
 
   fi
+
 
 
 
