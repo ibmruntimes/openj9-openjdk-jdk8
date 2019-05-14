@@ -296,24 +296,7 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 
   OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
 
-  # We use sort and tail to choose the latest tag in case more than one refers the same commit.
-  OPENJDK_TAG=`git -C $SRC_ROOT tag --points-at HEAD | $GREP jdk8u | $GREP -v _openj9 | $SORT | $TAIL -1`
-
-  # If there's no tag for HEAD, find the SHA of most recent ancestor that is tagged.
-  if test x$OPENJDK_TAG = x ; then
-    # For precision, get the full SHA for HEAD.
-    head_sha=`git -C $SRC_ROOT rev-parse HEAD`
-    # We insert 'filler' here so $head_sha will never be on the first line, which would break the sed filter.
-    tagged_sha=`($ECHO filler ; git -C $SRC_ROOT rev-list '--tags=*jdk8u*' '--exclude=*_openj9*' --topo-order --no-walk HEAD) | $SED -e "1,/$head_sha/d" | $HEAD -1`
-
-    if test x$tagged_sha != x ; then
-      # Select the latest tag, like above.
-      OPENJDK_TAG=`git -C $TOPDIR tag --points-at $tagged_sha | $GREP jdk8u | $GREP -v _openj9 | $SORT | $TAIL -1`
-    fi
-  fi
-
   AC_SUBST(OPENJDK_SHA)
-  AC_SUBST(OPENJDK_TAG)
 
   # Outer [ ] to quote m4.
   [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
