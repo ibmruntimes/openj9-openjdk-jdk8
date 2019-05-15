@@ -3,10 +3,10 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
-# 
+#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
@@ -19,9 +19,9 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # ===========================================================================
-    
+
 usage() {
 	echo "Usage: $0 [-h|--help] [-openj9-repo=<j9vm repo url>] [-openj9-branch=<branch>] [-openj9-sha=<commit sha>] [... other OpenJ9 repositories and branches options] [-parallel=<true|false>]"
 	echo "where:"
@@ -40,9 +40,9 @@ usage() {
 }
 
 # require bash 4.0 or later to support associative arrays
-if [ “0${BASH_VERSINFO[0]}” -lt 4 ] ; then
-        echo “Bash version 4.0 or later is required!”
-        exit 1
+if [ "0${BASH_VERSINFO[0]}" -lt 4 ] ; then
+	echo "Bash version 4.0 or later is required!"
+	exit 1
 fi
 
 declare -A j9repos
@@ -116,11 +116,11 @@ START_TIME=$(date +%s)
 
 for i in "${!default_j9repos[@]}" ; do
 	branch=${default_branches[$i]}
-	if [ ${branches[$i]+_} ]; then
+	if [ ${branches[$i]+_} ] ; then
 		branch=${branches[$i]}
 	fi
 
-	if [ -d ${i} ]; then
+	if [ -d ${i} ] ; then
 		echo
 		echo "Update ${i} source"
 		echo
@@ -128,7 +128,7 @@ for i in "${!default_j9repos[@]}" ; do
 		cd ${i}
 		git pull --rebase origin ${branch} || exit $?
 
-		if [ -f .gitmodules ]; then
+		if [ -f .gitmodules ] ; then
 			git pull --rebase --recurse-submodules=yes || exit $?
 			git submodule update --rebase --recursive || exit $?
 		fi
@@ -136,7 +136,7 @@ for i in "${!default_j9repos[@]}" ; do
 	else
 		git_url=${base_git_url}/${default_j9repos[$i]}
 
-		if [ ${j9repos[$i]+_} ]; then
+		if [ ${j9repos[$i]+_} ] ; then
 			git_url="${j9repos[$i]}"
 		fi
 
@@ -165,11 +165,11 @@ END_TIME=$(date +%s)
 date "+[%F %T] OpenJ9 clone repositories finished in $(($END_TIME - $START_TIME)) seconds"
 
 for i in "${!default_j9repos[@]}" ; do
-	if [ -e /tmp/${i}.pid.rc ]; then
+	if [ -e /tmp/${i}.pid.rc ] ; then
 		# check if the git clone repository command failed
 		rc=`cat /tmp/${i}.pid.rc | tr -d ' \n\r'`
 
-		if [ "$rc" -ne "0" ]; then
+		if [ "$rc" -ne "0" ] ; then
 			echo "ERROR: repository ${i} exited abnormally!"
 			cat /tmp/${i}.pid.rc
 			echo "Re-run: ${commands[$i]}"
@@ -185,7 +185,7 @@ for i in "${!default_j9repos[@]}" ; do
 		fi
 	fi
 
-	if [ ${shas[$i]+_} ]; then
+	if [ ${shas[$i]+_} ] ; then
 		echo
 		echo "Update ${i} to commit ID: ${shas[$i]}"
 		echo
