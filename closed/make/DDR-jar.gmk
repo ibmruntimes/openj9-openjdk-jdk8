@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -33,21 +33,29 @@ include $(SRC_ROOT)/jdk/make/Setup.gmk
 # The main source directory.
 DDR_SOURCE_DIR := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
 
-# A marker file to detect when compilation is needed.
+# Marker files to detect when compilation is needed.
 DDR_COMPILE_MARKER := $(JDK_OUTPUTDIR)/ddr/compile.done
+DDR_STUBS_MARKER := $(JDK_OUTPUTDIR)/ddr/stubs.done
 
 # Where to write the class files.
 DDR_CLASSES_BIN := $(JDK_OUTPUTDIR)/ddr/bin
+DDR_STUBS_BIN := $(JDK_OUTPUTDIR)/ddr/stubs
+
+# Compile stub classes.
+DDR_STUBS_FILES := $(call recur_wildcard,$(OPENJ9_TOPDIR)/debugtools/DDR_VM/src_stubs,*.java)
+
+$(DDR_STUBS_MARKER) : $(DDR_STUBS_FILES)
+	@$(ECHO) Compiling stub classes for j9ddr.jar
+	$(RM) -rf $(DDR_STUBS_BIN)
+	$(MKDIR) -p $(DDR_STUBS_BIN)
+	$(JAVAC) -d $(DDR_STUBS_BIN) $(DDR_STUBS_FILES)
+	$(TOUCH) $@
 
 # This file will contain the list of Java source files to be compiled.
 DDR_SRC_LIST_FILE := $(JDK_OUTPUTDIR)/ddr/src.list
 
 # Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
-
-ifeq (,$(filter mz31 mz64,$(OPENJ9_PLATFORM_CODE)))
-DDR_SRC_EXCLUDES += com/ibm/j9ddr/corereaders/tdump
-endif
 
 # The package containing the generated structure stubs.
 DDR_STUBS_PACKAGE := com/ibm/j9ddr/vm29/structure
@@ -68,7 +76,7 @@ DDR_SOURCE_FILES := $(shell \
 
 # Compile the Java sources. We can't use SetupJavaCompilation
 # because it doesn't properly handle source file names with '$'.
-$(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
+$(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES) $(DDR_STUBS_MARKER)
 	$(RM) -rf $(DDR_CLASSES_BIN)
 	$(MKDIR) -p $(DDR_CLASSES_BIN) $(addprefix $(DDR_CLASSES_BIN)/, $(dir $(DDR_ALIAS_FILES)))
 	@$(ECHO) "Compiling $(words $(DDR_SOURCE_FILES)) files for j9ddr.jar"
@@ -76,6 +84,7 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 		$(GENERATE_JDKBYTECODE_FLAGS) \
 		$(JAVAC_FLAGS) \
 		-d $(DDR_CLASSES_BIN) \
+		-cp $(DDR_STUBS_BIN) \
 		-implicit:none \
 		-sourcepath $(DDR_SOURCE_DIR) \
 		@$(DDR_SRC_LIST_FILE)
