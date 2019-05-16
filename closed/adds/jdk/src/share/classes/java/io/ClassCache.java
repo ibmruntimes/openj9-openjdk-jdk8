@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
  * ===========================================================================
  * 
  * This code is free software; you can redistribute it and/or modify it
@@ -209,25 +209,24 @@ final class ClassCache {
         }
 
         public Thread run() {
-            return new Reaper(cache, queue);
+            Reaper reaper = new Reaper(cache, queue);
+            return com.ibm.oti.vm.VM.getVMLangAccess().createThread(reaper, "ClassCache Reaper", true, false, true, null);
         }
     }
 
-    private static final class Reaper extends Thread {
+    private static final class Reaper implements Runnable {
         private final WeakReference<ClassCache> cacheRef;
         private final ReferenceQueue<Object> queue;
 
         Reaper(ClassCache cache, ReferenceQueue<Object> queue) {
-            super("ClassCache Reaper");
             this.queue = queue;
             cacheRef = new WeakReference<ClassCache>(cache, queue);
-            setDaemon(true);
-            setContextClassLoader(null);
         }
-/*
- * Blocks on remove() on queur reference and calls processStaleRef() when any loader is removed.(non-Javadoc)
- * @see java.lang.Thread#run()
- */
+
+        /*
+         * Blocks on remove() on queur reference and calls processStaleRef() when any loader is removed.(non-Javadoc)
+         * @see java.lang.Thread#run()
+         */
         public void run() {
             Object staleRef = null;
             do {
