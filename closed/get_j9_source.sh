@@ -48,7 +48,7 @@ fi
 declare -A j9repos
 declare -A branches
 declare -A default_j9repos=( [openj9]=eclipse/openj9 [omr]=eclipse/openj9-omr )
-declare -A default_branches=( [openj9]=v0.14.2-release [omr]=v0.14.2-release )
+declare -A default_branches=( [openj9]=openj9-0.14.2 [omr]=openj9-0.14.2 )
 declare -A commands
 declare -A shas
 
