@@ -181,12 +181,8 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 .PHONY : run-ddrgen
 $(OUTPUT_ROOT)/vm/j9ddr.dat : run-ddrgen
 run-ddrgen :
-	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		VERSION_MAJOR=8 \
-		$(EXPORT_MSVS_ENV_VARS) \
-	&& $(MAKE) -C $(OUTPUT_ROOT)/vm/ddr -f run_omrddrgen.mk \
-		CC="$(CC)" \
-		CXX="$(CXX)"
+	export CC="$(CC)" CXX="$(CXX)" VERSION_MAJOR=8 $(EXPORT_MSVS_ENV_VARS) \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm/ddr -f run_omrddrgen.mk
 
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
 	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
@@ -420,6 +416,7 @@ run-preprocessors-j9 : stage-j9
 		$(OUTPUT_ROOT)/vm/include/openj9_version_info.h)
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
+		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
 			CMAKE=$(CMAKE) \
