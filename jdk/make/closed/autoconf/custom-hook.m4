@@ -178,7 +178,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|oa64|wa64|wi32|xa64|xl64|xz64)
+      ap64|oa64|wa64|wi32|xa64|xl64|xr64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -209,6 +209,9 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
       ;;
     powerpc64)
       OPENJ9_CPU=ppc-64
+      ;;
+    aarch64)
+      OPENJ9_CPU=aarch64
       ;;
     *)
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
@@ -289,6 +292,8 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     OPENJ9_PLATFORM_CODE=xz64
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
+  elif test "x$OPENJ9_CPU" = xaarch64 ; then
+    OPENJ9_PLATFORM_CODE=xr64
   else
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi

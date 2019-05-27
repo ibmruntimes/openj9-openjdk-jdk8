@@ -15196,6 +15196,9 @@ fi
     powerpc64)
       OPENJ9_CPU=ppc-64
       ;;
+    aarch64)
+      OPENJ9_CPU=aarch64
+      ;;
     *)
       as_fn_error $? "unsupported OpenJ9 cpu $build_cpu" "$LINENO" 5
       ;;
@@ -15243,6 +15246,8 @@ fi
     OPENJ9_PLATFORM_CODE=xz64
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
+  elif test "x$OPENJ9_CPU" = xaarch64 ; then
+    OPENJ9_PLATFORM_CODE=xr64
   else
     as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
   fi
@@ -15864,7 +15869,7 @@ $as_echo "no (explicitly disabled)" >&6; }
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|oa64|wa64|wi32|xa64|xl64|xz64)
+      ap64|oa64|wa64|wi32|xa64|xl64|xr64|xz64)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default for $OPENJ9_PLATFORM_CODE)" >&5
 $as_echo "yes (default for $OPENJ9_PLATFORM_CODE)" >&6; }
         OPENJ9_ENABLE_DDR=true
@@ -17668,6 +17673,9 @@ $as_echo "no" >&6; }
       ;;
     powerpc64)
       OPENJ9_CPU=ppc-64
+      ;;
+    aarch64)
+      OPENJ9_CPU=aarch64
       ;;
     *)
       as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
