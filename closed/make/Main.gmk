@@ -36,7 +36,7 @@ openssl-build :
 	+$(OPENSSL_MAKE)
 
 j9vm-build : openssl-build
-	+$(OPENJ9_MAKE) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) build-j9
+	+$(OPENJ9_MAKE) build-j9
 
 j9vm-compose-buildjvm : j9vm-build
 	+$(OPENJ9_MAKE) stage_openj9_build_jdk
