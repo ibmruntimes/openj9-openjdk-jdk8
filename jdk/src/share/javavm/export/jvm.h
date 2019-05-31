@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
+
 #ifndef _JAVASOFT_JVM_H_
 #define _JAVASOFT_JVM_H_
 
@@ -117,6 +123,16 @@ JVM_InitProperties(JNIEnv *env, jobject p);
 JNIEXPORT void JNICALL
 JVM_OnExit(void (*func)(void));
 
+/*
+ * java.util.zip.ZipFile                                                        //use_openj9
+ */                                                                             //use_openj9
+#define JVM_ZIP_HOOK_STATE_OPEN 1                                               //use_openj9
+#define JVM_ZIP_HOOK_STATE_CLOSED 2                                             //use_openj9
+                                                                                //use_openj9
+JNIEXPORT void JNICALL                                                          //use_openj9
+JVM_ZipHook(JNIEnv *env, const char* filename, jint newState);                  //use_openj9
+                                                                                //use_openj9
+                                                                                //use_openj9
 /*
  * java.nio.Bits
  */

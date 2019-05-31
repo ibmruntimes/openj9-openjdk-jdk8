@@ -24,6 +24,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Native method support for java.util.zip.ZipFile
  */
 
@@ -117,6 +123,7 @@ Java_java_util_zip_ZipFile_open(JNIEnv *env, jclass cls, jstring name,
 
         if (zip != 0) {
             result = ptr_to_jlong(zip);
+            JVM_ZipHook(env, path, JVM_ZIP_HOOK_STATE_OPEN);                     //use_openj9
         } else if (msg != 0) {
             ThrowZipException(env, msg);
             free(msg);
@@ -150,7 +157,26 @@ Java_java_util_zip_ZipFile_startsWithLOC(JNIEnv *env, jclass cls, jlong zfile)
 JNIEXPORT void JNICALL
 Java_java_util_zip_ZipFile_close(JNIEnv *env, jclass cls, jlong zfile)
 {
-    ZIP_Close(jlong_to_ptr(zfile));
+    const char* path = NULL;                                                    //use_openj9
+    jzfile *zip = jlong_to_ptr(zfile);                  //JSE-2630              //use_openj9
+    if (zip != NULL) {                                                          //use_openj9
+       path= (*env)->NewStringUTF(env,zip->name);                               //use_openj9
+       if(path == NULL)                                                         //use_openj9
+       {                                                                        //use_openj9
+         if( (*env)->ExceptionCheck(env)  )                                     //use_openj9
+         {                                                                      //use_openj9
+           (*env)->ExceptionDescribe(env);                                      //use_openj9
+           return;                                                              //use_openj9
+         }                                                                      //use_openj9
+       }                                                                        //use_openj9
+       path = JNU_GetStringPlatformChars(env,path,0);                           //use_openj9
+       if(path != NULL)                                                         //use_openj9
+       {                                                                        //use_openj9
+         JVM_ZipHook(env, path, JVM_ZIP_HOOK_STATE_CLOSED);  //JSE-2630         //use_openj9
+         free((void *)path);                                                    //use_openj9
+       }                                                                        //use_openj9
+       ZIP_Close(zip);                                                          //use_openj9
+   }                                                                            //use_openj9
 }
 
 JNIEXPORT jlong JNICALL
