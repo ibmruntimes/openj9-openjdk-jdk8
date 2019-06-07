@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.tools.jdi;
 
@@ -29,6 +34,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.VirtualMachine;
@@ -81,7 +87,7 @@ public class GenericListeningConnector
                 false,
                 0, Integer.MAX_VALUE);
 
-        listenMap = new HashMap<Map<String,? extends Connector.Argument>,TransportService.ListenKey>(10);
+        listenMap = new ConcurrentHashMap<Map<String,? extends Connector.Argument>,TransportService.ListenKey>(10);
     }
 
     /**
