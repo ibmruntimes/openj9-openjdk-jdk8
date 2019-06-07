@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 # Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 #
 
@@ -152,18 +152,13 @@ function shell_quote() {
   fi
 }
 
-# Add default OpenJ9 closed extensions
-full_src_root_dir="$( cd "${conf_script_dir}/../.." && pwd )"
-OPENJDK_SHA=`git -C $full_src_root_dir rev-parse --short HEAD`
-OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${OPENJDK_SHA}"`
-if test "x$OPENJDK_TAG" = x; then
-  LAST_TAGGED_REVISION=`git -C $full_src_root_dir rev-list --tags --max-count=1`
-  OPENJDK_TAG=`git -C $full_src_root_dir describe --abbrev=0 --tags --match "jdk8u*" "${LAST_TAGGED_REVISION}"`
-fi
-build_update_version=`echo $OPENJDK_TAG | sed 's/jdk8u//' | awk -F'-' '{print $1}'`
-jdk_build_number=`echo $OPENJDK_TAG | awk -F'-' '{print $2}'`
+# Add default OpenJ9 closed extensions: decode OPENJDK_TAG from closed/openjdk-tag.gmk.
+openjdk_tag="$(sed -n -e 's/[\t ]//g' -e 's/^OPENJDK_TAG:=jdk8u//p' < "$TOPDIR/closed/openjdk-tag.gmk")"
+build_update_version="$(echo $openjdk_tag | sed -e 's/-b[0-9][0-9]*$//')"
+jdk_build_number="$(echo $openjdk_tag | sed -e 's/^[0-9][0-9]*-b//')"
+
 conf_milestone=
-conf_processed_arguments=("--with-custom-make-dir=$full_src_root_dir/closed/make" "--with-add-source-root=$full_src_root_dir/closed/adds" "--with-update-version=$build_update_version")
+conf_processed_arguments=("--with-custom-make-dir=$TOPDIR/closed/make" "--with-add-source-root=$TOPDIR/closed/adds" "--with-update-version=$build_update_version")
 conf_quoted_arguments=()
 conf_openjdk_target=
 
