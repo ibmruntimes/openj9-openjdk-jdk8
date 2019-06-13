@@ -42,6 +42,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
+  OPENJ9_CONFIGURE_JITSERVER
 
   if test "x$OPENJDK_TARGET_OS" = xwindows ; then
     BASIC_SETUP_OUTPUT_DIR
@@ -164,6 +165,26 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_DDR)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
+[
+  AC_MSG_CHECKING([for jitserver])
+  AC_ARG_ENABLE([jitserver], [AS_HELP_STRING([--enable-jitserver], [enable JITServer support @<:@disabled@:>@])])
+  if test "x$enable_jitserver" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_JITSERVER=true
+  elif test "x$enable_jitserver" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+    OPENJ9_ENABLE_JITSERVER=false
+  elif test "x$enable_jitserver" = x ; then
+    AC_MSG_RESULT([no (default)])
+    OPENJ9_ENABLE_JITSERVER=false
+  else
+    AC_MSG_ERROR([--enable-jitserver accepts no argument])
+  fi
+
+  AC_SUBST(OPENJ9_ENABLE_JITSERVER)
 ])
 
 AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],

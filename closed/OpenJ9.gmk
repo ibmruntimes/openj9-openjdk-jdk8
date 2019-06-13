@@ -402,6 +402,11 @@ endif
 ifneq (,$(OPENJ9_DEVELOPER_DIR))
   CUSTOM_COMPILER_ENV_VARS += DEVELOPER_DIR="$(OPENJ9_DEVELOPER_DIR)"
 endif
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  CUSTOM_COMPILER_ENV_VARS += JITSERVER_SUPPORT=1
+endif
+
+$(info TEST!!! $$CUSTOM_COMPILER_ENV_VARS is [${CUSTOM_COMPILER_ENV_VARS}])
 
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Ensuring version information is up-to-date

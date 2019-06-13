@@ -887,6 +887,7 @@ CYGWIN_LINK
 OUTPUT_ROOT
 CONF_NAME
 SPEC
+OPENJ9_ENABLE_JITSERVER
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -1079,6 +1080,7 @@ with_cuda
 with_gdk
 enable_cuda
 enable_ddr
+enable_jitserver
 with_conf_name
 with_toolchain_version
 with_msvcp_dll
@@ -1891,6 +1893,7 @@ Optional Features:
                           --with-debug-level=fastdebug) [disabled]
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
+  --enable-jitserver      enable JITServer support [disabled]
   --disable-headful       disable building headful support (graphical UI
                           support) [enabled]
   --enable-hotspot-test-in-build
@@ -4510,8 +4513,10 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1557935888
+DATE_WHEN_GENERATED=1562180238
 
 ###############################################################################
 #
@@ -15555,6 +15560,32 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
     esac
   else
     as_fn_error $? "--enable-ddr accepts no argument" "$LINENO" 5
+  fi
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
+$as_echo_n "checking for jitserver... " >&6; }
+  # Check whether --enable-jitserver was given.
+if test "${enable_jitserver+set}" = set; then :
+  enableval=$enable_jitserver;
+fi
+
+  if test "x$enable_jitserver" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_JITSERVER=true
+  elif test "x$enable_jitserver" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+    OPENJ9_ENABLE_JITSERVER=false
+  elif test "x$enable_jitserver" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+    OPENJ9_ENABLE_JITSERVER=false
+  else
+    as_fn_error $? "--enable-jitserver accepts no argument" "$LINENO" 5
   fi
 
 
