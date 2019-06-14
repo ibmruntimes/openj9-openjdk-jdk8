@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2000, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2000, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -415,7 +415,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         List<IOException> errors = ucp.closeLoaders();
 
         // now close any remaining streams.
-
+        sharedClassURLClasspathHelper.notifyURLClasspathStateChange(false);
+        
         synchronized (closeables) {
             Set<Closeable> keys = closeables.keySet();
             for (Closeable c : keys) {
