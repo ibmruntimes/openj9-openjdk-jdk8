@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -47,6 +47,7 @@
 static void dll_build_name(char* buffer, size_t buflen,
                            const char* paths, const char* fname) {
     char *path, *paths_copy, *next_token;
+    *buffer = '\0';
 
     paths_copy = strdup(paths);
     if (paths_copy == NULL) {
@@ -110,11 +111,9 @@ dbgsysGetLastErrorString(char *buf, int len)
  * Build a machine dependent library name out of a path and file name.
  */
 void
-dbgsysBuildLibName(char *holder, int holderlen, const char *pname, const char *fname)
+dbgsysBuildLibName(char *holder, size_t holderlen, const char *pname, const char *fname)
 {
     const int pnamelen = pname ? (int)strlen(pname) : 0;
-
-    *holder = '\0';
 
     if (pnamelen == 0) {
         size_t result_len = (size_t)_snprintf(holder, holderlen, "%s.dll", fname);
