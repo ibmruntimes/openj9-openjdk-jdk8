@@ -270,6 +270,9 @@ $(foreach file, \
 		testlibA \
 		testlibB \
 		vmruntimestateagent29 \
+		) \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/lib%.jnilib, \
+		loadLibraryTest \
 		), \
 	$(if $(wildcard $(file)), \
 		$(eval $(call openj9_test_image_rules, $(file)))))
