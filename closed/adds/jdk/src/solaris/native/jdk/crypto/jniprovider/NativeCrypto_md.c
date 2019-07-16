@@ -49,6 +49,7 @@ void * load_crypto_library() {
 #else
     "libcrypto.so.1.1",
     "libcrypto.so.1.0.0",
+    "libcrypto.so.10",
     "libcrypto.so",
 #endif
     };
