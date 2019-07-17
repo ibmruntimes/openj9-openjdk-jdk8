@@ -458,6 +458,10 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
       -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "sun.security.krb5.internal.tools.Ktab"$(COMMA) }'))
 endif
 
+$(eval $(call SetupLauncher,jcmd, \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jcmd" }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
+
 $(eval $(call SetupLauncher,jmap, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jmap" }' \
     -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
