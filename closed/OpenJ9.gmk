@@ -271,7 +271,7 @@ $(foreach file, \
 		testlibB \
 		vmruntimestateagent29 \
 		) \
-	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/lib%.jnilib, \
+	$(patsubst %, $(OUTPUT_ROOT)/vm/lib%.jnilib, \
 		loadLibraryTest \
 		), \
 	$(if $(wildcard $(file)), \
