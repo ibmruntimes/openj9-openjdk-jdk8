@@ -88,7 +88,6 @@ EXPORTED_PRIVATE_PKGS += \
 	openj9.lang.management.internal \
 	openj9.tools.attach.diagnostics.base \
 	openj9.tools.attach.diagnostics.info \
-	openj9.tools.attach.diagnostics.spi \
 	#
 
 RT_JAR_EXCLUDES += \
