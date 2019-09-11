@@ -42,13 +42,13 @@ JDK_BIN_TARGETS    := $(filter-out $(addprefix %, $(NOT_JDK_BIN_FILES)), $(JDK_B
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
-.PHONY : openj9.ddr-gensrc openj9.ddr-jar
+.PHONY : openj9.ddr-gen openj9.ddr-jar
 
-openj9.ddr-gensrc :
-	+$(MAKE) -f $(SRC_ROOT)/closed/make/DDR-gensrc.gmk SPEC=$(SPEC)
+openj9.ddr-gen :
+	+$(MAKE) -f $(SRC_ROOT)/closed/make/DDR.gmk SPEC=$(SPEC) generate
 
-openj9.ddr-jar : openj9.ddr-gensrc
-	+$(MAKE) -f $(SRC_ROOT)/closed/make/DDR-jar.gmk SPEC=$(SPEC)
+openj9.ddr-jar : openj9.ddr-gen
+	+$(MAKE) -f $(SRC_ROOT)/closed/make/DDR.gmk SPEC=$(SPEC) build_jar
 
 jdk-image : openj9.ddr-jar
 

@@ -34,13 +34,12 @@ ifeq (,$(OPENJ9_SHA))
   $(error Could not determine OpenJ9 SHA)
 endif
 
-# Find OpenJ9 tag associated with current commit specified by OPENJ9_SHA
-# (suppressing stderr in case there is no such tag).
-OPENJ9_TAG := $(shell git -C $(OPENJ9_TOPDIR) describe --exact-match $(OPENJ9_SHA) 2>/dev/null)
+# Find OpenJ9 tag associated with current commit (suppressing stderr in case there is no such tag).
+OPENJ9_TAG := $(shell git -C $(OPENJ9_TOPDIR) describe --exact-match HEAD 2>/dev/null)
 ifeq (,$(OPENJ9_TAG))
   OPENJ9_BRANCH := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --abbrev-ref HEAD)
   ifeq (,$(OPENJ9_BRANCH))
-    $(error Could not determine OpenJ9 Branch)
+    $(error Could not determine OpenJ9 branch)
   endif
   OPENJ9_VERSION_STRING := $(OPENJ9_BRANCH)-$(OPENJ9_SHA)
 else
@@ -156,6 +155,7 @@ OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/$(call STATIC_LIBRARY,jvm)
 endif # windows
 
 # classlib.properties
+
 $(JDK_OUTPUTDIR)/lib/classlib.properties : $(SRC_ROOT)/closed/classlib.properties
 	$(install-file)
 
@@ -189,7 +189,7 @@ $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
 	SRC := $(OUTPUT_ROOT)/vm, \
 	FILES := j9ddr.dat \
 	))
-endif # ddr
+endif # OPENJ9_ENABLE_DDR
 
 stage_openj9_build_jdk : $(OPENJ9_STAGED_FILES)
 
@@ -348,9 +348,6 @@ build-openj9-tools : stage-openj9-tools
 		JAVA_HOME=$(BOOT_JDK) lib/jpp.jar
 
 stage-j9 : stage-openj9-tools
-	@$(ECHO) Staging OpenJ9 debugtools in $(OUTPUT_ROOT)/vm
-	$(call openj9_copy_tree,$(OUTPUT_ROOT)/vm/debugtools,$(OPENJ9_TOPDIR)/debugtools)
-
 	@$(ECHO) Staging OpenJ9 jcl in $(OUTPUT_ROOT)/vm
 	$(call openj9_copy_tree,$(OUTPUT_ROOT)/vm/jcl,$(OPENJ9_TOPDIR)/jcl)
 
@@ -377,7 +374,7 @@ OPENJ9_VERSION_VARS := \
 	#
 
 OPENJ9_VERSION_SCRIPT := \
-	$(foreach var,$(OPENJ9_VERSION_VARS),-e 's|@${var}@|$(value $(var))|g')
+	$(foreach var,$(OPENJ9_VERSION_VARS),-e 's|@$(var)@|$(value $(var))|g')
 
 # create_or_update
 # ----------------
