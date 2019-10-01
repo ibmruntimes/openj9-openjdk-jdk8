@@ -32,6 +32,7 @@ package sun.security.rsa;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import java.security.*;
 import java.security.interfaces.*;
@@ -55,6 +56,8 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
 
     private static final long serialVersionUID = 2644735423591199609L;
     private static final BigInteger THREE = BigInteger.valueOf(3);
+
+    private final ConcurrentLinkedQueue<Long> keyQ = new ConcurrentLinkedQueue<>();
 
     private BigInteger n;       // modulus
     private BigInteger e;       // public exponent
@@ -162,16 +165,7 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
                         getEncoded());
     }
 
-    private long nativeRSAKey = 0x0;
-
-    /**
-     * Get native RSA Public Key context pointer.
-     * Create native context if uninitialized.
-     */
-    protected long getNativePtr() {
-        if (nativeRSAKey != 0x0) {
-            return nativeRSAKey;
-        }
+    private long RSAPublicKey_generate() {
 
         BigInteger n = this.getModulus();
         BigInteger e = this.getPublicExponent();
@@ -179,14 +173,26 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
         byte[] n_2c = n.toByteArray();
         byte[] e_2c = e.toByteArray();
 
-        nativeRSAKey = nativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
-        return nativeRSAKey;
+        return nativeCrypto.createRSAPublicKey(n_2c, n_2c.length, e_2c, e_2c.length);
+    }
+
+    protected long getNativePtr() {
+        Long ptr = keyQ.poll();
+        if (ptr == null) {
+            return RSAPublicKey_generate();
+        }
+        return ptr;
+    }
+
+    protected void returnNativePtr(long ptr) {
+        keyQ.add(ptr);
     }
 
     @Override
     public void finalize() {
-        if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
-           nativeCrypto.destroyRSAKey(nativeRSAKey);
+        Long itr;
+        while ((itr = keyQ.poll()) != null) {
+            nativeCrypto.destroyRSAKey(itr);
         }
     }
 }
