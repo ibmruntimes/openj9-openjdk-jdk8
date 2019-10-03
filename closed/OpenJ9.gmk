@@ -246,6 +246,7 @@ $(foreach file, \
 	$(patsubst %, $(OUTPUT_ROOT)/vm/$(call SHARED_LIBRARY,%), \
 		balloon29 \
 		bcuwhite \
+		bcvrelationships \
 		bcvwhite \
 		gptest \
 		hooktests \
