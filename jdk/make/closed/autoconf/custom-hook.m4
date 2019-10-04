@@ -333,28 +333,31 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
   AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
     [path to freemarker.jar (used to build OpenJ9 build tools)])])
 
-  if test "x$with_freemarker_jar" == x ; then
-    printf "\n"
-    printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-    printf "and has to be provided during configure process.\n"
-    printf "\n"
-    printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-    printf "\n"
-    printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-    printf "\n"
+  FREEMARKER_JAR=
+  if test "x$with_cmake" == x ; then
+    if test "x$with_freemarker_jar" == x ; then
+      printf "\n"
+      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
+      printf "and has to be provided during configure process.\n"
+      printf "\n"
+      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
+      printf "\n"
+      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
+      printf "\n"
 
-    AC_MSG_NOTICE([Could not find freemarker.jar])
-    AC_MSG_ERROR([Cannot continue])
-  fi
+      AC_MSG_NOTICE([Could not find freemarker.jar])
+      AC_MSG_ERROR([Cannot continue])
+    fi
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-  else
-    FREEMARKER_JAR=$with_freemarker_jar
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+    else
+      FREEMARKER_JAR=$with_freemarker_jar
+    fi
   fi
 
   AC_SUBST(FREEMARKER_JAR)
