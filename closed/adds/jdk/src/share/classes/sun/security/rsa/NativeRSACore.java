@@ -94,23 +94,28 @@ public final class NativeRSACore {
     /**
      * RSA public key ops. Simple modPow().
      */
-    synchronized private static byte[] crypt_Native(byte[] msg, sun.security.rsa.RSAPublicKeyImpl key)
+    private static byte[] crypt_Native(byte[] msg, sun.security.rsa.RSAPublicKeyImpl key)
         throws BadPaddingException {
-
         long nativePtr = key.getNativePtr();
-
         if (nativePtr == -1) {
             return null;
         }
 
-        BigInteger n = key.getModulus();
-        byte[] output = new byte[getByteLength(n)];
+        byte[] output;
+        int outputLen;
 
-        int outputLen = nativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
+        try {
+            BigInteger n = key.getModulus();
+            output = new byte[getByteLength(n)];
+            outputLen = nativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
+        } finally {
+            key.returnNativePtr(nativePtr);
+        }
 
         if (outputLen == -1) {
             return null;
         }
+
         return output;
     }
 
@@ -118,26 +123,25 @@ public final class NativeRSACore {
      * RSA private key operations with CRT. Algorithm and variable naming
      * are taken from PKCS#1 v2.1, section 5.1.2.
      */
-    synchronized private static byte[] crtCrypt_Native(byte[] msg, sun.security.rsa.RSAPrivateCrtKeyImpl key,
+    private static byte[] crtCrypt_Native(byte[] msg, sun.security.rsa.RSAPrivateCrtKeyImpl key,
             boolean verify) throws BadPaddingException {
         long nativePtr = key.getNativePtr();
-
         if (nativePtr == -1) {
             return null;
         }
 
-        int verifyInt;
-        BigInteger n = key.getModulus();
-        int outputLen = getByteLength(n);
-        byte[] output = new byte[outputLen];
+        int outputLen;
+        byte[] output;
 
-        if(verify) {
-            verifyInt = outputLen;
-        } else {
-            verifyInt = -1;
+        try {
+            BigInteger n = key.getModulus();
+            outputLen = getByteLength(n);
+            output = new byte[outputLen];
+            int verifyInt = verify ? outputLen : -1;
+            outputLen = nativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
+        } finally {
+            key.returnNativePtr(nativePtr);
         }
-
-        outputLen = nativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
 
         if (outputLen == -1) {
             return null;
