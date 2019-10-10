@@ -77,7 +77,7 @@ EXPORTED_PRIVATE_PKGS += \
 	com.ibm.oti.shared \
 	com.ibm.oti.util \
 	com.ibm.oti.vm \
-	com.ibm.tools.attach.target \
+	openj9.internal.tools.attach.target \
 	com.ibm.virtualization.management \
 	com.ibm.virtualization.management.internal \
 	jdk.internal.org.objectweb.asm \
@@ -86,7 +86,7 @@ EXPORTED_PRIVATE_PKGS += \
 	jdk.internal.org.objectweb.asm.util \
 	openj9.lang.management \
 	openj9.lang.management.internal \
-	openj9.tools.attach.diagnostics.base \
+	openj9.internal.tools.attach.diagnostics.base \
 	openj9.tools.attach.diagnostics.info \
 	#
 
