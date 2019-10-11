@@ -100,8 +100,20 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
 [
   AC_ARG_WITH(cuda, [AS_HELP_STRING([--with-cuda], [use this directory as CUDA_HOME])],
     [
-      if test -d "$with_cuda" ; then
-        OPENJ9_CUDA_HOME=$with_cuda
+      cuda_home="$with_cuda"
+      BASIC_FIXUP_PATH(cuda_home)
+      AC_MSG_CHECKING([CUDA_HOME])
+      if test -f "$cuda_home/include/cuda.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          cuda_home="`$CYGPATH -m $cuda_home`"
+        fi
+        if test "$cuda_home" = "$with_cuda" ; then
+          AC_MSG_RESULT([$with_cuda])
+        else
+          AC_MSG_RESULT([$with_cuda @<:@$cuda_home@:>@])
+        fi
+        OPENJ9_CUDA_HOME=$cuda_home
       else
         AC_MSG_ERROR([CUDA not found at $with_cuda])
       fi
@@ -110,8 +122,20 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
 
   AC_ARG_WITH(gdk, [AS_HELP_STRING([--with-gdk], [use this directory as GDK_HOME])],
     [
-      if test -d "$with_gdk" ; then
-        OPENJ9_GDK_HOME=$with_gdk
+      gdk_home="$with_gdk"
+      BASIC_FIXUP_PATH(gdk_home)
+      AC_MSG_CHECKING([GDK_HOME])
+      if test -f "$gdk_home/include/nvml.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          gdk_home="`$CYGPATH -m $gdk_home`"
+        fi
+        if test "$gdk_home" = "$with_gdk" ; then
+          AC_MSG_RESULT([$with_gdk])
+        else
+          AC_MSG_RESULT([$with_gdk @<:@$gdk_home@:>@])
+        fi
+        OPENJ9_GDK_HOME=$gdk_home
       else
         AC_MSG_ERROR([GDK not found at $with_gdk])
       fi
@@ -633,4 +657,3 @@ AC_DEFUN([CONFIGURE_OPENSSL],
   AC_SUBST(BUILD_OPENSSL)
   AC_SUBST(OPENSSL_CFLAGS)
 ])
-
