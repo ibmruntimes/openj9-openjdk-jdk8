@@ -4509,9 +4509,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
-
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1568020370
+DATE_WHEN_GENERATED=1570815643
 
 ###############################################################################
 #
@@ -15473,8 +15472,144 @@ fi
 # Check whether --with-cuda was given.
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda;
-      if test -d "$with_cuda" ; then
-        OPENJ9_CUDA_HOME=$with_cuda
+      cuda_home="$with_cuda"
+
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  path="$cuda_home"
+  new_path=`$CYGPATH -u "$path"`
+
+  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
+  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
+  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
+  # "foo.exe" is OK but "foo" is an error.
+  #
+  # This test is therefore slightly more accurate than "test -f" to check for file precense.
+  # It is also a way to make sure we got the proper file name for the real test later on.
+  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
+  if test "x$test_shortpath" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: The path of cuda_home, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of cuda_home, which resolves as \"$path\", is invalid." >&6;}
+    as_fn_error $? "Cannot locate the the path of cuda_home" "$LINENO" 5
+  fi
+
+  # Call helper function which possibly converts this using DOS-style short mode.
+  # If so, the updated path is stored in $new_path.
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
+    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
+    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
+      # Going to short mode and back again did indeed matter. Since short mode is
+      # case insensitive, let's make it lowercase to improve readability.
+      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+      # Now convert it back to Unix-style (cygpath)
+      input_path=`$CYGPATH -u "$shortmode_path"`
+      new_path="$input_path"
+    fi
+  fi
+
+  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
+  if test "x$test_cygdrive_prefix" = x; then
+    # As a simple fix, exclude /usr/bin since it's not a real path.
+    if test "x`$ECHO $new_path | $GREP ^/usr/bin/`" = x; then
+      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
+      # a path prefixed by /cygdrive for fixpath to work.
+      new_path="$CYGWIN_ROOT_PATH$input_path"
+    fi
+  fi
+
+
+  if test "x$path" != "x$new_path"; then
+    cuda_home="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting cuda_home to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting cuda_home to \"$new_path\"" >&6;}
+  fi
+
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+
+  path="$cuda_home"
+  has_colon=`$ECHO $path | $GREP ^.:`
+  new_path="$path"
+  if test "x$has_colon" = x; then
+    # Not in mixed or Windows style, start by that.
+    new_path=`cmd //c echo $path`
+  fi
+
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+  fi
+
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+  if test "x$path" != "x$new_path"; then
+    cuda_home="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting cuda_home to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting cuda_home to \"$new_path\"" >&6;}
+  fi
+
+  # Save the first 10 bytes of this path to the storage, so fixpath can work.
+  all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
+
+  else
+    # We're on a posix platform. Hooray! :)
+    path="$cuda_home"
+    has_space=`$ECHO "$path" | $GREP " "`
+    if test "x$has_space" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of cuda_home, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of cuda_home, which resolves as \"$path\", is invalid." >&6;}
+      as_fn_error $? "Spaces are not allowed in this path." "$LINENO" 5
+    fi
+
+    # Use eval to expand a potential ~
+    eval path="$path"
+    if test ! -f "$path" && test ! -d "$path"; then
+      as_fn_error $? "The path of cuda_home, which resolves as \"$path\", is not found." "$LINENO" 5
+    fi
+
+    cuda_home="`cd "$path"; $THEPWDCMD -L`"
+  fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking CUDA_HOME" >&5
+$as_echo_n "checking CUDA_HOME... " >&6; }
+      if test -f "$cuda_home/include/cuda.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          cuda_home="`$CYGPATH -m $cuda_home`"
+        fi
+        if test "$cuda_home" = "$with_cuda" ; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_cuda" >&5
+$as_echo "$with_cuda" >&6; }
+        else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_cuda [$cuda_home]" >&5
+$as_echo "$with_cuda [$cuda_home]" >&6; }
+        fi
+        OPENJ9_CUDA_HOME=$cuda_home
       else
         as_fn_error $? "CUDA not found at $with_cuda" "$LINENO" 5
       fi
@@ -15487,8 +15622,144 @@ fi
 # Check whether --with-gdk was given.
 if test "${with_gdk+set}" = set; then :
   withval=$with_gdk;
-      if test -d "$with_gdk" ; then
-        OPENJ9_GDK_HOME=$with_gdk
+      gdk_home="$with_gdk"
+
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  path="$gdk_home"
+  new_path=`$CYGPATH -u "$path"`
+
+  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
+  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
+  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
+  # "foo.exe" is OK but "foo" is an error.
+  #
+  # This test is therefore slightly more accurate than "test -f" to check for file precense.
+  # It is also a way to make sure we got the proper file name for the real test later on.
+  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
+  if test "x$test_shortpath" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: The path of gdk_home, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of gdk_home, which resolves as \"$path\", is invalid." >&6;}
+    as_fn_error $? "Cannot locate the the path of gdk_home" "$LINENO" 5
+  fi
+
+  # Call helper function which possibly converts this using DOS-style short mode.
+  # If so, the updated path is stored in $new_path.
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
+    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
+    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
+      # Going to short mode and back again did indeed matter. Since short mode is
+      # case insensitive, let's make it lowercase to improve readability.
+      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+      # Now convert it back to Unix-style (cygpath)
+      input_path=`$CYGPATH -u "$shortmode_path"`
+      new_path="$input_path"
+    fi
+  fi
+
+  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
+  if test "x$test_cygdrive_prefix" = x; then
+    # As a simple fix, exclude /usr/bin since it's not a real path.
+    if test "x`$ECHO $new_path | $GREP ^/usr/bin/`" = x; then
+      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
+      # a path prefixed by /cygdrive for fixpath to work.
+      new_path="$CYGWIN_ROOT_PATH$input_path"
+    fi
+  fi
+
+
+  if test "x$path" != "x$new_path"; then
+    gdk_home="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting gdk_home to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting gdk_home to \"$new_path\"" >&6;}
+  fi
+
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+
+  path="$gdk_home"
+  has_colon=`$ECHO $path | $GREP ^.:`
+  new_path="$path"
+  if test "x$has_colon" = x; then
+    # Not in mixed or Windows style, start by that.
+    new_path=`cmd //c echo $path`
+  fi
+
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+  fi
+
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+  if test "x$path" != "x$new_path"; then
+    gdk_home="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting gdk_home to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting gdk_home to \"$new_path\"" >&6;}
+  fi
+
+  # Save the first 10 bytes of this path to the storage, so fixpath can work.
+  all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
+
+  else
+    # We're on a posix platform. Hooray! :)
+    path="$gdk_home"
+    has_space=`$ECHO "$path" | $GREP " "`
+    if test "x$has_space" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of gdk_home, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of gdk_home, which resolves as \"$path\", is invalid." >&6;}
+      as_fn_error $? "Spaces are not allowed in this path." "$LINENO" 5
+    fi
+
+    # Use eval to expand a potential ~
+    eval path="$path"
+    if test ! -f "$path" && test ! -d "$path"; then
+      as_fn_error $? "The path of gdk_home, which resolves as \"$path\", is not found." "$LINENO" 5
+    fi
+
+    gdk_home="`cd "$path"; $THEPWDCMD -L`"
+  fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking GDK_HOME" >&5
+$as_echo_n "checking GDK_HOME... " >&6; }
+      if test -f "$gdk_home/include/nvml.h" ; then
+        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          gdk_home="`$CYGPATH -m $gdk_home`"
+        fi
+        if test "$gdk_home" = "$with_gdk" ; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gdk" >&5
+$as_echo "$with_gdk" >&6; }
+        else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_gdk [$gdk_home]" >&5
+$as_echo "$with_gdk [$gdk_home]" >&6; }
+        fi
+        OPENJ9_GDK_HOME=$gdk_home
       else
         as_fn_error $? "GDK not found at $with_gdk" "$LINENO" 5
       fi
