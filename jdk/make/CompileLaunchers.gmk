@@ -474,6 +474,10 @@ $(eval $(call SetupLauncher,jstack, \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jstack" }' \
     -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
 
+$(eval $(call SetupLauncher,jstat, \
+	    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jstat" }' \
+	    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
+
 ##########################################################################################
 # The order of the object files on the link command line affects the size of the resulting
 # binary (at least on linux) which causes the size to differ between old and new build.

@@ -222,6 +222,7 @@ package.access=sun.,\
                jdk.nashorn.internal.,\
                jdk.nashorn.tools.,\
                com.ibm.oti.,\
+               openj9.internal.,\
                jdk.xml.internal.,\
                com.sun.activation.registries.
 
