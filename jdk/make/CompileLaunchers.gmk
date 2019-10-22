@@ -441,7 +441,7 @@ $(eval $(call SetupLauncher,traceformat, \
     -DEXPAND_CLASSPATH_WILDCARDS \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.TraceFormat" }'))
 
-ifneq ($(findstring $(OPENJDK_TARGET_OS),aix linux),)
+ifneq ($(findstring $(OPENJDK_TARGET_OS),aix linux macosx),)
   $(eval $(call SetupLauncher,jextract, \
     -DEXPAND_CLASSPATH_WILDCARDS \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main" }'))
