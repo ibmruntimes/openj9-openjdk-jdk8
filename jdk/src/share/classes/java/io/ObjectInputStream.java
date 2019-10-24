@@ -337,25 +337,24 @@ public class ObjectInputStream
      * read* requests
      */
 
-      /* ClassCache Entry for caching class.forName results upon enableClassCaching */
-     private static final ClassCache classCache;
-     private static final boolean isClassCachingEnabled;
-     static {
-          isClassCachingEnabled =
-             AccessController.doPrivileged(new GetClassCachingSettingAction());
-         classCache = (isClassCachingEnabled ? new ClassCache() : null);
-     }
-  
+    /* ClassCache Entry for caching class.forName results upon enableClassCaching */
+    private static final ClassCache classCache;
+    private static final boolean isClassCachingEnabled;
+    static {
+        isClassCachingEnabled =
+            AccessController.doPrivileged(new GetClassCachingSettingAction());
+        classCache = (isClassCachingEnabled ? new ClassCache() : null);
+    }
 
-      /** if true LUDCL/forName results would be cached, false by default starting Java8 */
-     private static final class GetClassCachingSettingAction
-     implements PrivilegedAction<Boolean> {
- public Boolean run() {
-     String property =
-         System.getProperty("com.ibm.enableClassCaching", "false");
-     return property.equalsIgnoreCase("true");
- }
- }
+    /** if true LUDCL/forName results would be cached, false by default starting Java8 */
+    private static final class GetClassCachingSettingAction
+    implements PrivilegedAction<Boolean> {
+        public Boolean run() {
+            String property =
+                System.getProperty("com.ibm.enableClassCaching", "false");
+            return property.equalsIgnoreCase("true");
+        }
+    }
     private ClassLoader cachedLudcl;
 
     /**
