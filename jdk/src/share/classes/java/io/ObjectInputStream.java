@@ -356,6 +356,10 @@ public class ObjectInputStream
         }
     }
     private ClassLoader cachedLudcl;
+    /* If user code is invoked in the middle of a call to readObject the cachedLudcl
+     * must be refreshed as the ludcl could have been changed while in user code.
+     */
+    private boolean refreshLudcl = false;
 
     /**
      * Creates an ObjectInputStream that reads from the specified InputStream.
@@ -494,9 +498,9 @@ public class ObjectInputStream
         }
 
         ClassLoader oldCachedLudcl = null;
-	boolean setCached = false;
-	
-	if ((curContext == null) && (isClassCachingEnabled)) {
+        boolean setCached = false;
+
+        if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
             oldCachedLudcl = cachedLudcl;
 
             // If caller is not provided, follow the standard path to get the cachedLudcl.
@@ -509,6 +513,7 @@ public class ObjectInputStream
             }
 
             setCached = true;
+            refreshLudcl = false;
         }
 
         // if nested read, passHandle contains handle of enclosing object
@@ -608,10 +613,11 @@ public class ObjectInputStream
         ClassLoader oldCachedLudcl = null;
         boolean setCached = false; 
 
-        if ((curContext == null) && (isClassCachingEnabled)) {
+        if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
             oldCachedLudcl = cachedLudcl;
             cachedLudcl = latestUserDefinedLoader();
             setCached = true;
+            refreshLudcl = false;
         }
 
         // if nested read, passHandle contains handle of enclosing object
@@ -785,10 +791,15 @@ public class ObjectInputStream
     {
         String name = desc.getName();
         try {
-        	return ((classCache == null) ?
-        	        Class.forName(name, false, latestUserDefinedLoader()) :
-        	        classCache.get(name, cachedLudcl));
-           	
+            if (null == classCache) {
+                return Class.forName(name, false, latestUserDefinedLoader());
+            } else {
+                if (refreshLudcl) {
+                    cachedLudcl = latestUserDefinedLoader();
+                    refreshLudcl = false;
+                }
+                return classCache.get(name, cachedLudcl);
+            } 	
         } catch (ClassNotFoundException ex) {
             Class<?> cl = primClasses.get(name);
             if (cl != null) {
@@ -2180,6 +2191,8 @@ public class ObjectInputStream
             handles.lookupException(passHandle) == null &&
             desc.hasReadResolveMethod())
         {
+            /* user code is invoked */
+            refreshLudcl = true;
             Object rep = desc.invokeReadResolve(obj);
             if (unshared && rep.getClass().isArray()) {
                 rep = cloneArray(rep);
@@ -2280,6 +2293,9 @@ public class ObjectInputStream
                         curContext = new SerialCallbackContext(obj, slotDesc);
 
                         bin.setBlockDataMode(true);
+
+                        /* user code is invoked */
+                        refreshLudcl = true;
                         slotDesc.invokeReadObject(obj, this);
                     } catch (ClassNotFoundException ex) {
                         /*
@@ -2326,6 +2342,8 @@ public class ObjectInputStream
                     slotDesc.hasReadObjectNoDataMethod() &&
                     handles.lookupException(passHandle) == null)
                 {
+                    /* user code is invoked */
+                    refreshLudcl = true;
                     slotDesc.invokeReadObjectNoData(obj);
                 }
             }
