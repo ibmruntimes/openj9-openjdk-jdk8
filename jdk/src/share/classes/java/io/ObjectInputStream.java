@@ -346,12 +346,12 @@ public class ObjectInputStream
         classCache = (isClassCachingEnabled ? new ClassCache() : null);
     }
 
-    /** if true LUDCL/forName results would be cached, false by default starting Java8 */
+    /** if true LUDCL/forName results would be cached, true by default starting Java8 */
     private static final class GetClassCachingSettingAction
     implements PrivilegedAction<Boolean> {
         public Boolean run() {
             String property =
-                System.getProperty("com.ibm.enableClassCaching", "false");
+                System.getProperty("com.ibm.enableClassCaching", "true");
             return property.equalsIgnoreCase("true");
         }
     }
