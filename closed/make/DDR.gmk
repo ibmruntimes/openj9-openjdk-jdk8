@@ -49,7 +49,7 @@ DDR_VM_SRC_ROOT := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
 DDR_SUPPORT_DIR := $(JDK_OUTPUTDIR)/ddr
 
 # The blob and superset files are built with the VM.
-DDR_BLOB_FILE := $(OUTPUT_ROOT)/vm/j9ddr.dat
+DDR_BLOB_FILE := $(OPENJ9_VM_BUILD_DIR)/j9ddr.dat
 DDR_SUPERSET_FILE := $(OUTPUT_ROOT)/vm/superset.dat
 
 # Where to write class files.
