@@ -493,7 +493,9 @@ run-preprocessors-j9 : stage-j9
 
 endif # OPENJ9_ENABLE_CMAKE
 
-build-j9 : run-preprocessors-j9 generate-j9-version-headers
+run-preprocessors-j9 : generate-j9-version-headers
+
+build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
 	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
