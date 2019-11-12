@@ -4510,7 +4510,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1570815643
+DATE_WHEN_GENERATED=1571249188
 
 ###############################################################################
 #
@@ -15227,29 +15227,32 @@ if test "${with_freemarker_jar+set}" = set; then :
 fi
 
 
-  if test "x$with_freemarker_jar" == x ; then
-    printf "\n"
-    printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-    printf "and has to be provided during configure process.\n"
-    printf "\n"
-    printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-    printf "\n"
-    printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-    printf "\n"
+  FREEMARKER_JAR=
+  if test "x$with_cmake" == x ; then
+    if test "x$with_freemarker_jar" == x ; then
+      printf "\n"
+      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
+      printf "and has to be provided during configure process.\n"
+      printf "\n"
+      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
+      printf "\n"
+      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
+      printf "\n"
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find freemarker.jar" >&5
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find freemarker.jar" >&5
 $as_echo "$as_me: Could not find freemarker.jar" >&6;}
-    as_fn_error $? "Cannot continue" "$LINENO" 5
-  fi
+      as_fn_error $? "Cannot continue" "$LINENO" 5
+    fi
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-  else
-    FREEMARKER_JAR=$with_freemarker_jar
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+    else
+      FREEMARKER_JAR=$with_freemarker_jar
+    fi
   fi
 
 
