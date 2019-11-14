@@ -224,11 +224,21 @@ else
   JAVA_RC_FLAGS += -i "$(JDK_TOPDIR)/src/closed/windows/native/sun/windows"
 endif
 
+ifeq ($(OPENJDK_TARGET_OS), linux)
+################################################################################
+# Set the image base address for zLinux 64 to 0x60000 for java and javaw launchers,
+# to make compressedRefsShift to have 0 when -Xmx is set to 2040m or more.
+# / RTC PR 100052
+  ifeq ($(OPENJDK_TARGET_CPU), s390x)
+    JAVA_LDFLAGS += -Wl,-Ttext-segment=0x60000
+  endif
+endif
+
 # On windows, the debuginfo files get the same name as for java.dll. Build
 # into another dir and copy selectively so debuginfo for java.dll isn't
 # overwritten.
 $(eval $(call SetupLauncher,java, \
-    -DEXPAND_CLASSPATH_WILDCARDS,,,user32.lib comctl32.lib, \
+    -DEXPAND_CLASSPATH_WILDCARDS,$(JAVA_LDFLAGS),,user32.lib comctl32.lib, \
     $(JDK_OUTPUTDIR)/objs/jli_static.lib, $(JAVA_RC_FLAGS), \
     $(JDK_TOPDIR)/src/windows/resource/java.rc, $(JDK_OUTPUTDIR)/objs/java_objs,true))
 
@@ -241,7 +251,7 @@ BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(EXE_SUFFIX)
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
   $(eval $(call SetupLauncher,javaw, \
-      -DJAVAW -DEXPAND_CLASSPATH_WILDCARDS,,,user32.lib comctl32.lib, \
+      -DJAVAW -DEXPAND_CLASSPATH_WILDCARDS,$(JAVA_LDFLAGS),,user32.lib comctl32.lib, \
       $(JDK_OUTPUTDIR)/objs/jli_static.lib, $(JAVA_RC_FLAGS), \
       $(JDK_TOPDIR)/src/windows/resource/java.rc,,true))
 endif
