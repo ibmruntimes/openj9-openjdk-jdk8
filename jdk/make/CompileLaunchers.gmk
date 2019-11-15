@@ -239,7 +239,7 @@ endif
 # into another dir and copy selectively so debuginfo for java.dll isn't
 # overwritten.
 $(eval $(call SetupLauncher,java, \
-    -DEXPAND_CLASSPATH_WILDCARDS,$(JAVA_LDFLAGS),,user32.lib comctl32.lib, \
+    -DEXPAND_CLASSPATH_WILDCARDS,,,user32.lib comctl32.lib, \
     $(JDK_OUTPUTDIR)/objs/jli_static.lib, $(JAVA_RC_FLAGS), \
     $(JDK_TOPDIR)/src/windows/resource/java.rc, $(JDK_OUTPUTDIR)/objs/java_objs,true))
 
