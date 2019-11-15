@@ -96,11 +96,13 @@ define SetupLauncher
   
   ifeq ($(OPENJDK_TARGET_OS), linux)
   ################################################################################
-  # Set the image base address for zLinux 64 to 0x60000 for java launchers,
-  # to make compressedRefsShift to have 0 when -Xmx is set to 2040m or more.
+  # Set the image base address for zLinux 64 to 0x60000 for launchers,
+  # to make compressedRefsShift to allow compressedRefsShift to be 0 when -Xmx is set to 2040m or more.
   # / RTC PR 100052
     ifeq ($(OPENJDK_TARGET_CPU), s390x)
-      $1_LDFLAGS += -Wl,-Ttext-segment=0x60000
+      ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
+        $1_LDFLAGS += -Wl,-Ttext-segment=0x60000
+      endif
     endif
   endif
 
