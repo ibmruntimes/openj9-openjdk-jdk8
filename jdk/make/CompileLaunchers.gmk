@@ -104,6 +104,17 @@ define SetupLauncher
   endif
   
   $1_LDFLAGS_SUFFIX :=
+
+  # Set text/data load address for 64 bit aix to 0x100,0000,0000 (1TB) for launchers,
+  # ensures that it's out of the way of compressed heap allocation.
+  ifeq ($(OPENJDK_TARGET_OS), aix)
+    ifeq ($(OPENJDK_TARGET_CPU_BITS), 32)
+      $1_LDFLAGS_SUFFIX += -bmaxdata:0xa0000000/dsa
+    else
+      $1_LDFLAGS_SUFFIX += -bpT:0x10000000000
+    endif
+  endif
+  
   ifeq ($(OPENJDK_TARGET_OS), macosx)
     $1_PLIST_FILE := Info-cmdline.plist
     ifneq ($(11), )
