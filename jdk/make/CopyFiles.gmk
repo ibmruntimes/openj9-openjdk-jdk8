@@ -323,7 +323,30 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
 
     COPY_FILES += $(OPENSSL_TARGET_LIB)
   endif
-endif
+
+  ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+    # Copy OpenSSL SSL Lbrary
+    # To bundle first search for libssl 1.1.x library, if not found, search for 1.0.x
+    ifeq ($(OPENJDK_TARGET_OS), linux)
+      OPENSSL_SSL_LIB_NAME = libssl.so.1.1
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME))", "")
+        OPENSSL_SSL_LIB_NAME = libssl.so.1.0.0
+        ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME))", "")
+          OPENSSL_SSL_LIB_NAME =
+        endif
+      endif
+
+      ifneq ($(OPENSSL_SSL_LIB_NAME), )
+        OPENSSL_SSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(OPENSSL_SSL_LIB_NAME)
+
+        $(OPENSSL_SSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME)
+			$(call install-file)
+
+        COPY_FILES += $(OPENSSL_SSL_TARGET_LIB)
+      endif # OPENSSL_SSL_LIB_NAME
+    endif # OPENJDK_TARGET_OS
+  endif # OPENJ9_ENABLE_JITSERVER
+endif # OPENSSL_BUNDLE_LIB_PATH
 
 ##########################################################################################
 
