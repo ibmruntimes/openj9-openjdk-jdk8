@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -85,6 +85,22 @@ endif
 	stage-openj9-tools \
 	stage_openj9_build_jdk \
 	#
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/bin, \
+	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	FILES := jitserver$(EXE_SUFFIX) \
+	))
+
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/jre/bin, \
+	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	FILES := jitserver$(EXE_SUFFIX) \
+	))
+endif # OPENJ9_ENABLE_JITSERVER
 
 # redirector
 
@@ -321,6 +337,13 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_useOmrDdr)
   SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
+endif
+
+# Adjust JITServer enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  FEATURE_SED_SCRIPT += $(call SedEnable,build_jitserver)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,build_jitserver)
 endif
 
 # openj9_stage_buildspec_file
