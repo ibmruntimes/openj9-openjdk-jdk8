@@ -702,20 +702,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 
     AC_MSG_CHECKING([if we should bundle openssl])
     AC_MSG_RESULT([$BUNDLE_OPENSSL])
-
-    if test "x$OPENJ9_ENABLE_JITSERVER" = xtrue ; then
-      if test "x$OPENJDK_TARGET_OS" = xlinux ; then
-        if test "x$OPENSSL_DIR" != x ; then
-          AC_MSG_CHECKING([if the required OPENSSL API exists for JITServer in $OPENSSL_DIR])
-          if $GREP -q -w SSL_CTX_set_ecdh_auto "$OPENSSL_DIR/include/openssl/ssl.h" 2> /dev/null ; then
-            AC_MSG_RESULT([yes])
-          else
-            AC_MSG_RESULT([no])
-            AC_MSG_ERROR([SSL_CTX_set_ecdh_auto is required by JITServer])
-          fi
-        fi
-      fi
-    fi
   fi
 
   AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)

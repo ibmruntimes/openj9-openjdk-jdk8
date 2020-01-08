@@ -4576,7 +4576,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1576018331
+DATE_WHEN_GENERATED=1577815762
 
 ###############################################################################
 #
@@ -55786,23 +55786,6 @@ $as_echo "yes" >&6; }
 $as_echo_n "checking if we should bundle openssl... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUNDLE_OPENSSL" >&5
 $as_echo "$BUNDLE_OPENSSL" >&6; }
-
-    if test "x$OPENJ9_ENABLE_JITSERVER" = xtrue ; then
-      if test "x$OPENJDK_TARGET_OS" = xlinux ; then
-        if test "x$OPENSSL_DIR" != x ; then
-          { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the required OPENSSL API exists for JITServer in $OPENSSL_DIR" >&5
-$as_echo_n "checking if the required OPENSSL API exists for JITServer in $OPENSSL_DIR... " >&6; }
-          if $GREP -q -w SSL_CTX_set_ecdh_auto "$OPENSSL_DIR/include/openssl/ssl.h" 2> /dev/null ; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-          else
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-            as_fn_error $? "SSL_CTX_set_ecdh_auto is required by JITServer" "$LINENO" 5
-          fi
-        fi
-      fi
-    fi
   fi
 
 
