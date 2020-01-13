@@ -61,15 +61,10 @@ override MAKEFLAGS := -j $(JOBS)
 ifeq (windows,$(OPENJDK_TARGET_OS))
   # set Visual Studio environment
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
-  # On Windows, the mingw compiler is used for certain files such as
-  # the bytecode interpreter.
-  # Uncomment the following line to use the default compiler throughout.
-  # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
   # set the output directory for shared libraries
   OPENJ9_LIBS_OUTPUT_DIR := bin
 else
   EXPORT_MSVS_ENV_VARS :=
-  EXPORT_NO_USE_MINGW :=
   OPENJ9_LIBS_OUTPUT_DIR := lib$(OPENJDK_TARGET_CPU_LIBDIR)
 endif
 
@@ -564,7 +559,7 @@ run-preprocessors-j9 : generate-j9-version-headers
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
-	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 	@$(MKDIR) -p $(JDK_IMAGE_DIR)/
