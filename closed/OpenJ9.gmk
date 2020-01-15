@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -61,15 +61,10 @@ override MAKEFLAGS := -j $(JOBS)
 ifeq (windows,$(OPENJDK_TARGET_OS))
   # set Visual Studio environment
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
-  # On Windows, the mingw compiler is used for certain files such as
-  # the bytecode interpreter.
-  # Uncomment the following line to use the default compiler throughout.
-  # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
   # set the output directory for shared libraries
   OPENJ9_LIBS_OUTPUT_DIR := bin
 else
   EXPORT_MSVS_ENV_VARS :=
-  EXPORT_NO_USE_MINGW :=
   OPENJ9_LIBS_OUTPUT_DIR := lib$(OPENJDK_TARGET_CPU_LIBDIR)
 endif
 
@@ -85,6 +80,22 @@ endif
 	stage-openj9-tools \
 	stage_openj9_build_jdk \
 	#
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/bin, \
+	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	FILES := jitserver$(EXE_SUFFIX) \
+	))
+
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	DEST := $(JDK_OUTPUTDIR)/jre/bin, \
+	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	FILES := jitserver$(EXE_SUFFIX) \
+	))
+endif # OPENJ9_ENABLE_JITSERVER
 
 # redirector
 
@@ -323,6 +334,13 @@ else
   SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
 endif
 
+# Adjust JITServer enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  FEATURE_SED_SCRIPT += $(call SedEnable,build_jitserver)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,build_jitserver)
+endif
+
 # openj9_stage_buildspec_file
 # ---------------------------
 # param 1 = The simple name of the file to copy.
@@ -444,11 +462,21 @@ ifneq (,$(OPENJ9_CXX))
 else
   CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
 endif
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-  CMAKE_ARGS += "-DOMR_DDR=ON"
+
+ifeq (true,$(OPENJ9_ENABLE_CUDA))
+  CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON
+  CMAKE_CUDA_ENV := CUDA_BIN_PATH="$(CUDA_HOME)"
 else
-   CMAKE_ARGS += "-DOMR_DDR=OFF"
-endif
+  CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
+  CMAKE_CUDA_ENV :=
+endif # OPENJ9_ENABLE_CUDA
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  CMAKE_ARGS += -DOMR_DDR=ON
+else
+  CMAKE_ARGS += -DOMR_DDR=OFF
+endif # OPENJ9_ENABLE_DDR
+
 ifneq (,$(CCACHE))
   # openjdk makefiles adds a bunch of environemnt variables to the ccache command.
   # CMake will not parse this properly, so we wrap the whole thing in the env command.
@@ -463,6 +491,7 @@ ifneq (,$(CCACHE))
   CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
   CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
 endif # CCACHE
+
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
   CMAKE_ARGS += -DJITSERVER_SUPPORT=ON
 
@@ -485,7 +514,7 @@ endif # OPENJ9_ENABLE_JITSERVER
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	cd $(OUTPUT_ROOT)/vm && \
-	$(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	$(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUT_ROOT)/vm/cmake.stamp
@@ -530,7 +559,7 @@ run-preprocessors-j9 : generate-j9-version-headers
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
-	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 	@$(MKDIR) -p $(JDK_IMAGE_DIR)/
