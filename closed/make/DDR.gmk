@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -149,13 +149,25 @@ build_jar :
 
 else # DDR_GENSRC_DIR
 
+ifeq (zos,$(OPENJDK_TARGET_OS))
+
+BUILD_DDR_STUBS :=
+DDR_CLASSPATH :=
+
+else # OPENJDK_TARGET_OS
+
 # Compile the stub classes.
 $(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
 	SETUP := GENERATE_USINGJDKBYTECODE, \
 	BIN := $(DDR_STUBS_BIN), \
 	ADD_JAVAC_FLAGS := -cp $(JDK_OUTPUTDIR)/classes, \
-	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src_stubs \
+	SRC := $(OPENJ9_TOPDIR)/jcl/src/com.ibm.jzos/share/classes, \
+	EXCLUDE_FILES := module-info.java \
 	))
+	
+DDR_CLASSPATH := -cp $(DDR_STUBS_BIN)
+
+endif # OPENJDK_TARGET_OS
 
 # This file will contain the list of Java source files to be compiled.
 DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
@@ -188,7 +200,7 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES) $(BUILD_DDR_STUBS)
 		$(GENERATE_JDKBYTECODE_FLAGS) \
 		$(JAVAC_FLAGS) \
 		-d $(DDR_MAIN_BIN) \
-		-cp $(DDR_STUBS_BIN) \
+		$(DDR_CLASSPATH) \
 		-implicit:none \
 		-sourcepath "$(DDR_VM_SRC_ROOT)$(PATH_SEP)$(DDR_GENSRC_DIR)" \
 		@$(DDR_SRC_LIST_FILE)
