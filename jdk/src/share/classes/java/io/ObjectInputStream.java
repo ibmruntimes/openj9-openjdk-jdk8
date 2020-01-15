@@ -516,6 +516,9 @@ public class ObjectInputStream
             return readObjectOverride();
         }
 
+        if (! (type == Object.class || type == String.class))
+            throw new AssertionError("internal error");
+
         ClassLoader oldCachedLudcl = null;
         boolean setCached = false;
 
