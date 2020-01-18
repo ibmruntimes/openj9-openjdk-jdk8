@@ -59,11 +59,14 @@ OPENJ9_OPENJDK_NOTICE_FILE := openj9-openjdk-notices
 override MAKEFLAGS := -j $(JOBS)
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
+  # convert unix path to windows path
+  FixPath = $(shell $(CYGPATH) -m $1)
   # set Visual Studio environment
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
   # set the output directory for shared libraries
   OPENJ9_LIBS_OUTPUT_DIR := bin
 else
+  FixPath = $1
   EXPORT_MSVS_ENV_VARS :=
   OPENJ9_LIBS_OUTPUT_DIR := lib$(OPENJDK_TARGET_CPU_LIBDIR)
 endif
@@ -73,11 +76,11 @@ endif
 	build-openj9-tools \
 	clean-j9 \
 	clean-j9-dist \
+	clean-openj9-thirdparty-binaries \
 	generate-j9jcl-sources \
 	generate-j9-version-headers \
 	run-preprocessors-j9 \
 	stage-j9 \
-	stage-openj9-tools \
 	stage_openj9_build_jdk \
 	#
 
@@ -361,19 +364,18 @@ $(foreach file, \
 	$(notdir $(wildcard $(OPENJ9_TOPDIR)/buildspecs/*)), \
 	$(eval $(call openj9_stage_buildspec_file,$(file))))
 
-stage-openj9-tools :
-	@$(ECHO) Staging OpenJ9 sourcetools in $(OPENJ9_VM_BUILD_DIR)
-	$(call openj9_copy_tree,$(OPENJ9_VM_BUILD_DIR)/sourcetools,$(OPENJ9_TOPDIR)/sourcetools)
+J9TOOLS_DIR := $(JDK_OUTPUTDIR)/j9tools
+JPP_JAR     := $(J9TOOLS_DIR)/jpp.jar
 
-build-openj9-tools : stage-openj9-tools
-	@$(ECHO) Building OpenJ9 tools
-	$(MAKE) $(MAKEFLAGS) -C $(OPENJ9_VM_BUILD_DIR)/sourcetools -f buildj9tools.mk \
-		JAVA_HOME=$(BOOT_JDK) lib/jpp.jar
+build-openj9-tools :
+	@$(ECHO) Building OpenJ9 Java Preprocessor
+	@$(MKDIR) -p $(J9TOOLS_DIR)
+	$(MAKE) -C $(OPENJ9_TOPDIR)/sourcetools $(MAKEFLAGS) -f buildj9tools.mk \
+		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
+		JAVA_HOME=$(BOOT_JDK) \
+		$(call FixPath,$(JPP_JAR))
 
-stage-j9 : stage-openj9-tools
-	@$(ECHO) Staging OpenJ9 jcl in $(OPENJ9_VM_BUILD_DIR)
-	$(call openj9_copy_tree,$(OPENJ9_VM_BUILD_DIR)/jcl,$(OPENJ9_TOPDIR)/jcl)
-
+stage-j9 :
 	@$(ECHO) Staging OpenJ9 runtime in $(OPENJ9_VM_BUILD_DIR)
 	$(call openj9_copy_tree,$(OPENJ9_VM_BUILD_DIR),$(OPENJ9_TOPDIR)/runtime)
 
@@ -541,16 +543,18 @@ run-preprocessors-j9 : stage-j9
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
 		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f buildtools.mk \
+		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
+			DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
 			J9VM_SHA=$(OPENJ9_SHA) \
 			JAVA_HOME=$(BOOT_JDK) \
 			JAVA_VERSION=80 \
-			VERSION_MAJOR=8 \
 			OMR_DIR=$(OPENJ9_VM_BUILD_DIR)/omr \
+			SOURCETOOLS_DIR=$(call FixPath,$(OPENJ9_TOPDIR))/sourcetools \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
+			VERSION_MAJOR=8 \
 			tools
 
 endif # OPENJ9_ENABLE_CMAKE
@@ -574,43 +578,33 @@ J9JCL_SOURCES_DONEFILE := $(JDK_OUTPUTDIR)/j9jcl_sources/j9jcl_sources.done
 recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
 AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
-# FixPath
-# On Windows, convert unix path to windows path,
-# on other platforms leave it unchanged
-# ----------------------
-# param 1 = The path to convert
-FixPath = $(if $(findstring windows, $(OPENJDK_TARGET_OS)),$(shell $(CYGPATH) -m $1),$1)
-
-JPP_BASE_DIR := $(call FixPath,$(OPENJ9_TOPDIR))
-JPP_DEST     := $(call FixPath,$(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes)
-JPP_JAR      := $(call FixPath,$(OPENJ9_VM_BUILD_DIR)/sourcetools/lib/jpp.jar)
+JPP_DEST := $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
 
 $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 	@$(ECHO) Generating J9JCL sources
-	@$(MKDIR) -p $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
 	$(BOOT_JDK)/bin/java \
-		-cp "$(JPP_JAR)" \
+		-cp "$(call FixPath,$(JPP_JAR))" \
 		-Dfile.encoding=US-ASCII \
 		com.ibm.jpp.commandline.CommandlineBuilder \
 			-verdict \
-			-baseDir "$(JPP_BASE_DIR)/" \
+			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
 			-config SIDECAR18-SE-OPENJ9 \
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
-			-dest "$(JPP_DEST)" \
+			-dest "$(call FixPath,$(JPP_DEST))" \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
 			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
 	@$(ECHO) Generating J9JCL tools
 	@$(BOOT_JDK)/bin/java \
-		-cp "$(JPP_JAR)" \
+		-cp "$(call FixPath,$(JPP_JAR))" \
 		-Dfile.encoding=US-ASCII \
 		com.ibm.jpp.commandline.CommandlineBuilder \
 			-verdict \
-			-baseDir "$(JPP_BASE_DIR)/" \
+			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
 			-config SIDECAR18-TOOLS-OPENJ9 \
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
-			-dest "$(JPP_DEST)" \
+			-dest "$(call FixPath,$(JPP_DEST))" \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
 			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
 	@$(MKDIR) -p $(@D)
