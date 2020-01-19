@@ -515,8 +515,8 @@ endif # OPENJ9_ENABLE_JITSERVER
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
-	cd $(OUTPUT_ROOT)/vm && \
-	$(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	@$(MKDIR) -p $(@D)
+	cd $(@D) && $(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUT_ROOT)/vm/cmake.stamp
