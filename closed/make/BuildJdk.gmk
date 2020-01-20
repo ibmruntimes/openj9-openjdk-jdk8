@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,36 +18,14 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-clean-j9vm :
-	$(call CleanComponent,vm)
+# Generate J9JCL source just before openjdk source generation.
 
-.PHONY : \
-	j9vm-build \
-	j9vm-compose-buildjvm \
-	test-image \
-	test-image-openj9 \
-	#
+gensrc-only : generate_openj9_j9jcl
 
 OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
 
-OPENSSL_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/openssl.gmk SPEC=$(SPEC)
+.PHONY : generate_openj9_j9jcl
 
-openssl-build :
-	+$(OPENSSL_MAKE)
-
-j9vm-build : openssl-build
-	+$(OPENJ9_MAKE) build-j9
-
-j9vm-compose-buildjvm : j9vm-build
-	+$(OPENJ9_MAKE) stage_openj9_build_jdk
-
-all : test-image
-
-test-image : test-image-openj9
-
-# If not cross-compiling, capture 'java -version' output.
-test-image-openj9 : images
-	+$(OPENJ9_MAKE) openj9_test_image
-ifneq ($(COMPILE_TYPE), cross)
-	$(JRE_IMAGE_DIR)/bin/java -version 2>&1 | $(TEE) $(IMAGES_OUTPUTDIR)/test/openj9/java-version.txt
-endif
+generate_openj9_j9jcl :
+	+$(OPENJ9_MAKE) build-openj9-tools
+	+$(OPENJ9_MAKE) generate-j9jcl-sources

@@ -371,6 +371,7 @@ build-openj9-tools :
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) -C $(OPENJ9_TOPDIR)/sourcetools $(MAKEFLAGS) -f buildj9tools.mk \
+		BOOT_JDK=$(BOOT_JDK) \
 		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
 		JAVA_HOME=$(BOOT_JDK) \
 		$(call FixPath,$(JPP_JAR))
@@ -541,9 +542,11 @@ endif # OPENJ9_ENABLE_JITSERVER
 
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
-	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
+	@$(MKDIR) -p $(J9TOOLS_DIR)
+	export $(EXPORT_MSVS_ENV_VARS) \
 		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
+			BOOT_JDK=$(BOOT_JDK) \
 			BUILD_ID=$(BUILD_ID) \
 			DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
