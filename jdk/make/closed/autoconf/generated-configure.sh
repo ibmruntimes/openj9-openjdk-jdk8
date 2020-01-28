@@ -918,6 +918,7 @@ OS_VERSION_MICRO
 OS_VERSION_MINOR
 OS_VERSION_MAJOR
 PKG_CONFIG
+MACOSX_CODESIGN_IDENTITY
 CODESIGN
 XATTR
 DSYMUTIL
@@ -1153,6 +1154,7 @@ with_tools_dir
 with_toolchain_path
 with_extra_path
 with_xcode_path
+with_macosx_codesign_identity
 with_builddeps_conf
 with_builddeps_server
 with_builddeps_dir
@@ -2024,6 +2026,8 @@ Optional Packages:
   --with-extra-path       prepend these directories to the default path
   --with-xcode-path       explicit path to Xcode 4 (generally for building on
                           10.9 and later)
+  --with-macosx-codesign-identity
+                          specify the code signing identity
   --with-builddeps-conf   use this configuration file for the builddeps
   --with-builddeps-server download and use build dependencies from this server
                           url
@@ -3495,6 +3499,10 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 # Test if $1 is a valid argument to $3 (often is $JAVA passed as $3)
 # If so, then append $1 to $2 \
 # Also set JVM_ARG_OK to true/false depending on outcome.
@@ -4576,7 +4584,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1577815762
+DATE_WHEN_GENERATED=1580305659
 
 ###############################################################################
 #
@@ -22074,13 +22082,27 @@ $as_echo "$tool_specified" >&6; }
 
 
     if test "x$CODESIGN" != "x"; then
-      # Verify that the openjdk_codesign certificate is present
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if openjdk_codesign certificate is present" >&5
-$as_echo_n "checking if openjdk_codesign certificate is present... " >&6; }
-      rm -f codesign-testfile
-      touch codesign-testfile
-      codesign -s openjdk_codesign codesign-testfile 2>&5 >&5 || CODESIGN=
-      rm -f codesign-testfile
+      # Check for user provided code signing identity.
+      # If no identity was provided, fall back to "openjdk_codesign".
+
+# Check whether --with-macosx-codesign-identity was given.
+if test "${with_macosx_codesign_identity+set}" = set; then :
+  withval=$with_macosx_codesign_identity; MACOSX_CODESIGN_IDENTITY=$with_macosx_codesign_identity
+else
+  MACOSX_CODESIGN_IDENTITY=openjdk_codesign
+
+fi
+
+
+
+
+      # Verify that the codesign certificate is present
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if codesign certificate is present" >&5
+$as_echo_n "checking if codesign certificate is present... " >&6; }
+      $RM codesign-testfile
+      $TOUCH codesign-testfile
+      $CODESIGN -s "$MACOSX_CODESIGN_IDENTITY" codesign-testfile 2>&5 >&5 || CODESIGN=
+      $RM codesign-testfile
       if test "x$CODESIGN" = x; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
