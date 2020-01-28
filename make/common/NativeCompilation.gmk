@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 # When you read this source. Remember that $(sort ...) has the side effect
 # of removing duplicates. It is actually this side effect that is
 # desired whenever sort is used below!
@@ -624,11 +628,11 @@ endif # no MacOS X support yet
         ifneq (,$$($1_GEN_MANIFEST))
 	  $(MT) -nologo -manifest $$($1_GEN_MANIFEST) -outputresource:$$@;#1
         endif
-        # This only works if the openjdk_codesign identity is present on the system. Let
-        # silently fail otherwise.
+        # This only works if the codesign identity is present on the system.
+        # Let it silently fail otherwise.
         ifneq (,$(CODESIGN))
           ifneq (,$$($1_CODESIGN))
-	    $(CODESIGN) -s openjdk_codesign $$@
+	    $(CODESIGN) -s "$(MACOSX_CODESIGN_IDENTITY)" $$@
           endif
         endif
   endif
