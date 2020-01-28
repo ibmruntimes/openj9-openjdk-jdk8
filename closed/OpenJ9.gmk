@@ -84,51 +84,68 @@ endif
 	stage_openj9_build_jdk \
 	#
 
-# jitserver
+define copy_and_sign
+	$(call install-file)
+	$(if $(CODESIGN),$(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" "$@")
+endef
 
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/bin, \
+  # sign the jitserver executable as we copy it to bin
+  $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	MACRO := copy_and_sign, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/bin, \
 	FILES := jitserver$(EXE_SUFFIX) \
 	))
 
-$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+  # copy the signed jitserver executable to jre/bin
+  $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	MACRO := install-file, \
+	SRC := $(JDK_OUTPUTDIR)/bin, \
 	DEST := $(JDK_OUTPUTDIR)/jre/bin, \
-	SRC := $(OPENJ9_VM_BUILD_DIR), \
 	FILES := jitserver$(EXE_SUFFIX) \
 	))
 endif # OPENJ9_ENABLE_JITSERVER
 
-# redirector
-
-$(foreach subdir, j9vm server, \
-	$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-		DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(subdir), \
-		SRC := $(OPENJ9_VM_BUILD_DIR)/redirector, \
-		FILES := $(call SHARED_LIBRARY,jvm) \
-		)))
-
-# jsig
-
+# sign the redirector library as we copy it to j9vm
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR), \
+	MACRO := copy_and_sign, \
+	SRC := $(OPENJ9_VM_BUILD_DIR)/redirector, \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm, \
+	FILES := $(call SHARED_LIBRARY,jvm) \
+	))
+
+# copy the signed redirector library to server
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	MACRO := install-file, \
+	SRC := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm, \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/server, \
+	FILES := $(call SHARED_LIBRARY,jvm) \
+	))
+
+# sign the jsig library as we copy it to lib
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	MACRO := copy_and_sign, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR), \
 	FILES := $(call SHARED_LIBRARY,jsig) \
 	))
 
+# copy the signed jsig library to j9vm and server directories
 $(foreach subdir, j9vm server, \
 	$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+		MACRO := install-file, \
+		SRC := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR), \
 		DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(subdir), \
-		SRC := $(OPENJ9_VM_BUILD_DIR), \
 		FILES := $(call SHARED_LIBRARY,jsig) \
 	)))
 
 # regular shared libraries
 
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	MACRO := copy_and_sign, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
 	FILES := $(patsubst %, $(call SHARED_LIBRARY,%), \
 		cuda4j29 \
 		j9dmp29 \
@@ -157,8 +174,9 @@ $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
 ifeq (windows,$(OPENJDK_TARGET_OS))
 
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/lib, \
+	MACRO := install-file, \
 	SRC := $(OPENJ9_VM_BUILD_DIR)/lib, \
+	DEST := $(JDK_OUTPUTDIR)/lib, \
 	FILES := $(call STATIC_LIBRARY,jsig) \
 	))
 
@@ -169,32 +187,37 @@ OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/$(call STATIC_LIBRARY,jvm)
 
 endif # windows
 
-# classlib.properties
-
-$(JDK_OUTPUTDIR)/lib/classlib.properties : $(SRC_ROOT)/closed/classlib.properties
-	$(install-file)
-
-OPENJ9_STAGED_FILES += $(JDK_OUTPUTDIR)/lib/classlib.properties
+$(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
+	MACRO := install-file, \
+	SRC := $(SRC_ROOT)/closed, \
+	DEST := $(JDK_OUTPUTDIR)/lib, \
+	FILES := classlib.properties \
+	))
 
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	MACRO := install-file, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
 	FILES := \
 		$(notdir $(wildcard $(OUTPUT_ROOT)/vm/java*.properties)) \
 		options.default \
 	))
 
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/lib, \
+	MACRO := install-file, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/lib, \
 	FILES := \
 		J9TraceFormat.dat \
 		OMRTraceFormat.dat \
 	))
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
+
 .PHONY : run-ddrgen
+
 $(OPENJ9_VM_BUILD_DIR)/j9ddr.dat : run-ddrgen
+
 run-ddrgen :
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 	$(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
@@ -202,11 +225,14 @@ else # OPENJ9_ENABLE_CMAKE
 	export CC="$(CC)" CXX="$(CXX)" VERSION_MAJOR=8 $(EXPORT_MSVS_ENV_VARS) \
 		&& $(MAKE) -C $(OPENJ9_VM_BUILD_DIR)/ddr -f run_omrddrgen.mk
 endif # OPENJ9_ENABLE_CMAKE
+
 $(eval $(call SetupCopyFiles,OPENJ9_STAGED_FILES, \
-	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
+	MACRO := install-file, \
 	SRC := $(OPENJ9_VM_BUILD_DIR), \
+	DEST := $(JDK_OUTPUTDIR)/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR), \
 	FILES := j9ddr.dat \
 	))
+
 endif # OPENJ9_ENABLE_DDR
 
 stage_openj9_build_jdk : $(OPENJ9_STAGED_FILES)
@@ -237,7 +263,7 @@ OPENJ9_TEST_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/test/openj9
 define openj9_test_image_rules
 openj9_test_image : $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1))
 $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1)) : $(strip $1)
-	$$(call install-file)
+	$$(copy_and_sign)
 endef
 
 $(foreach file, \
