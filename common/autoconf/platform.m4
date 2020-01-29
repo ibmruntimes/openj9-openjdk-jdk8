@@ -22,9 +22,6 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
-# ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
-# ===========================================================================
 
 # Support macro for PLATFORM_EXTRACT_TARGET_AND_BUILD.
 # Converts autoconf style CPU name to OpenJDK style, into
