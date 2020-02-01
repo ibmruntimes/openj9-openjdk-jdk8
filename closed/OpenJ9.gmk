@@ -86,7 +86,7 @@ endif
 
 define copy_and_sign
 	$(call install-file)
-	$(if $(CODESIGN),$(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" "$@")
+	$(call CodesignFile,"$@")
 endef
 
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
