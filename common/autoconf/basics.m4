@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 # Test if $1 is a valid argument to $3 (often is $JAVA passed as $3)
 # If so, then append $1 to $2 \
 # Also set JVM_ARG_OK to true/false depending on outcome.
@@ -847,12 +851,22 @@ AC_DEFUN_ONCE([BASIC_SETUP_COMPLEX_TOOLS],
     BASIC_REQUIRE_PROGS(XATTR, xattr)
     BASIC_PATH_PROGS(CODESIGN, codesign)
     if test "x$CODESIGN" != "x"; then
-      # Verify that the openjdk_codesign certificate is present
-      AC_MSG_CHECKING([if openjdk_codesign certificate is present])
-      rm -f codesign-testfile
-      touch codesign-testfile
-      codesign -s openjdk_codesign codesign-testfile 2>&AS_MESSAGE_LOG_FD >&AS_MESSAGE_LOG_FD || CODESIGN=
-      rm -f codesign-testfile
+      # Check for user provided code signing identity.
+      # If no identity was provided, fall back to "openjdk_codesign".
+      AC_ARG_WITH([macosx-codesign-identity], [AS_HELP_STRING([--with-macosx-codesign-identity],
+        [specify the code signing identity])],
+        [MACOSX_CODESIGN_IDENTITY=$with_macosx_codesign_identity],
+        [MACOSX_CODESIGN_IDENTITY=openjdk_codesign]
+      )
+
+      AC_SUBST(MACOSX_CODESIGN_IDENTITY)
+
+      # Verify that the codesign certificate is present
+      AC_MSG_CHECKING([if codesign certificate is present])
+      $RM codesign-testfile
+      $TOUCH codesign-testfile
+      $CODESIGN -s "$MACOSX_CODESIGN_IDENTITY" codesign-testfile 2>&AS_MESSAGE_LOG_FD >&AS_MESSAGE_LOG_FD || CODESIGN=
+      $RM codesign-testfile
       if test "x$CODESIGN" = x; then
         AC_MSG_RESULT([no])
       else
