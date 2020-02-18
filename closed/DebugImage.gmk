@@ -1,0 +1,71 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+all :
+
+.PHONY : all
+
+include $(SPEC)
+include $(TOPDIR)/make/common/MakeBase.gmk
+
+ifneq (true,$(ENABLE_DEBUG_SYMBOLS))
+  DEBUG_SYMBOL_SUFFIX :=
+else ifeq (true,$(ZIP_DEBUGINFO_FILES))
+  DEBUG_SYMBOL_SUFFIX := .diz
+else ifeq (macosx,$(OPENJDK_TARGET_OS))
+  DEBUG_SYMBOL_SUFFIX := .dSYM
+else ifeq (windows,$(OPENJDK_TARGET_OS))
+  DEBUG_SYMBOL_SUFFIX := .pdb
+else
+  DEBUG_SYMBOL_SUFFIX := .debuginfo
+endif
+
+ifneq (,$(DEBUG_SYMBOL_SUFFIX))
+
+DEBUG_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/debug-image
+
+# openj9_copy_rule
+# ----------------
+# $1 - source file path
+# $2 - target file path
+define openj9_copy_rule
+  all : $2
+  $2 : $1
+	$$(call install-file)
+endef
+
+# openj9_copy_group - copy a file or a group of files into images/debug-image
+# -----------------
+# $1 - source file/folder
+# $2 - target folder
+openj9_copy_group = \
+	$(foreach path, $(call CacheFind, $1), \
+  		$(eval $(call openj9_copy_rule,$(path),$(strip $2)$(patsubst $(dir $1)%,%,$(path)))))
+
+DEBUGINFO_DIRS := $(addprefix $(JDK_OUTPUTDIR)/, bin lib)
+
+$(eval $(call FillCacheFind, $(DEBUGINFO_DIRS)))
+
+DEBUGINFO_FILES := $(filter %$(DEBUG_SYMBOL_SUFFIX), $(call CacheFind, $(DEBUGINFO_DIRS)))
+
+$(foreach file, $(DEBUGINFO_FILES), \
+	$(eval $(call openj9_copy_group,$(file),$(dir $(patsubst $(JDK_OUTPUTDIR)/%,$(DEBUG_IMAGE_DIR)/%,$(file))))))
+
+endif # DEBUG_SYMBOL_SUFFIX
