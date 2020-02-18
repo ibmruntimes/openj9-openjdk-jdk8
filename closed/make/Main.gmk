@@ -18,28 +18,26 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
+clean : clean-j9vm
+
 clean-j9vm :
 	$(call CleanComponent,vm)
 
 .PHONY : \
-	j9vm-build \
-	j9vm-compose-buildjvm \
+	build-j9vm \
+	clean-j9vm \
 	test-image \
 	test-image-openj9 \
 	#
 
-OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
+jdk : build-j9vm
 
-OPENSSL_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/openssl.gmk SPEC=$(SPEC)
-
-openssl-build :
-	+$(OPENSSL_MAKE)
-
-j9vm-build : openssl-build
-	+$(OPENJ9_MAKE) build-j9
-
-j9vm-compose-buildjvm : j9vm-build
-	+$(OPENJ9_MAKE) stage_openj9_build_jdk
+build-j9vm : start-make
+  ifeq ($(BUILD_OPENSSL),yes)
+	+$(MAKE) -f $(SRC_ROOT)/closed/openssl.gmk SPEC=$(SPEC)
+  endif # BUILD_OPENSSL
+	+$(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC) build-j9vm
+	+$(MAKE) -f $(SRC_ROOT)/closed/CopyToBuildJdk.gmk SPEC=$(SPEC)
 
 all : test-image
 
@@ -47,7 +45,7 @@ test-image : test-image-openj9
 
 # If not cross-compiling, capture 'java -version' output.
 test-image-openj9 : images
-	+$(OPENJ9_MAKE) openj9_test_image
+	+$(MAKE) -f $(SRC_ROOT)/closed/TestImage.gmk SPEC=$(SPEC)
 ifneq ($(COMPILE_TYPE), cross)
 	$(JRE_IMAGE_DIR)/bin/java -version 2>&1 | $(TEE) $(IMAGES_OUTPUTDIR)/test/openj9/java-version.txt
 endif

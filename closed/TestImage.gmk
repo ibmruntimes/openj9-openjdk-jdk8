@@ -1,0 +1,95 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+all :
+
+.PHONY : all
+
+include $(SPEC)
+include $(SRC_ROOT)/make/common/MakeBase.gmk
+
+OPENJ9_TEST_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/test/openj9
+
+# openj9_test_image_rule
+# ----------------------
+# $1 - absolute library path
+define openj9_test_image_rule
+  all : $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1))
+
+  $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1)) : $(strip $1)
+	$$(call install-file)
+	$$(call CodesignFile,"$$@")
+endef
+
+$(foreach file, \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/%$(EXE_SUFFIX), \
+		algotest \
+		bcvunit \
+		cfdump \
+		ctest \
+		dyntest \
+		gc_rwlocktest \
+		glaunch \
+		invtest \
+		jsigjnitest \
+		nativevmargs \
+		pltest \
+		propstest \
+		shrtest \
+		testjep178_dynamic \
+		testjep178_static \
+		thrstatetest \
+		vmLifecyleTests \
+		vmtest \
+		) \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/$(call SHARED_LIBRARY,%), \
+		balloon29 \
+		bcuwhite \
+		bcvrelationships \
+		bcvwhite \
+		gptest \
+		hooktests \
+		j9aixbaddep \
+		j9ben \
+		j9lazyClassLoad \
+		j9thrnumanatives29 \
+		j9thrtestnatives29 \
+		j9unresolved \
+		j9vmtest \
+		jcoregen29 \
+		jlmagent29 \
+		jniargtests \
+		jvmtitest \
+		memorywatcher29 \
+		migration \
+		osmemory29 \
+		SharedClassesNativeAgent \
+		softmxtest \
+		testjvmtiA \
+		testjvmtiB \
+		testlibA \
+		testlibB \
+		vmruntimestateagent29 \
+		) \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/lib%.jnilib, \
+		loadLibraryTest \
+		), \
+	$(if $(wildcard $(file)), \
+		$(eval $(call openj9_test_image_rule, $(file)))))
