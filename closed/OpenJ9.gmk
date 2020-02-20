@@ -494,10 +494,8 @@ endif
 
 ifeq (true,$(OPENJ9_ENABLE_CUDA))
   CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(CUDA_HOME)"
-  CMAKE_CUDA_ENV := CUDA_BIN_PATH="$(CUDA_HOME)"
 else
   CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
-  CMAKE_CUDA_ENV :=
 endif # OPENJ9_ENABLE_CUDA
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
@@ -543,7 +541,7 @@ endif # OPENJ9_ENABLE_JITSERVER
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-	cd $(@D) && $(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUT_ROOT)/vm/cmake.stamp
