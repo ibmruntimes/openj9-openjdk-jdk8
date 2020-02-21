@@ -125,8 +125,6 @@ $(call openj9_copy_shlibs, \
 	j9zlib29 \
 	jclse29 \
 	jvm \
-	management \
-	management_ext \
 	omrsig \
 	)
 
