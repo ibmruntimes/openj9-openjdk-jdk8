@@ -359,6 +359,7 @@ public class ObjectInputStream
      * must be refreshed as the ludcl could have been changed while in user code.
      */
     private boolean refreshLudcl = false;
+    private Object startingLudclObject = null;
 
     /**
      * Creates an ObjectInputStream that reads from the specified InputStream.
@@ -536,6 +537,9 @@ public class ObjectInputStream
 
             setCached = true;
             refreshLudcl = false;
+            if (null == startingLudclObject) {
+                startingLudclObject = this;
+            }
         }
 
         // if nested read, passHandle contains handle of enclosing object
@@ -552,6 +556,11 @@ public class ObjectInputStream
             }
             return obj;
         } finally {
+            /* Back to the start, refresh ludcl cache on next call. */
+            if (this == startingLudclObject) {
+                refreshLudcl = true;
+                startingLudclObject = null;
+            }
             passHandle = outerHandle;
             if (setCached) {
                 cachedLudcl = oldCachedLudcl;
@@ -640,6 +649,9 @@ public class ObjectInputStream
             cachedLudcl = latestUserDefinedLoader();
             setCached = true;
             refreshLudcl = false;
+            if (null == startingLudclObject) {
+                startingLudclObject = this;
+            }
         }
 
         // if nested read, passHandle contains handle of enclosing object
@@ -656,6 +668,11 @@ public class ObjectInputStream
             }
             return obj;
         } finally {
+            /* Back to the start, refresh ludcl cache on next call. */
+            if (this == startingLudclObject) {
+                refreshLudcl = true;
+                startingLudclObject = null;
+            }
             passHandle = outerHandle;
             if (setCached) {
                 cachedLudcl = oldCachedLudcl;

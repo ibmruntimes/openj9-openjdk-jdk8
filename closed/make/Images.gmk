@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -54,6 +54,16 @@ jdk-image : openj9.ddr-jar
 
 endif # OPENJ9_ENABLE_DDR
 
-# ensure jre/jdk binary LICENSE file content is correctly sourced
+# include legal content
+
 $(addsuffix /LICENSE, $(JDK_IMAGE_DIR) $(JDK_IMAGE_DIR)/jre $(JRE_IMAGE_DIR)) : $(SRC_ROOT)/LICENSE
 	$(process-doc-file)
+
+$(addsuffix /openj9-notices.html, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(OPENJ9_TOPDIR)/longabout.html
+	$(call install-file)
+
+$(addsuffix /openj9-openjdk-notices, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(SRC_ROOT)/openj9-openjdk-notices
+	$(call install-file)
+
+JDK_DOC_TARGETS += $(addprefix $(JDK_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)
+JRE_DOC_TARGETS += $(addprefix $(JRE_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)

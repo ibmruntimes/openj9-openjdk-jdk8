@@ -1,0 +1,173 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+all :
+
+.PHONY : all
+
+include $(SPEC)
+include $(SRC_ROOT)/make/common/MakeBase.gmk
+
+ifeq (windows,$(OPENJDK_TARGET_OS))
+  # set Visual Studio environment
+  EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
+  # set the output directory for shared libraries
+  OPENJ9_LIBS_DIR := $(JDK_OUTPUTDIR)/bin
+else
+  EXPORT_MSVS_ENV_VARS :=
+  OPENJ9_LIBS_DIR := $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)
+endif # windows
+
+define openj9_copy_only
+	$(call install-file)
+endef
+
+define openj9_copy_and_sign
+	$(openj9_copy_only)
+	$(call CodesignFile,"$@")
+endef
+
+# openj9_copy_rule
+# ----------------
+# $1 - suffix of install action macro ('only' or 'and_sign')
+# $2 - source file path
+# $3 - target file path
+define openj9_copy_rule
+  all : $3
+  $3 : $2
+	$$(openj9_copy_$1)
+endef
+
+# openj9_copy_files
+# -----------------
+# $1 - suffix of install action macro ('only' or 'and_sign'; default is 'only')
+# $2 - sequence of file paths
+openj9_copy_files = \
+	$(eval $(call openj9_copy_rule,$(if $1,$(strip $1),only),$(word 1,$2),$(word 2,$2))) \
+	$(if $(word 2,$2),$(call openj9_copy_files,,$(wordlist 2,$(words $2),$2)))
+
+# openj9_copy_exes
+# ----------------
+# $1 = list of executable names without $(EXE_SUFFIX)
+openj9_copy_exes = \
+	$(foreach file, $1, \
+		$(call openj9_copy_files,and_sign, \
+			$(addsuffix /$(file)$(EXE_SUFFIX), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(JDK_OUTPUTDIR)/bin)))
+
+# openj9_copy_shlibs
+# ------------------
+# $1 = list of shared library names without $(LIBRARY_PREFIX) or $(SHARED_LIBRARY_SUFFIX)
+openj9_copy_shlibs = \
+	$(foreach name, $1, \
+		$(call openj9_copy_files,and_sign, \
+			$(addsuffix /$(call SHARED_LIBRARY,$(name)), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(OPENJ9_LIBS_DIR)/$(OPENJ9_LIBS_SUBDIR))))
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+$(call openj9_copy_exes, jitserver)
+endif
+
+# jsig
+
+$(call openj9_copy_files,and_sign, \
+	$(addsuffix $(call SHARED_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/ \
+		$(addprefix $(OPENJ9_LIBS_DIR), / /j9vm/ /server/)))
+
+# redirector
+
+$(call openj9_copy_files,and_sign, \
+	$(addsuffix $(call SHARED_LIBRARY,jvm), \
+		$(OPENJ9_VM_BUILD_DIR)/redirector/ \
+		$(addprefix $(OPENJ9_LIBS_DIR), /j9vm/ /server/)))
+
+# regular shared libraries
+
+$(call openj9_copy_shlibs, \
+	cuda4j29 \
+	j9dmp29 \
+	j9jextract \
+	j9gc29 \
+	j9gcchk29 \
+	j9hookable29 \
+	j9jit29 \
+	j9jnichk29 \
+	j9jvmti29 \
+	j9prt29 \
+	j9shr29 \
+	j9thr29 \
+	j9trc29 \
+	j9vm29 \
+	j9vmchk29 \
+	j9vrb29 \
+	j9zlib29 \
+	jclse29 \
+	jvm \
+	management \
+	management_ext \
+	omrsig \
+	)
+
+ifeq (windows,$(OPENJDK_TARGET_OS)) # static libraries
+  $(call openj9_copy_files,, \
+	$(addsuffix /$(call STATIC_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/lib \
+		$(JDK_OUTPUTDIR)/lib))
+
+  $(call openj9_copy_files,, \
+	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm) \
+	$(JDK_OUTPUTDIR)/lib/$(call STATIC_LIBRARY,jvm))
+endif # windows
+
+$(foreach file, \
+		$(SRC_ROOT)/closed/classlib.properties \
+		$(OPENJ9_VM_BUILD_DIR)/J9TraceFormat.dat \
+		$(OPENJ9_VM_BUILD_DIR)/OMRTraceFormat.dat, \
+	$(call openj9_copy_files,, $(file) $(JDK_OUTPUTDIR)/lib/$(notdir $(file))))
+
+$(foreach file, \
+		$(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties) \
+		$(OPENJ9_VM_BUILD_DIR)/options.default, \
+	$(call openj9_copy_files,, \
+		$(file) $(OPENJ9_LIBS_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(notdir $(file))))
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  .PHONY : run-ddrgen
+
+  $(OPENJ9_VM_BUILD_DIR)/j9ddr.dat : run-ddrgen
+
+  run-ddrgen :
+    ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+	  $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
+    else # OPENJ9_ENABLE_CMAKE
+	  CC="$(CC)" CXX="$(CXX)" VERSION_MAJOR=8 $(EXPORT_MSVS_ENV_VARS) \
+		$(MAKE) -C $(OPENJ9_VM_BUILD_DIR)/ddr -f run_omrddrgen.mk
+    endif # OPENJ9_ENABLE_CMAKE
+
+  $(call openj9_copy_files,, \
+	$(addsuffix /j9ddr.dat, \
+		$(OPENJ9_VM_BUILD_DIR) \
+		$(OPENJ9_LIBS_DIR)/$(OPENJ9_LIBS_SUBDIR)))
+endif # OPENJ9_ENABLE_DDR
