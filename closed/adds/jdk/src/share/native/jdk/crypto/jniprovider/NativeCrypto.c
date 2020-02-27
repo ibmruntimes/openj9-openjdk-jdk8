@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,13 +38,21 @@
 
 #define OPENSSL_VERSION_1_0 "OpenSSL 1.0."
 #define OPENSSL_VERSION_1_1 "OpenSSL 1.1."
+/* needed for OpenSSL 1.0.2 Thread handling routines */
+# define CRYPTO_LOCK 1
 
-//Header for RSA algorithm using 1.0.2 OpenSSL
+#if defined(WINDOWS)
+# include <windows.h>
+#else /* defined(WINDOWS) */
+# include <pthread.h>
+#endif /* defined(WINDOWS) */
+
+/* Header for RSA algorithm using 1.0.2 OpenSSL */
 int OSSL102_RSA_set0_key(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_factors(RSA *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_crt_params(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 
-//Type definitions for function pointers
+/* Type definitions for function pointers */
 typedef char * OSSL_error_string_t(unsigned long, char *);
 typedef char * OSSL_error_string_n_t(unsigned long, char *, size_t);
 typedef unsigned long OSSL_get_error_t();
@@ -82,12 +90,35 @@ typedef BIGNUM* OSSL_BN_bin2bn_t (const unsigned char *, int, BIGNUM *);
 typedef void OSSL_BN_set_negative_t (BIGNUM *, int);
 typedef void OSSL_BN_free_t (BIGNUM *);
 
-//Define pointers for OpenSSL functions to handle Errors.
+typedef int OSSL_CRYPTO_num_locks_t();
+typedef void OSSL_CRYPTO_THREADID_set_numeric_t(CRYPTO_THREADID *id, unsigned long val);
+typedef void* OSSL_OPENSSL_malloc_t(size_t num);
+typedef void* OSSL_OPENSSL_free_t(void* addr);
+typedef int OSSL_CRYPTO_THREADID_set_callback_t(void (*threadid_func)(CRYPTO_THREADID *));
+typedef void OSSL_CRYPTO_set_locking_callback_t(void (*func)(int mode, int type, const char *file, int line));
+
+static int thread_setup();
+#if defined(WINDOWS)
+static void win32_locking_callback(int mode, int type, const char *file, int line);
+#else /* defined(WINDOWS) */
+static void pthreads_thread_id(CRYPTO_THREADID *tid);
+static void pthreads_locking_callback(int mode, int type, const char *file, int line);
+#endif /* defined(WINDOWS) */
+
+/* Define pointers for OpenSSL functions to handle Errors. */
 OSSL_error_string_t* OSSL_error_string;
 OSSL_error_string_n_t* OSSL_error_string_n;
 OSSL_get_error_t* OSSL_get_error;
 
-//Define pointers for OpenSSL functions to handle Message Digest algorithms.
+/* Define pointers for OpenSSL 1.0.2 threading routines */
+static OSSL_CRYPTO_num_locks_t* OSSL_CRYPTO_num_locks = NULL;
+static OSSL_CRYPTO_THREADID_set_numeric_t* OSSL_CRYPTO_THREADID_set_numeric = NULL;
+static OSSL_OPENSSL_malloc_t* OSSL_OPENSSL_malloc = NULL;
+static OSSL_OPENSSL_free_t* OSSL_OPENSSL_free = NULL;
+static OSSL_CRYPTO_THREADID_set_callback_t* OSSL_CRYPTO_THREADID_set_callback = NULL;
+static OSSL_CRYPTO_set_locking_callback_t* OSSL_CRYPTO_set_locking_callback = NULL;
+
+/* Define pointers for OpenSSL functions to handle Message Digest algorithms. */
 OSSL_sha_t* OSSL_sha1;
 OSSL_sha_t* OSSL_sha256;
 OSSL_sha_t* OSSL_sha224;
@@ -101,7 +132,7 @@ OSSL_DigestFinal_ex_t* OSSL_DigestFinal_ex;
 OSSL_MD_CTX_reset_t* OSSL_MD_CTX_reset;
 OSSL_MD_CTX_free_t* OSSL_MD_CTX_free;
 
-//Define pointers for OpenSSL functions to handle CBC and GCM Cipher algorithms.
+/* Define pointers for OpenSSL functions to handle CBC and GCM Cipher algorithms. */
 OSSL_CIPHER_CTX_new_t* OSSL_CIPHER_CTX_new;
 OSSL_CIPHER_CTX_free_t* OSSL_CIPHER_CTX_free;
 OSSL_aes_t* OSSL_aes_128_cbc;
@@ -112,7 +143,7 @@ OSSL_CIPHER_CTX_set_padding_t* OSSL_CIPHER_CTX_set_padding;
 OSSL_CipherUpdate_t* OSSL_CipherUpdate;
 OSSL_CipherFinal_ex_t* OSSL_CipherFinal_ex;
 
-//Define pointers for OpenSSL functions to handle GCM algorithm.
+/* Define pointers for OpenSSL functions to handle GCM algorithm. */
 OSSL_aes_t* OSSL_aes_128_gcm;
 OSSL_aes_t* OSSL_aes_192_gcm;
 OSSL_aes_t* OSSL_aes_256_gcm;
@@ -121,7 +152,7 @@ OSSL_DecryptInit_ex_t* OSSL_DecryptInit_ex;
 OSSL_DecryptUpdate_t* OSSL_DecryptUpdate;
 OSSL_DecryptFinal_t* OSSL_DecryptFinal;
 
-//Define pointers for OpenSSL functions to handle RSA algorithm.
+/* Define pointers for OpenSSL functions to handle RSA algorithm. */
 OSSL_RSA_new_t* OSSL_RSA_new;
 OSSL_RSA_set0_key_t* OSSL_RSA_set0_key;
 OSSL_RSA_set0_factors_t* OSSL_RSA_set0_factors;
@@ -153,6 +184,7 @@ static void printErrors(void) {
     fflush(stderr);
 }
 
+static void *crypto_library = NULL;
 /*
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    loadCrypto
@@ -161,122 +193,143 @@ static void printErrors(void) {
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
   (JNIEnv *env, jclass thisObj){
 
-    void *handle = NULL;
     typedef const char* OSSL_version_t(int);
 
-     // Determine the version of OpenSSL.
+    /* Determine the version of OpenSSL. */
     OSSL_version_t* OSSL_version;
     const char * openssl_version;
     int ossl_ver;
 
-    // Load OpenSSL Crypto library
-    handle = load_crypto_library();
-    if (NULL == handle) {
-        //fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
-        //fflush(stderr);
+    /* Load OpenSSL Crypto library */
+    crypto_library = load_crypto_library();
+    if (NULL == crypto_library) {
+#if 0
+        fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
+        fflush(stderr);
+#endif /* 0 */
         return -1;
     }
 
-    // Different symbols are used by OpenSSL with 1.0 and 1.1.
-    // The symbol 'OpenSSL_version' is used by OpenSSL 1.1 where as
-    // the symbol "SSLeay_version" is used by OpenSSL 1.0.
-    // Currently only openssl 1.0.x and 1.1.x are supported.
-    OSSL_version = (OSSL_version_t*)find_crypto_symbol(handle, "OpenSSL_version");
+    /* Different symbols are used by OpenSSL with 1.0 and 1.1.
+     * The symbol 'OpenSSL_version' is used by OpenSSL 1.1 where as
+     * the symbol "SSLeay_version" is used by OpenSSL 1.0.
+     * Currently only openssl 1.0.x and 1.1.x are supported.
+     */
+    OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "OpenSSL_version");
 
     if (NULL == OSSL_version)  {
-        OSSL_version = (OSSL_version_t*)find_crypto_symbol(handle, "SSLeay_version");
+        OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "SSLeay_version");
 
         if (NULL == OSSL_version)  {
-            //fprintf(stderr, "Only openssl 1.0.x and 1.1.x are supported\n");
-            //fflush(stderr);
-            unload_crypto_library(handle);
+#if 0
+            fprintf(stderr, "Only openssl 1.0.x and 1.1.x are supported\n");
+            fflush(stderr);
+#endif /* 0 */
+            unload_crypto_library(crypto_library);
+            crypto_library = NULL;
             return -1;
         } else {
-            openssl_version = (*OSSL_version)(0); //get OPENSSL_VERSION
-            //Ensure the OpenSSL version is "OpenSSL 1.0.x"
+            openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
+            /* Ensure the OpenSSL version is "OpenSSL 1.0.x" */
             if (0 != strncmp(openssl_version, OPENSSL_VERSION_1_0, strlen(OPENSSL_VERSION_1_0))) {
-                //fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
-                //fflush(stderr);
-                unload_crypto_library(handle);
+#if 0
+                fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
+                fflush(stderr);
+#endif /* 0 */
+                unload_crypto_library(crypto_library);
+                crypto_library = NULL;
                 return -1;
             }
             ossl_ver = 0;
         }
     } else {
-        openssl_version = (*OSSL_version)(0); //get OPENSSL_VERSION
-        //Ensure the OpenSSL version is "OpenSSL 1.1.x".
+        openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
+        /* Ensure the OpenSSL version is "OpenSSL 1.1.x". */
         if (0 != strncmp(openssl_version,OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1))) {
-            //fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
-            //fflush(stderr);
-            unload_crypto_library(handle);
+#if 0
+            fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
+            fflush(stderr);
+#endif /* 0 */
+            unload_crypto_library(crypto_library);
+            crypto_library = NULL;
             return -1;
         }
         ossl_ver = 1;
     }
 
-    // Load the function symbols for OpenSSL errors.
-    OSSL_error_string_n = (OSSL_error_string_n_t*)find_crypto_symbol(handle, "ERR_error_string_n");
-    OSSL_error_string = (OSSL_error_string_t*)find_crypto_symbol(handle, "ERR_error_string");
-    OSSL_get_error = (OSSL_get_error_t*)find_crypto_symbol(handle, "ERR_get_error");
+    /* Load the function symbols for OpenSSL errors. */
+    OSSL_error_string_n = (OSSL_error_string_n_t*)find_crypto_symbol(crypto_library, "ERR_error_string_n");
+    OSSL_error_string = (OSSL_error_string_t*)find_crypto_symbol(crypto_library, "ERR_error_string");
+    OSSL_get_error = (OSSL_get_error_t*)find_crypto_symbol(crypto_library, "ERR_get_error");
 
-    //Load the function symbols for OpenSSL Message Digest algorithms.
-    OSSL_sha1 = (OSSL_sha_t*)find_crypto_symbol(handle, "EVP_sha1");
-    OSSL_sha256 = (OSSL_sha_t*)find_crypto_symbol(handle, "EVP_sha256");
-    OSSL_sha224 = (OSSL_sha_t*)find_crypto_symbol(handle, "EVP_sha224");
-    OSSL_sha384 = (OSSL_sha_t*)find_crypto_symbol(handle, "EVP_sha384");
-    OSSL_sha512 = (OSSL_sha_t*)find_crypto_symbol(handle, "EVP_sha512");
-
-    if (1 == ossl_ver) {
-        OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(handle, "EVP_MD_CTX_new");
-        OSSL_MD_CTX_reset = (OSSL_MD_CTX_reset_t*)find_crypto_symbol(handle, "EVP_MD_CTX_reset");
-        OSSL_MD_CTX_free = (OSSL_MD_CTX_free_t*)find_crypto_symbol(handle, "EVP_MD_CTX_free");
-    } else {
-        OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(handle, "EVP_MD_CTX_create");
-        OSSL_MD_CTX_reset = (OSSL_MD_CTX_reset_t*)find_crypto_symbol(handle, "EVP_MD_CTX_cleanup");
-        OSSL_MD_CTX_free = (OSSL_MD_CTX_free_t*)find_crypto_symbol(handle, "EVP_MD_CTX_destroy");
+	/* Load Threading routines for OpenSSL 1.0.2 */
+    if (0 == ossl_ver) {
+        OSSL_CRYPTO_num_locks = (OSSL_CRYPTO_num_locks_t*)find_crypto_symbol(crypto_library, "CRYPTO_num_locks");
+        OSSL_CRYPTO_THREADID_set_numeric = (OSSL_CRYPTO_THREADID_set_numeric_t*)find_crypto_symbol(crypto_library, "CRYPTO_THREADID_set_numeric");
+        OSSL_OPENSSL_malloc = (OSSL_OPENSSL_malloc_t*)find_crypto_symbol(crypto_library, "CRYPTO_malloc");
+        OSSL_OPENSSL_free = (OSSL_OPENSSL_free_t*)find_crypto_symbol(crypto_library, "CRYPTO_free");
+        OSSL_CRYPTO_THREADID_set_callback = (OSSL_CRYPTO_THREADID_set_callback_t*)find_crypto_symbol(crypto_library, "CRYPTO_THREADID_set_callback");
+        OSSL_CRYPTO_set_locking_callback = (OSSL_CRYPTO_set_locking_callback_t*)find_crypto_symbol(crypto_library, "CRYPTO_set_locking_callback");
     }
 
-    OSSL_DigestInit_ex = (OSSL_DigestInit_ex_t*)find_crypto_symbol(handle, "EVP_DigestInit_ex");
-    OSSL_MD_CTX_copy_ex = (OSSL_MD_CTX_copy_ex_t*)find_crypto_symbol(handle, "EVP_MD_CTX_copy_ex");
-    OSSL_DigestUpdate = (OSSL_DigestUpdate_t*)find_crypto_symbol(handle, "EVP_DigestUpdate");
-    OSSL_DigestFinal_ex = (OSSL_DigestFinal_ex_t*)find_crypto_symbol(handle, "EVP_DigestFinal_ex");
-
-    //Load the function symbols for OpenSSL CBC and GCM Cipher algorithms.
-    OSSL_CIPHER_CTX_new = (OSSL_CIPHER_CTX_new_t*)find_crypto_symbol(handle, "EVP_CIPHER_CTX_new");
-    OSSL_CIPHER_CTX_free = (OSSL_CIPHER_CTX_free_t*)find_crypto_symbol(handle, "EVP_CIPHER_CTX_free");
-    OSSL_aes_128_cbc = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_128_cbc");
-    OSSL_aes_192_cbc = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_192_cbc");
-    OSSL_aes_256_cbc = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_256_cbc");
-    OSSL_CipherInit_ex = (OSSL_CipherInit_ex_t*)find_crypto_symbol(handle, "EVP_CipherInit_ex");
-    OSSL_CIPHER_CTX_set_padding = (OSSL_CIPHER_CTX_set_padding_t*)find_crypto_symbol(handle, "EVP_CIPHER_CTX_set_padding");
-    OSSL_CipherUpdate = (OSSL_CipherUpdate_t*)find_crypto_symbol(handle, "EVP_CipherUpdate");
-    OSSL_CipherFinal_ex = (OSSL_CipherFinal_ex_t*)find_crypto_symbol(handle, "EVP_CipherFinal_ex");
-    OSSL_aes_128_gcm = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_128_gcm");
-    OSSL_aes_192_gcm = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_192_gcm");
-    OSSL_aes_256_gcm = (OSSL_aes_t*)find_crypto_symbol(handle, "EVP_aes_256_gcm");
-    OSSL_CIPHER_CTX_ctrl = (OSSL_CIPHER_CTX_ctrl_t*)find_crypto_symbol(handle, "EVP_CIPHER_CTX_ctrl");
-    OSSL_DecryptInit_ex = (OSSL_DecryptInit_ex_t*)find_crypto_symbol(handle, "EVP_DecryptInit_ex");
-    OSSL_DecryptUpdate = (OSSL_DecryptUpdate_t*)find_crypto_symbol(handle, "EVP_DecryptUpdate");
-    OSSL_DecryptFinal = (OSSL_DecryptFinal_t*)find_crypto_symbol(handle, "EVP_DecryptFinal");
-
-    //Load the functions symbols for Openssl RSA algorithm.
-    OSSL_RSA_new = (OSSL_RSA_new_t*)find_crypto_symbol(handle, "RSA_new");
+    /* Load the function symbols for OpenSSL Message Digest algorithms. */
+    OSSL_sha1 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha1");
+    OSSL_sha256 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha256");
+    OSSL_sha224 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha224");
+    OSSL_sha384 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha384");
+    OSSL_sha512 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha512");
 
     if (1 == ossl_ver) {
-        OSSL_RSA_set0_key = (OSSL_RSA_set0_key_t*)find_crypto_symbol(handle, "RSA_set0_key");
-        OSSL_RSA_set0_factors = (OSSL_RSA_set0_factors_t*)find_crypto_symbol(handle, "RSA_set0_factors");
-        OSSL_RSA_set0_crt_params = (OSSL_RSA_set0_key_t*)find_crypto_symbol(handle, "RSA_set0_crt_params");
+        OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_new");
+        OSSL_MD_CTX_reset = (OSSL_MD_CTX_reset_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_reset");
+        OSSL_MD_CTX_free = (OSSL_MD_CTX_free_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_free");
+    } else {
+        OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_create");
+        OSSL_MD_CTX_reset = (OSSL_MD_CTX_reset_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_cleanup");
+        OSSL_MD_CTX_free = (OSSL_MD_CTX_free_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_destroy");
+    }
+
+    OSSL_DigestInit_ex = (OSSL_DigestInit_ex_t*)find_crypto_symbol(crypto_library, "EVP_DigestInit_ex");
+    OSSL_MD_CTX_copy_ex = (OSSL_MD_CTX_copy_ex_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_copy_ex");
+    OSSL_DigestUpdate = (OSSL_DigestUpdate_t*)find_crypto_symbol(crypto_library, "EVP_DigestUpdate");
+    OSSL_DigestFinal_ex = (OSSL_DigestFinal_ex_t*)find_crypto_symbol(crypto_library, "EVP_DigestFinal_ex");
+
+    /* Load the function symbols for OpenSSL CBC and GCM Cipher algorithms. */
+    OSSL_CIPHER_CTX_new = (OSSL_CIPHER_CTX_new_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_new");
+    OSSL_CIPHER_CTX_free = (OSSL_CIPHER_CTX_free_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_free");
+    OSSL_aes_128_cbc = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_128_cbc");
+    OSSL_aes_192_cbc = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_192_cbc");
+    OSSL_aes_256_cbc = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_256_cbc");
+    OSSL_CipherInit_ex = (OSSL_CipherInit_ex_t*)find_crypto_symbol(crypto_library, "EVP_CipherInit_ex");
+    OSSL_CIPHER_CTX_set_padding = (OSSL_CIPHER_CTX_set_padding_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_set_padding");
+    OSSL_CipherUpdate = (OSSL_CipherUpdate_t*)find_crypto_symbol(crypto_library, "EVP_CipherUpdate");
+    OSSL_CipherFinal_ex = (OSSL_CipherFinal_ex_t*)find_crypto_symbol(crypto_library, "EVP_CipherFinal_ex");
+    OSSL_aes_128_gcm = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_128_gcm");
+    OSSL_aes_192_gcm = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_192_gcm");
+    OSSL_aes_256_gcm = (OSSL_aes_t*)find_crypto_symbol(crypto_library, "EVP_aes_256_gcm");
+    OSSL_CIPHER_CTX_ctrl = (OSSL_CIPHER_CTX_ctrl_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_ctrl");
+    OSSL_DecryptInit_ex = (OSSL_DecryptInit_ex_t*)find_crypto_symbol(crypto_library, "EVP_DecryptInit_ex");
+    OSSL_DecryptUpdate = (OSSL_DecryptUpdate_t*)find_crypto_symbol(crypto_library, "EVP_DecryptUpdate");
+    OSSL_DecryptFinal = (OSSL_DecryptFinal_t*)find_crypto_symbol(crypto_library, "EVP_DecryptFinal");
+
+    /* Load the functions symbols for Openssl RSA algorithm. */
+    OSSL_RSA_new = (OSSL_RSA_new_t*)find_crypto_symbol(crypto_library, "RSA_new");
+
+    if (1 == ossl_ver) {
+        OSSL_RSA_set0_key = (OSSL_RSA_set0_key_t*)find_crypto_symbol(crypto_library, "RSA_set0_key");
+        OSSL_RSA_set0_factors = (OSSL_RSA_set0_factors_t*)find_crypto_symbol(crypto_library, "RSA_set0_factors");
+        OSSL_RSA_set0_crt_params = (OSSL_RSA_set0_key_t*)find_crypto_symbol(crypto_library, "RSA_set0_crt_params");
     } else {
         OSSL_RSA_set0_key = &OSSL102_RSA_set0_key;
         OSSL_RSA_set0_factors = &OSSL102_RSA_set0_factors;
         OSSL_RSA_set0_crt_params = &OSSL102_RSA_set0_crt_params;
     }
-    OSSL_RSA_free = (OSSL_RSA_free_t *)find_crypto_symbol(handle, "RSA_free");
-    OSSL_RSA_public_decrypt = (OSSL_RSA_public_decrypt_t *)find_crypto_symbol(handle, "RSA_public_decrypt");
-    OSSL_RSA_private_encrypt = (OSSL_RSA_private_encrypt_t *)find_crypto_symbol(handle, "RSA_private_decrypt");
-    OSSL_BN_bin2bn = (OSSL_BN_bin2bn_t *)find_crypto_symbol(handle, "BN_bin2bn");
-    OSSL_BN_set_negative = (OSSL_BN_set_negative_t *)find_crypto_symbol(handle, "BN_set_negative");
-    OSSL_BN_free = (OSSL_BN_free_t *)find_crypto_symbol(handle, "BN_free");
+    OSSL_RSA_free = (OSSL_RSA_free_t *)find_crypto_symbol(crypto_library, "RSA_free");
+    OSSL_RSA_public_decrypt = (OSSL_RSA_public_decrypt_t *)find_crypto_symbol(crypto_library, "RSA_public_decrypt");
+    OSSL_RSA_private_encrypt = (OSSL_RSA_private_encrypt_t *)find_crypto_symbol(crypto_library, "RSA_private_decrypt");
+    OSSL_BN_bin2bn = (OSSL_BN_bin2bn_t *)find_crypto_symbol(crypto_library, "BN_bin2bn");
+    OSSL_BN_set_negative = (OSSL_BN_set_negative_t *)find_crypto_symbol(crypto_library, "BN_set_negative");
+    OSSL_BN_free = (OSSL_BN_free_t *)find_crypto_symbol(crypto_library, "BN_free");
 
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
@@ -318,15 +371,169 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_RSA_private_encrypt) ||
         (NULL == OSSL_BN_bin2bn) ||
         (NULL == OSSL_BN_set_negative) ||
-        (NULL == OSSL_BN_free)) {
-        //fprintf(stderr, "One or more of the required symbols are missing in the crypto library\n");
-        //fflush(stderr);
-        unload_crypto_library(handle);
+        (NULL == OSSL_BN_free) ||
+        ((NULL == OSSL_CRYPTO_num_locks) && (0 == ossl_ver)) ||
+        ((NULL == OSSL_CRYPTO_THREADID_set_numeric) && (0 == ossl_ver)) ||
+        ((NULL == OSSL_OPENSSL_malloc) && (0 == ossl_ver)) ||
+        ((NULL == OSSL_OPENSSL_free) && (0 == ossl_ver)) ||
+        ((NULL == OSSL_CRYPTO_THREADID_set_callback) && (0 == ossl_ver)) ||
+        ((NULL == OSSL_CRYPTO_set_locking_callback) && (0 == ossl_ver))) {
+#if 0
+        fprintf(stderr, "One or more of the required symbols are missing in the crypto library\n");
+        fflush(stderr);
+#endif /* 0 */
+        unload_crypto_library(crypto_library);
+        crypto_library = NULL;
         return -1;
     } else {
+        if (0 == ossl_ver) {
+            if (0 != thread_setup()) {
+                unload_crypto_library(crypto_library);
+                crypto_library = NULL;
+                return -1;
+            }
+        }
         return 0;
     }
  }
+
+#if defined(WINDOWS)
+static HANDLE *lock_cs = NULL;
+
+int thread_setup()
+{
+    int i = 0;
+    int j = 0;
+    int lockNum = (*OSSL_CRYPTO_num_locks)();
+    size_t size = lockNum * sizeof(HANDLE);
+    lock_cs = (*OSSL_OPENSSL_malloc)(size);
+    if (NULL == lock_cs) {
+        return -1;
+    }
+    for (i = 0; i < lockNum; i++) {
+        lock_cs[i] = CreateMutex(NULL, FALSE, NULL);
+        if (NULL == lock_cs[i]) {
+            fprintf(stderr, "CreateMutex error: %d\n", GetLastError());
+            for (j = 0; j < i; j++) {
+                BOOL releaseResult = ReleaseMutex(lock_cs[j]);
+                if (FALSE == releaseResult) {
+                    fprintf(stderr, "ReleaseMutex error: %d\n", GetLastError());
+                }
+            }
+            (*OSSL_OPENSSL_free)(lock_cs);
+            lock_cs = NULL;
+            return -1;
+        }
+    }
+    /* For windows platform, OpenSSL already has an implementation to get thread id.
+     * So Windows do not need (*OSSL_CRYPTO_THREADID_set_callback)() here like non-Windows Platform.
+     */
+    (*OSSL_CRYPTO_set_locking_callback)(win32_locking_callback);
+    return 0;
+}
+
+void win32_locking_callback(int mode, int type, const char *file, int line)
+{
+    if (0 != (mode & CRYPTO_LOCK)) {
+        DWORD dwWaitResult = WaitForSingleObject(lock_cs[type], INFINITE);
+        if (WAIT_FAILED == dwWaitResult) {
+            fprintf(stderr, "WaitForSingleObject error: %d\n", GetLastError());
+        }
+    } else {
+        BOOL releaseResult = ReleaseMutex(lock_cs[type]);
+        if (FALSE == releaseResult) {
+            fprintf(stderr, "ReleaseMutex error: %d\n", GetLastError());
+        }
+    }
+}
+
+#else /* defined(WINDOWS) */
+static pthread_mutex_t *lock_cs = NULL;
+
+int thread_setup()
+{
+    int i = 0;
+    int j = 0;
+    int lockNum = (*OSSL_CRYPTO_num_locks)();
+    size_t size = lockNum * sizeof(pthread_mutex_t);
+    lock_cs = (*OSSL_OPENSSL_malloc)(size);
+    if (NULL == lock_cs) {
+        return -1;
+    }
+    for (i = 0; i < lockNum; i++) {
+        int initResult = pthread_mutex_init(&(lock_cs[i]), NULL);
+        if (0 != initResult) {
+            fprintf(stderr, "pthread_mutex_init error %d\n", initResult);
+            for (j = 0; j < i; j++) {
+                int destroyResult = pthread_mutex_destroy(&(lock_cs[j]));
+                if (0 != destroyResult) {
+                    fprintf(stderr, "pthread_mutex_destroy error %d\n", destroyResult);
+                }
+            }
+            (*OSSL_OPENSSL_free)(lock_cs);
+            lock_cs = NULL;
+            return -1;
+        }
+    }
+    (*OSSL_CRYPTO_THREADID_set_callback)(pthreads_thread_id);
+    (*OSSL_CRYPTO_set_locking_callback)(pthreads_locking_callback);
+    return 0;
+}
+
+void pthreads_locking_callback(int mode, int type, const char *file, int line)
+{
+    if (0 != (mode & CRYPTO_LOCK)) {
+        int lockResult = pthread_mutex_lock(&(lock_cs[type]));
+        if (0 != lockResult) {
+            fprintf(stderr, "pthread_mutex_lock error: %d\n", lockResult);
+        }
+    } else {
+        int unlockResult = pthread_mutex_unlock(&(lock_cs[type]));
+        if (0 != unlockResult) {
+            fprintf(stderr, "pthread_mutex_unlock error: %d\n", unlockResult);
+        }
+    }
+}
+
+void pthreads_thread_id(CRYPTO_THREADID *tid)
+{
+    (*OSSL_CRYPTO_THREADID_set_numeric)(tid, (unsigned long)pthread_self());
+}
+#endif /* defined(WINDOWS) */
+
+/* Clean up resource from loadCrypto() and thread_setup()*/
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM * vm, void * reserved)
+{
+    int i = 0;
+    int lockNum = 0;
+    if (NULL == crypto_library) {
+        return;
+    }
+    if ((NULL == OSSL_CRYPTO_num_locks) || (NULL == lock_cs)) {
+        unload_crypto_library(crypto_library);
+        crypto_library = NULL;
+        return;
+    }
+    lockNum = (*OSSL_CRYPTO_num_locks)();
+    (*OSSL_CRYPTO_set_locking_callback)(NULL);
+    for (i = 0; i < lockNum; i++) {
+#if defined(WINDOWS)
+        BOOL destoryResult = CloseHandle(lock_cs[i]);
+        if (FALSE == destoryResult) {
+            fprintf(stderr, "destoryResult error: %d\n", GetLastError());
+        }
+#else /* defined(WINDOWS) */
+        int destroyResult = pthread_mutex_destroy(&(lock_cs[i]));
+        if (0 != destroyResult) {
+            fprintf(stderr, "pthread_mutex_destroy error %d\n", destroyResult);
+        }
+#endif /* defined(WINDOWS) */
+    }
+    (*OSSL_OPENSSL_free)(lock_cs);
+    lock_cs = NULL;
+    unload_crypto_library(crypto_library);
+    crypto_library = NULL;
+}
 
 /* Create Digest context
  *
@@ -1395,7 +1602,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
 
     rsaKey = (RSA*)(intptr_t)publicRSAKey;
 
-    // OSSL_RSA_public_decrypt returns -1 on error
+    /* OSSL_RSA_public_decrypt returns -1 on error */
     msg_len = (*OSSL_RSA_public_decrypt)(kLen, kNative, mNative, rsaKey, RSA_NO_PADDING);
 
     (*env)->ReleasePrimitiveArrayCritical(env, k, kNative, JNI_ABORT);
@@ -1434,7 +1641,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
 
     rsaKey = (RSA*)(intptr_t)privateRSAKey;
 
-    // OSSL_RSA_private_encrypt returns -1 on error
+    /* OSSL_RSA_private_encrypt returns -1 on error */
     msg_len = (*OSSL_RSA_private_encrypt)(kLen, kNative, mNative, rsaKey, RSA_NO_PADDING);
 
     if ((-1 != verify) && (-1 != msg_len)) {
@@ -1442,7 +1649,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
             k2 = malloc(kLen * (sizeof(unsigned char)));
             if (NULL != k2) {
 
-                //mNative is size 'verify'
+                /* mNative is size 'verify' */
                 msg_len2 = (*OSSL_RSA_public_decrypt)(verify, mNative, k2, rsaKey, RSA_NO_PADDING);
                 if (-1 != msg_len2) {
 
@@ -1476,17 +1683,18 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
  * into an OpenSSL BIGNUM
  */
 BIGNUM* convertJavaBItoBN(unsigned char* in, int len) {
-    // first bit is neg
+    /* first bit is neg */
     int neg = (in[0] & 0x80);
-    int c = 1; // carry bit
+    int c = 1; /* carry bit */
     int i = 0;
     BIGNUM* bn = NULL;
     if (0 != neg) {
-        // number is negative in two's complement form
-        // need to extract magnitude
+        /* number is negative in two's complement form
+         * need to extract magnitude
+         */
         for (i = len - 1; i >= 0; i--) {
-            in[i] ^= 0xff; // flip bits
-            if (c) { // add 1 for as long as needed
+            in[i] ^= 0xff; /* flip bits */
+            if (c) { /* add 1 for as long as needed */
                 c = 0 == (++in[i]);
             }
         }
