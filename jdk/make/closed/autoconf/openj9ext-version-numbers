@@ -20,5 +20,5 @@
 # 
 # ===========================================================================
 
-JDK_MOD_VERSION=0
-JDK_FIX_VERSION=HEAD
+JDK_MOD_VERSION=252
+JDK_FIX_VERSION=0
