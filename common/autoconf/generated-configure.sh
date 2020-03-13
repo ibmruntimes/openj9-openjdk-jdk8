@@ -3962,6 +3962,10 @@ pkgadd_help() {
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 
 
 
@@ -4405,7 +4409,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1582627014
+DATE_WHEN_GENERATED=1584456140
 
 ###############################################################################
 #
@@ -42454,8 +42458,8 @@ $as_echo_n "checking if we should generate debug symbols... " >&6; }
     # Default is on if objcopy is found
     if test "x$OBJCOPY" != x; then
       ENABLE_DEBUG_SYMBOLS=true
-    # MacOS X and Windows don't use objcopy but default is on for those OSes
-    elif test "x$OPENJDK_TARGET_OS" = xmacosx || test "x$OPENJDK_TARGET_OS" = xwindows; then
+    # AIX, MacOS X and Windows don't use objcopy but default is on for those OSes
+    elif test "x$OPENJDK_TARGET_OS" = xaix || test "x$OPENJDK_TARGET_OS" = xmacosx || test "x$OPENJDK_TARGET_OS" = xwindows; then
       ENABLE_DEBUG_SYMBOLS=true
     else
       ENABLE_DEBUG_SYMBOLS=false
@@ -42501,11 +42505,6 @@ $as_echo_n "checking what type of native debug symbols to use (this will overrid
 # Check whether --with-native-debug-symbols was given.
 if test "${with_native_debug_symbols+set}" = set; then :
   withval=$with_native_debug_symbols;
-        if test "x$OPENJDK_TARGET_OS" = xaix; then
-          if test "x$with_native_debug_symbols" = xexternal || test "x$with_native_debug_symbols" = xzipped; then
-            as_fn_error $? "AIX only supports the parameters 'none' and 'internal' for --with-native-debug-symbols" "$LINENO" 5
-          fi
-        fi
 
 else
 
