@@ -490,8 +490,12 @@ define SetupNativeCompilation
               ifneq ($$($1_STRIP_POLICY), no_strip)
                 $$($1_OBJECT_DIR)/$$(LIBRARY_PREFIX)$$($1_LIBRARY).debuginfo : $$($1_TARGET)
 		$(RM) $$@
+                ifeq ($(OPENJDK_TARGET_OS), aix)
+		$(CP) -f $$< $$@
+                else
 		$(OBJCOPY) --only-keep-debug $$< $$@
 		$(CD) $$(@D) && $(OBJCOPY) --add-gnu-debuglink=$$(@F) $$<
+                endif
               endif
             endif # Touch to not retrigger rule on rebuild
             ifneq ($$($1_STRIP_POLICY), no_strip)
@@ -594,8 +598,12 @@ endif # no MacOS X support yet
               ifneq ($$($1_STRIP_POLICY), no_strip)
                 $$($1_OBJECT_DIR)/$$($1_PROGRAM).debuginfo : $$($1_TARGET)
 		$(RM) $$@
+                ifeq ($(OPENJDK_TARGET_OS), aix)
+		$(CP) -f $$< $$@
+                else
 		$(OBJCOPY) --only-keep-debug $$< $$@
 		$(CD) $$(@D) && $(OBJCOPY) --add-gnu-debuglink=$$(@F) $$<
+                endif
               endif
             endif
             ifneq ($$($1_STRIP_POLICY), no_strip)
