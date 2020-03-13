@@ -519,8 +519,16 @@ endif # not possible when stripping is disabled
 endif # no MacOS X support yet
         else
           ifeq ($(OPENJDK_TARGET_OS), windows)
-            $1 += $$($1_OUTPUT_DIR)/$$($1_LIBRARY).map \
-                $$($1_OUTPUT_DIR)/$$($1_LIBRARY).pdb
+            ifneq ($$($1_LIBRARY),unpack) # unpack has its own rules for .map and .pdb
+              $1 += $$($1_OUTPUT_DIR)/$$($1_LIBRARY).map \
+                    $$($1_OUTPUT_DIR)/$$($1_LIBRARY).pdb
+              $$($1_OUTPUT_DIR)/$$($1_LIBRARY).map $$($1_OUTPUT_DIR)/$$($1_LIBRARY).pdb : $$($1_TARGET)
+              ifeq ($$($1_OUTPUT_DIR),$$($1_OBJECT_DIR))
+		$(TOUCH) $$@
+              else
+		$(CP) -f $$($1_OBJECT_DIR)/$$(@F) $$@
+              endif
+            endif # not unpack
           else ifneq ($(OPENJDK_TARGET_OS), macosx) # MacOS X does not use .debuginfo files
             ifneq ($$($1_STRIP_POLICY), no_strip)
               $1 += $$($1_OUTPUT_DIR)/$$(LIBRARY_PREFIX)$$($1_LIBRARY).debuginfo
@@ -616,7 +624,13 @@ endif # no MacOS X support yet
         else
           ifeq ($(OPENJDK_TARGET_OS), windows)
             $1 += $$($1_OUTPUT_DIR)/$$($1_PROGRAM).map \
-                $$($1_OUTPUT_DIR)/$$($1_PROGRAM).pdb
+                  $$($1_OUTPUT_DIR)/$$($1_PROGRAM).pdb
+            $$($1_OUTPUT_DIR)/$$($1_PROGRAM).map $$($1_OUTPUT_DIR)/$$($1_PROGRAM).pdb : $$($1_TARGET)
+            ifeq ($$($1_OUTPUT_DIR),$$($1_OBJECT_DIR))
+		$(TOUCH) $$@
+            else
+		$(CP) -f $$($1_OBJECT_DIR)/$$(@F) $$@
+            endif
           else ifneq ($(OPENJDK_TARGET_OS), macosx) # MacOS X does not use .debuginfo files
             ifneq ($$($1_STRIP_POLICY), no_strip)
               $1 += $$($1_OUTPUT_DIR)/$$($1_PROGRAM).debuginfo
