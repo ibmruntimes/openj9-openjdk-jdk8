@@ -67,3 +67,20 @@ $(addsuffix /openj9-openjdk-notices, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(SRC_
 
 JDK_DOC_TARGETS += $(addprefix $(JDK_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)
 JRE_DOC_TARGETS += $(addprefix $(JRE_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)
+
+# Omit man pages for launchers not provided by OpenJ9 or that describe
+# behavior that differs from the OpenJ9 implementation.
+OPENJ9_UNWANTED_MAN_PAGES := \
+	jcmd \
+	jhat \
+	jinfo \
+	jps \
+	jstack \
+	jstat \
+	jstatd \
+	#
+
+OPENJ9_MAN_PAGE_FILTER := $(foreach page,$(OPENJ9_UNWANTED_MAN_PAGES),%/$(page).1)
+
+$(foreach var, JDK_MAN_PAGE_LIST JRE_MAN_PAGE_LIST, \
+	$(eval $(var) := $$(filter-out $(OPENJ9_MAN_PAGE_FILTER), $($(var)))))

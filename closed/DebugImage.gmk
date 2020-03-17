@@ -25,9 +25,7 @@ all :
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 
-ifneq (true,$(ENABLE_DEBUG_SYMBOLS))
-  DEBUG_SYMBOL_SUFFIX :=
-else ifeq (true,$(ZIP_DEBUGINFO_FILES))
+ifeq (true,$(ZIP_DEBUGINFO_FILES))
   DEBUG_SYMBOL_SUFFIX := .diz
 else ifeq (macosx,$(OPENJDK_TARGET_OS))
   DEBUG_SYMBOL_SUFFIX := .dSYM
@@ -36,8 +34,6 @@ else ifeq (windows,$(OPENJDK_TARGET_OS))
 else
   DEBUG_SYMBOL_SUFFIX := .debuginfo
 endif
-
-ifneq (,$(DEBUG_SYMBOL_SUFFIX))
 
 DEBUG_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/debug-image
 
@@ -67,5 +63,3 @@ DEBUGINFO_FILES := $(filter %$(DEBUG_SYMBOL_SUFFIX), $(call CacheFind, $(DEBUGIN
 
 $(foreach file, $(DEBUGINFO_FILES), \
 	$(eval $(call openj9_copy_group,$(file),$(dir $(patsubst $(JDK_OUTPUTDIR)/%,$(DEBUG_IMAGE_DIR)/%,$(file))))))
-
-endif # DEBUG_SYMBOL_SUFFIX
