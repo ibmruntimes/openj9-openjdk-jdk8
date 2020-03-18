@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -60,17 +60,20 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
   AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
     [
-      if test "x$with_cmake" != x ; then
-        CMAKE=$with_cmake
+      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+        with_cmake=cmake
       fi
-      with_cmake=yes
+      if test "x$with_cmake" != xno ; then
+        if AS_EXECUTABLE_P(["$with_cmake"]) ; then
+          CMAKE="$with_cmake"
+        else
+          BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
+        fi
+        with_cmake=yes
+      fi
     ],
     [with_cmake=no])
   if test "$with_cmake" == yes ; then
-    AC_PATH_PROG([CMAKE], [cmake])
-    if test "x$CMAKE" == x ; then
-      AC_MSG_ERROR([Could not find CMake])
-    fi
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
@@ -344,9 +347,9 @@ AC_DEFUN_ONCE([OPENJ9_CHECK_NASM_VERSION],
         AC_MSG_RESULT([yes])
       else
         # NASM version string is of the following format:
-        #  ---
-        #  NASM version 2.14.02 compiled on Dec 27 2018
-        #  ---
+        # ---
+        # NASM version 2.14.02 compiled on Dec 27 2018
+        # ---
         # Some builds may not contain any text after the version number
         #
         # NASM_VERSION is set within square brackets so that the sed expression would not
@@ -384,8 +387,8 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
     [path to freemarker.jar (used to build OpenJ9 build tools)])])
 
   FREEMARKER_JAR=
-  if test "x$with_cmake" == x ; then
-    if test "x$with_freemarker_jar" == x ; then
+  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
+    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
       printf "\n"
       printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
       printf "and has to be provided during configure process.\n"
@@ -399,8 +402,15 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
       printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
       printf "\n"
 
-      AC_MSG_NOTICE([Could not find freemarker.jar])
       AC_MSG_ERROR([Cannot continue])
+    fi
+
+    AC_MSG_CHECKING([checking that '$with_freemarker_jar' exists])
+    if test -f "$with_freemarker_jar" ; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([freemarker.jar not found at '$with_freemarker_jar'])
     fi
 
     if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
