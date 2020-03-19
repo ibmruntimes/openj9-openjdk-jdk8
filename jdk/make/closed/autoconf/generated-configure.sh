@@ -3812,11 +3812,9 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 # questions.
 #
 
-#
 # ===========================================================================
 # (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 
 
@@ -4540,7 +4538,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1587557868
+DATE_WHEN_GENERATED=1587571672
 
 ###############################################################################
 #
@@ -45042,7 +45040,7 @@ $as_echo "$supports" >&6; }
       MACOSX_VERSION_MIN=10.9.0
 
 
-      # The macro takes the version with no dots, ex: 1070
+      # The macro takes the version with no dots, ex: 1090
       # Let the flags variables get resolved in make for easier override on make
       # command line.
       CCXXFLAGS_JDK="$CCXXFLAGS_JDK -DMAC_OS_X_VERSION_MAX_ALLOWED=\$(subst .,,\$(MACOSX_VERSION_MIN)) -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"

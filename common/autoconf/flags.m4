@@ -23,11 +23,9 @@
 # questions.
 #
 
-#
 # ===========================================================================
 # (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 AC_DEFUN_ONCE([FLAGS_SETUP_INIT_FLAGS],
 [
@@ -691,7 +689,7 @@ AC_DEFUN_ONCE([FLAGS_SETUP_COMPILER_FLAGS_FOR_JDK],
       MACOSX_VERSION_MIN=10.9.0
       AC_SUBST(MACOSX_VERSION_MIN)
     
-      # The macro takes the version with no dots, ex: 1070
+      # The macro takes the version with no dots, ex: 1090
       # Let the flags variables get resolved in make for easier override on make
       # command line.
       CCXXFLAGS_JDK="$CCXXFLAGS_JDK -DMAC_OS_X_VERSION_MAX_ALLOWED=\$(subst .,,\$(MACOSX_VERSION_MIN)) -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
