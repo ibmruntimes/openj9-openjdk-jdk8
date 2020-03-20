@@ -562,66 +562,6 @@ as_tr_cpp="eval sed 'y%*$as_cr_letters%P$as_cr_LETTERS%;s%[^_$as_cr_alnum]%_%g'"
 # Sed expression to map a string onto a valid variable name.
 as_tr_sh="eval sed 'y%*+%pp%;s%[^_$as_cr_alnum]%_%g'"
 
-as_awk_strverscmp='
-  # Use only awk features that work with 7th edition Unix awk (1978).
-  # My, what an old awk you have, Mr. Solaris!
-  END {
-    while (length(v1) && length(v2)) {
-      # Set d1 to be the next thing to compare from v1, and likewise for d2.
-      # Normally this is a single character, but if v1 and v2 contain digits,
-      # compare them as integers and fractions as strverscmp does.
-      if (v1 ~ /^[0-9]/ && v2 ~ /^[0-9]/) {
-	# Split v1 and v2 into their leading digit string components d1 and d2,
-	# and advance v1 and v2 past the leading digit strings.
-	for (len1 = 1; substr(v1, len1 + 1) ~ /^[0-9]/; len1++) continue
-	for (len2 = 1; substr(v2, len2 + 1) ~ /^[0-9]/; len2++) continue
-	d1 = substr(v1, 1, len1); v1 = substr(v1, len1 + 1)
-	d2 = substr(v2, 1, len2); v2 = substr(v2, len2 + 1)
-	if (d1 ~ /^0/) {
-	  if (d2 ~ /^0/) {
-	    # Compare two fractions.
-	    while (d1 ~ /^0/ && d2 ~ /^0/) {
-	      d1 = substr(d1, 2); len1--
-	      d2 = substr(d2, 2); len2--
-	    }
-	    if (len1 != len2 && ! (len1 && len2 && substr(d1, 1, 1) == substr(d2, 1, 1))) {
-	      # The two components differ in length, and the common prefix
-	      # contains only leading zeros.  Consider the longer to be less.
-	      d1 = -len1
-	      d2 = -len2
-	    } else {
-	      # Otherwise, compare as strings.
-	      d1 = "x" d1
-	      d2 = "x" d2
-	    }
-	  } else {
-	    # A fraction is less than an integer.
-	    exit 1
-	  }
-	} else {
-	  if (d2 ~ /^0/) {
-	    # An integer is greater than a fraction.
-	    exit 2
-	  } else {
-	    # Compare two integers.
-	    d1 += 0
-	    d2 += 0
-	  }
-	}
-      } else {
-	# The normal case, without worrying about digits.
-	d1 = substr(v1, 1, 1); v1 = substr(v1, 2)
-	d2 = substr(v2, 1, 1); v2 = substr(v2, 2)
-      }
-      if (d1 < d2) exit 1
-      if (d1 > d2) exit 2
-    }
-    # Beware Solaris /usr/xgp4/bin/awk (at least through Solaris 10),
-    # which mishandles some comparisons of empty strings to integers.
-    if (length(v2)) exit 1
-    if (length(v1)) exit 2
-  }
-'
 
 test -n "$DJDIR" || exec 7<&0 </dev/null
 exec 6>&1
@@ -950,7 +890,6 @@ OUTPUT_ROOT
 CONF_NAME
 SPEC
 OPENJ9_ENABLE_JITSERVER
-PROTOC_INSTALLED
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -4590,7 +4529,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1584643014
+DATE_WHEN_GENERATED=1584707835
 
 ###############################################################################
 #
@@ -16079,96 +16018,25 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
 
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
-$as_echo_n "checking for jitserver... " >&6; }
   # Check whether --enable-jitserver was given.
 if test "${enable_jitserver+set}" = set; then :
   enableval=$enable_jitserver;
 fi
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
+$as_echo_n "checking for jitserver... " >&6; }
   OPENJ9_ENABLE_JITSERVER=false
-
   if test "x$enable_jitserver" = xyes ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
 $as_echo "yes (explicitly enabled)" >&6; }
-
-    if test "x$OPENJDK_TARGET_OS" != xlinux ; then
-      as_fn_error $? "jitserver is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
+      OPENJ9_ENABLE_JITSERVER=true
     else
-      # Extract the first word of "protoc", so it can be a program name with args.
-set dummy protoc; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_PROTOC_INSTALLED+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$PROTOC_INSTALLED"; then
-  ac_cv_prog_PROTOC_INSTALLED="$PROTOC_INSTALLED" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_PROTOC_INSTALLED="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_PROTOC_INSTALLED" && ac_cv_prog_PROTOC_INSTALLED="no"
-fi
-fi
-PROTOC_INSTALLED=$ac_cv_prog_PROTOC_INSTALLED
-if test -n "$PROTOC_INSTALLED"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROTOC_INSTALLED" >&5
-$as_echo "$PROTOC_INSTALLED" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-      if test "x$PROTOC_INSTALLED" = xno ; then
-        as_fn_error $? "jitserver requires protoc" "$LINENO" 5
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking protobuf version" >&5
-$as_echo_n "checking protobuf version... " >&6; }
-        if test "x$OPENJ9_CPU" = xx86-64 ; then
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.5.1
-        else
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.7.1
-        fi
-
-        PROTOBUF_VERSION=`protoc --version 2>&1 | $SED -e 's/libprotoc //'`
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROTOBUF_VERSION" >&5
-$as_echo "$PROTOBUF_VERSION" >&6; }
-
-        as_arg_v1=$PROTOBUF_VERSION
-as_arg_v2=$MIN_SUPPORTED_PROTOBUF_VERSION
-awk "$as_awk_strverscmp" v1="$as_arg_v1" v2="$as_arg_v2" /dev/null
-case $? in #(
-  1) :
-    PROTOBUF_VERSION_SUPPORTED=no ;; #(
-  0) :
-    PROTOBUF_VERSION_SUPPORTED=yes ;; #(
-  2) :
-    PROTOBUF_VERSION_SUPPORTED=yes ;; #(
-  *) :
-     ;;
-esac
-        if test "x$PROTOBUF_VERSION_SUPPORTED" = xyes ; then
-          OPENJ9_ENABLE_JITSERVER=true
-        else
-          as_fn_error $? "jitserver requires protobuf version >= ($MIN_SUPPORTED_PROTOBUF_VERSION) for ($OPENJ9_CPU)" "$LINENO" 5
-        fi
-      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (unsupported platform)" >&5
+$as_echo "no (unsupported platform)" >&6; }
+      as_fn_error $? "jitserver is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
     fi
-
   elif test "x$enable_jitserver" = xno ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
 $as_echo "no (explicitly disabled)" >&6; }
