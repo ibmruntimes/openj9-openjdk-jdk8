@@ -4529,7 +4529,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1584707835
+DATE_WHEN_GENERATED=1584720860
 
 ###############################################################################
 #
@@ -14909,101 +14909,6 @@ $as_echo "$DEBUG_LEVEL" >&6; }
 # With basic setup done, call the custom early hook.
 
 
-# Check whether --with-noncompressedrefs was given.
-if test "${with_noncompressedrefs+set}" = set; then :
-  withval=$with_noncompressedrefs;
-fi
-
-
-
-  # Convert openjdk cpu names to openj9 names
-  case "$build_cpu" in
-    x86_64)
-      OPENJ9_CPU=x86-64
-      ;;
-    powerpc64le)
-      OPENJ9_CPU=ppc-64_le
-      ;;
-    s390x)
-      OPENJ9_CPU=390-64
-      ;;
-    powerpc64)
-      OPENJ9_CPU=ppc-64
-      ;;
-    *)
-      as_fn_error $? "unsupported OpenJ9 cpu $build_cpu" "$LINENO" 5
-      ;;
-  esac
-
-  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
-    OPENJ9_LIBS_SUBDIR=default
-  else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
-    OPENJ9_LIBS_SUBDIR=compressedrefs
-  fi
-
-  if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
-      OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
-      OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-          OPENJ9_PLATFORM_CODE=wi32
-          OPENJ9_BUILDSPEC="win_x86"
-        else
-          OPENJ9_BUILDSPEC="win_x86-64"
-        fi
-      else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
-      fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
-      OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
-      else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
-      fi
-    else
-      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
-    fi
-  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
-    OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
-    else
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
-    fi
-  elif test "x$OPENJ9_CPU" = x390-64 ; then
-    OPENJ9_PLATFORM_CODE=xz64
-  elif test "x$OPENJ9_CPU" = xppc-64 ; then
-    OPENJ9_PLATFORM_CODE=ap64
-  else
-    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
-  fi
-
-
-
-
-
-
-  # Source the closed version numbers
-  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
-
-
-
-
-  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-
-
-
-  # Outer [ ] to quote m4.
-   USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'`
-
-
-
-
 
 # Check whether --with-conf-name was given.
 if test "${with_conf_name+set}" = set; then :
@@ -15238,152 +15143,6 @@ $as_echo "$as_me: The path of OUTPUT_ROOT, which resolves as \"$path\", is inval
 
 
 
-  # check 3rd party library requirement for UMA
-
-# Check whether --with-freemarker-jar was given.
-if test "${with_freemarker_jar+set}" = set; then :
-  withval=$with_freemarker_jar;
-fi
-
-
-  FREEMARKER_JAR=
-  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
-      printf "\n"
-      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-      printf "and has to be provided during configure process.\n"
-      printf "\n"
-      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-      printf "\n"
-      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-      printf "\n"
-
-      as_fn_error $? "Cannot continue" "$LINENO" 5
-    fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking checking that '$with_freemarker_jar' exists" >&5
-$as_echo_n "checking checking that '$with_freemarker_jar' exists... " >&6; }
-    if test -f "$with_freemarker_jar" ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      as_fn_error $? "freemarker.jar not found at '$with_freemarker_jar'" "$LINENO" 5
-    fi
-
-    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-    else
-      FREEMARKER_JAR=$with_freemarker_jar
-    fi
-  fi
-
-
-
-
-
-  # Convert openjdk cpu names to openj9 names
-  case "$host_cpu" in
-    x86_64)
-      OPENJ9_CPU=x86-64
-      ;;
-    powerpc64le)
-      OPENJ9_CPU=ppc-64_le
-      ;;
-    s390x)
-      OPENJ9_CPU=390-64
-      ;;
-    powerpc64)
-      OPENJ9_CPU=ppc-64
-      ;;
-    *)
-      as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
-      ;;
-  esac
-
-
-  # OPENJ9_CPU == x86-64 even for win32 builds
-  if test "x$OPENJ9_CPU" = xx86-64 ; then
-    # Extract the first word of "nasm", so it can be a program name with args.
-set dummy nasm; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$NASM_INSTALLED"; then
-  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_NASM_INSTALLED="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
-fi
-fi
-NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
-if test -n "$NASM_INSTALLED"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
-$as_echo "$NASM_INSTALLED" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-    if test "x$NASM_INSTALLED" = xyes ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
-$as_echo_n "checking whether nasm version requirement is met... " >&6; }
-
-      # Require NASM v2.11+. This is checked by trying to build conftest.c
-      # containing an instruction that makes use of zmm registers that are
-      # supported on NASM v2.11+
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-vdivpd zmm0, zmm1, zmm3;
-_ACEOF
-
-      # the following hack is needed because conftest.c contains C preprocessor
-      # directives defined in confdefs.h that would cause nasm to error out
-      $SED -i -e '/vdivpd/!d' conftest.c
-
-      if nasm -f elf64 conftest.c 2> /dev/null ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-      else
-        # NASM version string is of the following format:
-        # ---
-        # NASM version 2.14.02 compiled on Dec 27 2018
-        # ---
-        # Some builds may not contain any text after the version number
-        #
-        # NASM_VERSION is set within square brackets so that the sed expression would not
-        # require quadrigraps to represent square brackets
-        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
-        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
-      fi
-    else
-      as_fn_error $? "nasm not found" "$LINENO" 5
-    fi
-  fi
-
-
   # Where are the OpenJ9 sources.
   OPENJ9OMR_TOPDIR="$SRC_ROOT/omr"
   OPENJ9_TOPDIR="$SRC_ROOT/openj9"
@@ -15400,6 +15159,99 @@ $as_echo "yes" >&6; }
 
 
 
+
+
+# Check whether --with-noncompressedrefs was given.
+if test "${with_noncompressedrefs+set}" = set; then :
+  withval=$with_noncompressedrefs;
+fi
+
+
+
+  # Convert openjdk cpu names to openj9 names
+  case "$build_cpu" in
+    x86_64)
+      OPENJ9_CPU=x86-64
+      ;;
+    powerpc64le)
+      OPENJ9_CPU=ppc-64_le
+      ;;
+    s390x)
+      OPENJ9_CPU=390-64
+      ;;
+    powerpc64)
+      OPENJ9_CPU=ppc-64
+      ;;
+    *)
+      as_fn_error $? "unsupported OpenJ9 cpu $build_cpu" "$LINENO" 5
+      ;;
+  esac
+
+  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+    OPENJ9_LIBS_SUBDIR=default
+  else
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
+  fi
+
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+      OPENJ9_PLATFORM_CODE=xa64
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
+      OPENJ9_PLATFORM_CODE=wa64
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+          OPENJ9_PLATFORM_CODE=wi32
+          OPENJ9_BUILDSPEC="win_x86"
+        else
+          OPENJ9_BUILDSPEC="win_x86-64"
+        fi
+      else
+        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      fi
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+      OPENJ9_PLATFORM_CODE=oa64
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        OPENJ9_BUILDSPEC="osx_x86-64"
+      else
+        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
+      fi
+    else
+      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
+    fi
+  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
+    OPENJ9_PLATFORM_CODE=xl64
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
+    else
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
+    fi
+  elif test "x$OPENJ9_CPU" = x390-64 ; then
+    OPENJ9_PLATFORM_CODE=xz64
+  elif test "x$OPENJ9_CPU" = xppc-64 ; then
+    OPENJ9_PLATFORM_CODE=ap64
+  else
+    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
+  fi
+
+
+
+
+
+
+  # Source the closed version numbers
+  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
+
+
+
+
+  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
+
+
+
+  # Outer [ ] to quote m4.
+   USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'`
 
 
 
@@ -17742,6 +17594,150 @@ $as_echo "$as_me: The path of MSVCP_DLL, which resolves as \"$path\", is invalid
 
 
 
+  # check 3rd party library requirement for UMA
+
+# Check whether --with-freemarker-jar was given.
+if test "${with_freemarker_jar+set}" = set; then :
+  withval=$with_freemarker_jar;
+fi
+
+
+  FREEMARKER_JAR=
+  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
+    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
+      printf "\n"
+      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
+      printf "and has to be provided during configure process.\n"
+      printf "\n"
+      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
+      printf "\n"
+      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
+      printf "\n"
+
+      as_fn_error $? "Cannot continue" "$LINENO" 5
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking checking that '$with_freemarker_jar' exists" >&5
+$as_echo_n "checking checking that '$with_freemarker_jar' exists... " >&6; }
+    if test -f "$with_freemarker_jar" ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      as_fn_error $? "freemarker.jar not found at '$with_freemarker_jar'" "$LINENO" 5
+    fi
+
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+    else
+      FREEMARKER_JAR=$with_freemarker_jar
+    fi
+  fi
+
+
+
+
+
+  # Convert openjdk cpu names to openj9 names
+  case "$host_cpu" in
+    x86_64)
+      OPENJ9_CPU=x86-64
+      ;;
+    powerpc64le)
+      OPENJ9_CPU=ppc-64_le
+      ;;
+    s390x)
+      OPENJ9_CPU=390-64
+      ;;
+    powerpc64)
+      OPENJ9_CPU=ppc-64
+      ;;
+    *)
+      as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
+      ;;
+  esac
+
+
+  # OPENJ9_CPU == x86-64 even for win32 builds
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    # Extract the first word of "nasm", so it can be a program name with args.
+set dummy nasm; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$NASM_INSTALLED"; then
+  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_NASM_INSTALLED="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
+fi
+fi
+NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
+if test -n "$NASM_INSTALLED"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
+$as_echo "$NASM_INSTALLED" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    if test "x$NASM_INSTALLED" = xyes ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
+$as_echo_n "checking whether nasm version requirement is met... " >&6; }
+
+      # Require NASM v2.11+. This is checked by trying to build conftest.c
+      # containing an instruction that makes use of zmm registers that are
+      # supported on NASM v2.11+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+vdivpd zmm0, zmm1, zmm3;
+_ACEOF
+
+      # the following hack is needed because conftest.c contains C preprocessor
+      # directives defined in confdefs.h that would cause nasm to error out
+      $SED -i -e '/vdivpd/!d' conftest.c
+
+      if nasm -f elf64 conftest.c 2> /dev/null ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      else
+        # NASM version string is of the following format:
+        # ---
+        # NASM version 2.14.02 compiled on Dec 27 2018
+        # ---
+        # Some builds may not contain any text after the version number
+        #
+        # NASM_VERSION is set within square brackets so that the sed expression would not
+        # require quadrigraps to represent square brackets
+        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
+        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
+      fi
+    else
+      as_fn_error $? "nasm not found" "$LINENO" 5
+    fi
+  fi
 
 
 
