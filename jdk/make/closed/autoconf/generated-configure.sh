@@ -562,66 +562,6 @@ as_tr_cpp="eval sed 'y%*$as_cr_letters%P$as_cr_LETTERS%;s%[^_$as_cr_alnum]%_%g'"
 # Sed expression to map a string onto a valid variable name.
 as_tr_sh="eval sed 'y%*+%pp%;s%[^_$as_cr_alnum]%_%g'"
 
-as_awk_strverscmp='
-  # Use only awk features that work with 7th edition Unix awk (1978).
-  # My, what an old awk you have, Mr. Solaris!
-  END {
-    while (length(v1) && length(v2)) {
-      # Set d1 to be the next thing to compare from v1, and likewise for d2.
-      # Normally this is a single character, but if v1 and v2 contain digits,
-      # compare them as integers and fractions as strverscmp does.
-      if (v1 ~ /^[0-9]/ && v2 ~ /^[0-9]/) {
-	# Split v1 and v2 into their leading digit string components d1 and d2,
-	# and advance v1 and v2 past the leading digit strings.
-	for (len1 = 1; substr(v1, len1 + 1) ~ /^[0-9]/; len1++) continue
-	for (len2 = 1; substr(v2, len2 + 1) ~ /^[0-9]/; len2++) continue
-	d1 = substr(v1, 1, len1); v1 = substr(v1, len1 + 1)
-	d2 = substr(v2, 1, len2); v2 = substr(v2, len2 + 1)
-	if (d1 ~ /^0/) {
-	  if (d2 ~ /^0/) {
-	    # Compare two fractions.
-	    while (d1 ~ /^0/ && d2 ~ /^0/) {
-	      d1 = substr(d1, 2); len1--
-	      d2 = substr(d2, 2); len2--
-	    }
-	    if (len1 != len2 && ! (len1 && len2 && substr(d1, 1, 1) == substr(d2, 1, 1))) {
-	      # The two components differ in length, and the common prefix
-	      # contains only leading zeros.  Consider the longer to be less.
-	      d1 = -len1
-	      d2 = -len2
-	    } else {
-	      # Otherwise, compare as strings.
-	      d1 = "x" d1
-	      d2 = "x" d2
-	    }
-	  } else {
-	    # A fraction is less than an integer.
-	    exit 1
-	  }
-	} else {
-	  if (d2 ~ /^0/) {
-	    # An integer is greater than a fraction.
-	    exit 2
-	  } else {
-	    # Compare two integers.
-	    d1 += 0
-	    d2 += 0
-	  }
-	}
-      } else {
-	# The normal case, without worrying about digits.
-	d1 = substr(v1, 1, 1); v1 = substr(v1, 2)
-	d2 = substr(v2, 1, 1); v2 = substr(v2, 2)
-      }
-      if (d1 < d2) exit 1
-      if (d1 > d2) exit 2
-    }
-    # Beware Solaris /usr/xgp4/bin/awk (at least through Solaris 10),
-    # which mishandles some comparisons of empty strings to integers.
-    if (length(v2)) exit 1
-    if (length(v1)) exit 2
-  }
-'
 
 test -n "$DJDIR" || exec 7<&0 </dev/null
 exec 6>&1
@@ -950,7 +890,6 @@ OUTPUT_ROOT
 CONF_NAME
 SPEC
 OPENJ9_ENABLE_JITSERVER
-PROTOC_INSTALLED
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -1277,6 +1216,7 @@ READLINK
 DF
 SETFILE
 CPIO
+CMAKE
 UNZIP
 ZIP
 LDD
@@ -2194,6 +2134,7 @@ Some influential environment variables:
   DF          Override default value for DF
   SETFILE     Override default value for SETFILE
   CPIO        Override default value for CPIO
+  CMAKE       Override default value for CMAKE
   UNZIP       Override default value for UNZIP
   ZIP         Override default value for ZIP
   LDD         Override default value for LDD
@@ -4092,6 +4033,10 @@ pkgadd_help() {
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 
 
 
@@ -4533,7 +4478,7 @@ VS_SDK_PLATFORM_NAME_2017=
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -4584,7 +4529,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1582627014
+DATE_WHEN_GENERATED=1584720860
 
 ###############################################################################
 #
@@ -14964,101 +14909,6 @@ $as_echo "$DEBUG_LEVEL" >&6; }
 # With basic setup done, call the custom early hook.
 
 
-# Check whether --with-noncompressedrefs was given.
-if test "${with_noncompressedrefs+set}" = set; then :
-  withval=$with_noncompressedrefs;
-fi
-
-
-
-  # Convert openjdk cpu names to openj9 names
-  case "$build_cpu" in
-    x86_64)
-      OPENJ9_CPU=x86-64
-      ;;
-    powerpc64le)
-      OPENJ9_CPU=ppc-64_le
-      ;;
-    s390x)
-      OPENJ9_CPU=390-64
-      ;;
-    powerpc64)
-      OPENJ9_CPU=ppc-64
-      ;;
-    *)
-      as_fn_error $? "unsupported OpenJ9 cpu $build_cpu" "$LINENO" 5
-      ;;
-  esac
-
-  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
-    OPENJ9_LIBS_SUBDIR=default
-  else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
-    OPENJ9_LIBS_SUBDIR=compressedrefs
-  fi
-
-  if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
-      OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
-      OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-          OPENJ9_PLATFORM_CODE=wi32
-          OPENJ9_BUILDSPEC="win_x86"
-        else
-          OPENJ9_BUILDSPEC="win_x86-64"
-        fi
-      else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
-      fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
-      OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
-      else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
-      fi
-    else
-      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
-    fi
-  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
-    OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
-    else
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
-    fi
-  elif test "x$OPENJ9_CPU" = x390-64 ; then
-    OPENJ9_PLATFORM_CODE=xz64
-  elif test "x$OPENJ9_CPU" = xppc-64 ; then
-    OPENJ9_PLATFORM_CODE=ap64
-  else
-    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
-  fi
-
-
-
-
-
-
-  # Source the closed version numbers
-  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
-
-
-
-
-  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-
-
-
-  # Outer [ ] to quote m4.
-   USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'`
-
-
-
-
 
 # Check whether --with-conf-name was given.
 if test "${with_conf_name+set}" = set; then :
@@ -15293,143 +15143,6 @@ $as_echo "$as_me: The path of OUTPUT_ROOT, which resolves as \"$path\", is inval
 
 
 
-  # check 3rd party library requirement for UMA
-
-# Check whether --with-freemarker-jar was given.
-if test "${with_freemarker_jar+set}" = set; then :
-  withval=$with_freemarker_jar;
-fi
-
-
-  FREEMARKER_JAR=
-  if test "x$with_cmake" == x ; then
-    if test "x$with_freemarker_jar" == x ; then
-      printf "\n"
-      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-      printf "and has to be provided during configure process.\n"
-      printf "\n"
-      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-      printf "\n"
-      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-      printf "\n"
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Could not find freemarker.jar" >&5
-$as_echo "$as_me: Could not find freemarker.jar" >&6;}
-      as_fn_error $? "Cannot continue" "$LINENO" 5
-    fi
-
-    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-    else
-      FREEMARKER_JAR=$with_freemarker_jar
-    fi
-  fi
-
-
-
-
-
-  # Convert openjdk cpu names to openj9 names
-  case "$host_cpu" in
-    x86_64)
-      OPENJ9_CPU=x86-64
-      ;;
-    powerpc64le)
-      OPENJ9_CPU=ppc-64_le
-      ;;
-    s390x)
-      OPENJ9_CPU=390-64
-      ;;
-    powerpc64)
-      OPENJ9_CPU=ppc-64
-      ;;
-    *)
-      as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
-      ;;
-  esac
-
-
-  # OPENJ9_CPU == x86-64 even for win32 builds
-  if test "x$OPENJ9_CPU" = xx86-64 ; then
-    # Extract the first word of "nasm", so it can be a program name with args.
-set dummy nasm; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$NASM_INSTALLED"; then
-  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_NASM_INSTALLED="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
-fi
-fi
-NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
-if test -n "$NASM_INSTALLED"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
-$as_echo "$NASM_INSTALLED" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-    if test "x$NASM_INSTALLED" = xyes ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
-$as_echo_n "checking whether nasm version requirement is met... " >&6; }
-
-      # Require NASM v2.11+. This is checked by trying to build conftest.c
-      # containing an instruction that makes use of zmm registers that are
-      # supported on NASM v2.11+
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-vdivpd zmm0, zmm1, zmm3;
-_ACEOF
-
-      # the following hack is needed because conftest.c contains C preprocessor
-      # directives defined in confdefs.h that would cause nasm to error out
-      $SED -i -e '/vdivpd/!d' conftest.c
-
-      if nasm -f elf64 conftest.c 2> /dev/null ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-      else
-        # NASM version string is of the following format:
-        #  ---
-        #  NASM version 2.14.02 compiled on Dec 27 2018
-        #  ---
-        # Some builds may not contain any text after the version number
-        #
-        # NASM_VERSION is set within square brackets so that the sed expression would not
-        # require quadrigraps to represent square brackets
-        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
-        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
-      fi
-    else
-      as_fn_error $? "nasm not found" "$LINENO" 5
-    fi
-  fi
-
-
   # Where are the OpenJ9 sources.
   OPENJ9OMR_TOPDIR="$SRC_ROOT/omr"
   OPENJ9_TOPDIR="$SRC_ROOT/openj9"
@@ -15448,23 +15161,123 @@ $as_echo "yes" >&6; }
 
 
 
+# Check whether --with-noncompressedrefs was given.
+if test "${with_noncompressedrefs+set}" = set; then :
+  withval=$with_noncompressedrefs;
+fi
+
+
+
+  # Convert openjdk cpu names to openj9 names
+  case "$build_cpu" in
+    x86_64)
+      OPENJ9_CPU=x86-64
+      ;;
+    powerpc64le)
+      OPENJ9_CPU=ppc-64_le
+      ;;
+    s390x)
+      OPENJ9_CPU=390-64
+      ;;
+    powerpc64)
+      OPENJ9_CPU=ppc-64
+      ;;
+    *)
+      as_fn_error $? "unsupported OpenJ9 cpu $build_cpu" "$LINENO" 5
+      ;;
+  esac
+
+  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+    OPENJ9_LIBS_SUBDIR=default
+  else
+    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
+  fi
+
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+      OPENJ9_PLATFORM_CODE=xa64
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
+      OPENJ9_PLATFORM_CODE=wa64
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+          OPENJ9_PLATFORM_CODE=wi32
+          OPENJ9_BUILDSPEC="win_x86"
+        else
+          OPENJ9_BUILDSPEC="win_x86-64"
+        fi
+      else
+        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      fi
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+      OPENJ9_PLATFORM_CODE=oa64
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        OPENJ9_BUILDSPEC="osx_x86-64"
+      else
+        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
+      fi
+    else
+      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
+    fi
+  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
+    OPENJ9_PLATFORM_CODE=xl64
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
+    else
+      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
+    fi
+  elif test "x$OPENJ9_CPU" = x390-64 ; then
+    OPENJ9_PLATFORM_CODE=xz64
+  elif test "x$OPENJ9_CPU" = xppc-64 ; then
+    OPENJ9_PLATFORM_CODE=ap64
+  else
+    as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
+  fi
+
+
+
+
+
+
+  # Source the closed version numbers
+  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
+
+
+
+
+  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
+
+
+
+  # Outer [ ] to quote m4.
+   USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'`
+
+
 
 
 # Check whether --with-cmake was given.
 if test "${with_cmake+set}" = set; then :
   withval=$with_cmake;
-      if test "x$with_cmake" != x ; then
-        CMAKE=$with_cmake
+      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+        with_cmake=cmake
       fi
-      with_cmake=yes
+      if test "x$with_cmake" != xno ; then
+        if as_fn_executable_p "$with_cmake" ; then
+          CMAKE="$with_cmake"
+        else
 
-else
-  with_cmake=no
-fi
 
-  if test "$with_cmake" == yes ; then
-    # Extract the first word of "cmake", so it can be a program name with args.
-set dummy cmake; ac_word=$2
+
+  # Publish this variable in the help.
+
+
+  if test "x$CMAKE" = x; then
+    # The variable is not set by user, try to locate tool using the code snippet
+    for ac_prog in $with_cmake
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
 if ${ac_cv_path_CMAKE+:} false; then :
@@ -15503,9 +15316,158 @@ $as_echo "no" >&6; }
 fi
 
 
-    if test "x$CMAKE" == x ; then
-      as_fn_error $? "Could not find CMake" "$LINENO" 5
+  test -n "$CMAKE" && break
+done
+
+  else
+    # The variable is set, but is it from the command line or the environment?
+
+    # Try to remove the string !CMAKE! from our list.
+    try_remove_var=${CONFIGURE_OVERRIDDEN_VARIABLES//!CMAKE!/}
+    if test "x$try_remove_var" = "x$CONFIGURE_OVERRIDDEN_VARIABLES"; then
+      # If it failed, the variable was not from the command line. Ignore it,
+      # but warn the user (except for BASH, which is always set by the calling BASH).
+      if test "xCMAKE" != xBASH; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring value of CMAKE from the environment. Use command line variables instead." >&5
+$as_echo "$as_me: WARNING: Ignoring value of CMAKE from the environment. Use command line variables instead." >&2;}
+      fi
+      # Try to locate tool using the code snippet
+      for ac_prog in $with_cmake
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_CMAKE+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $CMAKE in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_CMAKE="$CMAKE" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_CMAKE="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+CMAKE=$ac_cv_path_CMAKE
+if test -n "$CMAKE"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CMAKE" >&5
+$as_echo "$CMAKE" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CMAKE" && break
+done
+
+    else
+      # If it succeeded, then it was overridden by the user. We will use it
+      # for the tool.
+
+      # First remove it from the list of overridden variables, so we can test
+      # for unknown variables in the end.
+      CONFIGURE_OVERRIDDEN_VARIABLES="$try_remove_var"
+
+      # Check if the provided tool contains a complete path.
+      tool_specified="$CMAKE"
+      tool_basename="${tool_specified##*/}"
+      if test "x$tool_basename" = "x$tool_specified"; then
+        # A command without a complete path is provided, search $PATH.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will search for user supplied tool CMAKE=$tool_basename" >&5
+$as_echo "$as_me: Will search for user supplied tool CMAKE=$tool_basename" >&6;}
+        # Extract the first word of "$tool_basename", so it can be a program name with args.
+set dummy $tool_basename; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_CMAKE+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $CMAKE in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_CMAKE="$CMAKE" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_CMAKE="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+CMAKE=$ac_cv_path_CMAKE
+if test -n "$CMAKE"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CMAKE" >&5
+$as_echo "$CMAKE" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+        if test "x$CMAKE" = x; then
+          as_fn_error $? "User supplied tool $tool_basename could not be found" "$LINENO" 5
+        fi
+      else
+        # Otherwise we believe it is a complete path. Use it as it is.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will use user supplied tool CMAKE=$tool_specified" >&5
+$as_echo "$as_me: Will use user supplied tool CMAKE=$tool_specified" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CMAKE" >&5
+$as_echo_n "checking for CMAKE... " >&6; }
+        if test ! -x "$tool_specified"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+          as_fn_error $? "User supplied tool CMAKE=$tool_specified does not exist or is not executable" "$LINENO" 5
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tool_specified" >&5
+$as_echo "$tool_specified" >&6; }
+      fi
     fi
+  fi
+
+
+
+  if test "x$CMAKE" = x; then
+    as_fn_error $? "Could not find required tool for CMAKE" "$LINENO" 5
+  fi
+
+
+        fi
+        with_cmake=yes
+      fi
+
+else
+  with_cmake=no
+fi
+
+  if test "$with_cmake" == yes ; then
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
@@ -15908,96 +15870,25 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
 
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
-$as_echo_n "checking for jitserver... " >&6; }
   # Check whether --enable-jitserver was given.
 if test "${enable_jitserver+set}" = set; then :
   enableval=$enable_jitserver;
 fi
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
+$as_echo_n "checking for jitserver... " >&6; }
   OPENJ9_ENABLE_JITSERVER=false
-
   if test "x$enable_jitserver" = xyes ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
 $as_echo "yes (explicitly enabled)" >&6; }
-
-    if test "x$OPENJDK_TARGET_OS" != xlinux ; then
-      as_fn_error $? "jitserver is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
+      OPENJ9_ENABLE_JITSERVER=true
     else
-      # Extract the first word of "protoc", so it can be a program name with args.
-set dummy protoc; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_PROTOC_INSTALLED+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$PROTOC_INSTALLED"; then
-  ac_cv_prog_PROTOC_INSTALLED="$PROTOC_INSTALLED" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_PROTOC_INSTALLED="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_PROTOC_INSTALLED" && ac_cv_prog_PROTOC_INSTALLED="no"
-fi
-fi
-PROTOC_INSTALLED=$ac_cv_prog_PROTOC_INSTALLED
-if test -n "$PROTOC_INSTALLED"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROTOC_INSTALLED" >&5
-$as_echo "$PROTOC_INSTALLED" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-      if test "x$PROTOC_INSTALLED" = xno ; then
-        as_fn_error $? "jitserver requires protoc" "$LINENO" 5
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking protobuf version" >&5
-$as_echo_n "checking protobuf version... " >&6; }
-        if test "x$OPENJ9_CPU" = xx86-64 ; then
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.5.1
-        else
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.7.1
-        fi
-
-        PROTOBUF_VERSION=`protoc --version 2>&1 | $SED -e 's/libprotoc //'`
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PROTOBUF_VERSION" >&5
-$as_echo "$PROTOBUF_VERSION" >&6; }
-
-        as_arg_v1=$PROTOBUF_VERSION
-as_arg_v2=$MIN_SUPPORTED_PROTOBUF_VERSION
-awk "$as_awk_strverscmp" v1="$as_arg_v1" v2="$as_arg_v2" /dev/null
-case $? in #(
-  1) :
-    PROTOBUF_VERSION_SUPPORTED=no ;; #(
-  0) :
-    PROTOBUF_VERSION_SUPPORTED=yes ;; #(
-  2) :
-    PROTOBUF_VERSION_SUPPORTED=yes ;; #(
-  *) :
-     ;;
-esac
-        if test "x$PROTOBUF_VERSION_SUPPORTED" = xyes ; then
-          OPENJ9_ENABLE_JITSERVER=true
-        else
-          as_fn_error $? "jitserver requires protobuf version >= ($MIN_SUPPORTED_PROTOBUF_VERSION) for ($OPENJ9_CPU)" "$LINENO" 5
-        fi
-      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (unsupported platform)" >&5
+$as_echo "no (unsupported platform)" >&6; }
+      as_fn_error $? "jitserver is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
     fi
-
   elif test "x$enable_jitserver" = xno ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
 $as_echo "no (explicitly disabled)" >&6; }
@@ -17703,6 +17594,150 @@ $as_echo "$as_me: The path of MSVCP_DLL, which resolves as \"$path\", is invalid
 
 
 
+  # check 3rd party library requirement for UMA
+
+# Check whether --with-freemarker-jar was given.
+if test "${with_freemarker_jar+set}" = set; then :
+  withval=$with_freemarker_jar;
+fi
+
+
+  FREEMARKER_JAR=
+  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
+    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
+      printf "\n"
+      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
+      printf "and has to be provided during configure process.\n"
+      printf "\n"
+      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
+      printf "\n"
+      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
+      printf "\n"
+
+      as_fn_error $? "Cannot continue" "$LINENO" 5
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking checking that '$with_freemarker_jar' exists" >&5
+$as_echo_n "checking checking that '$with_freemarker_jar' exists... " >&6; }
+    if test -f "$with_freemarker_jar" ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      as_fn_error $? "freemarker.jar not found at '$with_freemarker_jar'" "$LINENO" 5
+    fi
+
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+    else
+      FREEMARKER_JAR=$with_freemarker_jar
+    fi
+  fi
+
+
+
+
+
+  # Convert openjdk cpu names to openj9 names
+  case "$host_cpu" in
+    x86_64)
+      OPENJ9_CPU=x86-64
+      ;;
+    powerpc64le)
+      OPENJ9_CPU=ppc-64_le
+      ;;
+    s390x)
+      OPENJ9_CPU=390-64
+      ;;
+    powerpc64)
+      OPENJ9_CPU=ppc-64
+      ;;
+    *)
+      as_fn_error $? "unsupported OpenJ9 cpu $host_cpu" "$LINENO" 5
+      ;;
+  esac
+
+
+  # OPENJ9_CPU == x86-64 even for win32 builds
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    # Extract the first word of "nasm", so it can be a program name with args.
+set dummy nasm; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$NASM_INSTALLED"; then
+  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_NASM_INSTALLED="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
+fi
+fi
+NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
+if test -n "$NASM_INSTALLED"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
+$as_echo "$NASM_INSTALLED" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    if test "x$NASM_INSTALLED" = xyes ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
+$as_echo_n "checking whether nasm version requirement is met... " >&6; }
+
+      # Require NASM v2.11+. This is checked by trying to build conftest.c
+      # containing an instruction that makes use of zmm registers that are
+      # supported on NASM v2.11+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+vdivpd zmm0, zmm1, zmm3;
+_ACEOF
+
+      # the following hack is needed because conftest.c contains C preprocessor
+      # directives defined in confdefs.h that would cause nasm to error out
+      $SED -i -e '/vdivpd/!d' conftest.c
+
+      if nasm -f elf64 conftest.c 2> /dev/null ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      else
+        # NASM version string is of the following format:
+        # ---
+        # NASM version 2.14.02 compiled on Dec 27 2018
+        # ---
+        # Some builds may not contain any text after the version number
+        #
+        # NASM_VERSION is set within square brackets so that the sed expression would not
+        # require quadrigraps to represent square brackets
+        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
+        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
+      fi
+    else
+      as_fn_error $? "nasm not found" "$LINENO" 5
+    fi
+  fi
 
 
 
@@ -45141,8 +45176,8 @@ $as_echo_n "checking if we should generate debug symbols... " >&6; }
     # Default is on if objcopy is found
     if test "x$OBJCOPY" != x; then
       ENABLE_DEBUG_SYMBOLS=true
-    # MacOS X and Windows don't use objcopy but default is on for those OSes
-    elif test "x$OPENJDK_TARGET_OS" = xmacosx || test "x$OPENJDK_TARGET_OS" = xwindows; then
+    # AIX, MacOS X and Windows don't use objcopy but default is on for those OSes
+    elif test "x$OPENJDK_TARGET_OS" = xaix || test "x$OPENJDK_TARGET_OS" = xmacosx || test "x$OPENJDK_TARGET_OS" = xwindows; then
       ENABLE_DEBUG_SYMBOLS=true
     else
       ENABLE_DEBUG_SYMBOLS=false
@@ -45188,11 +45223,6 @@ $as_echo_n "checking what type of native debug symbols to use (this will overrid
 # Check whether --with-native-debug-symbols was given.
 if test "${with_native_debug_symbols+set}" = set; then :
   withval=$with_native_debug_symbols;
-        if test "x$OPENJDK_TARGET_OS" = xaix; then
-          if test "x$with_native_debug_symbols" = xexternal || test "x$with_native_debug_symbols" = xzipped; then
-            as_fn_error $? "AIX only supports the parameters 'none' and 'internal' for --with-native-debug-symbols" "$LINENO" 5
-          fi
-        fi
 
 else
 
