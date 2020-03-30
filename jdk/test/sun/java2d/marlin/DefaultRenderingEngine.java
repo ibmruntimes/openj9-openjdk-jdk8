@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Azul Systems, Inc. All rights reserved.
+ * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,14 +21,22 @@
  * questions.
  */
 
-class Target {
-    static {
-        try {
-            System.loadLibrary("someLibrary");
-            throw new RuntimeException("someLibrary was loaded");
-        } catch (UnsatisfiedLinkError e) {
-            // expected: we do not have a someLibrary
+import sun.java2d.pipe.RenderingEngine;
+
+/**
+ * @test
+ * @bug 8241307
+ * @summary Verifies that the default RenderingEngine is not the Marlin renderer in jdk8u
+ * @run main DefaultRenderingEngine
+ */
+public class DefaultRenderingEngine {
+
+    public static void main(String argv[]) {
+
+        final RenderingEngine engine = RenderingEngine.getInstance();
+
+        if (engine.getClass().getSimpleName().contains("Marlin")) {
+            throw new RuntimeException("Marlin must not be the default RenderingEngine in jdk8u !");
         }
     }
 }
-
