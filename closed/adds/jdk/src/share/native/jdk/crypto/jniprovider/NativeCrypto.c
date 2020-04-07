@@ -415,9 +415,9 @@ int thread_setup()
         if (NULL == lock_cs[i]) {
             fprintf(stderr, "CreateMutex error: %d\n", GetLastError());
             for (j = 0; j < i; j++) {
-                BOOL releaseResult = ReleaseMutex(lock_cs[j]);
-                if (FALSE == releaseResult) {
-                    fprintf(stderr, "ReleaseMutex error: %d\n", GetLastError());
+                BOOL closeResult = CloseHandle(lock_cs[j]);
+                if (FALSE == closeResult) {
+                    fprintf(stderr, "CloseHandle error: %d\n", GetLastError());
                 }
             }
             (*OSSL_OPENSSL_free)(lock_cs);
