@@ -307,6 +307,11 @@ else
   CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=OFF
 endif # OPENJ9_ENABLE_JITSERVER
 
+ifneq (,$(filter debug trace, $(LOG_LEVEL)))
+  # The user said LOG=debug or LOG=trace, so tell cmake to echo commands.
+  CMAKE_ARGS += -DCMAKE_VERBOSE_MAKEFILE=ON
+endif
+
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
@@ -358,10 +363,19 @@ endif # OPENJ9_ENABLE_CMAKE
 
 run-preprocessors-j9 : generate-j9-version-headers
 
+ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+  # Both cmake and the makefiles it generates are sensitive to the VERBOSE
+  # environment variable. This removes VERBOSE from the environment altogether
+  # for build behavior that's consistent with newer jdk versions.
+  MAKE_VM := unset VERBOSE && $(filter-out VERBOSE=%, $(MAKE))
+else
+  MAKE_VM := $(MAKE)
+endif
+
 build-j9vm : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
 	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
-		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
+		&& $(MAKE_VM) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 
 J9JCL_SOURCES_DONEFILE := $(JDK_OUTPUTDIR)/j9jcl_sources/j9jcl_sources.done

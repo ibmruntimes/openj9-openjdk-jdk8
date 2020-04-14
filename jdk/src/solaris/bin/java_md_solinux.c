@@ -388,9 +388,9 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                                            is asked for */
 #ifdef AIX
     const char *mallocOptionsName = "MALLOCOPTIONS";
-    const char *mallocOptionsValue = "multiheap";
+    const char *mallocOptionsValue = "multiheap,considersize";
     if (setenv(mallocOptionsName, mallocOptionsValue, 0) != 0) {
-        fprintf(stderr, "setenv('MALLOCOPTIONS=multiheap') failed: performance may be affected\n");
+        fprintf(stderr, "setenv('MALLOCOPTIONS=multiheap,considersize') failed: performance may be affected\n");
     }
 #endif
 #ifdef SETENV_REQUIRED
