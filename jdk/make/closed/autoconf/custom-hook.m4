@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -215,42 +215,18 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
 
 AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
 [
-  AC_MSG_CHECKING([for jitserver])
   AC_ARG_ENABLE([jitserver], [AS_HELP_STRING([--enable-jitserver], [enable JITServer support @<:@disabled@:>@])])
+
+  AC_MSG_CHECKING([for jitserver])
   OPENJ9_ENABLE_JITSERVER=false
-
   if test "x$enable_jitserver" = xyes ; then
-    AC_MSG_RESULT([yes (explicitly enabled)])
-
-    if test "x$OPENJDK_TARGET_OS" != xlinux ; then
-      AC_MSG_ERROR([jitserver is unsupported for $OPENJDK_TARGET_OS])
+    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+      AC_MSG_RESULT([yes (explicitly enabled)])
+      OPENJ9_ENABLE_JITSERVER=true
     else
-      AC_CHECK_PROG(PROTOC_INSTALLED,protoc,yes,no)
-      if test "x$PROTOC_INSTALLED" = xno ; then
-        AC_MSG_ERROR([jitserver requires protoc])
-      else
-        AC_MSG_CHECKING([protobuf version])
-        if test "x$OPENJ9_CPU" = xx86-64 ; then
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.5.1
-        else
-          MIN_SUPPORTED_PROTOBUF_VERSION=3.7.1
-        fi
-
-        PROTOBUF_VERSION=`protoc --version 2>&1 | $SED -e 's/libprotoc //'`
-        AC_MSG_RESULT([$PROTOBUF_VERSION])
-
-        AS_VERSION_COMPARE([$PROTOBUF_VERSION], [$MIN_SUPPORTED_PROTOBUF_VERSION],
-          [PROTOBUF_VERSION_SUPPORTED=no],
-          [PROTOBUF_VERSION_SUPPORTED=yes],
-          [PROTOBUF_VERSION_SUPPORTED=yes])
-        if test "x$PROTOBUF_VERSION_SUPPORTED" = xyes ; then
-          OPENJ9_ENABLE_JITSERVER=true
-        else
-          AC_MSG_ERROR([jitserver requires protobuf version >= ($MIN_SUPPORTED_PROTOBUF_VERSION) for ($OPENJ9_CPU)])
-        fi
-      fi
+      AC_MSG_RESULT([no (unsupported platform)])
+      AC_MSG_ERROR([jitserver is unsupported for $OPENJDK_TARGET_OS])
     fi
-
   elif test "x$enable_jitserver" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_jitserver" = x ; then
