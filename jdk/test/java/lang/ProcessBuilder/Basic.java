@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 4199068 4738465 4937983 4930681 4926230 4931433 4932663 4986689
  *      5026830 5023243 5070673 4052517 4811767 6192449 6397034 6413313
@@ -1663,6 +1669,10 @@ public class Basic {
             List<String> list = new ArrayList<String>(javaChildArgs);
             list.add(1, String.format("-XX:OnOutOfMemoryError=%s -version",
                                       javaExe));
+            // Disable OpenJ9 OOM dumps for this OOM test, but enable others to catch unexpected problems.
+            list.add(2, "-Xdump:system:none");
+            list.add(3, "-Xdump:heap:none");
+            list.add(4, "-Xdump:system:events=gpf+abort+traceassert+corruptcache");
             list.add("ArrayOOME");
             ProcessResults r = run(new ProcessBuilder(list));
             check(r.err().contains("java.lang.OutOfMemoryError:"));
