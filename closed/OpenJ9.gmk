@@ -247,20 +247,28 @@ CMAKE_ARGS := \
 	-DJAVA_SPEC_VERSION=8 \
 	-DOPENJ9_BUILD=true
 
-# We grab the C/C++ compilers detected by autoconf or provided by user, not
-# the CC/CXX variables defined by the makefiles, which potentially include
-# the ccache command which will throw off cmake.
-ifneq (,$(OPENJ9_CC))
-  CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
+ifeq (windows,$(OPENJDK_TARGET_OS))
+  CMAKE_ARGS += -DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain-win.cmake"
 else
-  CMAKE_ARGS += -DCMAKE_C_COMPILER="$(ac_cv_prog_CC)"
-endif
+  # We grab the C/C++ compilers detected by autoconf or provided by user, not
+  # the CC/CXX variables defined by the makefiles, which potentially include
+  # the ccache command which will throw off cmake.
+  ifneq (,$(OPENJ9_CC))
+    CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
+  else
+    CMAKE_ARGS += -DCMAKE_C_COMPILER="$(ac_cv_prog_CC)"
+  endif
 
-ifneq (,$(OPENJ9_CXX))
-  CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
-else
-  CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
-endif
+  ifneq (,$(OPENJ9_CXX))
+    CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
+  else
+    CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
+  endif
+
+  ifneq (,$(NASM))
+    CMAKE_ARGS += -DCMAKE_ASM_NASM_COMPILER="$(NASM)"
+  endif
+endif # windows
 
 ifeq (true,$(OPENJ9_ENABLE_CUDA))
   CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(CUDA_HOME)"
