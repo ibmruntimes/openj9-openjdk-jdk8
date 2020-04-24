@@ -25,14 +25,17 @@ all :
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 
+# openj9_debuginfo_filter - select debuginfo files from a list of paths 
+# -----------------------
+# $1 - input file paths
 ifeq (true,$(ZIP_DEBUGINFO_FILES))
-  DEBUG_SYMBOL_SUFFIX := .diz
+  openj9_debuginfo_filter = $(filter %.diz, $1)
 else ifeq (macosx,$(OPENJDK_TARGET_OS))
-  DEBUG_SYMBOL_SUFFIX := .dSYM
+  openj9_debuginfo_filter = $(strip $(foreach path, $1, $(if $(findstring .dSYM/,$(path)),$(path))))
 else ifeq (windows,$(OPENJDK_TARGET_OS))
-  DEBUG_SYMBOL_SUFFIX := .pdb
+  openj9_debuginfo_filter = $(filter %.pdb, $1)
 else
-  DEBUG_SYMBOL_SUFFIX := .debuginfo
+  openj9_debuginfo_filter = $(filter %.debuginfo, $1)
 endif
 
 DEBUG_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/debug-image
@@ -59,7 +62,7 @@ DEBUGINFO_DIRS := $(addprefix $(JDK_OUTPUTDIR)/, bin lib)
 
 $(eval $(call FillCacheFind, $(DEBUGINFO_DIRS)))
 
-DEBUGINFO_FILES := $(filter %$(DEBUG_SYMBOL_SUFFIX), $(call CacheFind, $(DEBUGINFO_DIRS)))
+DEBUGINFO_FILES := $(call openj9_debuginfo_filter, $(call CacheFind, $(DEBUGINFO_DIRS)))
 
 $(foreach file, $(DEBUGINFO_FILES), \
 	$(eval $(call openj9_copy_group,$(file),$(dir $(patsubst $(JDK_OUTPUTDIR)/%,$(DEBUG_IMAGE_DIR)/%,$(file))))))
