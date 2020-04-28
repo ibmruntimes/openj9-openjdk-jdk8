@@ -161,7 +161,7 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
 	SETUP := GENERATE_USINGJDKBYTECODE, \
 	BIN := $(DDR_STUBS_BIN), \
 	ADD_JAVAC_FLAGS := -cp $(JDK_OUTPUTDIR)/classes, \
-	SRC := $(OPENJ9_TOPDIR)/jcl/src/com.ibm.jzos/share/classes, \
+	SRC := $(OPENJ9_TOPDIR)/jcl/src/ibm.jzos/share/classes, \
 	EXCLUDE_FILES := module-info.java \
 	))
 	
