@@ -629,6 +629,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+OPENJ9_TOOL_DIR
 COMPILER_VERSION_STRING
 BUILD_OPENSSL
 WITH_OPENSSL
@@ -880,7 +881,7 @@ CHECK_MAKE
 CHECK_GMAKE
 PKGHANDLER
 DEVKIT_LIB_DIR
-NASM_INSTALLED
+NASM
 FREEMARKER_JAR
 MSVCP_DLL
 VS_LIB
@@ -1219,6 +1220,7 @@ DF
 SETFILE
 CPIO
 CMAKE
+NASM
 UNZIP
 ZIP
 LDD
@@ -1969,8 +1971,8 @@ Optional Packages:
   --with-toolchain-path   prepend these directories when searching for
                           toolchain binaries (compilers etc)
   --with-extra-path       prepend these directories to the default path
-  --with-xcode-path       explicit path to Xcode 4 (generally for building on
-                          10.9 and later)
+  --with-xcode-path       explicit path to Xcode (Xcode 4 is supported;
+                          generally for building on 10.9 and later)
   --with-macosx-codesign-identity
                           specify the code signing identity
   --with-builddeps-conf   use this configuration file for the builddeps
@@ -2138,6 +2140,7 @@ Some influential environment variables:
   SETFILE     Override default value for SETFILE
   CPIO        Override default value for CPIO
   CMAKE       Override default value for CMAKE
+  NASM        Override default value for NASM
   UNZIP       Override default value for UNZIP
   ZIP         Override default value for ZIP
   LDD         Override default value for LDD
@@ -3812,11 +3815,9 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 # questions.
 #
 
-#
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 
 
@@ -4530,9 +4531,17 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+# Create a tool wrapper for use by cmake.
+# Consists of a shell script which wraps commands with an invocation of fixpath.
+# OPENJ9_GENERATE_TOOL_WRAPER(<name_of_wrapper>, <command_to_call>)
+
+
+# Generate all the tool wrappers required for cmake on windows
+
+
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1588177384
+DATE_WHEN_GENERATED=1588177583
 
 ###############################################################################
 #
@@ -14147,6 +14156,8 @@ $as_echo "$COMPILE_TYPE" >&6; }
     elif test "x$OPENJDK_TARGET_CPU_ARCH" = xx86; then
       OPENJDK_TARGET_CPU_JLI_CFLAGS="$OPENJDK_TARGET_CPU_JLI_CFLAGS -DLIBARCH32NAME='\"i386\"' -DLIBARCH64NAME='\"amd64\"'"
     fi
+  elif test "x$OPENJDK_TARGET_OS" = xmacosx && test "x$TOOLCHAIN_TYPE" = xclang ; then
+    OPENJDK_TARGET_CPU_JLI_CFLAGS="$OPENJDK_TARGET_CPU_JLI_CFLAGS -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
   fi
 
 
@@ -17668,24 +17679,36 @@ $as_echo "no" >&6; }
 
   # OPENJ9_CPU == x86-64 even for win32 builds
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    # Extract the first word of "nasm", so it can be a program name with args.
-set dummy nasm; ac_word=$2
+
+
+
+  # Publish this variable in the help.
+
+
+  if test "x$NASM" = x; then
+    # The variable is not set by user, try to locate tool using the code snippet
+    for ac_prog in nasm
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_NASM_INSTALLED+:} false; then :
+if ${ac_cv_path_NASM+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$NASM_INSTALLED"; then
-  ac_cv_prog_NASM_INSTALLED="$NASM_INSTALLED" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+  case $NASM in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NASM="$NASM" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_NASM_INSTALLED="yes"
+    ac_cv_path_NASM="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -17693,53 +17716,193 @@ done
   done
 IFS=$as_save_IFS
 
-  test -z "$ac_cv_prog_NASM_INSTALLED" && ac_cv_prog_NASM_INSTALLED="no"
+  ;;
+esac
 fi
-fi
-NASM_INSTALLED=$ac_cv_prog_NASM_INSTALLED
-if test -n "$NASM_INSTALLED"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM_INSTALLED" >&5
-$as_echo "$NASM_INSTALLED" >&6; }
+NASM=$ac_cv_path_NASM
+if test -n "$NASM"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM" >&5
+$as_echo "$NASM" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-    if test "x$NASM_INSTALLED" = xyes ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
+  test -n "$NASM" && break
+done
+
+  else
+    # The variable is set, but is it from the command line or the environment?
+
+    # Try to remove the string !NASM! from our list.
+    try_remove_var=${CONFIGURE_OVERRIDDEN_VARIABLES//!NASM!/}
+    if test "x$try_remove_var" = "x$CONFIGURE_OVERRIDDEN_VARIABLES"; then
+      # If it failed, the variable was not from the command line. Ignore it,
+      # but warn the user (except for BASH, which is always set by the calling BASH).
+      if test "xNASM" != xBASH; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring value of NASM from the environment. Use command line variables instead." >&5
+$as_echo "$as_me: WARNING: Ignoring value of NASM from the environment. Use command line variables instead." >&2;}
+      fi
+      # Try to locate tool using the code snippet
+      for ac_prog in nasm
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_NASM+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $NASM in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NASM="$NASM" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_NASM="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+NASM=$ac_cv_path_NASM
+if test -n "$NASM"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM" >&5
+$as_echo "$NASM" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$NASM" && break
+done
+
+    else
+      # If it succeeded, then it was overridden by the user. We will use it
+      # for the tool.
+
+      # First remove it from the list of overridden variables, so we can test
+      # for unknown variables in the end.
+      CONFIGURE_OVERRIDDEN_VARIABLES="$try_remove_var"
+
+      # Check if the provided tool contains a complete path.
+      tool_specified="$NASM"
+      tool_basename="${tool_specified##*/}"
+      if test "x$tool_basename" = "x$tool_specified"; then
+        # A command without a complete path is provided, search $PATH.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will search for user supplied tool NASM=$tool_basename" >&5
+$as_echo "$as_me: Will search for user supplied tool NASM=$tool_basename" >&6;}
+        # Extract the first word of "$tool_basename", so it can be a program name with args.
+set dummy $tool_basename; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_NASM+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $NASM in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NASM="$NASM" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_NASM="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+NASM=$ac_cv_path_NASM
+if test -n "$NASM"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NASM" >&5
+$as_echo "$NASM" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+        if test "x$NASM" = x; then
+          as_fn_error $? "User supplied tool $tool_basename could not be found" "$LINENO" 5
+        fi
+      else
+        # Otherwise we believe it is a complete path. Use it as it is.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will use user supplied tool NASM=$tool_specified" >&5
+$as_echo "$as_me: Will use user supplied tool NASM=$tool_specified" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for NASM" >&5
+$as_echo_n "checking for NASM... " >&6; }
+        if test ! -x "$tool_specified"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+          as_fn_error $? "User supplied tool NASM=$tool_specified does not exist or is not executable" "$LINENO" 5
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tool_specified" >&5
+$as_echo "$tool_specified" >&6; }
+      fi
+    fi
+  fi
+
+
+
+  if test "x$NASM" = x; then
+    as_fn_error $? "Could not find required tool for NASM" "$LINENO" 5
+  fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether nasm version requirement is met" >&5
 $as_echo_n "checking whether nasm version requirement is met... " >&6; }
 
-      # Require NASM v2.11+. This is checked by trying to build conftest.c
-      # containing an instruction that makes use of zmm registers that are
-      # supported on NASM v2.11+
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    # Require NASM v2.11+. This is checked by trying to build conftest.c
+    # containing an instruction that makes use of zmm registers that are
+    # supported on NASM v2.11+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 vdivpd zmm0, zmm1, zmm3;
 _ACEOF
 
-      # the following hack is needed because conftest.c contains C preprocessor
-      # directives defined in confdefs.h that would cause nasm to error out
-      $SED -i -e '/vdivpd/!d' conftest.c
+    # the following hack is needed because conftest.c contains C preprocessor
+    # directives defined in confdefs.h that would cause nasm to error out
+    $SED -i -e '/vdivpd/!d' conftest.c
 
-      if nasm -f elf64 conftest.c 2> /dev/null ; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+    if $NASM -f elf64 conftest.c 2> /dev/null ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-      else
-        # NASM version string is of the following format:
-        # ---
-        # NASM version 2.14.02 compiled on Dec 27 2018
-        # ---
-        # Some builds may not contain any text after the version number
-        #
-        # NASM_VERSION is set within square brackets so that the sed expression would not
-        # require quadrigraps to represent square brackets
-        NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
-        as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
-      fi
     else
-      as_fn_error $? "nasm not found" "$LINENO" 5
+      # NASM version string is of the following format:
+      # ---
+      # NASM version 2.14.02 compiled on Dec 27 2018
+      # ---
+      # Some builds may not contain any text after the version number
+      #
+      # NASM_VERSION is set within square brackets so that the sed expression would not
+      # require quadrigraps to represent square brackets
+      NASM_VERSION=`$NASM -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`
+      as_fn_error $? "nasm version detected: $NASM_VERSION; required version 2.11+" "$LINENO" 5
     fi
+
   fi
 
 
@@ -29514,7 +29677,7 @@ $as_echo "$as_me: or run \"bash.exe -l\" from a VS command prompt and then run c
 $as_echo_n "checking Determining if we need to set DEVELOPER_DIR... " >&6; }
     if test -n "$DEVELOPER_DIR"; then
       if test ! -d "$DEVELOPER_DIR"; then
-        as_fn_error $? "Xcode Developer path does not exist: $DEVELOPER_DIR, please provide a path to the Xcode 4 application bundle using --with-xcode-path" "$LINENO" 5
+        as_fn_error $? "Xcode Developer path does not exist: $DEVELOPER_DIR, please provide a path to the Xcode application bundle using --with-xcode-path" "$LINENO" 5
       fi
       if test ! -f "$DEVELOPER_DIR"/usr/bin/xcodebuild; then
         as_fn_error $? "Xcode Developer path is not valid: $DEVELOPER_DIR, it must point to Contents/Developer inside an Xcode application bundle" "$LINENO" 5
@@ -29577,8 +29740,8 @@ fi
     # Fail-fast: verify we're building on Xcode 4, we cannot build with Xcode 5 or later
     XCODE_VERSION=`$XCODEBUILD -version | grep '^Xcode ' | sed 's/Xcode //'`
     XC_VERSION_PARTS=( ${XCODE_VERSION//./ } )
-    if test ! "${XC_VERSION_PARTS[0]}" = "4"; then
-      as_fn_error $? "Xcode 4 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode 4 or make Xcode 4 active by using xcode-select." "$LINENO" 5
+    if test "${XC_VERSION_PARTS[0]}" != "4" -a "${XC_VERSION_PARTS[0]}" != "9" -a "${XC_VERSION_PARTS[0]}" != "10" -a "${XC_VERSION_PARTS[0]}" != "11" ; then
+      as_fn_error $? "Xcode 4, 9, 10 or 11 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode or make Xcode active by using xcode-select." "$LINENO" 5
     fi
 
     # Some versions of Xcode 5 command line tools install gcc and g++ as symlinks to
@@ -44050,6 +44213,26 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
       SET_SHARED_LIBRARY_NAME='-Xlinker -soname=$1'
       SET_SHARED_LIBRARY_MAPFILE='-Xlinker -version-script=$1'
     fi
+  elif test "x$TOOLCHAIN_TYPE" = xclang; then
+    PICFLAG="-fPIC"
+    C_FLAG_REORDER=''
+    CXX_FLAG_REORDER=''
+
+    if test "x$OPENJDK_TARGET_OS" = xmacosx; then
+      # Linking is different on MacOSX
+      SHARED_LIBRARY_FLAGS="-dynamiclib -compatibility_version 1.0.0 -current_version 1.0.0 $PICFLAG"
+      SET_EXECUTABLE_ORIGIN='-Xlinker -rpath -Xlinker @loader_path/.'
+      SET_SHARED_LIBRARY_ORIGIN="$SET_EXECUTABLE_ORIGIN"
+      SET_SHARED_LIBRARY_NAME='-Xlinker -install_name -Xlinker @rpath/$1'
+      SET_SHARED_LIBRARY_MAPFILE=''
+    else
+      # Default works for linux, might work on other platforms as well.
+      SHARED_LIBRARY_FLAGS='-shared'
+      SET_EXECUTABLE_ORIGIN='-Xlinker -rpath -Xlinker \$$$$ORIGIN$1'
+      SET_SHARED_LIBRARY_ORIGIN="-Xlinker -z -Xlinker origin $SET_EXECUTABLE_ORIGIN"
+      SET_SHARED_LIBRARY_NAME='-Xlinker -soname=$1'
+      SET_SHARED_LIBRARY_MAPFILE='-Xlinker -version-script=$1'
+    fi
   elif test "x$TOOLCHAIN_TYPE" = xsolstudio; then
     PICFLAG="-KPIC"
     PIEFLAG=""
@@ -44114,6 +44297,8 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
   # Generate make dependency files
   if test "x$TOOLCHAIN_TYPE" = xgcc; then
     C_FLAG_DEPS="-MMD -MF"
+  elif test "x$TOOLCHAIN_TYPE" = xclang; then
+    C_FLAG_DEPS="-MMD -MF"
   elif test "x$TOOLCHAIN_TYPE" = xsolstudio; then
     C_FLAG_DEPS="-xMMD -xMF"
   elif test "x$TOOLCHAIN_TYPE" = xxlc; then
@@ -44130,6 +44315,15 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
   # See JDK-8207057.
   ASFLAGS_DEBUG_SYMBOLS=""
   if test "x$TOOLCHAIN_TYPE" = xgcc; then
+    if test "x$OPENJDK_TARGET_CPU_BITS" = "x64" && test "x$DEBUG_LEVEL" = "xfastdebug"; then
+      CFLAGS_DEBUG_SYMBOLS="-g1"
+      CXXFLAGS_DEBUG_SYMBOLS="-g1"
+    else
+      CFLAGS_DEBUG_SYMBOLS="-g"
+      CXXFLAGS_DEBUG_SYMBOLS="-g"
+    fi
+    ASFLAGS_DEBUG_SYMBOLS="-g"
+  elif test "x$TOOLCHAIN_TYPE" = xclang; then
     if test "x$OPENJDK_TARGET_CPU_BITS" = "x64" && test "x$DEBUG_LEVEL" = "xfastdebug"; then
       CFLAGS_DEBUG_SYMBOLS="-g1"
       CXXFLAGS_DEBUG_SYMBOLS="-g1"
@@ -44181,6 +44375,20 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
     # The remaining toolchains share opt flags between CC and CXX;
     # setup for C and duplicate afterwards.
     if test "x$TOOLCHAIN_TYPE" = xgcc; then
+      if test "x$OPENJDK_TARGET_OS" = xmacosx; then
+        # On MacOSX we optimize for size, something
+        # we should do for all platforms?
+        C_O_FLAG_HIGHEST="-Os"
+        C_O_FLAG_HI="-Os"
+        C_O_FLAG_NORM="-Os"
+        C_O_FLAG_NONE=""
+      else
+        C_O_FLAG_HIGHEST="-O3"
+        C_O_FLAG_HI="-O3"
+        C_O_FLAG_NORM="-O2"
+        C_O_FLAG_NONE="-O0"
+      fi
+    elif test "x$TOOLCHAIN_TYPE" = xclang; then
       if test "x$OPENJDK_TARGET_OS" = xmacosx; then
         # On MacOSX we optimize for size, something
         # we should do for all platforms?
@@ -44854,7 +45062,7 @@ $as_echo "$supports" >&6; }
 
   # Additional macosx handling
   if test "x$OPENJDK_TARGET_OS" = xmacosx; then
-    if test "x$TOOLCHAIN_TYPE" = xgcc; then
+    if test "x$TOOLCHAIN_TYPE" = xgcc -o "x$TOOLCHAIN_TYPE" = xclang; then
       # FIXME: This needs to be exported in spec.gmk due to closed legacy code.
       # FIXME: clean this up, and/or move it elsewhere.
 
@@ -44865,7 +45073,7 @@ $as_echo "$supports" >&6; }
       MACOSX_VERSION_MIN=10.9.0
 
 
-      # The macro takes the version with no dots, ex: 1070
+      # The macro takes the version with no dots, ex: 1090
       # Let the flags variables get resolved in make for easier override on make
       # command line.
       CCXXFLAGS_JDK="$CCXXFLAGS_JDK -DMAC_OS_X_VERSION_MAX_ALLOWED=\$(subst .,,\$(MACOSX_VERSION_MIN)) -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
@@ -44922,6 +45130,23 @@ $as_echo "$supports" >&6; }
     LDFLAGS_JDKEXE="${LDFLAGS_JDK} /STACK:$LDFLAGS_STACK_SIZE"
   else
     if test "x$TOOLCHAIN_TYPE" = xgcc; then
+      # If this is a --hash-style=gnu system, use --hash-style=both, why?
+      # We have previously set HAS_GNU_HASH if this is the case
+      if test -n "$HAS_GNU_HASH"; then
+        LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker --hash-style=both "
+      fi
+      if test "x$OPENJDK_TARGET_OS" = xlinux; then
+        # And since we now know that the linker is gnu, then add:
+        #   -z defs, to forbid undefined symbols in object files
+        #   -z noexecstack, to mark stack regions as non-executable
+        LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker -z -Xlinker defs -Xlinker -z -Xlinker noexecstack"
+        if test "x$DEBUG_LEVEL" = "xrelease"; then
+          # When building release libraries, tell the linker optimize them.
+          # Should this be supplied to the OSS linker as well?
+          LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker -O1"
+        fi
+      fi
+    elif test "x$TOOLCHAIN_TYPE" = xclang; then
       # If this is a --hash-style=gnu system, use --hash-style=both, why?
       # We have previously set HAS_GNU_HASH if this is the case
       if test -n "$HAS_GNU_HASH"; then
@@ -51591,8 +51816,12 @@ fi
   fi
 
   # TODO better (platform agnostic) test
-  if test "x$OPENJDK_TARGET_OS" = xmacosx && test "x$LIBCXX" = x && test "x$TOOLCHAIN_TYPE" = xgcc; then
-    LIBCXX="-lstdc++"
+  if test "x$OPENJDK_TARGET_OS" = xmacosx && test "x$LIBCXX" = x ; then
+    if test "x$TOOLCHAIN_TYPE" = xgcc; then
+      LIBCXX="-lstdc++"
+    elif test "x$TOOLCHAIN_TYPE" = xclang; then
+      LIBCXX="-std=libc++"
+    fi
   fi
 
 
@@ -55942,6 +56171,118 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
   # explicitly disable classlist generation
   ENABLE_GENERATE_CLASSLIST="false"
 
+  if test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    OPENJ9_TOOL_DIR="$OUTPUT_ROOT/tools"
+
+
+  MSVC_BIN_DIR=$($DIRNAME $CC)
+  SDK_BIN_DIR=$($DIRNAME $RC)
+
+  mkdir -p "$OPENJ9_TOOL_DIR"
+
+  tool_file="$OPENJ9_TOOL_DIR/cl"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[cl],[$CC]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$CC" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/lib"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[lib],[$AR]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$AR" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/link"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[link],[$LD]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$LD" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/ml"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[ml],[$MSVC_BIN_DIR/ml]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$MSVC_BIN_DIR/ml" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/ml64"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[ml64],[$MSVC_BIN_DIR/ml64]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$MSVC_BIN_DIR/ml64" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/rc"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[rc],[$RC]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$RC" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/mc"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[mc],[$SDK_BIN_DIR/mc]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$SDK_BIN_DIR/mc" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/nasm"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[nasm],[$NASM]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$NASM" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/java"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[java],[$JAVA]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$JAVA" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/jar"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[jar],[$JAR]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$JAR" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/javac"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[javac],[$JAVAC]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$JAVAC" >> $tool_file
+  chmod +x $tool_file
+
+
+    ac_config_files="$ac_config_files $OUTPUT_ROOT/toolchain-win.cmake:$CLOSED_AUTOCONF_DIR/toolchain-win.cmake.in"
+
+  fi
+
 
 # We're messing a bit with internal autoconf variables to put the config.status
 # in the output directory instead of the current directory.
@@ -56647,6 +56988,7 @@ do
     "$OUTPUT_ROOT/spec.sh") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/spec.sh:$AUTOCONF_DIR/spec.sh.in" ;;
     "$OUTPUT_ROOT/Makefile") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/Makefile:$AUTOCONF_DIR/Makefile.in" ;;
     "$OUTPUT_ROOT/custom-spec.gmk") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/custom-spec.gmk:$CLOSED_AUTOCONF_DIR/custom-spec.gmk.in" ;;
+    "$OUTPUT_ROOT/toolchain-win.cmake") CONFIG_FILES="$CONFIG_FILES $OUTPUT_ROOT/toolchain-win.cmake:$CLOSED_AUTOCONF_DIR/toolchain-win.cmake.in" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

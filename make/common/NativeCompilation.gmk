@@ -661,9 +661,7 @@ endif # no MacOS X support yet
         # This only works if the codesign identity is present on the system.
         # Let it silently fail otherwise.
         ifneq (,$(CODESIGN))
-          ifneq (,$$($1_CODESIGN))
 	    $(CODESIGN) $(CODESIGN_OPTIONS) $$@
-          endif
         endif
   endif
 endef
