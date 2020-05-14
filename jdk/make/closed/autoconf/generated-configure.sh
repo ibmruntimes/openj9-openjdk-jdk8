@@ -898,6 +898,7 @@ SPEC
 WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+OPENJ9_ENABLE_MICROJIT
 OPENJ9_ENABLE_JITSERVER
 HEALTHCENTER_JAR
 OPENJ9_ENABLE_DEMOS
@@ -1103,6 +1104,7 @@ enable_jitserver
 enable_openjdk_methodhandles
 enable_warnings_as_errors_omr
 enable_warnings_as_errors_openj9
+enable_microjit
 with_conf_name
 with_toolchain_version
 with_freemarker_jar
@@ -1937,6 +1939,7 @@ Optional Features:
   --disable-warnings-as-errors-openj9
                           do not consider OpenJ9 native compile warnings to be
                           errors [enabled]
+  --enable-microjit       enable MicroJIT support [disabled]
   --disable-headful       disable building headful support (graphical UI
                           support) [enabled]
   --enable-hotspot-test-in-build
@@ -16424,6 +16427,33 @@ $as_echo "no (explicitly disabled)" >&6; }
 $as_echo "no (default)" >&6; }
   else
     as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
+  # Check whether --enable-microjit was given.
+if test "${enable_microjit+set}" = set; then :
+  enableval=$enable_microjit;
+fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for microjit" >&5
+$as_echo_n "checking for microjit... " >&6; }
+  OPENJ9_ENABLE_MICROJIT=false
+  if test "x$enable_microjit" = xyes ; then
+    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+      OPENJ9_ENABLE_MICROJIT=true
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (unsupported platform)" >&5
+$as_echo "no (unsupported platform)" >&6; }
+      as_fn_error $? "MicroJIT is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
+    fi
+  elif test "x$enable_microjit" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_microjit" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-microjit accepts no argument" "$LINENO" 5
   fi
 
 
