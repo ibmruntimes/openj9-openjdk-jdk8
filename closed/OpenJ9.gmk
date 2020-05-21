@@ -175,7 +175,7 @@ ifeq (true,$(OPENJ9_ENABLE_MICROJIT))
   FEATURE_SED_SCRIPT += $(call SedEnable,opt_microjit)
 else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_microjit)
-endif
+endif # OPENJ9_ENABLE_MICROJIT
 
 # openj9_stage_buildspec_file
 # ---------------------------
