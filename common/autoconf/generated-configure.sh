@@ -4410,7 +4410,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1588177583
+DATE_WHEN_GENERATED=1590130971
 
 ###############################################################################
 #
@@ -28032,7 +28032,7 @@ $as_echo "$as_me: The result from running with --version was: \"$COMPILER_VERSIO
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT | \
         $SED -e 's/ *Copyright .*//'`
     COMPILER_VERSION_NUMBER=`$ECHO $COMPILER_VERSION_OUTPUT | \
-        $SED -e 's/^.* \([1-9]\.[0-9.]*\) .*$/\1/'`
+        $SED -e 's/^.* \([1-9][0-9]*\.[0-9.]*\) .*$/\1/'`
   elif test  "x$TOOLCHAIN_TYPE" = xclang; then
     # clang --version output typically looks like
     #    Apple LLVM version 5.0 (clang-500.2.79) (based on LLVM 3.3svn)
@@ -29773,7 +29773,7 @@ $as_echo "$as_me: The result from running with --version was: \"$COMPILER_VERSIO
     COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT | \
         $SED -e 's/ *Copyright .*//'`
     COMPILER_VERSION_NUMBER=`$ECHO $COMPILER_VERSION_OUTPUT | \
-        $SED -e 's/^.* \([1-9]\.[0-9.]*\) .*$/\1/'`
+        $SED -e 's/^.* \([1-9][0-9]*\.[0-9.]*\) .*$/\1/'`
   elif test  "x$TOOLCHAIN_TYPE" = xclang; then
     # clang --version output typically looks like
     #    Apple LLVM version 5.0 (clang-500.2.79) (based on LLVM 3.3svn)
