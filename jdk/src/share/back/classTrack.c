@@ -24,6 +24,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * This module tracks classes that have been prepared, so as to
  * be able to report which have been unloaded. On VM start-up
  * and whenever new classes are loaded, all prepared classes'
@@ -81,13 +87,14 @@ cbTrackingObjectFree(jvmtiEnv* jvmti_env, jlong tag)
 struct bag *
 classTrack_processUnloads(JNIEnv *env)
 {
+    struct bag* deleted;
     debugMonitorEnter(classTrackLock);
     if (deletedSignatures == NULL) {
         // Class tracking not initialized, nobody's interested.
         debugMonitorExit(classTrackLock);
         return NULL;
     }
-    struct bag* deleted = deletedSignatures;
+    deleted = deletedSignatures;
     deletedSignatures = bagCreateBag(sizeof(char*), 10);
     debugMonitorExit(classTrackLock);
     return deleted;
@@ -101,6 +108,7 @@ classTrack_addPreparedClass(JNIEnv *env_unused, jclass klass)
 {
     jvmtiError error;
     jvmtiEnv* env = trackingEnv;
+    char* signature;
 
     if (gdata && gdata->assertOn) {
         // Check this is not already tagged.
@@ -112,7 +120,6 @@ classTrack_addPreparedClass(JNIEnv *env_unused, jclass klass)
         JDI_ASSERT(tag == NOT_TAGGED);
     }
 
-    char* signature;
     error = classSignature(klass, &signature, NULL);
     if (error != JVMTI_ERROR_NONE) {
         EXIT_ERROR(error,"signature");
@@ -128,13 +135,14 @@ static jboolean
 setupEvents()
 {
     jvmtiCapabilities caps;
+    jvmtiError error;
+    jvmtiEventCallbacks cb;
     memset(&caps, 0, sizeof(caps));
     caps.can_generate_object_free_events = 1;
-    jvmtiError error = JVMTI_FUNC_PTR(trackingEnv, AddCapabilities)(trackingEnv, &caps);
+    error = JVMTI_FUNC_PTR(trackingEnv, AddCapabilities)(trackingEnv, &caps);
     if (error != JVMTI_ERROR_NONE) {
         return JNI_FALSE;
     }
-    jvmtiEventCallbacks cb;
     memset(&cb, 0, sizeof(cb));
     cb.ObjectFree = cbTrackingObjectFree;
     error = JVMTI_FUNC_PTR(trackingEnv, SetEventCallbacks)(trackingEnv, &cb, sizeof(cb));
@@ -154,6 +162,11 @@ setupEvents()
 void
 classTrack_initialize(JNIEnv *env)
 {
+    jint classCount;
+    jclass *classes;
+    jvmtiError error;
+    jint i;
+
     deletedSignatures = NULL;
     classTrackLock = debugMonitorCreate("Deleted class tag lock");
     trackingEnv = getSpecialJvmti();
@@ -165,11 +178,6 @@ classTrack_initialize(JNIEnv *env)
     if (!setupEvents()) {
         EXIT_ERROR(AGENT_ERROR_INTERNAL, "Unable to setup ObjectFree tracking");
     }
-
-    jint classCount;
-    jclass *classes;
-    jvmtiError error;
-    jint i;
 
     error = allLoadedClasses(&classes, &classCount);
     if ( error == JVMTI_ERROR_NONE ) {
