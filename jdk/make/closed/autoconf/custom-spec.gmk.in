@@ -89,7 +89,7 @@ MSVCP_DLL               := @MSVCP_DLL@
 
 COPY_JVM_CFG_FILE       := true
 
-ifeq ($(OPENJDK_BUILD_OS), macosx)
+ifeq ($(OPENJDK_TARGET_OS), macosx)
   # MACOSX_DEPLOYMENT_TARGET acts similar to -mmacosx-version-min=version
   # compiler option. If both the compiler option is specified and the
   # environment variable is set, then the compiler option will take
@@ -101,6 +101,12 @@ ifeq ($(OPENJDK_BUILD_OS), macosx)
 
   # Set page zero size to 4KB for mapping memory below 4GB.
   LDFLAGS_JDKEXE += -pagezero_size 0x1000
+endif
+
+ifeq ($(OPENJDK_TARGET_OS), windows)
+  # Create 32-bit Windows builds which can handle addresses bigger than 2GB.
+  # This is already the default for 64-bit builds.
+  LDFLAGS_JDKEXE += /LARGEADDRESSAWARE
 endif
 
 # Usage: $(call CodesignFile, files ...)
