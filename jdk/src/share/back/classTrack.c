@@ -134,6 +134,8 @@ classTrack_addPreparedClass(JNIEnv *env_unused, jclass klass)
 static jboolean
 setupEvents()
 {
+    jvmtiError error;
+    jvmtiEventCallbacks cb;
     jvmtiCapabilities caps;
     jvmtiError error;
     jvmtiEventCallbacks cb;
