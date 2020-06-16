@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -30,10 +30,12 @@ usage() {
 	echo "                    or git@github.com:<namespace>/openj9.git"
 	echo "  -openj9-branch    the OpenJ9 git branch: master"
 	echo "  -openj9-sha       a commit SHA for the OpenJ9 repository"
+	echo "  -openj9-reference a local repo to use as a clone reference"
 	echo "  -omr-repo         the OpenJ9/omr repository url: https://github.com/eclipse/openj9-omr.git"
 	echo "                    or git@github.com:<namespace>/openj9-omr.git"
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
 	echo "  -omr-sha           a commit SHA for the omr repository"
+	echo "  -omr-reference    a local repo to use as a clone reference"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo ""
 	exit 1
@@ -51,6 +53,7 @@ declare -A default_j9repos=( [openj9]=eclipse/openj9 [omr]=eclipse/openj9-omr )
 declare -A default_branches=( [openj9]=master [omr]=openj9 )
 declare -A commands
 declare -A shas
+declare -A references
 
 pflag="false"
 base_git_url=https://github.com
@@ -78,6 +81,10 @@ do
 		shas[openj9]="${i#*=}"
 		;;
 
+		-openj9-reference=* )
+		references[openj9]="${i#*=}"
+		;;
+
 		-omr-repo=* )
 		j9repos[omr]="${i#*=}"
 		;;
@@ -88,6 +95,10 @@ do
 
 		-omr-sha=* )
 		shas[omr]="${i#*=}"
+		;;
+
+		-omr-reference=* )
+		references[omr]="${i#*=}"
 		;;
 
 		-parallel=* )
@@ -119,6 +130,9 @@ for i in "${!default_j9repos[@]}" ; do
 	if [ ${branches[$i]+_} ] ; then
 		branch=${branches[$i]}
 	fi
+	if [ ${references[$i]+_} ] ; then
+		reference="--reference ${references[$i]}"
+	fi
 
 	if [ -d ${i} ] ; then
 		echo
@@ -140,7 +154,7 @@ for i in "${!default_j9repos[@]}" ; do
 			git_url="${j9repos[$i]}"
 		fi
 
-		git_clone_command="${git} clone --recursive -b ${branch} ${git_url} ${i}"
+		git_clone_command="${git} clone ${reference} --recursive -b ${branch} ${git_url} ${i}"
 		commands[$i]=${git_clone_command}
 
 		echo
