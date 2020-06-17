@@ -55,3 +55,8 @@ test-image-openj9 : images
 ifneq ($(COMPILE_TYPE), cross)
 	$(JRE_IMAGE_DIR)/bin/java -version 2>&1 | $(TEE) $(IMAGES_OUTPUTDIR)/test/openj9/java-version.txt
 endif
+
+clean-docs : clean-openj9-only-docs
+clean-openj9-only-docs :
+	$(call CleanComponent,openj9-docs)
+.PHONY : clean-openj9-only-docs

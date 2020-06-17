@@ -37,9 +37,9 @@
 #############################################################################
 
 #############################################################################
-# Set the link prefix for the JavaSE core and com.sun.management packages
-# to reference the pages created in this build.
-JAVASE_BASE_URL := $(JDKJRE2COREAPI)
+# Set the link prefix for the docs in the platform directory to reference the
+# core api doc pages created in this build.
+PLATFORM2COREAPI := ../api
 
 #############################################################################
 # Source files for openj9 extensions javadoc
@@ -56,11 +56,11 @@ ALL_EXISTING_SOURCE_DIRS := $(wildcard $(ALL_SOURCE_DIRS))
 # html page footer for the OpenJ9 extensions and overrides pages
 OPENJ9_BASE_URL := https://www.eclipse.org/openj9/
 OPENJ9_BUG_SUBMIT_URL := https://github.com/eclipse/openj9/issues
-OPENJ9_FULL_COMPANY_NAME := IBM Corp
+OPENJ9_FULL_COMPANY_NAME := IBM Corp.
 OPENJ9_JAVADOC_BOTTOM = \
-    <a href="$(OPENJ9_BASE_URL)">Link</a> to Eclipse OpenJ9 documentation.<br> \
-    To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)">Eclipse Openj9 issue.</a><br> \
-    Copyright &copy; $(FIRST_COPYRIGHT_YEAR), $(COPYRIGHT_YEAR), $(OPENJ9_FULL_COMPANY_NAME). All rights reserved.
+    <a href="$(OPENJ9_BASE_URL)" target="_blank">Eclipse OpenJ9 website.</a><br> \
+    To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)" target="_blank">Eclipse OpenJ9 issue.</a><br> \
+    Copyright &copy; $(FIRST_COPYRIGHT_YEAR), $(COPYRIGHT_YEAR), $(OPENJ9_FULL_COMPANY_NAME) and others.
 
 #############################################################################
 #
@@ -72,6 +72,7 @@ OPENJ9_SHAREDCLASSES_PKGS := com.ibm.oti.shared
 OPENJ9_SHAREDCLASSES_FIRST_COPYRIGHT_YEAR := 1998
 
 OPENJ9_SHAREDCLASSES_DOCDIR := $(PLATFORM_DOCSDIR)/sharedclasses
+OPENJ9_SHAREDCLASSES2COREAPI := ../$(PLATFORM2COREAPI)
 OPENJ9_SHAREDCLASSES_DOCTITLE := OpenJ9 Shared Classes
 OPENJ9_SHAREDCLASSES_WINDOWTITLE := OpenJ9 Shared Classes
 OPENJ9_SHAREDCLASSES_HEADER := <strong>OpenJ9 Shared Classes</strong>
@@ -81,20 +82,20 @@ OPENJ9_SHAREDCLASSES_INDEX_FILE := $(OPENJ9_SHAREDCLASSES_DOCDIR)/index.html
 OPENJ9_SHAREDCLASSES_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.sharedclasses.options
 OPENJ9_SHAREDCLASSES_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.sharedclasses.packages
 
-openj9-sharedclassesdocs: $(OPENJ9_SHAREDCLASSES_INDEX_FILE)
+openj9-sharedclassesdocs : $(OPENJ9_SHAREDCLASSES_INDEX_FILE)
 
 # Set relative location to platform document root
 $(OPENJ9_SHAREDCLASSES_INDEX_FILE): GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
 
 # Run javadoc if the index file is out of date or missing
-$(OPENJ9_SHAREDCLASSES_INDEX_FILE): $(OPENJ9_SHAREDCLASSES_OPTIONS_FILE) $(OPENJ9_SHAREDCLASSES_PACKAGES_FILE)
+$(OPENJ9_SHAREDCLASSES_INDEX_FILE) : $(OPENJ9_SHAREDCLASSES_OPTIONS_FILE) $(OPENJ9_SHAREDCLASSES_PACKAGES_FILE)
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE),$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) \
 	    @$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE) @$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE)
 
-$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_SHAREDCLASSES_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE):
+$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_SHAREDCLASSES_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_SHAREDCLASSES_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
@@ -103,11 +104,11 @@ $(OPENJ9_SHAREDCLASSES_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(OPENJ9_SHAREDCLASSES_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(OPENJ9_SHAREDCLASSES_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_SHAREDCLASSES2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_SHAREDCLASSES_PKGS))
+$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_SHAREDCLASSES_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(OPENJ9_SHAREDCLASSES_PKGS))
 
@@ -121,7 +122,7 @@ OPENJ9_GPU_PKGS := com.ibm.gpu
 OPENJ9_GPU_FIRST_COPYRIGHT_YEAR := 2014
 
 OPENJ9_GPU_DOCDIR := $(PLATFORM_DOCSDIR)/gpu
-OPENJ9_GPU2COREAPI := $(JDKJRE2COREAPI)
+OPENJ9_GPU2COREAPI := ../$(PLATFORM2COREAPI)
 OPENJ9_GPU_DOCTITLE := OpenJ9 GPU Classes
 OPENJ9_GPU_WINDOWTITLE := OpenJ9 GPU Classes
 OPENJ9_GPU_HEADER := <strong>OpenJ9 GPU Classes</strong>
@@ -134,17 +135,17 @@ OPENJ9_GPU_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.gpu.packages
 openj9-gpudocs: $(OPENJ9_GPU_INDEX_FILE)
 
 # Set relative location to platform document root
-$(OPENJ9_GPU_INDEX_FILE): GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+$(OPENJ9_GPU_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
 
 # Run javadoc if the index file is out of date or missing
-$(OPENJ9_GPU_INDEX_FILE): $(OPENJ9_GPU_OPTIONS_FILE) $(OPENJ9_GPU_PACKAGES_FILE)
+$(OPENJ9_GPU_INDEX_FILE) : $(OPENJ9_GPU_OPTIONS_FILE) $(OPENJ9_GPU_PACKAGES_FILE)
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_GPU_OPTIONS_FILE),$(OPENJ9_GPU_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) \
 	    @$(OPENJ9_GPU_OPTIONS_FILE) @$(OPENJ9_GPU_PACKAGES_FILE)
 
-$(OPENJ9_GPU_OPTIONS_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_GPU_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_GPU_OPTIONS_FILE):
+$(OPENJ9_GPU_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_GPU_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_GPU_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
@@ -153,11 +154,11 @@ $(OPENJ9_GPU_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(OPENJ9_GPU_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(OPENJ9_GPU_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_GPU2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_GPU_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_GPU_PKGS))
+$(OPENJ9_GPU_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_GPU_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(OPENJ9_GPU_PKGS))
 
@@ -171,7 +172,7 @@ OPENJ9_CUDA_PKGS := com.ibm.cuda
 OPENJ9_CUDA_FIRST_COPYRIGHT_YEAR := 2013
 
 OPENJ9_CUDA_DOCDIR := $(PLATFORM_DOCSDIR)/cuda
-OPENJ9_CUDA2COREAPI := $(JDKJRE2COREAPI)
+OPENJ9_CUDA2COREAPI := ../$(PLATFORM2COREAPI)
 OPENJ9_CUDA_DOCTITLE := OpenJ9 CUDA Classes
 OPENJ9_CUDA_WINDOWTITLE := OpenJ9 CUDA Classes
 OPENJ9_CUDA_HEADER := <strong>OpenJ9 CUDA Classes</strong>
@@ -181,20 +182,20 @@ OPENJ9_CUDA_INDEX_FILE := $(OPENJ9_CUDA_DOCDIR)/index.html
 OPENJ9_CUDA_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.cuda.options
 OPENJ9_CUDA_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.cuda.packages
 
-openj9-cudadocs: $(OPENJ9_CUDA_INDEX_FILE)
+openj9-cudadocs : $(OPENJ9_CUDA_INDEX_FILE)
 
 # Set relative location to platform document root
-$(OPENJ9_CUDA_INDEX_FILE): GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+$(OPENJ9_CUDA_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
 
 # Run javadoc if the index file is out of date or missing
-$(OPENJ9_CUDA_INDEX_FILE): $(OPENJ9_CUDA_OPTIONS_FILE) $(OPENJ9_CUDA_PACKAGES_FILE)
+$(OPENJ9_CUDA_INDEX_FILE) : $(OPENJ9_CUDA_OPTIONS_FILE) $(OPENJ9_CUDA_PACKAGES_FILE)
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_CUDA_OPTIONS_FILE),$(OPENJ9_CUDA_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) \
 	    @$(OPENJ9_CUDA_OPTIONS_FILE) @$(OPENJ9_CUDA_PACKAGES_FILE)
 
-$(OPENJ9_CUDA_OPTIONS_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_CUDA_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_CUDA_OPTIONS_FILE):
+$(OPENJ9_CUDA_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_CUDA_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_CUDA_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
@@ -203,11 +204,11 @@ $(OPENJ9_CUDA_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(OPENJ9_CUDA_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(OPENJ9_CUDA_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_CUDA2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_CUDA_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_CUDA_PKGS))
+$(OPENJ9_CUDA_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_CUDA_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(OPENJ9_CUDA_PKGS))
 
@@ -221,7 +222,7 @@ OPENJ9_DATAACCESS_PKGS := com.ibm.dataaccess
 OPENJ9_DATAACCESS_FIRST_COPYRIGHT_YEAR := 2013
 
 OPENJ9_DATAACCESS_DOCDIR := $(PLATFORM_DOCSDIR)/dataaccess
-OPENJ9_DATAACCESS2COREAPI := $(JDKJRE2COREAPI)
+OPENJ9_DATAACESSS2COREAPI := ../$(PLATFORM2COREAPI)
 OPENJ9_DATAACCESS_DOCTITLE := OpenJ9 Data Access Acceleration Classes
 OPENJ9_DATAACCESS_WINDOWTITLE := OpenJ9 Data Access Acceleration Classes
 OPENJ9_DATAACCESS_HEADER := <strong>OpenJ9 Data Access Acceleration Classes</strong>
@@ -231,20 +232,20 @@ OPENJ9_DATAACCESS_INDEX_FILE := $(OPENJ9_DATAACCESS_DOCDIR)/index.html
 OPENJ9_DATAACCESS_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.dataaccess.options
 OPENJ9_DATAACCESS_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.dataaccess.packages
 
-openj9-dataaccessdocs: $(OPENJ9_DATAACCESS_INDEX_FILE)
+openj9-dataaccessdocs : $(OPENJ9_DATAACCESS_INDEX_FILE)
 
 # Set relative location to platform document root
-$(OPENJ9_DATAACCESS_INDEX_FILE): GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+$(OPENJ9_DATAACCESS_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
 
 # Run javadoc if the index file is out of date or missing
-$(OPENJ9_DATAACCESS_INDEX_FILE): $(OPENJ9_DATAACCESS_OPTIONS_FILE) $(OPENJ9_DATAACCESS_PACKAGES_FILE)
+$(OPENJ9_DATAACCESS_INDEX_FILE) : $(OPENJ9_DATAACCESS_OPTIONS_FILE) $(OPENJ9_DATAACCESS_PACKAGES_FILE)
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_DATAACCESS_OPTIONS_FILE),$(OPENJ9_DATAACCESS_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) \
 	    @$(OPENJ9_DATAACCESS_OPTIONS_FILE) @$(OPENJ9_DATAACCESS_PACKAGES_FILE)
 
-$(OPENJ9_DATAACCESS_OPTIONS_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_DATAACCESS_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_DATAACCESS_OPTIONS_FILE):
+$(OPENJ9_DATAACCESS_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_DATAACCESS_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_DATAACCESS_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
@@ -253,11 +254,11 @@ $(OPENJ9_DATAACCESS_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(OPENJ9_DATAACCESS_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(OPENJ9_DATAACCESS_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_DATAACESSS2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_DATAACCESS_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_DATAACCESS_PKGS))
+$(OPENJ9_DATAACCESS_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_DATAACCESS_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(OPENJ9_DATAACCESS_PKGS))
 
@@ -271,7 +272,7 @@ OPENJ9_JVM_PKGS := com.ibm.jvm
 OPENJ9_JVM_FIRST_COPYRIGHT_YEAR := 1998
 
 OPENJ9_JVM_DOCDIR := $(PLATFORM_DOCSDIR)/jvm
-OPENJ9_JVM2COREAPI := $(JDKJRE2COREAPI)
+OPENJ9_JVM2COREAPI := ../$(PLATFORM2COREAPI)
 OPENJ9_JVM_DOCTITLE := OpenJ9 JVM Diagnostic Utilities Classes
 OPENJ9_JVM_WINDOWTITLE := OpenJ9 JVM Diagnostic Utilities Classes
 OPENJ9_JVM_HEADER := <strong>OpenJ9 JVM Diagnostic Utilities Classes</strong>
@@ -281,20 +282,20 @@ OPENJ9_JVM_INDEX_FILE := $(OPENJ9_JVM_DOCDIR)/index.html
 OPENJ9_JVM_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.jvm.options
 OPENJ9_JVM_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.jvm.packages
 
-openj9-jvmdocs: $(OPENJ9_JVM_INDEX_FILE)
+openj9-jvmdocs : $(OPENJ9_JVM_INDEX_FILE)
 
 # Set relative location to platform document root
-$(OPENJ9_JVM_INDEX_FILE): GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+$(OPENJ9_JVM_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
 
 # Run javadoc if the index file is out of date or missing
-$(OPENJ9_JVM_INDEX_FILE): $(OPENJ9_JVM_OPTIONS_FILE) $(OPENJ9_JVM_PACKAGES_FILE)
+$(OPENJ9_JVM_INDEX_FILE) : $(OPENJ9_JVM_OPTIONS_FILE) $(OPENJ9_JVM_PACKAGES_FILE)
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_JVM_OPTIONS_FILE),$(OPENJ9_JVM_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) \
 	    @$(OPENJ9_JVM_OPTIONS_FILE) @$(OPENJ9_JVM_PACKAGES_FILE)
 
-$(OPENJ9_JVM_OPTIONS_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_JVM_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_JVM_OPTIONS_FILE):
+$(OPENJ9_JVM_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_JVM_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_JVM_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
@@ -303,13 +304,115 @@ $(OPENJ9_JVM_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(OPENJ9_JVM_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(OPENJ9_JVM_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_JVM2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_JVM_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_JVM_PKGS))
+$(OPENJ9_JVM_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_JVM_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(OPENJ9_JVM_PKGS))
+
+#############################################################################
+#
+# openj9-dtfj
+#
+
+OPENJ9_DTFJ_PKGS := com.ibm.dtfj.image com.ibm.dtfj.java com.ibm.dtfj.runtime
+
+OPENJ9_DTFJ_FIRST_COPYRIGHT_YEAR := 2004
+OPENJ9_DTFJ_OVERVIEW := $(OPENJ9_DOCS_SRCDIR)/dtfj-overview.html
+
+OPENJ9_DTFJ_DOCDIR := $(PLATFORM_DOCSDIR)/dtfj
+OPENJ9_DTFJ2COREAPI := ../$(PLATFORM2COREAPI)
+OPENJ9_DTFJ_DOCTITLE := Diagnostic Tool Framework for Java&trade;
+OPENJ9_DTFJ_WINDOWTITLE := Diagnostic Tool Framework for Java&trade;
+OPENJ9_DTFJ_HEADER := <strong>Diagnostic Tool Framework for Java&trade;</strong>
+
+# The index.html, options, and packages files
+OPENJ9_DTFJ_INDEX_FILE := $(OPENJ9_DTFJ_DOCDIR)/index.html
+OPENJ9_DTFJ_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.dtfj.options
+OPENJ9_DTFJ_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.dtfj.packages
+
+openj9-dtfjdocs : $(OPENJ9_DTFJ_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_DTFJ_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+$(OPENJ9_DTFJ_INDEX_FILE) : $(OPENJ9_DTFJ_OPTIONS_FILE) $(OPENJ9_DTFJ_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_DTFJ_OPTIONS_FILE),$(OPENJ9_DTFJ_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_DTFJ_OPTIONS_FILE) @$(OPENJ9_DTFJ_PACKAGES_FILE)
+
+$(OPENJ9_DTFJ_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_DTFJ_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_DTFJ_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_DTFJ_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_DTFJ_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_DTFJ_HEADER)$(DRAFT_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
+	  $(call OptionPair,-overview,$(OPENJ9_DTFJ_OVERVIEW)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_DTFJ2COREAPI),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+# Create a file with the package names in it
+$(OPENJ9_DTFJ_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_DTFJ_PKGS))
+	$(prep-target)
+	$(call PackageFilter,$(OPENJ9_DTFJ_PKGS))
+
+#############################################################################
+#
+# openj9-zosconditionhandling
+#
+
+OPENJ9_ZOSCONDITIONHANDLING_PKGS := com.ibm.le.conditionhandling
+
+OPENJ9_ZOSCONDITIONHANDLING_FIRST_COPYRIGHT_YEAR := 2009
+
+OPENJ9_ZOSCONDITIONHANDLING_DOCDIR := $(PLATFORM_DOCSDIR)/zosconditionhandling
+OPENJ9_ZOSCONDITIONHANDLINGCOREAPI := ../$(PLATFORM2COREAPI)
+OPENJ9_ZOSCONDITIONHANDLING_DOCTITLE := z/OS Language Environment condition handling
+OPENJ9_ZOSCONDITIONHANDLING_WINDOWTITLE := z/OS Language Environment condition handling
+OPENJ9_ZOSCONDITIONHANDLING_HEADER := <strong>z/OS Language Environment condition handling</strong>
+
+# The index.html, options, and packages files
+OPENJ9_ZOSCONDITIONHANDLING_INDEX_FILE := $(OPENJ9_ZOSCONDITIONHANDLING_DOCDIR)/index.html
+OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.zosconditionhandling.options
+OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.zosconditionhandling.packages
+
+openj9-zosconditionhandlingdocs : $(OPENJ9_ZOSCONDITIONHANDLING_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ZOSCONDITIONHANDLING_INDEX_FILE) : GET2DOCSDIR := $(PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+$(OPENJ9_ZOSCONDITIONHANDLING_INDEX_FILE) : $(OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE) $(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE),$(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE) @$(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE)
+
+$(OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_ZOSCONDITIONHANDLING_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ZOSCONDITIONHANDLING_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_ZOSCONDITIONHANDLING_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_ZOSCONDITIONHANDLING_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_ZOSCONDITIONHANDLING_HEADER)$(DRAFT_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)$(DRAFT_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ZOSCONDITIONHANDLING2COREAPI),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+# Create a file with the package names in it
+$(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(OPENJ9_ZOSCONDITIONHANDLING_PKGS))
+	$(prep-target)
+	$(call PackageFilter,$(OPENJ9_ZOSCONDITIONHANDLING_PKGS))
 
 #############################################################################
 #
@@ -358,11 +461,6 @@ OPENJ9_MGMT_INDEX_FILE = $(OPENJ9_MGMT_DOCDIR)/index.html
 OPENJ9_MGMT_OPTIONS_FILE := $(DOCSTMPDIR)/openj9.mgmt.options
 OPENJ9_MGMT_PACKAGES_FILE := $(DOCSTMPDIR)/openj9.mgmt.packages
 
-#############################################################################
-# Set the link prefix for the JavaSE core and com.sun.management packages
-# point at the pages created in this build.
-JAVASE_BASE_URL := ../../$(JDKJRE2COREAPI)
-MGMT_BASE_URL := $(OPENJ9_MGMT_DOCDIR)
 OPENJ9_MGMT_SRCPATH := $(OPENJ9_DOCS_SRCDIR)$(PATH_SEP)$(TEMP_SUN_MGMT_PKGDIR)
 
 #############################################################################
@@ -371,10 +469,9 @@ OPENJ9_MGMT_SRCPATH := $(OPENJ9_DOCS_SRCDIR)$(PATH_SEP)$(TEMP_SUN_MGMT_PKGDIR)
 # uses the index-all.html file instead.
 # The dependency on the index.html file ensures this javadoc
 # generation will replace the openjdk javadoc generation.
-$(OPENJ9_MGMT_INDEXALL_FILE): FIRST_COPYRIGHT_YEAR := $(OPENJ9_MGMT_FIRST_COPYRIGHT_YEAR)
-$(OPENJ9_MGMT_INDEXALL_FILE): $(OPENJ9_MGMT_INDEX_FILE) $(OPENJ9_MGMT_OPTIONS_FILE) $(OPENJ9_MGMT_PACKAGES_FILE)
+$(OPENJ9_MGMT_INDEXALL_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_MGMT_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_MGMT_INDEXALL_FILE) : $(OPENJ9_MGMT_INDEX_FILE) $(OPENJ9_MGMT_OPTIONS_FILE) $(OPENJ9_MGMT_PACKAGES_FILE)
 	$(MKDIR) -p $(TEMP_SUN_MGMT_SRCDIR)
-	if [ ! -d $(TEMP_SUN_MGMT_SRCDIR) ]; then echo Error: $(TEMP_SUN_MGMT_SRCDIR) does not exist, mkdir -p $(TEMP_SUN_MGMT_SRCDIR) must have failed; exit 1; fi
 	$(CP) $(SUN_MGMT_SRCDIR)/GarbageCollectorMXBean.java $(TEMP_SUN_MGMT_SRCDIR)
 	$(CP) $(SUN_MGMT_SRCDIR)/OperatingSystemMXBean.java $(TEMP_SUN_MGMT_SRCDIR)
 	$(CP) $(SUN_MGMT_SRCDIR)/UnixOperatingSystemMXBean.java $(TEMP_SUN_MGMT_SRCDIR)
@@ -382,9 +479,9 @@ $(OPENJ9_MGMT_INDEXALL_FILE): $(OPENJ9_MGMT_INDEX_FILE) $(OPENJ9_MGMT_OPTIONS_FI
 	$(prep-javadoc)
 	$(call JavadocSummary,$(OPENJ9_MGMT_OPTIONS_FILE),$(OPENJ9_MGMT_PACKAGES_FILE))
 	$(JAVADOC_CMD) -d $(@D) @$(OPENJ9_MGMT_OPTIONS_FILE) @$(OPENJ9_MGMT_PACKAGES_FILE) 1>&2
-	$(RM) -r $(TEMP_SUN_MGMT_PKGDIR)
+	$(RM) -rf $(TEMP_SUN_MGMT_PKGDIR)
 
-$(OPENJ9_MGMT_OPTIONS_FILE):
+$(OPENJ9_MGMT_OPTIONS_FILE) :
 	$(prep-target)
 	@($(call OptionOnly,$(COMMON_JAVADOCFLAGS)) ; \
 	  $(call OptionPair,-sourcepath,$(OPENJ9_MGMT_SRCPATH)) ; \
@@ -393,12 +490,11 @@ $(OPENJ9_MGMT_OPTIONS_FILE):
 	  $(call OptionPair,-windowtitle,$(MGMT_WINDOWTITLE) $(DRAFT_WINTITLE)) ; \
 	  $(call OptionPair,-header,$(MGMT_HEADER)$(DRAFT_HEADER)) ; \
 	  $(call OptionPair,-bottom,$(MGMT_BOTTOM)$(DRAFT_BOTTOM)) ; \
-	  $(call OptionTrip,-linkoffline,$(JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
-	  $(call OptionTrip,-linkoffline,$(MGMT_BASE_URL),$(MGMT_DOCDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(MGMT2COREAPI),$(COREAPI_DOCSDIR)/) ; \
 	) > $@
 
 # Create a file with the package names in it
-$(OPENJ9_MGMT_PACKAGES_FILE): $(DIRECTORY_CACHE) $(call PackageDependencies,$(ALL_MGMT_PKGS))
+$(OPENJ9_MGMT_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(ALL_MGMT_PKGS))
 	$(prep-target)
 	$(call PackageFilter,$(ALL_MGMT_PKGS))
 
@@ -453,12 +549,12 @@ OPENJ9_JAVADOC_TEMP  := $(TEMPDIR)/_javadoc_temp.html
 OPENJ9_JAVADOC_SCRIPT_BODY = \
     for path in "$$@" ; do \
       if [ -f "$(COREAPI_DOCSDIR)/$$path" ] ; then \
-        $(CP) "$(COREAPI_DOCSDIR)/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
+        $(CP) -f "$(COREAPI_DOCSDIR)/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
         $(OPENJ9_COREAPI_SUBST_COMMAND) < "$(OPENJ9_JAVADOC_TEMP)" > "$(COREAPI_DOCSDIR)/$$path" ; \
         $(RM) "$(OPENJ9_JAVADOC_TEMP)" ; \
       fi ; \
       if [ -f "$(JRE_API_DOCSDIR)/management/extension/$$path" ] ; then \
-        $(CP) "$(JRE_API_DOCSDIR)/management/extension/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
+        $(CP) -f "$(JRE_API_DOCSDIR)/management/extension/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
         $(OPENJ9_MGMT_SUBST_COMMAND) < "$(OPENJ9_JAVADOC_TEMP)" > "$(JRE_API_DOCSDIR)/management/extension/$$path" ; \
         $(RM) "$(OPENJ9_JAVADOC_TEMP)" ; \
       fi ; \
@@ -482,4 +578,364 @@ $(OPENJ9_JAVADOC_MARKER) : $(COREAPI_DOCSDIR)/index.html $(OPENJ9_MGMT_INDEXALL_
 	$(TOUCH) $@
 
 # ALL_OTHER_TARGETS are declared as PHONY in make/Javadoc.gmk
-ALL_OTHER_TARGETS += $(OPENJ9_JAVADOC_MARKER) openj9-sharedclassesdocs openj9-gpudocs openj9-cudadocs openj9-dataaccessdocs openj9-jvmdocs
+ALL_OTHER_TARGETS += $(OPENJ9_JAVADOC_MARKER) openj9-sharedclassesdocs openj9-gpudocs openj9-cudadocs openj9-dataaccessdocs openj9-jvmdocs openj9-dtfjdocs openj9-only-zosconditionhandlingdocs
+
+#############################################################################
+# Generate javadoc from only the openj9 source files with reference links to
+# the online Oracle javadoc for the classes derived from openjdk source
+# files.
+#############################################################################
+
+OPENJ9_ONLY_JAVADOC_MARKER := $(TEMPDIR)/_javadoc_openj9_only.marker
+
+#############################################################################
+# Add an output directory to put the openj9 only javadoc.
+OPENJ9_ONLY_DOCSDIR=$(OUTPUT_ROOT)/openj9-docs
+
+OPENJ9_ONLY_PLATFORM_DOCSDIR = $(OPENJ9_ONLY_DOCSDIR)/platform
+
+#############################################################################
+# Set the link prefixes for the openjdk source file classes to reference the
+# online Oracle documentation.
+OPENJ9_ONLY_JAVASE_BASE_URL := https://docs.oracle.com/javase/8/docs/api/
+OPENJ9_ONLY_MGMT_BASE_URL := https://docs.oracle.com/javase/8/docs/jre/api/management/extension/
+
+#############################################################################
+# Exclude the openjdk profiles data.
+OPENJ9_ONLY_COMMON_JAVADOCFLAGS = $(filter-out -Xprofilespath $(JDK_TOPDIR)/make/profile-rtjar-includes.txt,$(COMMON_JAVADOCFLAGS))
+
+#############################################################################
+#
+# openj9-only-sharedclassesdocs
+#
+
+OPENJ9_ONLY_SHAREDCLASSES_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/sharedclasses
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_SHAREDCLASSES_INDEX_FILE := $(OPENJ9_ONLY_SHAREDCLASSES_DOCDIR)/index.html
+OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.sharedclasses.options
+
+openj9-only-sharedclassesdocs : $(OPENJ9_ONLY_SHAREDCLASSES_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_SHAREDCLASSES_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_SHAREDCLASSES_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE) $(OPENJ9_SHAREDCLASSES_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE),$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE) @$(OPENJ9_SHAREDCLASSES_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_SHAREDCLASSES_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_SHAREDCLASSES_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_SHAREDCLASSES_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_SHAREDCLASSES_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_SHAREDCLASSES_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-gpudocs
+#
+
+OPENJ9_ONLY_GPU_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/gpu
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_GPU_INDEX_FILE := $(OPENJ9_ONLY_GPU_DOCDIR)/index.html
+OPENJ9_ONLY_GPU_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.gpu.options
+
+openj9-only-gpudocs : $(OPENJ9_ONLY_GPU_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_GPU_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_GPU_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_GPU_OPTIONS_FILE) $(OPENJ9_GPU_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_GPU_OPTIONS_FILE),$(OPENJ9_GPU_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_GPU_OPTIONS_FILE) @$(OPENJ9_GPU_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_GPU_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_GPU_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_GPU_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_GPU_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_GPU_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_GPU_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-cudadocs
+#
+
+OPENJ9_ONLY_CUDA_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/cuda
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_CUDA_INDEX_FILE := $(OPENJ9_ONLY_CUDA_DOCDIR)/index.html
+OPENJ9_ONLY_CUDA_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.cuda.options
+
+openj9-only-cudadocs : $(OPENJ9_ONLY_CUDA_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_CUDA_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_CUDA_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_CUDA_OPTIONS_FILE) $(OPENJ9_CUDA_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_CUDA_OPTIONS_FILE),$(OPENJ9_CUDA_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_CUDA_OPTIONS_FILE) @$(OPENJ9_CUDA_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_CUDA_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_CUDA_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_CUDA_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_CUDA_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_CUDA_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_CUDA_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-dataaccessdocs
+#
+
+OPENJ9_ONLY_DATAACCESS_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/dataaccess
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_DATAACCESS_INDEX_FILE := $(OPENJ9_ONLY_DATAACCESS_DOCDIR)/index.html
+OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.dataaccess.options
+
+openj9-only-dataaccessdocs : $(OPENJ9_ONLY_DATAACCESS_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_DATAACCESS_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_DATAACCESS_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE) $(OPENJ9_DATAACCESS_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE),$(OPENJ9_DATAACCESS_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE) @$(OPENJ9_DATAACCESS_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_DATAACCESS_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_DATAACCESS_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_DATAACCESS_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_DATAACCESS_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_DATAACCESS_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-jvmdocs
+#
+
+OPENJ9_ONLY_JVM_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/jvm
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_JVM_INDEX_FILE := $(OPENJ9_ONLY_JVM_DOCDIR)/index.html
+OPENJ9_ONLY_JVM_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.jvm.options
+
+openj9-only-jvmdocs : $(OPENJ9_ONLY_JVM_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_JVM_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_JVM_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_JVM_OPTIONS_FILE) $(OPENJ9_JVM_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_JVM_OPTIONS_FILE),$(OPENJ9_JVM_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_JVM_OPTIONS_FILE) @$(OPENJ9_JVM_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_JVM_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_JVM_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_JVM_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_JVM_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_JVM_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_JVM_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-dtfjdocs
+#
+
+OPENJ9_ONLY_DTFJ_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/dtfj
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_DTFJ_INDEX_FILE := $(OPENJ9_ONLY_DTFJ_DOCDIR)/index.html
+OPENJ9_ONLY_DTFJ_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.dtfj.options
+
+openj9-only-dtfjdocs : $(OPENJ9_ONLY_DTFJ_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_DTFJ_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_DTFJ_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_DTFJ_OPTIONS_FILE) $(OPENJ9_DTFJ_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_DTFJ_OPTIONS_FILE),$(OPENJ9_DTFJ_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_DTFJ_OPTIONS_FILE) @$(OPENJ9_DTFJ_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_DTFJ_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_DTFJ_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_DTFJ_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_DTFJ_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_DTFJ_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_DTFJ_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionPair,-overview,$(OPENJ9_DTFJ_OVERVIEW)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-zosconditionhandlingdocs
+#
+
+OPENJ9_ONLY_ZOSCONDITIONHANDLING_DOCDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/zosconditionhandling
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+OPENJ9_ONLY_ZOSCONDITIONHANDLING_INDEX_FILE := $(OPENJ9_ONLY_ZOSCONDITIONHANDLING_DOCDIR)/index.html
+OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.zosconditionhandling.options
+
+openj9-only-zosconditionhandlingdocs : $(OPENJ9_ONLY_ZOSCONDITIONHANDLING_INDEX_FILE)
+
+# Set relative location to platform document root
+$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_INDEX_FILE) : GET2DOCSDIR := $(OPENJ9_ONLY_PLATFORM_DOCSDIR)/..
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages file needed by the
+# --linkoffline option will have been created.
+$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE) $(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE),$(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) \
+	    @$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE) @$(OPENJ9_ZOSCONDITIONHANDLING_PACKAGES_FILE)
+
+$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_ZOSCONDITIONHANDLING_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_ZOSCONDITIONHANDLING_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_ZOSCONDITIONHANDLING_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_ZOSCONDITIONHANDLING_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_ZOSCONDITIONHANDLING_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	) > $@
+
+#############################################################################
+#
+# openj9-only-mgmtdocs
+#
+
+OPENJ9_ONLY_JRE_DOCSDIR = $(OPENJ9_ONLY_DOCSDIR)/jre
+
+OPENJ9_ONLY_MGMT_DOCDIR := $(OPENJ9_ONLY_JRE_DOCSDIR)/management/extension
+
+# The index.html and options files
+# The package file generated for the full jdk javadoc build is reused.
+# The index.html, options, and packages files
+OPENJ9_ONLY_MGMT_INDEX_FILE = $(OPENJ9_ONLY_MGMT_DOCDIR)/index.html
+OPENJ9_ONLY_MGMT_OPTIONS_FILE := $(DOCSTMPDIR)/openj9_only.mgmt.options
+
+openj9-only-mgmtdocs : $(OPENJ9_ONLY_MGMT_INDEX_FILE)
+
+# Run javadoc if the index file is out of date or missing
+# The dependency on OPENJ9_JAVADOC_MARKER makes sure the full jdk javadoc is created first
+# and that therefore the doctmp/coredocs.packages and doctmp/mgmt.packages
+# files needed by the --linkoffline options will have been created.
+$(OPENJ9_ONLY_MGMT_INDEX_FILE) : FIRST_COPYRIGHT_YEAR := $(OPENJ9_MGMT_FIRST_COPYRIGHT_YEAR)
+$(OPENJ9_ONLY_MGMT_INDEX_FILE) : $(OPENJ9_JAVADOC_MARKER) $(OPENJ9_ONLY_MGMT_OPTIONS_FILE) $(OPENJ9_MGMT_PACKAGES_FILE)
+	$(prep-javadoc)
+	$(call JavadocSummary,$(OPENJ9_ONLY_MGMT_OPTIONS_FILE),$(OPENJ9_MGMT_PACKAGES_FILE))
+	$(JAVADOC_CMD) -d $(@D) @$(OPENJ9_ONLY_MGMT_OPTIONS_FILE) @$(OPENJ9_MGMT_PACKAGES_FILE) 1>&2
+
+$(OPENJ9_ONLY_MGMT_OPTIONS_FILE) :
+	$(prep-target)
+	@($(call OptionOnly,$(OPENJ9_ONLY_COMMON_JAVADOCFLAGS)) ; \
+	  $(call OptionPair,-sourcepath,$(OPENJ9_DOCS_SRCDIR)) ; \
+	  $(call OptionPair,-encoding,ascii) ; \
+	  $(call OptionPair,-doctitle,$(OPENJ9_MGMT_DOCTITLE)) ; \
+	  $(call OptionPair,-windowtitle,$(OPENJ9_MGMT_WINDOWTITLE)) ; \
+	  $(call OptionPair,-header,$(OPENJ9_MGMT_HEADER)) ; \
+	  $(call OptionPair,-bottom,$(OPENJ9_JAVADOC_BOTTOM)) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_JAVASE_BASE_URL),$(COREAPI_DOCSDIR)/) ; \
+	  $(call OptionTrip,-linkoffline,$(OPENJ9_ONLY_MGMT_BASE_URL),$(MGMT_DOCDIR)/) ; \
+	) > $@
+
+#############################################################################
+# Change the generated links to the online Oracle javadoc so that they open
+# in a new tab.
+
+$(OPENJ9_ONLY_JAVADOC_MARKER) : openj9-only-sharedclassesdocs openj9-only-gpudocs openj9-only-cudadocs openj9-only-dataaccessdocs openj9-only-jvmdocs openj9-only-dtfjdocs openj9-only-zosconditionhandlingdocs openj9-only-mgmtdocs
+	set -x; for file in `$(FIND) $(OPENJ9_ONLY_DOCSDIR) -type f` ; do \
+		$(CP) -f "$$file" "$(OPENJ9_JAVADOC_TEMP)" ; \
+		$(SED) -e 's/is-external=true"/is-external=true" target="_blank"/g' <"$(OPENJ9_JAVADOC_TEMP)" >"$$file" ; \
+	done
+	$(RM) -f $(OPENJ9_JAVADOC_TEMP)
+	$(TOUCH) $@
+
+# ALL_OTHER_TARGETS are declared as PHONY in make/Javadoc.gmk
+ALL_OTHER_TARGETS += $(OPENJ9_ONLY_JAVADOC_MARKER) openj9-only-sharedclassesdocs openj9-only-gpudocs openj9-only-cudadocs openj9-only-dataaccessdocs openj9-only-jvmdocs openj9-only-dtfjdocs openj9-only-zosconditionhandlingdocs openj9-only-mgmtdocs
