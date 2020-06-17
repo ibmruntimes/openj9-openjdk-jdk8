@@ -24,12 +24,6 @@
  */
 
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * This module tracks classes that have been prepared, so as to
  * be able to report which have been unloaded. On VM start-up
  * and whenever new classes are loaded, all prepared classes'
@@ -134,9 +128,9 @@ classTrack_addPreparedClass(JNIEnv *env_unused, jclass klass)
 static jboolean
 setupEvents()
 {
-    jvmtiCapabilities caps;
     jvmtiError error;
     jvmtiEventCallbacks cb;
+    jvmtiCapabilities caps;
     memset(&caps, 0, sizeof(caps));
     caps.can_generate_object_free_events = 1;
     error = JVMTI_FUNC_PTR(trackingEnv, AddCapabilities)(trackingEnv, &caps);

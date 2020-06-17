@@ -25,9 +25,8 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 usage() {
 	echo "Usage: $0 [-h|--help] [... other j9 options] [-parallel=<true|false>] [--openssl-version=<openssl version to download>]"
@@ -38,13 +37,15 @@ usage() {
 	echo "                    or git@github.com:<namespace>/openj9.git"
 	echo "  -openj9-branch    the OpenJ9 git branch: master"
 	echo "  -openj9-sha       a commit SHA for the OpenJ9 repository"
+	echo "  -openj9-reference a local repo to use as a clone reference"
 	echo "  -omr-repo         the OpenJ9/omr repository url: https://github.com/eclipse/openj9-omr.git"
 	echo "                    or git@github.com:<namespace>/openj9-omr.git"
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
-	echo "  -omr-sha           a commit SHA for the omr repository"
+	echo "  -omr-sha          a commit SHA for the omr repository"
+	echo "  -omr-reference    a local repo to use as a clone reference"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo "  --openssl-version Specify the version of OpenSSL source to download"
-	echo " "
+	echo ""
 	exit 1
 }
 
@@ -58,7 +59,7 @@ for i in "$@" ; do
 			usage
 			;;
 
-		-openj9-repo=* | -openj9-branch=* | -openj9-sha=* | -omr-repo=* | -omr-branch=* | -omr-sha=* | -parallel=* )
+		-openj9-repo=* | -openj9-branch=* | -openj9-sha=* | -openj9-reference=* | -omr-repo=* | -omr-branch=* | -omr-sha=* | -omr-reference=* | -parallel=* )
 			j9options="${j9options} ${i}"
 			;;
 
