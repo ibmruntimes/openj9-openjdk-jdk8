@@ -27,7 +27,6 @@
 # ===========================================================================
 # (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 usage() {
 	echo "Usage: $0 [-h|--help] [... other j9 options] [-parallel=<true|false>] [--openssl-version=<openssl version to download>]"
@@ -46,7 +45,7 @@ usage() {
 	echo "  -omr-reference    a local repo to use as a clone reference"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo "  --openssl-version Specify the version of OpenSSL source to download"
-	echo " "
+	echo ""
 	exit 1
 }
 

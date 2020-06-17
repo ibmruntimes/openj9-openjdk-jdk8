@@ -34,7 +34,7 @@ usage() {
 	echo "  -omr-repo         the OpenJ9/omr repository url: https://github.com/eclipse/openj9-omr.git"
 	echo "                    or git@github.com:<namespace>/openj9-omr.git"
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
-	echo "  -omr-sha           a commit SHA for the omr repository"
+	echo "  -omr-sha          a commit SHA for the omr repository"
 	echo "  -omr-reference    a local repo to use as a clone reference"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo ""
@@ -130,8 +130,10 @@ for i in "${!default_j9repos[@]}" ; do
 	if [ ${branches[$i]+_} ] ; then
 		branch=${branches[$i]}
 	fi
-	if [ ${references[$i]+_} ] ; then
-		reference="--reference ${references[$i]}"
+	if [ -n "${references[$i]+_}" ] ; then
+		reference=" --reference ${references[$i]}"
+	else
+		reference=""
 	fi
 
 	if [ -d ${i} ] ; then
@@ -154,7 +156,7 @@ for i in "${!default_j9repos[@]}" ; do
 			git_url="${j9repos[$i]}"
 		fi
 
-		git_clone_command="${git} clone ${reference} --recursive -b ${branch} ${git_url} ${i}"
+		git_clone_command="${git} clone${reference} --recursive -b ${branch} ${git_url} ${i}"
 		commands[$i]=${git_clone_command}
 
 		echo
