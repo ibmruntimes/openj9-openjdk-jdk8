@@ -24,9 +24,8 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 default: all
 
@@ -93,7 +92,7 @@ define SetupLauncher
   endif
 
   $1_LDFLAGS := $3
-  
+
   ifeq ($(OPENJDK_TARGET_OS), linux)
   # Set the image base address for zLinux 64 to 0x60000 for launchers,
   # allows compressedRefsShift to be 0 when -Xmx is set to 2040m or more.
@@ -102,7 +101,7 @@ define SetupLauncher
       $1_LDFLAGS += -Wl,-Ttext-segment=0x60000
     endif
   endif
-  
+
   $1_LDFLAGS_SUFFIX :=
 
   # Set text/data load address for 64 bit aix to 0x100,0000,0000 (1TB) for launchers,
@@ -114,7 +113,7 @@ define SetupLauncher
       $1_LDFLAGS_SUFFIX += -bpT:0x10000000000
     endif
   endif
-  
+
   ifeq ($(OPENJDK_TARGET_OS), macosx)
     $1_PLIST_FILE := Info-cmdline.plist
     ifneq ($(11), )
@@ -329,9 +328,9 @@ $(eval $(call SetupLauncher,jdb, \
     -DAPP_CLASSPATH='{ "/lib/tools.jar"$(COMMA) "/lib/sa-jdi.jar"$(COMMA) "/classes" }'))
 
 ifeq ($(ENABLE_JFR), true)
-#$(eval $(call SetupLauncher,jfr, \
-#    -DEXPAND_CLASSPATH_WILDCARDS \
-#    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "jdk.jfr.internal.tool.Main"$(COMMA) }'))
+$(eval $(call SetupLauncher,jfr, \
+    -DEXPAND_CLASSPATH_WILDCARDS \
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "jdk.jfr.internal.tool.Main"$(COMMA) }'))
 endif
 
 #$(eval $(call SetupLauncher,jhat, \
