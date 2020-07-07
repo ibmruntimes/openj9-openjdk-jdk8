@@ -33,7 +33,7 @@ ifeq (true,$(ZIP_DEBUGINFO_FILES))
 else ifeq (macosx,$(OPENJDK_TARGET_OS))
   openj9_debuginfo_filter = $(strip $(foreach path, $1, $(if $(findstring .dSYM/,$(path)),$(path))))
 else ifeq (windows,$(OPENJDK_TARGET_OS))
-  openj9_debuginfo_filter = $(filter %.pdb, $1)
+  openj9_debuginfo_filter = $(filter %.map %.pdb, $1)
 else
   openj9_debuginfo_filter = $(filter %.debuginfo, $1)
 endif
