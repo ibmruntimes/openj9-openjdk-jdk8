@@ -35,76 +35,54 @@ else
   OPENJ9_LIBS_DIR := $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)
 endif # windows
 
+# openj9_debuginfo_sources
+# ------------------------
+# $1 - representative path
 ifeq (macosx,$(OPENJDK_TARGET_OS))
-  DEBUGINFO_SRC_SUFFIX := .dSYM
+  openj9_debuginfo_sources = $(wildcard $1.dSYM/Contents/Info.plist $1.dSYM/Contents/Resources/DWARF/$(notdir $1))
 else ifeq (windows,$(OPENJDK_TARGET_OS))
-  DEBUGINFO_SRC_SUFFIX := .pdb
+  openj9_debuginfo_sources = $(wildcard $(addprefix $(basename $1),.map .pdb))
 else
-  DEBUGINFO_SRC_SUFFIX := .debuginfo
+  openj9_debuginfo_sources = $(wildcard $(basename $1).debuginfo)
 endif
 
 ifeq (true,$(ZIP_DEBUGINFO_FILES))
-  DEBUGINFO_DST_SUFFIX := .diz
-else
-  DEBUGINFO_DST_SUFFIX := $(DEBUGINFO_SRC_SUFFIX)
-endif
-
-# openj9_make_debuginfo_paths
-# ---------------------------
-# $1 - required suffix
-# $2 - input paths
-openj9_make_debuginfo_paths = \
-	$(if $(filter .dSYM, $1), \
-		$(addsuffix .dSYM, $2), \
-		$(foreach path, $2, $(path:$(suffix $(path))=$1)))
-
-# openj9_copy_debuginfo_rule
-# --------------------------
-# $1 - source file path
-# $2 - target file path
-define openj9_copy_debuginfo_rule
-  all : $2
-  $2 : $1
-  ifneq (,$(and $(filter %$(DEBUGINFO_SRC_SUFFIX),$1),$(filter %.diz,$2)))
-	$(eval $(call MakeDir,$(dir $2)))
-	($(CD) $$(<D) && $(ZIPEXE) -Dqr $$@ $$(<F))
-  else
-	$$(call install-file)
-  endif
-endef
-
-# openj9_copy_debuginfo_helper
-# ----------------------------
-# $1 - sequence of file paths
-openj9_copy_debuginfo_helper = \
-	$(eval $(call openj9_copy_debuginfo_rule,$(word 1,$1),$(word 2,$1))) \
-	$(if $(word 3,$1),$(call openj9_copy_debuginfo_helper,$(wordlist 2,$(words $1),$1)))
-
-# openj9_copy_debuginfo_paths*
-# ----------------------------
-# $1 - source suffix
-# $2 - sequence of file paths
-ifeq (macosx/.dSYM,$(OPENJDK_TARGET_OS)/$(DEBUGINFO_DST_SUFFIX))
-  # When not zipping on MacOSX, there are multiple files to copy; openj9_copy_debuginfo_paths_list
-  # names the functions that produce the sequence for each file.
-  openj9_copy_debuginfo_paths_list = openj9_copy_debuginfo_paths_a openj9_copy_debuginfo_paths_b
-  openj9_copy_debuginfo_paths_a = $(foreach path, $2, $(path).dSYM/Contents/Info.plist)
-  openj9_copy_debuginfo_paths_b = $(foreach path, $2, $(path).dSYM/Contents/Resources/DWARF/$(notdir $(path)))
-else
-  openj9_copy_debuginfo_paths_list = openj9_copy_debuginfo_paths
-  openj9_copy_debuginfo_paths = \
-	$(call openj9_make_debuginfo_paths,$(DEBUGINFO_SRC_SUFFIX),$(word 1,$2)) \
-	$(call openj9_make_debuginfo_paths,$(DEBUGINFO_DST_SUFFIX),$(wordlist 2,$(words $2),$2))
-endif # macosx/.dSYM
 
 # openj9_copy_debuginfos
 # ----------------------
-# $1 - source suffix
-# $2 - sequence of file paths
+# $1 - sequence of file paths
 openj9_copy_debuginfos = \
-	$(if $(wildcard $(call openj9_make_debuginfo_paths,$(DEBUGINFO_SRC_SUFFIX),$(word 1,$2))), \
-		$(foreach paths, $(openj9_copy_debuginfo_paths_list), \
-			$(call openj9_copy_debuginfo_helper, $(call $(paths),$1,$2))))
+	$(if $(call openj9_debuginfo_sources,$(word 1,$1)), \
+		$(eval $(call openj9_zip_files,$(dir $(word 1,$1)),$(call openj9_debuginfo_sources,$(word 1,$1)),$(basename $(word 2,$1)).diz)) \
+		$(if $(word 3,$1),$(call openj9_copy_files,,$(addsuffix .diz,$(basename $(wordlist 2,$(words $1),$1))))))
+
+# openj9_zip_files
+# ----------------
+# $1 - working directory
+# $2 - source file paths
+# $3 - target file path
+define openj9_zip_files
+  all : $3
+  $3 : $2
+	$(call MakeTargetDir)
+	($(CD) $1 && $(ZIPEXE) -Dq $$@ $(patsubst $1%,%,$2))
+endef
+
+else # ZIP_DEBUGINFO_FILES
+
+# openj9_copy_debuginfos
+# ----------------------
+# $1 - sequence of file paths
+openj9_copy_debuginfos = \
+	$(foreach suffix, $(call openj9_debuginfo_suffixes,$(word 1,$1)), \
+		$(call openj9_copy_files,,$(addsuffix $(suffix),$(basename $1))))
+
+# openj9_debuginfo_suffixes
+# -------------------------
+# $1 - sequence of file paths
+openj9_debuginfo_suffixes = $(patsubst $(basename $1)%,%,$(call openj9_debuginfo_sources,$1))
+
+endif # ZIP_DEBUGINFO_FILES
 
 define openj9_copy_only
 	$(call install-file)
@@ -139,7 +117,7 @@ openj9_copy_files = \
 # $1 - sequence of file paths
 openj9_copy_files_and_debuginfos = \
 	$(call openj9_copy_files,and_sign,$1) \
-	$(call openj9_copy_debuginfos,$(suffix $(word 1,$1)),$1)
+	$(call openj9_copy_debuginfos,$1)
 
 # openj9_copy_exes
 # ----------------
