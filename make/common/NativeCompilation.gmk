@@ -53,12 +53,6 @@ else ifeq ($(OPENJDK_BUILD_OS_ENV), windows.msys)
   UNIX_PATH_PREFIX :=
 endif
 
-CODESIGN_OPTIONS := \
-  --sign "$(MACOSX_CODESIGN_IDENTITY)" \
-  --entitlements $(TOPDIR)/jdk/make/data/macosxsigning/entitlements.plist \
-  --options runtime \
-  --timestamp
-
 define add_native_source
   # param 1 = BUILD_MYPACKAGE
   # parma 2 = the source file name (..../alfa.c or .../beta.cpp)
@@ -547,9 +541,7 @@ endif # no MacOS X support yet
 	$$($1_LD) $$($1_LDFLAGS) $$($1_EXTRA_LDFLAGS) $(LD_OUT_OPTION)$$@ \
 	$$($1_EXPECTED_OBJS) $$($1_RES) $$($1_LDFLAGS_SUFFIX) \
 	$$($1_EXTRA_LDFLAGS_SUFFIX)
-      ifneq (,$(CODESIGN))
-	$(CODESIGN) $(CODESIGN_OPTIONS) $$@
-      endif
+	$$(call CodesignFile,$$@)
   endif
 
   ifneq (,$$($1_STATIC_LIBRARY))
@@ -660,8 +652,6 @@ endif # no MacOS X support yet
         endif
         # This only works if the codesign identity is present on the system.
         # Let it silently fail otherwise.
-        ifneq (,$(CODESIGN))
-	    $(CODESIGN) $(CODESIGN_OPTIONS) $$@
-        endif
+	    $$(call CodesignFile,$$@)
   endif
 endef
