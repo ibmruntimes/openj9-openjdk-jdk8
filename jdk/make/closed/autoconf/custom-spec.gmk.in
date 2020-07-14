@@ -109,15 +109,15 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   LDFLAGS_JDKEXE += /LARGEADDRESSAWARE
 endif
 
-# Usage: $(call CodesignFile, files ...)
+# Usage: $(call CodesignFile, file)
 ifeq (,$(CODESIGN))
   CodesignFile =
 else
   CodesignFile = $(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" \
-	--entitlements $(TOPDIR)/jdk/make/data/macosxsigning/entitlements.plist \
+	--entitlements $(firstword $(wildcard $(patsubst %,$(TOPDIR)/jdk/make/data/macosxsigning/%.plist,$(notdir $1) default))) \
 	--options runtime \
 	--timestamp \
-	$1
+	"$1"
 endif
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
