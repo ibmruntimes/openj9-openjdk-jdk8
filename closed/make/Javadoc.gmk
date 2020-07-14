@@ -601,8 +601,10 @@ OPENJ9_ONLY_JAVASE_BASE_URL := https://docs.oracle.com/javase/8/docs/api/
 OPENJ9_ONLY_MGMT_BASE_URL := https://docs.oracle.com/javase/8/docs/jre/api/management/extension/
 
 #############################################################################
-# Exclude the openjdk profiles data.
-OPENJ9_ONLY_COMMON_JAVADOCFLAGS = $(filter-out -Xprofilespath $(JDK_TOPDIR)/make/profile-rtjar-includes.txt,$(COMMON_JAVADOCFLAGS))
+# Exclude the openjdk profiles data and do not include a time stamp in the
+# generated files so that content changes can be monitored if the files
+# are added to a SCM (e.g. git) repository.
+OPENJ9_ONLY_COMMON_JAVADOCFLAGS = -notimestamp $(filter-out -Xprofilespath $(JDK_TOPDIR)/make/profile-rtjar-includes.txt,$(COMMON_JAVADOCFLAGS))
 
 #############################################################################
 #
@@ -930,7 +932,7 @@ $(OPENJ9_ONLY_MGMT_OPTIONS_FILE) :
 # in a new tab.
 
 $(OPENJ9_ONLY_JAVADOC_MARKER) : openj9-only-sharedclassesdocs openj9-only-gpudocs openj9-only-cudadocs openj9-only-dataaccessdocs openj9-only-jvmdocs openj9-only-dtfjdocs openj9-only-zosconditionhandlingdocs openj9-only-mgmtdocs
-	set -x; for file in `$(FIND) $(OPENJ9_ONLY_DOCSDIR) -type f` ; do \
+	for file in `$(FIND) $(OPENJ9_ONLY_DOCSDIR) -type f` ; do \
 		$(CP) -f "$$file" "$(OPENJ9_JAVADOC_TEMP)" ; \
 		$(SED) -e 's/is-external=true"/is-external=true" target="_blank"/g' <"$(OPENJ9_JAVADOC_TEMP)" >"$$file" ; \
 	done
