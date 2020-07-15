@@ -35,7 +35,7 @@ define openj9_test_image_rule
 
   $(OPENJ9_TEST_IMAGE_DIR)/$(notdir $(strip $1)) : $(strip $1)
 	$$(call install-file)
-	$$(call CodesignFile,"$$@")
+	$$(call CodesignFile,$$@)
 endef
 
 $(foreach file, \
