@@ -90,7 +90,7 @@ endef
 
 define openj9_copy_and_sign
 	$(openj9_copy_only)
-	$(call CodesignFile,"$@")
+	$(call CodesignFile,$@)
 endef
 
 # openj9_copy_rule
