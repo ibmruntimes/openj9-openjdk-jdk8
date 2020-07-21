@@ -541,6 +541,14 @@ endif # no MacOS X support yet
 	$$($1_LD) $$($1_LDFLAGS) $$($1_EXTRA_LDFLAGS) $(LD_OUT_OPTION)$$@ \
 	$$($1_EXPECTED_OBJS) $$($1_RES) $$($1_LDFLAGS_SUFFIX) \
 	$$($1_EXTRA_LDFLAGS_SUFFIX)
+    ifeq ($(OPENJDK_TARGET_OS):$(ENABLE_DEBUG_SYMBOLS), macosx:true)
+	$(DSYMUTIL) --out $$@.dSYM $$@
+      ifeq ($(ZIP_DEBUGINFO_FILES), true)
+	$(CD) $$(@D) && $(ZIP) -q $$(@:$(SHARED_LIBRARY_SUFFIX)=.diz) \
+		$$(@F).dSYM/Contents/Info.plist \
+		$$(@F).dSYM/Contents/Resources/DWARF/$$(@F)
+      endif
+    endif
 	$$(call CodesignFile,$$@)
   endif
 
@@ -649,6 +657,14 @@ endif # no MacOS X support yet
 	$$($1_EXTRA_LDFLAGS_SUFFIX)
         ifneq (,$$($1_GEN_MANIFEST))
 	  $(MT) -nologo -manifest $$($1_GEN_MANIFEST) -outputresource:$$@;#1
+        endif
+        ifeq ($(OPENJDK_TARGET_OS):$(ENABLE_DEBUG_SYMBOLS), macosx:true)
+	$(DSYMUTIL) --out $$@.dSYM $$@
+          ifeq ($(ZIP_DEBUGINFO_FILES), true)
+	$(CD) $$(@D) && $(ZIP) -q $$@.diz \
+		$$(@F).dSYM/Contents/Info.plist \
+		$$(@F).dSYM/Contents/Resources/DWARF/$$(@F)
+          endif
         endif
         # This only works if the codesign identity is present on the system.
         # Let it silently fail otherwise.
