@@ -292,7 +292,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   else ifeq ($(OPENJDK_BUILD_OS), windows)
 	$(CHMOD) a+rx $@
   endif
-	$(call CodesignFile,"$@")
+	$(call CodesignFile,$@)
 
   COPY_FILES += $(LIBCRYPTO_TARGET_LIB)
 
@@ -306,7 +306,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
         TARGETS += $(LIBSSL_TARGET_LIB)
         $(LIBSSL_TARGET_LIB) : $(LIBSSL_PATH)
 			$(call install-file)
-			$(call CodesignFile,"$@")
+			$(call CodesignFile,$@)
 
         COPY_FILES += $(LIBSSL_TARGET_LIB)
       endif # LIBSSL_PATH

@@ -258,6 +258,29 @@ $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(EXE_SUFFIX): $(BUILD_LAUNCHER_java)
 
 BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(EXE_SUFFIX)
 
+ifeq ($(OPENJDK_TARGET_OS):$(ENABLE_DEBUG_SYMBOLS), macosx:true)
+  # Because the java launcher is built in a non-standard directory,
+  # we need to copy debug information so it can be included in a debug image.
+  $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.dSYM/Contents/Info.plist : $(BUILD_LAUNCHER_java)
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $(JDK_OUTPUTDIR)/objs/java_objs$(OUTPUT_SUBDIR)/java.dSYM/Contents/Info.plist $@
+  $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.dSYM/Contents/Resources/DWARF/java : $(BUILD_LAUNCHER_java)
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $(JDK_OUTPUTDIR)/objs/java_objs$(OUTPUT_SUBDIR)/java.dSYM/Contents/Resources/DWARF/java $@
+  BUILD_LAUNCHERS += \
+    $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.dSYM/Contents/Info.plist \
+    $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.dSYM/Contents/Resources/DWARF/java
+  ifeq ($(ZIP_DEBUGINFO_FILES), true)
+    $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.diz : $(BUILD_LAUNCHER_java)
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $(JDK_OUTPUTDIR)/objs/java_objs$(OUTPUT_SUBDIR)/java.diz $@
+    BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.diz
+  endif
+endif # macosx with debug symbols
+
 ifeq ($(OPENJDK_TARGET_OS), windows)
   $(eval $(call SetupLauncher,javaw, \
       -DJAVAW -DEXPAND_CLASSPATH_WILDCARDS,,,user32.lib comctl32.lib, \

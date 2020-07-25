@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
 
 include $(SPEC)
@@ -162,6 +162,11 @@ else
   ALL_BIN_DEBUG_FILTER := $(addprefix %, $(patsubst %.exe, %.debuginfo, $(ALL_BIN_EXEC_FILES)) \
       $(patsubst %.exe, %.diz, $(ALL_BIN_EXEC_FILES))) %.pdb
   ALL_BIN_LIST := $(filter-out $(ALL_BIN_DEBUG_FILTER), $(ALL_BIN_LIST))
+endif
+
+# Filter out files in .dSYM folders on macosx.
+ifeq ($(OPENJDK_TARGET_OS), macosx)
+  ALL_BIN_LIST := $(foreach file, $(ALL_BIN_LIST),$(if $(findstring .dSYM/,$(file)),,$(file)))
 endif
 
 JDKJRE_BIN_LIST := $(filter-out $(addprefix %, $(NOT_JRE_BIN_FILES)), $(ALL_BIN_LIST))
