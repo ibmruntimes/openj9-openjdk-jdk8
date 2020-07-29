@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2011, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2011, 2020 All Rights Reserved
 # ===========================================================================
 
 LIBJSOUND_SRC_DIRS := \
@@ -149,6 +149,10 @@ else
 
   ifeq ($(OPENJDK_TARGET_CPU), s390x)
     LIBJSOUND_CFLAGS += -DX_ARCH=X_S390X
+  endif
+
+  ifeq ($(OPENJDK_TARGET_CPU), aarch64)
+    LIBJSOUND_CFLAGS += -DX_ARCH=X_AARCH64
   endif
 
 endif
