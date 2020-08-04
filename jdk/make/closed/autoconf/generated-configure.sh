@@ -4541,7 +4541,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1596522749
+DATE_WHEN_GENERATED=1596530655
 
 ###############################################################################
 #
@@ -22750,7 +22750,7 @@ else
   enable_jfr=auto
 fi
 
-  if test "x$enable_jfr" = "xno"; then
+  if test "x$enable_jfr" = "xno" -o "x$OPENJ9_BUILDSPEC" != "x"; then
     ENABLE_JFR=false
   elif test "x$enable_jfr" = "xyes" -o "x$enable_jfr" = "xauto"; then
     if test "x$JVM_VARIANT_MINIMAL1" = "xtrue" -o "x$JVM_VARIANT_ZERO" = "xtrue"; then
