@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * ===========================================================================
+ */
 
 #ifndef __SOUNDDEFS_INCLUDED__
 #define __SOUNDDEFS_INCLUDED__
@@ -45,6 +50,8 @@
 #define X_PPC           8
 #define X_PPC64         9
 #define X_PPC64LE      10
+#define X_S390X        11
+#define X_AARCH64      12
 
 // **********************************
 // Make sure you set X_PLATFORM and X_ARCH defines correctly.
