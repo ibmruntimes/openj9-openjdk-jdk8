@@ -24,12 +24,6 @@
  */
 
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * Adapted from JDK 1.2 linker_md.c v1.37. Note that we #define
  * NATIVE here, whether or not we're running solaris native threads.
  * Outside the VM, it's unclear how we can do the locking that is
@@ -48,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "util.h"
 #include "path_md.h"
 #ifndef NATIVE
 #include "iomgr.h"
@@ -65,7 +60,8 @@ static void dll_build_name(char* buffer, size_t buflen,
     char *path, *paths_copy, *next_token;
     *buffer = '\0';
 
-    paths_copy = strdup(paths);
+    paths_copy = jvmtiAllocate((int)strlen(paths) + 1);
+    strcpy(paths_copy, paths);
     if (paths_copy == NULL) {
         return;
     }
@@ -76,7 +72,8 @@ static void dll_build_name(char* buffer, size_t buflen,
     while (path != NULL) {
         size_t result_len = (size_t)snprintf(buffer, buflen, "%s/lib%s." LIB_SUFFIX, path, fname);
         if (result_len >= buflen) {
-            /* Ignore this path that doesn't fit in the supplied buffer. */
+            EXIT_ERROR(JVMTI_ERROR_INVALID_LOCATION, "One or more of the library paths supplied to jdwp, "
+                                                     "likely by sun.boot.library.path, is too long.");
         } else if (access(buffer, F_OK) == 0) {
             break;
         }
@@ -84,7 +81,7 @@ static void dll_build_name(char* buffer, size_t buflen,
         path = strtok_r(NULL, PATH_SEPARATOR, &next_token);
     }
 
-    free(paths_copy);
+    jvmtiDeallocate(paths_copy);
 }
 
 /*
@@ -105,16 +102,16 @@ dbgsysBuildFunName(char *name, int nameLen, int args_size, int encodingIndex)
  * appropriate pre and extensions to a filename and the path
  */
 void
-dbgsysBuildLibName(char *holder, size_t holderlen, const char *pname, const char *fname)
+dbgsysBuildLibName(char *holder, int holderlen, const char *pname, const char *fname)
 {
     const int pnamelen = pname ? strlen(pname) : 0;
 
     if (pnamelen == 0) {
-        size_t result_len = (size_t)snprintf(holder, holderlen, "lib%s." LIB_SUFFIX, fname);
-        if (result_len >= holderlen) {
-            /* Ignore this path that doesn't fit in the supplied buffer. */
-            *holder = '\0';
+        if (pnamelen + (int)strlen(fname) + 10 > holderlen) {
+            EXIT_ERROR(JVMTI_ERROR_INVALID_LOCATION, "One or more of the library paths supplied to jdwp, "
+                                                     "likely by sun.boot.library.path, is too long.");
         }
+        (void)snprintf(holder, holderlen, "lib%s." LIB_SUFFIX, fname);
     } else {
       dll_build_name(holder, holderlen, pname, fname);
     }
