@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <jni.h>
 #include <string.h>
 #if defined(__linux__) || defined(MACOSX)
@@ -439,8 +445,13 @@ JNIEXPORT jboolean JNICALL Java_sun_net_ExtendedOptionsImpl_flowSupported
  */
 JNIEXPORT jboolean JNICALL Java_sun_net_ExtendedOptionsImpl_keepAliveOptionsSupported
 (JNIEnv *env, jobject unused) {
+#if defined(TCP_KEEPCNT) && defined(TCP_KEEPINTVL)
     return socketOptionSupported(SOCK_OPT_NAME_KEEPIDLE) && socketOptionSupported(TCP_KEEPCNT)
             && socketOptionSupported(TCP_KEEPINTVL);
+#else
+    /* TCP_KEEPCNT and TCP_KEEPINTVL are not defined on older versions of OSX. */
+    return JNI_FALSE;
+#endif
 }
 
 #else
@@ -464,8 +475,13 @@ JNIEXPORT jboolean JNICALL Java_sun_net_ExtendedOptionsImpl_keepAliveOptionsSupp
  */
 JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveProbes
 (JNIEnv *env, jobject unused, jobject fileDesc, jint optval) {
+#if defined(TCP_KEEPCNT) && defined(SOCK_OPT_LEVEL)
     setTcpSocketOption(env, fileDesc, optval, TCP_KEEPCNT, SOCK_OPT_LEVEL,
                        "set option TCP_KEEPCNT failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+#endif
 }
 
 /*
@@ -475,8 +491,13 @@ JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveProbes
  */
 JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveTime
 (JNIEnv *env, jobject unused, jobject fileDesc, jint optval) {
+#if defined(SOCK_OPT_NAME_KEEPIDLE) && defined(SOCK_OPT_LEVEL)
     setTcpSocketOption(env, fileDesc, optval, SOCK_OPT_NAME_KEEPIDLE, SOCK_OPT_LEVEL,
                        "set option " SOCK_OPT_NAME_KEEPIDLE_STR " failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+#endif
 }
 
 /*
@@ -486,8 +507,13 @@ JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveTime
  */
 JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveIntvl
 (JNIEnv *env, jobject unused, jobject fileDesc, jint optval) {
+#if defined(TCP_KEEPINTVL) && defined(SOCK_OPT_LEVEL)
     setTcpSocketOption(env, fileDesc, optval, TCP_KEEPINTVL, SOCK_OPT_LEVEL,
                        "set option TCP_KEEPINTVL failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+#endif
 }
 
 /*
@@ -497,8 +523,14 @@ JNIEXPORT void JNICALL Java_sun_net_ExtendedOptionsImpl_setTcpKeepAliveIntvl
  */
 JNIEXPORT jint JNICALL Java_sun_net_ExtendedOptionsImpl_getTcpKeepAliveProbes
 (JNIEnv *env, jobject unused, jobject fileDesc) {
+#if defined(TCP_KEEPCNT) && defined(SOCK_OPT_LEVEL)
     return getTcpSocketOption(env, fileDesc, TCP_KEEPCNT, SOCK_OPT_LEVEL,
                               "get option TCP_KEEPCNT failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+    return 0;
+#endif
 }
 
 /*
@@ -508,8 +540,14 @@ JNIEXPORT jint JNICALL Java_sun_net_ExtendedOptionsImpl_getTcpKeepAliveProbes
  */
 JNIEXPORT jint JNICALL Java_sun_net_ExtendedOptionsImpl_getTcpKeepAliveTime
 (JNIEnv *env, jobject unused, jobject fileDesc) {
+#if defined(SOCK_OPT_NAME_KEEPIDLE) && defined(SOCK_OPT_LEVEL)
     return getTcpSocketOption(env, fileDesc, SOCK_OPT_NAME_KEEPIDLE, SOCK_OPT_LEVEL,
                               "get option " SOCK_OPT_NAME_KEEPIDLE_STR " failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+    return 0;
+#endif
 }
 
 /*
@@ -519,6 +557,12 @@ JNIEXPORT jint JNICALL Java_sun_net_ExtendedOptionsImpl_getTcpKeepAliveTime
  */
 JNIEXPORT jint JNICALL Java_sun_net_ExtendedOptionsImpl_getTcpKeepAliveIntvl
 (JNIEnv *env, jobject unused, jobject fileDesc) {
+#if defined(TCP_KEEPINTVL) && defined(SOCK_OPT_LEVEL)
     return getTcpSocketOption(env, fileDesc, TCP_KEEPINTVL, SOCK_OPT_LEVEL,
                               "get option TCP_KEEPINTVL failed");
+#else
+    JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+                    "unsupported socket option");
+    return 0;
+#endif
 }
