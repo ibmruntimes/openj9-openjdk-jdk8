@@ -43,6 +43,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_JITSERVER
+  OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
 
   if test "x$OPENJDK_TARGET_OS" = xwindows ; then
     BASIC_SETUP_OUTPUT_DIR
@@ -242,6 +243,26 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_JITSERVER)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
+[
+  AC_MSG_CHECKING([for openjdk-methodhandles])
+  AC_ARG_ENABLE([openjdk-methodhandles], [AS_HELP_STRING([--enable-openjdk-methodhandles], [enable support for OpenJDK MethodHandles @<:@disabled@:>@])])
+  OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
+
+  if test "x$enable_openjdk_methodhandles" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_OPENJDK_METHODHANDLES=true
+  elif test "x$enable_openjdk_methodhandles" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_openjdk_methodhandles" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-openjdk-methodhandles accepts no argument])
+  fi
+
+  AC_SUBST(OPENJ9_ENABLE_OPENJDK_METHODHANDLES)
 ])
 
 AC_DEFUN([OPENJ9_PLATFORM_SETUP],
