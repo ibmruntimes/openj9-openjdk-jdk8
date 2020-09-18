@@ -140,6 +140,15 @@ else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_jitserver)
 endif
 
+# Adjust OpenJDK MethodHandles enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_openjdkMethodhandle)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_methodHandle)
+else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_methodHandle)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_openjdkMethodhandle)
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 # openj9_stage_buildspec_file
 # ---------------------------
 # param 1 = The simple name of the file to copy.
@@ -315,6 +324,14 @@ else
   CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=OFF
 endif # OPENJ9_ENABLE_JITSERVER
 
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=ON
+  CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=OFF
+else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+  CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=ON
+  CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 ifneq (,$(filter debug trace, $(LOG_LEVEL)))
   # The user said LOG=debug or LOG=trace, so tell cmake to echo commands.
   CMAKE_ARGS += -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -393,6 +410,12 @@ AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
 JPP_DEST := $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
 
+JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  JPP_TAGS := $(JPP_TAGS);OPENJDK_METHODHANDLES
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 	@$(ECHO) Generating J9JCL sources
 	$(BOOT_JDK)/bin/java \
@@ -406,7 +429,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
-			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
+			-tag:define "$(JPP_TAGS)"
 	@$(ECHO) Generating J9JCL tools
 	@$(BOOT_JDK)/bin/java \
 		-cp "$(call FixPath,$(JPP_JAR))" \
@@ -419,7 +442,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
-			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
+			-tag:define "$(JPP_TAGS)"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 

@@ -891,6 +891,7 @@ CYGWIN_LINK
 OUTPUT_ROOT
 CONF_NAME
 SPEC
+OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
@@ -1085,6 +1086,7 @@ with_gdk
 enable_cuda
 enable_ddr
 enable_jitserver
+enable_openjdk_methodhandles
 with_conf_name
 with_toolchain_version
 with_msvcp_dll
@@ -1903,6 +1905,8 @@ Optional Features:
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
   --enable-jitserver      enable JITServer support [disabled]
+  --enable-openjdk-methodhandles
+                          enable support for OpenJDK MethodHandles [disabled]
   --disable-headful       disable building headful support (graphical UI
                           support) [enabled]
   --enable-hotspot-test-in-build
@@ -4531,6 +4535,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of fixpath.
 # OPENJ9_GENERATE_TOOL_WRAPER(<name_of_wrapper>, <command_to_call>)
@@ -4541,7 +4547,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1596530655
+DATE_WHEN_GENERATED=1600276123
 
 ###############################################################################
 #
@@ -15914,6 +15920,32 @@ $as_echo "no (explicitly disabled)" >&6; }
 $as_echo "no (default)" >&6; }
   else
     as_fn_error $? "--enable-jitserver accepts no argument" "$LINENO" 5
+  fi
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for openjdk-methodhandles" >&5
+$as_echo_n "checking for openjdk-methodhandles... " >&6; }
+  # Check whether --enable-openjdk-methodhandles was given.
+if test "${enable_openjdk_methodhandles+set}" = set; then :
+  enableval=$enable_openjdk_methodhandles;
+fi
+
+  OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
+
+  if test "x$enable_openjdk_methodhandles" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_OPENJDK_METHODHANDLES=true
+  elif test "x$enable_openjdk_methodhandles" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_openjdk_methodhandles" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
   fi
 
 
