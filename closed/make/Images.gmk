@@ -59,14 +59,17 @@ endif # OPENJ9_ENABLE_DDR
 $(addsuffix /LICENSE, $(JDK_IMAGE_DIR) $(JDK_IMAGE_DIR)/jre $(JRE_IMAGE_DIR)) : $(SRC_ROOT)/LICENSE
 	$(process-doc-file)
 
-$(addsuffix /openj9-notices.html, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(OPENJ9_TOPDIR)/longabout.html
+$(addsuffix /openj9-notices, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(OPENJ9_TOPDIR)/LICENSE
+	$(call install-file)
+
+$(addsuffix /epl-2.0.html, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(OPENJ9_TOPDIR)/epl-2.0.html
 	$(call install-file)
 
 $(addsuffix /openj9-openjdk-notices, $(JDK_IMAGE_DIR) $(JRE_IMAGE_DIR)) : $(SRC_ROOT)/openj9-openjdk-notices
 	$(call install-file)
 
-JDK_DOC_TARGETS += $(addprefix $(JDK_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)
-JRE_DOC_TARGETS += $(addprefix $(JRE_IMAGE_DIR)/, openj9-notices.html openj9-openjdk-notices)
+JDK_DOC_TARGETS += $(addprefix $(JDK_IMAGE_DIR)/, openj9-notices epl-2.0.html openj9-openjdk-notices)
+JRE_DOC_TARGETS += $(addprefix $(JRE_IMAGE_DIR)/, openj9-notices epl-2.0.html openj9-openjdk-notices)
 
 # Omit man pages for launchers not provided by OpenJ9 or that describe
 # behavior that differs from the OpenJ9 implementation.
