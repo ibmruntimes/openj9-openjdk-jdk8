@@ -897,8 +897,8 @@ CONF_NAME
 SPEC
 WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
-OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_MICROJIT
+OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 HEALTHCENTER_JAR
 OPENJ9_ENABLE_DEMOS
@@ -16427,6 +16427,11 @@ $as_echo "no (explicitly disabled)" >&6; }
 $as_echo "no (default)" >&6; }
   else
     as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
+  fi
+
+
+
+
   # Check whether --enable-microjit was given.
 if test "${enable_microjit+set}" = set; then :
   enableval=$enable_microjit;
