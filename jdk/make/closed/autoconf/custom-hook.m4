@@ -61,7 +61,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
   AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
     [
-      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+      if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
         with_cmake=cmake
       fi
       if test "x$with_cmake" != xno ; then
@@ -74,10 +74,15 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
       fi
     ],
     [with_cmake=no])
-  if test "$with_cmake" == yes ; then
+  if test "$with_cmake" = yes ; then
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
+
+    # Currently, mixedrefs mode is only available with CMake enabled
+    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
+      AC_MSG_ERROR([[--with-mixedrefs=[static|dynamic] requires --with-cmake]])
+    fi
   fi
   AC_SUBST(OPENJ9_ENABLE_CMAKE)
 ])
@@ -270,44 +275,57 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
   AC_ARG_WITH(noncompressedrefs, [AS_HELP_STRING([--with-noncompressedrefs],
     [build non-compressedrefs vm (large heap)])])
 
+  AC_ARG_WITH(mixedrefs, [AS_HELP_STRING([--with-mixedrefs],
+    [build mixedrefs vm (--with-mixedrefs=static or --with-mixedrefs=dynamic)])])
+
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
-  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+
+  # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
+  OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
+
+  OMR_MIXED_REFERENCES_MODE=off
+  if test "x$with_mixedrefs" != x -a "x$with_mixedrefs" != xno; then
+    if test "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic; then
+      OMR_MIXED_REFERENCES_MODE=static
+    elif test "x$with_mixedrefs" = xdynamic; then
+      OMR_MIXED_REFERENCES_MODE=dynamic
+    else
+      AC_MSG_ERROR([OpenJ9 supports --with-mixedrefs=static and --with-mixedrefs=dynamic])
+    fi
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
+    OPENJ9_LIBS_SUBDIR=default
+  elif test "x$with_noncompressedrefs" = xyes ; then
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+    if test "x$OPENJ9_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-          OPENJ9_PLATFORM_CODE=wi32
-          OPENJ9_BUILDSPEC="win_x86"
-        else
-          OPENJ9_BUILDSPEC="win_x86-64"
-        fi
-      else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      OPENJ9_BUILD_OS=win
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+        OPENJ9_PLATFORM_CODE=wi32
+        OPENJ9_BUILD_MODE_ARCH="x86"
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+    elif test "x$OPENJ9_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
-      else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
-      fi
+      OPENJ9_BUILD_OS=osx
     else
-      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJ9_BUILD_OS}!])
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le"
+    if test "x$OMR_MIXED_REFERENCES_MODE" = xoff ; then
+      if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
+        OPENJ9_BUILD_MODE_ARCH="ppc-64_cmprssptrs_le"
+      fi
+    else
+      OPENJ9_BUILD_MODE_ARCH="ppc-64_mxdptrs_le"
     fi
   elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
@@ -319,9 +337,12 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
 
+  OPENJ9_BUILDSPEC="${OPENJ9_BUILD_OS}_${OPENJ9_BUILD_MODE_ARCH}"
+
   AC_SUBST(OPENJ9_BUILDSPEC)
   AC_SUBST(OPENJ9_PLATFORM_CODE)
   AC_SUBST(OPENJ9_LIBS_SUBDIR)
+  AC_SUBST(OMR_MIXED_REFERENCES_MODE)
 ])
 
 AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
@@ -381,7 +402,7 @@ AC_DEFUN([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
   FREEMARKER_JAR=
   if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
+    if test "x$with_freemarker_jar" = x -o "x$with_freemarker_jar" = xno ; then
       printf "\n"
       printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
       printf "and has to be provided during configure process.\n"
