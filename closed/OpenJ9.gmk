@@ -52,8 +52,12 @@ ifeq (,$(OPENJ9OMR_SHA))
   $(error Could not determine OMR SHA)
 endif
 
-# openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
-override MAKEFLAGS := -j $(JOBS)
+# openjdk makeflags don't work with openj9/omr native compiles
+override MAKEFLAGS :=
+# specify desired parallelism
+ifneq (,$(JOBS))
+  MAKE_ARGS += -j $(JOBS)
+endif
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
   # convert unix path to windows path
@@ -67,7 +71,6 @@ endif
 
 .PHONY : \
 	build-j9vm \
-	build-openj9-tools \
 	generate-j9jcl-sources \
 	generate-j9-version-headers \
 	run-preprocessors-j9 \
@@ -170,16 +173,6 @@ $(foreach file, \
 	$(eval $(call openj9_stage_buildspec_file,$(file))))
 
 J9TOOLS_DIR := $(JDK_OUTPUTDIR)/j9tools
-JPP_JAR     := $(J9TOOLS_DIR)/jpp.jar
-
-build-openj9-tools :
-	@$(ECHO) Building OpenJ9 Java Preprocessor
-	@$(MKDIR) -p $(J9TOOLS_DIR)
-	$(MAKE) -C $(OPENJ9_TOPDIR)/sourcetools $(MAKEFLAGS) -f buildj9tools.mk \
-		BOOT_JDK=$(BOOT_JDK) \
-		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
-		JAVA_HOME=$(BOOT_JDK) \
-		$(call FixPath,$(JPP_JAR))
 
 stage-j9 :
 	@$(ECHO) Staging OpenJ9 runtime in $(OPENJ9_VM_BUILD_DIR)
@@ -337,6 +330,7 @@ ifneq (,$(filter debug trace, $(LOG_LEVEL)))
   CMAKE_ARGS += -DCMAKE_VERBOSE_MAKEFILE=ON
 endif
 
+  # Do this last so extra args take precedence.
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
@@ -367,9 +361,8 @@ endif # OPENJ9_ENABLE_JITSERVER
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	@$(MKDIR) -p $(J9TOOLS_DIR)
-	export $(EXPORT_MSVS_ENV_VARS) \
-		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		&& $(MAKE) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
+	+$(EXPORT_MSVS_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+		$(MAKE) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
 			BOOT_JDK=$(BOOT_JDK) \
 			BUILD_ID=$(BUILD_ID) \
 			DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
@@ -386,7 +379,7 @@ run-preprocessors-j9 : stage-j9
 
 endif # OPENJ9_ENABLE_CMAKE
 
-run-preprocessors-j9 : generate-j9-version-headers
+run-preprocessors-j9 : generate-j9-version-headers generate-j9jcl-sources
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
   # Both cmake and the makefiles it generates are sensitive to the VERBOSE
@@ -399,8 +392,8 @@ endif
 
 build-j9vm : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
-	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
-		&& $(MAKE_VM) -C $(OUTPUT_ROOT)/vm $(MAKEFLAGS) JAVA_VERSION=80 VERSION_MAJOR=8 all
+	+export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+		&& $(MAKE_VM) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 
 J9JCL_SOURCES_DONEFILE := $(JDK_OUTPUTDIR)/j9jcl_sources/j9jcl_sources.done
@@ -409,14 +402,21 @@ recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2)
 AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
 JPP_DEST := $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
-
+JPP_JAR  := $(J9TOOLS_DIR)/jpp.jar
 JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
 
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
-  JPP_TAGS := $(JPP_TAGS);OPENJDK_METHODHANDLES
+  JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
 $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
+	@$(ECHO) Building OpenJ9 Java Preprocessor
+	@$(MKDIR) -p $(J9TOOLS_DIR)
+	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
+		BOOT_JDK=$(BOOT_JDK) \
+		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
+		JAVA_HOME=$(BOOT_JDK) \
+		$(call FixPath,$(JPP_JAR))
 	@$(ECHO) Generating J9JCL sources
 	$(BOOT_JDK)/bin/java \
 		-cp "$(call FixPath,$(JPP_JAR))" \
@@ -440,7 +440,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
-			-tag:define "$(JPP_TAGS)"
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 

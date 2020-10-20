@@ -27,5 +27,4 @@ OPENJ9_MAKE := $(MAKE) -f $(SRC_ROOT)/closed/OpenJ9.gmk SPEC=$(SPEC)
 .PHONY : generate_openj9_j9jcl
 
 generate_openj9_j9jcl :
-	+$(OPENJ9_MAKE) build-openj9-tools
 	+$(OPENJ9_MAKE) generate-j9jcl-sources
