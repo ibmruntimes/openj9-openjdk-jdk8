@@ -39,7 +39,7 @@ ifneq (,@OPENJ9_GDK_HOME@)
 export GDK_HOME         := @OPENJ9_GDK_HOME@
 endif
 
-# OPENSSL
+# OpenSSL
 OPENSSL_DIR             := @OPENSSL_DIR@
 BUILD_OPENSSL           := @BUILD_OPENSSL@
 OPENSSL_CFLAGS          := @OPENSSL_CFLAGS@
@@ -69,8 +69,8 @@ J9JDK_EXT_VERSION       := HEAD
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by CMake
-CMAKE                       := @CMAKE@
-export OPENJ9_ENABLE_CMAKE  := @OPENJ9_ENABLE_CMAKE@
+CMAKE                   := @CMAKE@
+OPENJ9_ENABLE_CMAKE     := @OPENJ9_ENABLE_CMAKE@
 
 # required by UMA
 FREEMARKER_JAR          := @FREEMARKER_JAR@
@@ -123,8 +123,9 @@ else
 	"$1"
 endif
 
+# Use '=' instead of ':=' because bootcycle-spec.gmk overrides OUTPUT_ROOT.
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  OPENJ9_VM_BUILD_DIR := $(OUTPUT_ROOT)/vm/runtime
+  OPENJ9_VM_BUILD_DIR = $(OUTPUT_ROOT)/vm/runtime
 else
-  OPENJ9_VM_BUILD_DIR := $(OUTPUT_ROOT)/vm
+  OPENJ9_VM_BUILD_DIR = $(OUTPUT_ROOT)/vm
 endif
