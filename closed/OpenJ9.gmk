@@ -30,6 +30,11 @@ ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
 endif
 
+OPENJDK_SHA := $(shell git -C $(TOPDIR) rev-parse --short HEAD)
+ifeq (,$(OPENJDK_SHA))
+  $(error Could not determine OpenJDK SHA)
+endif
+
 OPENJ9_SHA := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
 ifeq (,$(OPENJ9_SHA))
   $(error Could not determine OpenJ9 SHA)
@@ -391,7 +396,11 @@ else
 endif
 
 build-j9vm : run-preprocessors-j9
-	@$(ECHO) Compiling OpenJ9 in $(OPENJ9_VM_BUILD_DIR)
+	@$(ECHO) "Compiling OpenJ9 in $(OUTPUT_ROOT)/vm"
+	@$(ECHO) "  Source version info:"
+	@$(ECHO) "    openjdk - $(OPENJDK_SHA)"
+	@$(ECHO) "    openj9  - $(OPENJ9_SHA)"
+	@$(ECHO) "    omr     - $(OPENJ9OMR_SHA)"
 	+export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE_VM) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
