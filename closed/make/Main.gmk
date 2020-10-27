@@ -32,6 +32,15 @@ clean-j9vm :
 	test-image-openj9 \
 	#
 
+# Override definition from MakeBase.gmk for OpenJ9.
+define GetSourceTips
+	$(PRINTF) "%s:%s\n" \
+		OpenJDK "$(shell git -C $(TOPDIR) rev-parse --short HEAD)" \
+		OpenJ9  "$(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)" \
+		OMR     "$(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)" \
+		> $@
+endef
+
 jdk : build-j9vm
 
 build-j9vm : start-make
