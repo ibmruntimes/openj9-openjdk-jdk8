@@ -903,7 +903,6 @@ OPENJ9_CC
 OPENJ9_ENABLE_CMAKE
 CMAKE
 USERNAME
-OPENJDK_SHA
 JDK_FIX_VERSION
 JDK_MOD_VERSION
 OPENJ9_LIBS_SUBDIR
@@ -4547,7 +4546,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1600276123
+DATE_WHEN_GENERATED=1603832230
 
 ###############################################################################
 #
@@ -15266,10 +15265,6 @@ fi
   # Source the closed version numbers
   . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
 
-
-
-
-  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
 
 
 
