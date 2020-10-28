@@ -368,10 +368,6 @@ AC_DEFUN([OPENJDK_VERSION_DETAILS],
   AC_SUBST(JDK_MOD_VERSION)
   AC_SUBST(JDK_FIX_VERSION)
 
-  OPENJDK_SHA=`git -C $SRC_ROOT rev-parse --short HEAD`
-
-  AC_SUBST(OPENJDK_SHA)
-
   # Outer [ ] to quote m4.
   [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
   AC_SUBST(USERNAME)
