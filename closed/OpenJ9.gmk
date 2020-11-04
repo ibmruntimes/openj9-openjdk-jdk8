@@ -148,6 +148,9 @@ else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_jitserver)
 endif
 
+# Disable windows rebase.
+SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
+
 # Adjust OpenJDK MethodHandles enablement flags.
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   FEATURE_SED_SCRIPT += $(call SedEnable,opt_openjdkMethodhandle)
