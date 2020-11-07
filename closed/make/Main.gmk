@@ -26,24 +26,34 @@ clean-j9vm :
 .PHONY : \
 	build-j9vm \
 	clean-j9vm \
+	clean-openj9-only-docs \
 	debug-image \
 	test-image \
 	test-image-openj9 \
 	#
 
+# Override definition from MakeBase.gmk for OpenJ9.
+define GetSourceTips
+	$(PRINTF) "%s:%s\n" \
+		OpenJDK "$(shell git -C $(TOPDIR) rev-parse --short HEAD)" \
+		OpenJ9  "$(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)" \
+		OMR     "$(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)" \
+		> $@
+endef
+
 jdk : build-j9vm
 
 build-j9vm : start-make
   ifeq ($(BUILD_OPENSSL),yes)
-	@$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/openssl.gmk
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/openssl.gmk
   endif # BUILD_OPENSSL
-	@$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/OpenJ9.gmk build-j9vm
-	@$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/CopyToBuildJdk.gmk
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/OpenJ9.gmk build-j9vm
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/CopyToBuildJdk.gmk
 
 all : debug-image
 
 debug-image : images
-	@$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/DebugImage.gmk
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/DebugImage.gmk
 
 all : test-image
 
@@ -51,12 +61,12 @@ test-image : test-image-openj9
 
 # If not cross-compiling, capture 'java -version' output.
 test-image-openj9 : images
-	@$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/TestImage.gmk
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/TestImage.gmk
 ifneq ($(COMPILE_TYPE), cross)
 	$(JRE_IMAGE_DIR)/bin/java -version 2>&1 | $(TEE) $(IMAGES_OUTPUTDIR)/test/openj9/java-version.txt
 endif
 
 clean-docs : clean-openj9-only-docs
+
 clean-openj9-only-docs :
 	$(call CleanComponent,openj9-docs)
-.PHONY : clean-openj9-only-docs
