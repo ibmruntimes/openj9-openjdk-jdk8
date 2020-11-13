@@ -252,6 +252,7 @@ char *fix_at_file(char *in)
   rc = _mktemp_s(name, strlen(name)+1);
   if (rc) {
     fprintf(stderr, "Could not create temporary file name for at file!\n");
+    fprintf(stderr, "RC is: %d Filename is: %s\n", rc, name);
     exit(-1);
   }
 
