@@ -905,6 +905,7 @@ CMAKE
 USERNAME
 JDK_FIX_VERSION
 JDK_MOD_VERSION
+OMR_MIXED_REFERENCES_MODE
 OPENJ9_LIBS_SUBDIR
 OPENJ9_PLATFORM_CODE
 OPENJ9_BUILDSPEC
@@ -1076,6 +1077,7 @@ with_jvm_variants
 enable_debug
 with_debug_level
 with_noncompressedrefs
+with_mixedrefs
 with_cmake
 with_openj9_cc
 with_openj9_cxx
@@ -1949,6 +1951,8 @@ Optional Packages:
                           [release]
   --with-noncompressedrefs
                           build non-compressedrefs vm (large heap)
+  --with-mixedrefs        build mixedrefs vm (--with-mixedrefs=static or
+                          --with-mixedrefs=dynamic)
   --with-cmake            enable building openJ9 with CMake
   --with-openj9-cc        build OpenJ9 with a specific C compiler
   --with-openj9-cxx       build OpenJ9 with a specific C++ compiler
@@ -4546,7 +4550,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1604507962
+DATE_WHEN_GENERATED=1605236068
 
 ###############################################################################
 #
@@ -15187,6 +15191,13 @@ fi
 
 
 
+# Check whether --with-mixedrefs was given.
+if test "${with_mixedrefs+set}" = set; then :
+  withval=$with_mixedrefs;
+fi
+
+
+
   # Convert openjdk cpu names to openj9 names
   case "$build_cpu" in
     x86_64)
@@ -15209,43 +15220,53 @@ fi
       ;;
   esac
 
-  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+
+  # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
+  OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
+
+  OMR_MIXED_REFERENCES_MODE=off
+  if test "x$with_mixedrefs" != x -a "x$with_mixedrefs" != xno; then
+    if test "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic; then
+      OMR_MIXED_REFERENCES_MODE=static
+    elif test "x$with_mixedrefs" = xdynamic; then
+      OMR_MIXED_REFERENCES_MODE=dynamic
+    else
+      as_fn_error $? "OpenJ9 supports --with-mixedrefs=static and --with-mixedrefs=dynamic" "$LINENO" 5
+    fi
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
+    OPENJ9_LIBS_SUBDIR=default
+  elif test "x$with_noncompressedrefs" = xyes ; then
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+    if test "x$OPENJ9_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-          OPENJ9_PLATFORM_CODE=wi32
-          OPENJ9_BUILDSPEC="win_x86"
-        else
-          OPENJ9_BUILDSPEC="win_x86-64"
-        fi
-      else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      OPENJ9_BUILD_OS=win
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+        OPENJ9_PLATFORM_CODE=wi32
+        OPENJ9_BUILD_MODE_ARCH="x86"
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+    elif test "x$OPENJ9_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
-      else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
-      fi
+      OPENJ9_BUILD_OS=osx
     else
-      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!" "$LINENO" 5
+      as_fn_error $? "Unsupported OpenJ9 platform ${OPENJ9_BUILD_OS}!" "$LINENO" 5
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le"
+    if test "x$OMR_MIXED_REFERENCES_MODE" = xoff ; then
+      if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
+        OPENJ9_BUILD_MODE_ARCH="ppc-64_cmprssptrs_le"
+      fi
+    else
+      OPENJ9_BUILD_MODE_ARCH="ppc-64_mxdptrs_le"
     fi
   elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
@@ -15256,6 +15277,9 @@ fi
   else
     as_fn_error $? "Unsupported OpenJ9 cpu ${OPENJ9_CPU}!" "$LINENO" 5
   fi
+
+  OPENJ9_BUILDSPEC="${OPENJ9_BUILD_OS}_${OPENJ9_BUILD_MODE_ARCH}"
+
 
 
 
@@ -15277,7 +15301,7 @@ fi
 # Check whether --with-cmake was given.
 if test "${with_cmake+set}" = set; then :
   withval=$with_cmake;
-      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+      if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
         with_cmake=cmake
       fi
       if test "x$with_cmake" != xno ; then
@@ -15485,10 +15509,15 @@ else
   with_cmake=no
 fi
 
-  if test "$with_cmake" == yes ; then
+  if test "$with_cmake" = yes ; then
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
+
+    # Currently, mixedrefs mode is only available with CMake enabled
+    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
+      as_fn_error $? "--with-mixedrefs=[static|dynamic] requires --with-cmake" "$LINENO" 5
+    fi
   fi
 
 
@@ -17648,7 +17677,7 @@ fi
 
   FREEMARKER_JAR=
   if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
+    if test "x$with_freemarker_jar" = x -o "x$with_freemarker_jar" = xno ; then
       printf "\n"
       printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
       printf "and has to be provided during configure process.\n"
