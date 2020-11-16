@@ -294,7 +294,7 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     fi
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
     OPENJ9_LIBS_SUBDIR=default
-  elif test "x$with_noncompressedrefs" = xyes ; then
+  elif test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else

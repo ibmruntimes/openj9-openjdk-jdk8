@@ -4550,7 +4550,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1605236068
+DATE_WHEN_GENERATED=1605496318
 
 ###############################################################################
 #
@@ -15235,7 +15235,7 @@ fi
     fi
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
     OPENJ9_LIBS_SUBDIR=default
-  elif test "x$with_noncompressedrefs" = xyes ; then
+  elif test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
