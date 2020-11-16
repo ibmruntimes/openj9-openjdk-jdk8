@@ -89,9 +89,6 @@ OMR_MIXED_REFERENCES_MODE := @OMR_MIXED_REFERENCES_MODE@
 export ac_cv_prog_CC    := @CC@
 export ac_cv_prog_CXX   := @CXX@
 
-# Windows
-MSVCP_DLL               := @MSVCP_DLL@
-
 COPY_JVM_CFG_FILE       := true
 
 ifeq ($(OPENJDK_TARGET_OS), macosx)
