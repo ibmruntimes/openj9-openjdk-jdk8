@@ -43,7 +43,7 @@ PLATFORM2COREAPI := ../api
 
 #############################################################################
 # Source files for openj9 extensions javadoc
-OPENJ9_DOCS_SRCDIR := $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
+OPENJ9_DOCS_SRCDIR := $(J9JCL_SOURCES_DIR)/jdk/src/share/classes
 
 #############################################################################
 # Update macros which hold a list of the source directories.
@@ -511,7 +511,7 @@ $(OPENJ9_MGMT_PACKAGES_FILE) : $(DIRECTORY_CACHE) $(call PackageDependencies,$(A
 # When pages are being generated openj9 extensions (under the docs/platform
 # directory), the correct footer is specified directly in the javadoc command.
 #
-# The OpenJ9 classes are built from the j9jcl_sources and closed/src
+# The OpenJ9 classes are built from the $(J9JCL_SOURCES_DIR) and closed/src
 # directories.
 # The packages are beneath directories called /share/classes (or /unix/classes,
 # /windows/classes etc.) which do not appear in the javadoc tree structure.
@@ -563,7 +563,7 @@ OPENJ9_JAVADOC_SCRIPT_BODY = \
 
 $(OPENJ9_JAVADOC_MARKER) : $(COREAPI_DOCSDIR)/index.html $(OPENJ9_MGMT_INDEXALL_FILE)
 	$(ECHO) '$(OPENJ9_JAVADOC_SCRIPT_BODY)' >$(OPENJ9_JAVADOC_SCRIPT)
-	$(CD) $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src ; \
+	$(CD) $(J9JCL_SOURCES_DIR)/jdk/src ; \
 		$(FIND) . -type f -name '*.java' \
 			| $(SED) -e 's|/[^/]\+/classes/|/|' -e 's|\.java$$|.html|' \
 			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)

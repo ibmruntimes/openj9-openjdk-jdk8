@@ -128,3 +128,5 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 else
   OPENJ9_VM_BUILD_DIR = $(OUTPUT_ROOT)/vm
 endif
+
+J9JCL_SOURCES_DIR := $(JDK_OUTPUTDIR)/j9jcl

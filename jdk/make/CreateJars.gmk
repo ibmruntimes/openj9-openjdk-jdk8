@@ -23,9 +23,8 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
-#
 
 include $(SPEC)
 include MakeBase.gmk
@@ -646,7 +645,7 @@ SRC_ZIP_SRCS += $(JDK_OUTPUTDIR)/gendocsrc_rmic
 ifndef OPENJDK
   SRC_ZIP_SRCS += $(JDK_TOPDIR)/src/closed/share/classes
 endif
-SRC_ZIP_SRCS += $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
+SRC_ZIP_SRCS += $(J9JCL_SOURCES_DIR)/jdk/src/share/classes
 SRC_ZIP_SRCS += $(SRC_ROOT)/closed/adds/jdk/src/share/classes
 
 # Need to copy launcher src files into desired directory structure

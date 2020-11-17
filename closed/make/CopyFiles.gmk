@@ -20,7 +20,7 @@
 # 
 # ===========================================================================
 
-$(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties: $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes/com/ibm/oti/util/ExternalMessages.properties
+$(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties: $(J9JCL_SOURCES_DIR)/jdk/src/share/classes/com/ibm/oti/util/ExternalMessages.properties
 	$(call install-file)
 
 COPY_FILES += $(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties

@@ -411,12 +411,12 @@ build-j9vm : run-preprocessors-j9
 		&& $(MAKE_VM) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 
-J9JCL_SOURCES_DONEFILE := $(JDK_OUTPUTDIR)/j9jcl_sources/j9jcl_sources.done
+J9JCL_SOURCES_DONEFILE := $(J9JCL_SOURCES_DIR)/j9jcl.done
 
 recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
 AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
-JPP_DEST := $(JDK_OUTPUTDIR)/j9jcl_sources/jdk/src/share/classes
+JPP_DEST := $(J9JCL_SOURCES_DIR)/jdk/src/share/classes
 JPP_JAR  := $(J9TOOLS_DIR)/jpp.jar
 JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
 
