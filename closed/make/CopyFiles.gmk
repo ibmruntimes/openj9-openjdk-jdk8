@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -24,18 +24,6 @@ $(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties: $(JDK_OUT
 	$(call install-file)
 
 COPY_FILES += $(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties
-
-# Copy msvcpXX.dll on windows
-
-ifeq ($(OPENJDK_TARGET_OS), windows)
-  MSVCP_TARGET := $(JDK_OUTPUTDIR)/bin/$(notdir $(MSVCP_DLL))
-  # Chmod to avoid permission issues if bundles are unpacked on unix platforms.
-  $(MSVCP_TARGET): $(MSVCP_DLL)
-	$(call install-file)
-	$(CHMOD) a+rx $@
-
-  COPY_FILES += $(MSVCP_TARGET)
-endif
 
 # Copy ibmjvmti.h
 $(JDK_OUTPUTDIR)/include/ibmjvmti.h: $(SRC_ROOT)/openj9/runtime/include/ibmjvmti.h

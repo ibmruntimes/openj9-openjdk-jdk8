@@ -166,7 +166,9 @@ $(call openj9_copy_shlibs, \
 	j9dmp29 \
 	j9jextract \
 	j9gc29 \
+	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9gc_full29) \
 	j9gcchk29 \
+	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9gcchk_full29) \
 	j9hookable29 \
 	j9jit29 \
 	j9jnichk29 \
