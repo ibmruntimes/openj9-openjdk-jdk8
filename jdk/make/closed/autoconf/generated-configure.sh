@@ -4546,7 +4546,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1605549617
+DATE_WHEN_GENERATED=1605656592
 
 ###############################################################################
 #
@@ -15282,9 +15282,6 @@ fi
 
 
 
-  # Source the closed version numbers
-  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
-
 
 
 
@@ -22408,6 +22405,7 @@ $as_echo "$ENABLE_JFR" >&6; }
 
   # Source the version numbers
   . $AUTOCONF_DIR/version-numbers
+  . $TOPDIR/jdk/make/closed/autoconf/openj9ext-version-numbers
 
   # Get the settings from parameters
 
@@ -22521,7 +22519,9 @@ fi
     as_fn_error $? "--with-vendor-url must have a value" "$LINENO" 5
   elif  ! [[ $with_vendor_url =~ ^[[:print:]]*$ ]] ; then
     as_fn_error $? "--with-vendor-url contains non-printing characters: $with_vendor_url" "$LINENO" 5
-  else
+  elif test "x$with_vendor_url" != x; then
+    # Only set VENDOR_URL if '--with-vendor-url' was used and is not empty.
+    # Otherwise we will use the value from "openj9ext-version-numbers" included above.
     VENDOR_URL="$with_vendor_url"
   fi
 

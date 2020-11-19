@@ -380,9 +380,6 @@ AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
 
 AC_DEFUN([OPENJDK_VERSION_DETAILS],
 [
-  # Source the closed version numbers
-  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
-
   AC_SUBST(JDK_MOD_VERSION)
   AC_SUBST(JDK_FIX_VERSION)
 

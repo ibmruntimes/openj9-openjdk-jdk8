@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,5 +37,7 @@
 #define OPENJ9_TAG                "@OPENJ9_TAG@"
 #define J9JDK_EXT_VERSION         "@J9JDK_EXT_VERSION@"
 #define J9JDK_EXT_NAME            "@J9JDK_EXT_NAME@"
+#define JAVA_VENDOR               "@COMPANY_NAME@"
+#define JAVA_VENDOR_URL           "@VENDOR_URL@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
