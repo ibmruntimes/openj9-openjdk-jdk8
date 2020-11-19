@@ -48,10 +48,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   if test "x$OPENJDK_TARGET_OS" = xwindows ; then
     BASIC_SETUP_OUTPUT_DIR
     TOOLCHAIN_SETUP_VISUAL_STUDIO_ENV
-    TOOLCHAIN_SETUP_MSVCP_DLL
   fi
-
-  AC_SUBST(MSVCP_DLL)
 
   OPENJ9_THIRD_PARTY_REQUIREMENTS
   OPENJ9_CHECK_NASM_VERSION
@@ -61,7 +58,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
   AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
     [
-      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+      if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
         with_cmake=cmake
       fi
       if test "x$with_cmake" != xno ; then
@@ -74,10 +71,15 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
       fi
     ],
     [with_cmake=no])
-  if test "$with_cmake" == yes ; then
+  if test "$with_cmake" = yes ; then
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
+
+    # Currently, mixedrefs mode is only available with CMake enabled
+    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
+      AC_MSG_ERROR([[--with-mixedrefs=[static|dynamic] requires --with-cmake]])
+    fi
   fi
   AC_SUBST(OPENJ9_ENABLE_CMAKE)
 ])
@@ -270,44 +272,57 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
   AC_ARG_WITH(noncompressedrefs, [AS_HELP_STRING([--with-noncompressedrefs],
     [build non-compressedrefs vm (large heap)])])
 
+  AC_ARG_WITH(mixedrefs, [AS_HELP_STRING([--with-mixedrefs],
+    [build mixedrefs vm (--with-mixedrefs=static or --with-mixedrefs=dynamic)])])
+
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($build_cpu)
-  if test "x$with_noncompressedrefs" != x -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
+
+  # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
+  OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
+
+  OMR_MIXED_REFERENCES_MODE=off
+  if test "x$with_mixedrefs" != x -a "x$with_mixedrefs" != xno; then
+    if test "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic; then
+      OMR_MIXED_REFERENCES_MODE=static
+    elif test "x$with_mixedrefs" = xdynamic; then
+      OMR_MIXED_REFERENCES_MODE=dynamic
+    else
+      AC_MSG_ERROR([OpenJ9 supports --with-mixedrefs=static and --with-mixedrefs=dynamic])
+    fi
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
+    OPENJ9_LIBS_SUBDIR=default
+  elif test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   else
-    OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+    if test "x$OPENJ9_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-          OPENJ9_PLATFORM_CODE=wi32
-          OPENJ9_BUILDSPEC="win_x86"
-        else
-          OPENJ9_BUILDSPEC="win_x86-64"
-        fi
-      else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+      OPENJ9_BUILD_OS=win
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+        OPENJ9_PLATFORM_CODE=wi32
+        OPENJ9_BUILD_MODE_ARCH="x86"
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+    elif test "x$OPENJ9_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
-      else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
-      fi
+      OPENJ9_BUILD_OS=osx
     else
-      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJ9_BUILD_OS}!])
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
-      OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le"
+    if test "x$OMR_MIXED_REFERENCES_MODE" = xoff ; then
+      if test "x$OPENJ9_LIBS_SUBDIR" != xdefault ; then
+        OPENJ9_BUILD_MODE_ARCH="ppc-64_cmprssptrs_le"
+      fi
+    else
+      OPENJ9_BUILD_MODE_ARCH="ppc-64_mxdptrs_le"
     fi
   elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
@@ -319,9 +334,12 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
 
+  OPENJ9_BUILDSPEC="${OPENJ9_BUILD_OS}_${OPENJ9_BUILD_MODE_ARCH}"
+
   AC_SUBST(OPENJ9_BUILDSPEC)
   AC_SUBST(OPENJ9_PLATFORM_CODE)
   AC_SUBST(OPENJ9_LIBS_SUBDIR)
+  AC_SUBST(OMR_MIXED_REFERENCES_MODE)
 ])
 
 AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
@@ -362,9 +380,6 @@ AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
 
 AC_DEFUN([OPENJDK_VERSION_DETAILS],
 [
-  # Source the closed version numbers
-  . $SRC_ROOT/jdk/make/closed/autoconf/openj9ext-version-numbers
-
   AC_SUBST(JDK_MOD_VERSION)
   AC_SUBST(JDK_FIX_VERSION)
 
@@ -381,7 +396,7 @@ AC_DEFUN([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
   FREEMARKER_JAR=
   if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
+    if test "x$with_freemarker_jar" = x -o "x$with_freemarker_jar" = xno ; then
       printf "\n"
       printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
       printf "and has to be provided during configure process.\n"
@@ -490,88 +505,6 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
       AC_MSG_NOTICE([The file type of the located msvcp120.dll is $MSVCP_DLL_FILETYPE])
     fi
   fi
-])
-
-AC_DEFUN([TOOLCHAIN_SETUP_MSVCP_DLL],
-[
-  AC_ARG_WITH(msvcp-dll, [AS_HELP_STRING([--with-msvcp-dll],
-      [copy this msvcp120.dll into the built JDK (Windows only) @<:@probed@:>@])])
-
-  if test "x$with_msvcp_dll" != x ; then
-    # If given explicitly by user, do not probe. If not present, fail directly.
-    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$with_msvcp_dll], [--with-msvcp-dll])
-    if test "x$MSVCP_DLL" = x ; then
-      AC_MSG_ERROR([Could not find a proper msvcp120.dll as specified by --with-msvcp-dll])
-    fi
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    # Probe: Using well-known location from Visual Studio 12.0
-    if test "x$VCINSTALLDIR" != x ; then
-      CYGWIN_VC_INSTALL_DIR="$VCINSTALLDIR"
-      BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VC_INSTALL_DIR)
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
-        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x64/Microsoft.VC120.CRT/msvcp120.dll"
-      else
-        POSSIBLE_MSVCP_DLL="$CYGWIN_VC_INSTALL_DIR/redist/x86/Microsoft.VC120.CRT/msvcp120.dll"
-      fi
-      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in VCINSTALLDIR])
-    fi
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    # Probe: Check in the Boot JDK directory.
-    POSSIBLE_MSVCP_DLL="$BOOT_JDK/bin/msvcp120.dll"
-    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in Boot JDK])
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    # Probe: Look in the Windows system32 directory
-    CYGWIN_SYSTEMROOT="$SYSTEMROOT"
-    BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_SYSTEMROOT)
-    POSSIBLE_MSVCP_DLL="$CYGWIN_SYSTEMROOT/system32/msvcp120.dll"
-    TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [well-known location in SYSTEMROOT])
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    # Probe: If Visual Studio Express is installed, there is usually one with the debugger
-    if test "x$VS120COMNTOOLS" != x ; then
-      CYGWIN_VS_TOOLS_DIR="$VS120COMNTOOLS/.."
-      BASIC_WINDOWS_REWRITE_AS_UNIX_PATH(CYGWIN_VS_TOOLS_DIR)
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
-        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp120.dll | $GREP -i /x64/ | $HEAD --lines 1`
-      else
-        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VS_TOOLS_DIR" -name msvcp120.dll | $GREP -i /x86/ | $HEAD --lines 1`
-      fi
-      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VS120COMNTOOLS])
-    fi
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    # Probe: Search wildly in the VCINSTALLDIR. We've probably lost by now.
-    # (This was the original behaviour ; kept since it might turn up something)
-    if test "x$CYGWIN_VC_INSTALL_DIR" != x ; then
-      if test "x$OPENJDK_TARGET_CPU_BITS" = x64 ; then
-        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp120.dll | $GREP x64 | $HEAD --lines 1`
-      else
-        POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp120.dll | $GREP x86 | $GREP -v ia64 | $GREP -v x64 | $HEAD --lines 1`
-        if test "x$POSSIBLE_MSVCP_DLL" = x ; then
-          # We're grasping at straws now...
-          POSSIBLE_MSVCP_DLL=`$FIND "$CYGWIN_VC_INSTALL_DIR" -name msvcp120.dll | $HEAD --lines 1`
-        fi
-      fi
-
-      TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL([$POSSIBLE_MSVCP_DLL], [search of VCINSTALLDIR])
-    fi
-  fi
-
-  if test "x$MSVCP_DLL" = x ; then
-    AC_MSG_CHECKING([for msvcp120.dll])
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([Could not find msvcp120.dll. Please specify using --with-msvcp-dll.])
-  fi
-
-  BASIC_FIXUP_PATH(MSVCP_DLL)
 ])
 
 AC_DEFUN([CONFIGURE_OPENSSL],

@@ -478,6 +478,7 @@ AC_DEFUN_ONCE([JDKOPT_SETUP_JDK_VERSION_NUMBERS],
 [
   # Source the version numbers
   . $AUTOCONF_DIR/version-numbers
+  . $TOPDIR/jdk/make/closed/autoconf/openj9ext-version-numbers
 
   # Get the settings from parameters
   AC_ARG_WITH(milestone, [AS_HELP_STRING([--with-milestone],
@@ -568,7 +569,9 @@ AC_DEFUN_ONCE([JDKOPT_SETUP_JDK_VERSION_NUMBERS],
     AC_MSG_ERROR([--with-vendor-url must have a value])
   elif [ ! [[ $with_vendor_url =~ ^[[:print:]]*$ ]] ]; then
     AC_MSG_ERROR([--with-vendor-url contains non-printing characters: $with_vendor_url])
-  else
+  elif test "x$with_vendor_url" != x; then
+    # Only set VENDOR_URL if '--with-vendor-url' was used and is not empty.
+    # Otherwise we will use the value from "openj9ext-version-numbers" included above.
     VENDOR_URL="$with_vendor_url"
   fi
   AC_SUBST(VENDOR_URL)
