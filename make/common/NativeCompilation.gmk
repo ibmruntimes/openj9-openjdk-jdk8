@@ -450,10 +450,10 @@ define SetupNativeCompilation
             # to be rebuilt properly.
             $$($1_OUTPUT_DIR)/% : $$($1_OBJECT_DIR)/% $$($1_TARGET)
 		$(CP) $$< $$@
-    endif
+          endif
 
           # Generate debuginfo files.
-        ifeq ($(OPENJDK_TARGET_OS), windows)
+          ifeq ($(OPENJDK_TARGET_OS), windows)
             ifneq ($$($1_STRIP_POLICY), no_strip)
               $1_EXTRA_LDFLAGS += "-pdb:$$($1_OBJECT_DIR)/$$($1_NOSUFFIX).pdb" \
                 "-map:$$($1_OBJECT_DIR)/$$($1_NOSUFFIX).map"
@@ -464,46 +464,48 @@ define SetupNativeCompilation
               # properly if deleted.
               $$($1_TARGET): $$($1_DEBUGINFO_FILES)
               $$($1_DEBUGINFO_FILES): $$($1_EXPECTED_OBJS)
-        endif
+            endif
           else ifeq ($(OPENJDK_TARGET_OS), solaris)
-              ifneq ($$($1_STRIP_POLICY), no_strip)
+            ifneq ($$($1_STRIP_POLICY), no_strip)
               $1_DEBUGINFO_FILES := $$($1_OBJECT_DIR)/$$($1_NOSUFFIX).debuginfo
-                # gobjcopy crashes on "empty" section headers with the SHF_ALLOC flag set.
-                # Use $(FIX_EMPTY_SEC_HDR_FLAGS) to clear the SHF_ALLOC flag (if set) from
-                # empty section headers until a fixed $(OBJCOPY) is available.
-                # An empty section header has sh_addr == 0 and sh_size == 0.
-                # This problem has only been seen on Solaris X64, but we call this tool
-                # on all Solaris builds just in case.
-                #
-                # $(OBJCOPY) --add-gnu-debuglink=... corrupts SUNW_* sections.
-                # Use $(ADD_GNU_DEBUGLINK) until a fixed $(OBJCOPY) is available.
+              # gobjcopy crashes on "empty" section headers with the SHF_ALLOC flag set.
+              # Use $(FIX_EMPTY_SEC_HDR_FLAGS) to clear the SHF_ALLOC flag (if set) from
+              # empty section headers until a fixed $(OBJCOPY) is available.
+              # An empty section header has sh_addr == 0 and sh_size == 0.
+              # This problem has only been seen on Solaris X64, but we call this tool
+              # on all Solaris builds just in case.
+              #
+              # $(OBJCOPY) --add-gnu-debuglink=... corrupts SUNW_* sections.
+              # Use $(ADD_GNU_DEBUGLINK) until a fixed $(OBJCOPY) is available.
               $$($1_DEBUGINFO_FILES): $$($1_TARGET) \
-				$(FIX_EMPTY_SEC_HDR_FLAGS) $(ADD_GNU_DEBUGLINK)
-		$(RM) $$@
-		$(FIX_EMPTY_SEC_HDR_FLAGS) $(LOG_INFO) $$<
-		$(OBJCOPY) --only-keep-debug $$< $$@
-		$(CD) $$(@D) && $(ADD_GNU_DEBUGLINK) $(LOG_INFO) $$(@F) $$<
+                $(FIX_EMPTY_SEC_HDR_FLAGS) $(ADD_GNU_DEBUGLINK)
+			$(RM) $$@
+			$(FIX_EMPTY_SEC_HDR_FLAGS) $(LOG_INFO) $$<
+			$(OBJCOPY) --only-keep-debug $$< $$@
+			$(CD) $$(@D) && $(ADD_GNU_DEBUGLINK) $(LOG_INFO) $$(@F) $$<
 			$(TOUCH) $$@
-              endif
+            endif
           else ifeq ($(OPENJDK_TARGET_OS), linux)
-              ifneq ($$($1_STRIP_POLICY), no_strip)
+            ifneq ($$($1_STRIP_POLICY), no_strip)
               $1_DEBUGINFO_FILES := $$($1_OBJECT_DIR)/$$($1_NOSUFFIX).debuginfo
               $$($1_DEBUGINFO_FILES): $$($1_TARGET)
-		$(RM) $$@
-		$(OBJCOPY) --only-keep-debug $$< $$@
-		$(CD) $$(@D) && $(OBJCOPY) --add-gnu-debuglink=$$(@F) $$<
+			$(RM) $$@
+			$(OBJCOPY) --only-keep-debug $$< $$@
+			$(CD) $$(@D) && $(OBJCOPY) --add-gnu-debuglink=$$(@F) $$<
+			$(TOUCH) $$@
+            endif
           else ifeq ($(OPENJDK_TARGET_OS), aix)
-              ifneq ($$($1_STRIP_POLICY), no_strip)
+            ifneq ($$($1_STRIP_POLICY), no_strip)
               $1_DEBUGINFO_FILES := $$($1_OBJECT_DIR)/$$($1_NOSUFFIX).debuginfo
               $$($1_DEBUGINFO_FILES): $$($1_TARGET)
-		$(RM) $$@
-		$(CP) -f $$< $$@
-		$(TOUCH) $$@
+			$(RM) $$@
+			$(CP) -f $$< $$@
+			$(TOUCH) $$@
             endif
           endif # No MacOS X support
 
-        ifeq ($(ZIP_DEBUGINFO_FILES), true)
-ifneq ($$($1_STRIP_POLICY), no_strip)
+          ifeq ($(ZIP_DEBUGINFO_FILES), true)
+            ifneq ($$($1_STRIP_POLICY), no_strip)
               $1_DEBUGINFO_ZIP := $$($1_OBJECT_DIR)/$$($1_NOSUFFIX).diz
               $1 += $$(subst $$($1_OBJECT_DIR),$$($1_OUTPUT_DIR),$$($1_DEBUGINFO_ZIP))
 
@@ -512,8 +514,8 @@ ifneq ($$($1_STRIP_POLICY), no_strip)
               $$($1_DEBUGINFO_ZIP): $$($1_DEBUGINFO_FILES) $$($1_TARGET)
 		$(CD) $$($1_OBJECT_DIR) \
 		&& $(ZIP) -q $$@ $$($1_DEBUGINFO_FILES)
-          endif
-        else
+            endif
+          else
             ifneq ($$($1_STRIP_POLICY), no_strip)
               $1 += $$(subst $$($1_OBJECT_DIR),$$($1_OUTPUT_DIR),$$($1_DEBUGINFO_FILES))
             endif
@@ -528,7 +530,7 @@ ifneq ($$($1_STRIP_POLICY), no_strip)
     $1_EXTRA_LDFLAGS+=$$(call SET_SHARED_LIBRARY_NAME,$$($1_BASENAME))
     ifeq ($(OPENJDK_TARGET_OS), windows)
       $1_EXTRA_LDFLAGS+="-implib:$$($1_OBJECT_DIR)/$$($1_LIBRARY).lib"
-      endif
+    endif
 
     $1_EXTRA_LDFLAGS_SUFFIX += $(GLOBAL_LDFLAGS_SUFFIX)
 
