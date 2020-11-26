@@ -269,7 +269,7 @@ endif
 $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(DEBUGINFO_EXT): $(BUILD_LAUNCHER_java)
 	$(MKDIR) -p $(@D)
 	$(RM) $@
-	$(CP) -R $(JDK_OUTPUTDIR)/objs/java_objs$(OUTPUT_SUBDIR)/java$(DEBUGINFO_EXT) $@
+	$(CP) $(JDK_OUTPUTDIR)/objs/java_objs$(OUTPUT_SUBDIR)/java$(DEBUGINFO_EXT) $@
 
 BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(EXE_SUFFIX)
 ifeq ($(ENABLE_DEBUG_SYMBOLS), true)
@@ -281,6 +281,8 @@ ifeq ($(ENABLE_DEBUG_SYMBOLS), true)
 endif
 
 ifeq ($(OPENJDK_TARGET_OS):$(ENABLE_DEBUG_SYMBOLS), macosx:true)
+  # Remove java.dSYM from BUILD_LAUNCHERS in favour of the following, avoiding the broken rule above.
+  BUILD_LAUNCHERS := $(filter-out $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java$(DEBUGINFO_EXT), $(BUILD_LAUNCHERS))
   # Because the java launcher is built in a non-standard directory,
   # we need to copy debug information so it can be included in a debug image.
   $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/java.dSYM/Contents/Info.plist : $(BUILD_LAUNCHER_java)
@@ -648,7 +650,9 @@ $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/unpack200$(DEBUGINFO_EXT): $(BUILD_UNPACKEX
 	$(call install-file)
 
 BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/unpack200$(EXE_SUFFIX)
-ifeq ($(ENABLE_DEBUG_SYMBOLS), true)
+ifeq ($(OPENJDK_TARGET_OS), macosx)
+  # Avoid using the broken rule above and do without unpack200.dSYM.
+else ifeq ($(ENABLE_DEBUG_SYMBOLS), true)
   ifneq ($(POST_STRIP_CMD), )
     ifneq ($(STRIP_POLICY), no_strip)
       BUILD_LAUNCHERS += $(JDK_OUTPUTDIR)/bin$(OUTPUT_SUBDIR)/unpack200$(DEBUGINFO_EXT)
