@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2011, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2011, 2020 All Rights Reserved
 # ===========================================================================
 
 # This makefile is much simpler now that it can use the smart javac wrapper
@@ -409,14 +409,14 @@ define SetupJavaCompilation
   # Find all files in the source trees.
  
   # Add J9 generated source overrides
-  J9_OVERRIDE_SRC_ROOT := $$(JDK_OUTPUTDIR)/j9jcl_sources
+  J9_OVERRIDE_SRC_ROOT := $$(J9JCL_SOURCES_DIR)
   $1_SRC += $$(wildcard $$(subst $$(SRC_ROOT),$$(J9_OVERRIDE_SRC_ROOT),$$($1_SRC)))
 
   $1_ALL_SRCS += $$(filter-out $(OVR_SRCS),$$(call CacheFind,$$($1_SRC)))
 
   # Filter out SRC_ROOT equivalents of J9 generated source overrides
-  AllJ9JclSource   = $$(call recur_wildcard,$$(J9_OVERRIDE_SRC_ROOT),*.java)
-  J9_OVR_SRCS:=$$(subst $$(J9_OVERRIDE_SRC_ROOT),$$(SRC_ROOT),$$(AllJ9JclSource))
+  AllJ9JclSource = $$(call recur_wildcard,$$(J9_OVERRIDE_SRC_ROOT),*.java)
+  J9_OVR_SRCS := $$(subst $$(J9_OVERRIDE_SRC_ROOT),$$(SRC_ROOT),$$(AllJ9JclSource))
   $1_ALL_SRCS := $$(filter-out $$(J9_OVR_SRCS),$$($1_ALL_SRCS))
 
   # Extract the java files.
