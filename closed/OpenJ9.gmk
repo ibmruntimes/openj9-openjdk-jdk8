@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -431,7 +431,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 		BOOT_JDK=$(BOOT_JDK) \
 		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
 		JAVA_HOME=$(BOOT_JDK) \
-		$(call FixPath,$(JPP_JAR))
+		preprocessor
 	@$(ECHO) Generating J9JCL sources
 	$(BOOT_JDK)/bin/java \
 		-cp "$(call FixPath,$(JPP_JAR))" \
