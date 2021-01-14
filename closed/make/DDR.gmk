@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -26,13 +26,12 @@
 #     2b) generate java structure stub source files
 #     2c) generate pointer and structure stub class files
 # - build_jar
-#     3) compile jzos stubs
-#     4a) compile DDR_VM source with 2a, 2b and 3
-#     4b) compile DDR_VM source with 2c and 3
-#     5) build j9ddr.jar from the 4b
+#     3a) compile DDR_VM source with 2a and 2b
+#     3b) compile DDR_VM source with 2c
+#     4) build j9ddr.jar from the 3b
 # ===========================================================================
 
-.PHONY : no_default generate build_jar
+.PHONY : no_default generate
 
 no_default :
 	$(error DDR.gmk has no default target)
@@ -55,7 +54,6 @@ DDR_SUPERSET_FILE := $(OUTPUT_ROOT)/vm/superset.dat
 # Where to write class files.
 DDR_CLASSES_BIN := $(DDR_SUPPORT_DIR)/classes
 DDR_MAIN_BIN := $(DDR_SUPPORT_DIR)/main
-DDR_STUBS_BIN := $(DDR_SUPPORT_DIR)/stubs
 DDR_TEST_BIN := $(DDR_SUPPORT_DIR)/test
 DDR_TOOLS_BIN := $(DDR_SUPPORT_DIR)/tools
 
@@ -142,32 +140,7 @@ generate : $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) $(DDR_CLASSES_MARKER)
 # SetupJavaCompilation requires that SRC directories exist: the 'generate' target,
 # which creates $(DDR_GENSRC_DIR), must have been built previously.
 
-ifeq (,$(wildcard $(DDR_GENSRC_DIR)))
-
-build_jar :
-	$(error Directory $(DDR_GENSRC_DIR) does not exist - 'generate' target must be built first.)
-
-else # DDR_GENSRC_DIR
-
-ifeq (zos,$(OPENJDK_TARGET_OS))
-
-BUILD_DDR_STUBS :=
-DDR_CLASSPATH :=
-
-else # OPENJDK_TARGET_OS
-
-# Compile the stub classes.
-$(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
-	SETUP := GENERATE_USINGJDKBYTECODE, \
-	BIN := $(DDR_STUBS_BIN), \
-	ADD_JAVAC_FLAGS := -cp $(JDK_OUTPUTDIR)/classes, \
-	SRC := $(OPENJ9_TOPDIR)/jcl/stubs/ibm.jzos/share/classes, \
-	EXCLUDE_FILES := module-info.java \
-	))
-	
-DDR_CLASSPATH := -cp $(DDR_STUBS_BIN)
-
-endif # OPENJDK_TARGET_OS
+ifneq (,$(wildcard $(DDR_GENSRC_DIR)))
 
 # This file will contain the list of Java source files to be compiled.
 DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
@@ -192,7 +165,7 @@ DDR_SOURCE_FILES := $(shell \
 
 # Compile the Java sources. We can't use SetupJavaCompilation
 # because it doesn't properly handle source file names with '$'.
-$(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES) $(BUILD_DDR_STUBS)
+$(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 	$(RM) -rf $(DDR_MAIN_BIN)
 	$(MKDIR) -p $(DDR_MAIN_BIN) $(addprefix $(DDR_MAIN_BIN)/, $(dir $(DDR_ALIAS_FILES)))
 	@$(ECHO) "Compiling $(words $(DDR_SOURCE_FILES)) files for j9ddr.jar"
@@ -200,7 +173,6 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES) $(BUILD_DDR_STUBS)
 		$(GENERATE_JDKBYTECODE_FLAGS) \
 		$(JAVAC_FLAGS) \
 		-d $(DDR_MAIN_BIN) \
-		$(DDR_CLASSPATH) \
 		-implicit:none \
 		-sourcepath "$(DDR_VM_SRC_ROOT)$(PATH_SEP)$(DDR_GENSRC_DIR)" \
 		@$(DDR_SRC_LIST_FILE)
@@ -213,10 +185,10 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES) $(BUILD_DDR_STUBS)
 $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
 	BIN := $(DDR_TEST_BIN), \
-	ADD_JAVAC_FLAGS := -cp "$(DDR_CLASSES_BIN)$(PATH_SEP)$(DDR_STUBS_BIN)", \
+	ADD_JAVAC_FLAGS := -cp $(DDR_CLASSES_BIN), \
 	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
 	EXCLUDES := $(DDR_SRC_EXCLUDES), \
-	DEPENDS := $(DDR_CLASSES_MARKER) $(BUILD_DDR_STUBS) \
+	DEPENDS := $(DDR_CLASSES_MARKER) \
 	))
 
 # Finally, build the jar for the JDK image.
@@ -226,6 +198,8 @@ $(eval $(call SetupArchive,BUILD_J9DDR_JAR,$(DDR_COMPILE_MARKER), \
 	EXCLUDES := com/ibm/j9ddr/vm29/structure, \
 	JAR := $(JDK_IMAGE_DIR)/jre/lib/ddr/j9ddr.jar \
 	))
+
+.PHONY : build_jar
 
 build_jar : $(BUILD_J9DDR_TEST_CLASSES) $(BUILD_J9DDR_JAR_JAR)
 
