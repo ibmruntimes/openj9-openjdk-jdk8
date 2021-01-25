@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -180,6 +180,7 @@ $(call openj9_copy_shlibs, \
 	j9vm29 \
 	j9vmchk29 \
 	j9vrb29 \
+	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9vrb_full29) \
 	j9zlib29 \
 	jclse29 \
 	jvm \
