@@ -450,6 +450,9 @@ AC_DEFUN([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
+  # You're here because you want OpenJ9, not some other implementation.
+  BUILD_HOTSPOT=false
+
   CONFIGURE_OPENSSL
 
   COMPILER=$CXX
