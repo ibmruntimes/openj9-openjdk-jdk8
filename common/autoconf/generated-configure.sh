@@ -4031,6 +4031,10 @@ fi
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
+
 
 
 
@@ -4410,7 +4414,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1605656592
+DATE_WHEN_GENERATED=1612387414
 
 ###############################################################################
 #
@@ -14646,9 +14650,6 @@ $as_echo "$with_jvm_variants" >&6; }
     INCLUDE_SA=false
   fi
   if test "x$VAR_CPU" = xppc64 -o "x$VAR_CPU" = xppc64le ; then
-    INCLUDE_SA=false
-  fi
-  if test "x$OPENJDK_TARGET_CPU" = xaarch64; then
     INCLUDE_SA=false
   fi
 
@@ -48442,9 +48443,9 @@ fi
 $as_echo_n "checking for which zlib to use... " >&6; }
 
   DEFAULT_ZLIB=bundled
-  if test "x$OPENJDK_TARGET_OS" = xmacosx; then
+  if test "x$OPENJDK_TARGET_OS" = xmacosx -o "x$OPENJDK_TARGET_OS" = xaix; then
     #
-    # On macosx default is system...on others default is
+    # On macosx and aix default is system...on others default is
     #
     DEFAULT_ZLIB=system
   fi

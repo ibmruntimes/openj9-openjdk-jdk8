@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -61,26 +61,37 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
       if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
         with_cmake=cmake
       fi
-      if test "x$with_cmake" != xno ; then
-        if AS_EXECUTABLE_P(["$with_cmake"]) ; then
-          CMAKE="$with_cmake"
-        else
-          BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
-        fi
-        with_cmake=yes
-      fi
     ],
-    [with_cmake=no])
-  if test "$with_cmake" = yes ; then
-    OPENJ9_ENABLE_CMAKE=true
-  else
+    [
+      case "$OPENJ9_PLATFORM_CODE" in
+        ap64|oa64|xa64|xl64|xr64|xz64)
+          if test "x$COMPILE_TYPE" != xcross ; then
+            with_cmake=cmake
+          else
+            with_cmake=no
+          fi
+          ;;
+        *)
+          with_cmake=no
+          ;;
+      esac
+    ])
+  # at this point with_cmake should either be no, or the name of the cmake command
+  if test "x$with_cmake" = xno ; then
     OPENJ9_ENABLE_CMAKE=false
-
     # Currently, mixedrefs mode is only available with CMake enabled
     if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
       AC_MSG_ERROR([[--with-mixedrefs=[static|dynamic] requires --with-cmake]])
     fi
+  else
+    OPENJ9_ENABLE_CMAKE=true
+    if AS_EXECUTABLE_P(["$with_cmake"]) ; then
+      CMAKE="$with_cmake"
+    else
+      BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
+    fi
   fi
+
   AC_SUBST(OPENJ9_ENABLE_CMAKE)
 ])
 

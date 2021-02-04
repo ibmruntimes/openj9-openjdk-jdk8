@@ -4110,6 +4110,10 @@ fi
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
+
 
 
 
@@ -4487,7 +4491,7 @@ VS_SDK_PLATFORM_NAME_2017=
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -4546,7 +4550,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1605656592
+DATE_WHEN_GENERATED=1612387414
 
 ###############################################################################
 #
@@ -14784,9 +14788,6 @@ $as_echo "$with_jvm_variants" >&6; }
   if test "x$VAR_CPU" = xppc64 -o "x$VAR_CPU" = xppc64le ; then
     INCLUDE_SA=false
   fi
-  if test "x$OPENJDK_TARGET_CPU" = xaarch64; then
-    INCLUDE_SA=false
-  fi
 
 
   if test "x$OPENJDK_TARGET_OS" = "xmacosx"; then
@@ -15297,10 +15298,36 @@ if test "${with_cmake+set}" = set; then :
       if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
         with_cmake=cmake
       fi
-      if test "x$with_cmake" != xno ; then
-        if as_fn_executable_p "$with_cmake" ; then
-          CMAKE="$with_cmake"
-        else
+
+else
+
+      case "$OPENJ9_PLATFORM_CODE" in
+        ap64|oa64|xa64|xl64|xr64|xz64)
+          if test "x$COMPILE_TYPE" != xcross ; then
+            with_cmake=cmake
+          else
+            with_cmake=no
+          fi
+          ;;
+        *)
+          with_cmake=no
+          ;;
+      esac
+
+fi
+
+  # at this point with_cmake should either be no, or the name of the cmake command
+  if test "x$with_cmake" = xno ; then
+    OPENJ9_ENABLE_CMAKE=false
+    # Currently, mixedrefs mode is only available with CMake enabled
+    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
+      as_fn_error $? "--with-mixedrefs=[static|dynamic] requires --with-cmake" "$LINENO" 5
+    fi
+  else
+    OPENJ9_ENABLE_CMAKE=true
+    if as_fn_executable_p "$with_cmake" ; then
+      CMAKE="$with_cmake"
+    else
 
 
 
@@ -15494,24 +15521,9 @@ $as_echo "$tool_specified" >&6; }
   fi
 
 
-        fi
-        with_cmake=yes
-      fi
-
-else
-  with_cmake=no
-fi
-
-  if test "$with_cmake" = yes ; then
-    OPENJ9_ENABLE_CMAKE=true
-  else
-    OPENJ9_ENABLE_CMAKE=false
-
-    # Currently, mixedrefs mode is only available with CMake enabled
-    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
-      as_fn_error $? "--with-mixedrefs=[static|dynamic] requires --with-cmake" "$LINENO" 5
     fi
   fi
+
 
 
 
@@ -50956,9 +50968,9 @@ fi
 $as_echo_n "checking for which zlib to use... " >&6; }
 
   DEFAULT_ZLIB=bundled
-  if test "x$OPENJDK_TARGET_OS" = xmacosx; then
+  if test "x$OPENJDK_TARGET_OS" = xmacosx -o "x$OPENJDK_TARGET_OS" = xaix; then
     #
-    # On macosx default is system...on others default is
+    # On macosx and aix default is system...on others default is
     #
     DEFAULT_ZLIB=system
   fi
