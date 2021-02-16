@@ -2096,8 +2096,8 @@ Optional Packages:
                           use this java binary for running the sjavac
                           background server [Boot JDK java]
   --with-ccache-dir       where to store ccache files [~/.ccache]
-  --with-openssl          Use either fetched | system | <path to openssl 1.0.2
-                          (and above)
+  --with-openssl          Use either fetched | system | <path to openssl
+                          version 1.0.2 or later>
 
 Some influential environment variables:
   BASENAME    Override default value for BASENAME
@@ -4554,7 +4554,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1613485990
+DATE_WHEN_GENERATED=1613493478
 
 ###############################################################################
 #
