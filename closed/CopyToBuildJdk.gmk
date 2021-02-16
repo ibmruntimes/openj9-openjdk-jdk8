@@ -217,7 +217,7 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 
   run-ddrgen :
     ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-	  $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
+	  $(EXPORT_MSVS_ENV_VARS) $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
     else # OPENJ9_ENABLE_CMAKE
 	  CC="$(CC)" CXX="$(CXX)" VERSION_MAJOR=8 $(EXPORT_MSVS_ENV_VARS) \
 		$(MAKE) -C $(OPENJ9_VM_BUILD_DIR)/ddr -f run_omrddrgen.mk

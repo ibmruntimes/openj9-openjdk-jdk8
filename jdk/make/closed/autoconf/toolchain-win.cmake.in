@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -26,6 +26,7 @@ set(CMAKE_SYSTEM_PROCESSOR "@OPENJDK_TARGET_CPU@")
 set(tool_dir "@OPENJ9_TOOL_DIR@")
 set(CMAKE_C_COMPILER "${tool_dir}/cl" CACHE FILEPATH "")
 set(CMAKE_CXX_COMPILER "${tool_dir}/cl" CACHE FILEPATH "")
+set(CMAKE_J9VM_CXX_COMPILER "${tool_dir}/clang" CACHE FILEPATH "")
 set(CMAKE_AR "${tool_dir}/lib" CACHE FILEPATH "")
 set(CMAKE_LINKER "${tool_dir}/link" CACHE FILEPATH "")
 set(CMAKE_MC_COMPILER "${tool_dir}/mc" CACHE FILEPATH "")

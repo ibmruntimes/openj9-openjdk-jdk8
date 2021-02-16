@@ -67,10 +67,13 @@ endif
 ifeq (windows,$(OPENJDK_TARGET_OS))
   # convert unix path to windows path
   FixPath = $(shell $(CYGPATH) -m $1)
+  # convert windows path to unix path
+  UnixPath = $(shell $(CYGPATH) -u $1)
   # set Visual Studio environment
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
 else
   FixPath = $1
+  UnixPath = $1
   EXPORT_MSVS_ENV_VARS :=
 endif
 
@@ -287,7 +290,7 @@ else
 endif # windows
 
 ifeq (true,$(OPENJ9_ENABLE_CUDA))
-  CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(CUDA_HOME)"
+  CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(call UnixPath,$(CUDA_HOME))"
 else
   CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
 endif # OPENJ9_ENABLE_CUDA
@@ -349,7 +352,7 @@ endif
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	cd $(@D) && $(EXPORT_MSVS_ENV_VARS) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUT_ROOT)/vm/cmake.stamp
