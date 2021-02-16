@@ -525,10 +525,10 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
 AC_DEFUN([CONFIGURE_OPENSSL],
 [
   AC_ARG_WITH(openssl, [AS_HELP_STRING([--with-openssl],
-    [Use either fetched | system | <path to openssl 1.0.2 (and above)])])
+    [Use either fetched | system | <path to openssl version 1.0.2 or later>])])
 
   AC_ARG_ENABLE(openssl-bundling, [AS_HELP_STRING([--enable-openssl-bundling],
-      [enable bundling of the openssl crypto library with the jdk build])])
+    [enable bundling of the openssl crypto library with the jdk build])])
 
   WITH_OPENSSL=yes
 
