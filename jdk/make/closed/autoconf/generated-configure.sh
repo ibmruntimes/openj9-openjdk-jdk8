@@ -900,6 +900,7 @@ OPENJ9_ENABLE_CUDA
 OPENJ9_DEVELOPER_DIR
 OPENJ9_CXX
 OPENJ9_CC
+OPENJ9_CLANG
 OPENJ9_ENABLE_CMAKE
 CMAKE
 USERNAME
@@ -1223,6 +1224,7 @@ DF
 SETFILE
 CPIO
 CMAKE
+OPENJ9_CLANG
 NASM
 UNZIP
 ZIP
@@ -2094,8 +2096,8 @@ Optional Packages:
                           use this java binary for running the sjavac
                           background server [Boot JDK java]
   --with-ccache-dir       where to store ccache files [~/.ccache]
-  --with-openssl          Use either fetched | system | <path to openssl 1.0.2
-                          (and above)
+  --with-openssl          Use either fetched | system | <path to openssl
+                          version 1.0.2 or later>
 
 Some influential environment variables:
   BASENAME    Override default value for BASENAME
@@ -2145,6 +2147,8 @@ Some influential environment variables:
   SETFILE     Override default value for SETFILE
   CPIO        Override default value for CPIO
   CMAKE       Override default value for CMAKE
+  OPENJ9_CLANG
+              Override default value for OPENJ9_CLANG
   NASM        Override default value for NASM
   UNZIP       Override default value for UNZIP
   ZIP         Override default value for ZIP
@@ -4541,8 +4545,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Create a tool wrapper for use by cmake.
-# Consists of a shell script which wraps commands with an invocation of fixpath.
-# OPENJ9_GENERATE_TOOL_WRAPER(<name_of_wrapper>, <command_to_call>)
+# Consists of a shell script which wraps commands with an invocation of a wrapper command.
+# OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
 
 
 # Generate all the tool wrappers required for cmake on windows
@@ -4550,7 +4554,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1612387414
+DATE_WHEN_GENERATED=1613493478
 
 ###############################################################################
 #
@@ -15302,7 +15306,7 @@ if test "${with_cmake+set}" = set; then :
 else
 
       case "$OPENJ9_PLATFORM_CODE" in
-        ap64|oa64|xa64|xl64|xr64|xz64)
+        ap64|oa64|wa64|xa64|xl64|xr64|xz64)
           if test "x$COMPILE_TYPE" != xcross ; then
             with_cmake=cmake
           else
@@ -15553,6 +15557,202 @@ else
   OPENJ9_DEVELOPER_DIR=
 fi
 
+
+  if test "x$OPENJDK_BUILD_OS" = xwindows ; then
+
+
+
+  # Publish this variable in the help.
+
+
+  if test "x$OPENJ9_CLANG" = x; then
+    # The variable is not set by user, try to locate tool using the code snippet
+    for ac_prog in clang
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_OPENJ9_CLANG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $OPENJ9_CLANG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_OPENJ9_CLANG="$OPENJ9_CLANG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_OPENJ9_CLANG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+OPENJ9_CLANG=$ac_cv_path_OPENJ9_CLANG
+if test -n "$OPENJ9_CLANG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPENJ9_CLANG" >&5
+$as_echo "$OPENJ9_CLANG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$OPENJ9_CLANG" && break
+done
+
+  else
+    # The variable is set, but is it from the command line or the environment?
+
+    # Try to remove the string !OPENJ9_CLANG! from our list.
+    try_remove_var=${CONFIGURE_OVERRIDDEN_VARIABLES//!OPENJ9_CLANG!/}
+    if test "x$try_remove_var" = "x$CONFIGURE_OVERRIDDEN_VARIABLES"; then
+      # If it failed, the variable was not from the command line. Ignore it,
+      # but warn the user (except for BASH, which is always set by the calling BASH).
+      if test "xOPENJ9_CLANG" != xBASH; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring value of OPENJ9_CLANG from the environment. Use command line variables instead." >&5
+$as_echo "$as_me: WARNING: Ignoring value of OPENJ9_CLANG from the environment. Use command line variables instead." >&2;}
+      fi
+      # Try to locate tool using the code snippet
+      for ac_prog in clang
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_OPENJ9_CLANG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $OPENJ9_CLANG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_OPENJ9_CLANG="$OPENJ9_CLANG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_OPENJ9_CLANG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+OPENJ9_CLANG=$ac_cv_path_OPENJ9_CLANG
+if test -n "$OPENJ9_CLANG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPENJ9_CLANG" >&5
+$as_echo "$OPENJ9_CLANG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$OPENJ9_CLANG" && break
+done
+
+    else
+      # If it succeeded, then it was overridden by the user. We will use it
+      # for the tool.
+
+      # First remove it from the list of overridden variables, so we can test
+      # for unknown variables in the end.
+      CONFIGURE_OVERRIDDEN_VARIABLES="$try_remove_var"
+
+      # Check if the provided tool contains a complete path.
+      tool_specified="$OPENJ9_CLANG"
+      tool_basename="${tool_specified##*/}"
+      if test "x$tool_basename" = "x$tool_specified"; then
+        # A command without a complete path is provided, search $PATH.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will search for user supplied tool OPENJ9_CLANG=$tool_basename" >&5
+$as_echo "$as_me: Will search for user supplied tool OPENJ9_CLANG=$tool_basename" >&6;}
+        # Extract the first word of "$tool_basename", so it can be a program name with args.
+set dummy $tool_basename; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_OPENJ9_CLANG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $OPENJ9_CLANG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_OPENJ9_CLANG="$OPENJ9_CLANG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_OPENJ9_CLANG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+OPENJ9_CLANG=$ac_cv_path_OPENJ9_CLANG
+if test -n "$OPENJ9_CLANG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPENJ9_CLANG" >&5
+$as_echo "$OPENJ9_CLANG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+        if test "x$OPENJ9_CLANG" = x; then
+          as_fn_error $? "User supplied tool $tool_basename could not be found" "$LINENO" 5
+        fi
+      else
+        # Otherwise we believe it is a complete path. Use it as it is.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Will use user supplied tool OPENJ9_CLANG=$tool_specified" >&5
+$as_echo "$as_me: Will use user supplied tool OPENJ9_CLANG=$tool_specified" >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENJ9_CLANG" >&5
+$as_echo_n "checking for OPENJ9_CLANG... " >&6; }
+        if test ! -x "$tool_specified"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+          as_fn_error $? "User supplied tool OPENJ9_CLANG=$tool_specified does not exist or is not executable" "$LINENO" 5
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tool_specified" >&5
+$as_echo "$tool_specified" >&6; }
+      fi
+    fi
+  fi
+
+
+
+  if test "x$OPENJ9_CLANG" = x; then
+    as_fn_error $? "Could not find required tool for OPENJ9_CLANG" "$LINENO" 5
+  fi
+
+
+  fi
 
 
 
@@ -55833,103 +56033,115 @@ $as_echo "$BUNDLE_OPENSSL" >&6; }
 
   MSVC_BIN_DIR=$($DIRNAME $CC)
   SDK_BIN_DIR=$($DIRNAME $RC)
+  FIXPATH2="$SRC_ROOT/closed/fixpath2.sh"
 
   mkdir -p "$OPENJ9_TOOL_DIR"
 
   tool_file="$OPENJ9_TOOL_DIR/cl"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[cl],[$CC]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[cl],[$FIXPATH2],[$CC]" as a
   # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$CC" >> $tool_file
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$CC" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/clang"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[clang],[$FIXPATH2],[$OPENJ9_CLANG]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$OPENJ9_CLANG" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/lib"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[lib],[$AR]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[lib],[$FIXPATH2],[$AR]" as a
   # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$AR" >> $tool_file
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$AR" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/link"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[link],[$LD]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[link],[$FIXPATH2],[$LD]" as a
   # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$LD" >> $tool_file
-  chmod +x $tool_file
-
-
-  tool_file="$OPENJ9_TOOL_DIR/ml"
-
-  echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[ml],[$MSVC_BIN_DIR/ml]" as a
-  # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$MSVC_BIN_DIR/ml" >> $tool_file
-  chmod +x $tool_file
-
-
-  tool_file="$OPENJ9_TOOL_DIR/ml64"
-
-  echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[ml64],[$MSVC_BIN_DIR/ml64]" as a
-  # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$MSVC_BIN_DIR/ml64" >> $tool_file
-  chmod +x $tool_file
-
-
-  tool_file="$OPENJ9_TOOL_DIR/rc"
-
-  echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[rc],[$RC]" as a
-  # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$RC" >> $tool_file
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$LD" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/mc"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[mc],[$SDK_BIN_DIR/mc]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[mc],[$FIXPATH2],[$SDK_BIN_DIR/mc]" as a
   # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$SDK_BIN_DIR/mc" >> $tool_file
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$SDK_BIN_DIR/mc" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/ml"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[ml],[$FIXPATH2],[$MSVC_BIN_DIR/ml]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$MSVC_BIN_DIR/ml" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/ml64"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[ml64],[$FIXPATH2],[$MSVC_BIN_DIR/ml64]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$MSVC_BIN_DIR/ml64" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/nasm"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[nasm],[$NASM]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[nasm],[$FIXPATH2],[$NASM]" as a
   # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$NASM" >> $tool_file
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$NASM" >> $tool_file
+  chmod +x $tool_file
+
+
+  tool_file="$OPENJ9_TOOL_DIR/rc"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[rc],[$FIXPATH2],[$RC]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH2" "$RC" >> $tool_file
+  chmod +x $tool_file
+
+
+  # fixpath2 can't handle classpaths, or @<file_name> arguments
+
+  tool_file="$OPENJ9_TOOL_DIR/jar"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "[jar],[$FIXPATH],[$JAR]" as a
+  # variable reference
+  printf '%s "%s" "$@"\n' "$FIXPATH" "$JAR" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/java"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[java],[$JAVA]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[java],[$FIXPATH],[$JAVA]" as a
   # variable reference
   printf '%s "%s" "$@"\n' "$FIXPATH" "$JAVA" >> $tool_file
-  chmod +x $tool_file
-
-
-  tool_file="$OPENJ9_TOOL_DIR/jar"
-
-  echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[jar],[$JAR]" as a
-  # variable reference
-  printf '%s "%s" "$@"\n' "$FIXPATH" "$JAR" >> $tool_file
   chmod +x $tool_file
 
 
   tool_file="$OPENJ9_TOOL_DIR/javac"
 
   echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "[javac],[$JAVAC]" as a
+  # We need to insert an empty string ([]), to stop M4 treating "[javac],[$FIXPATH],[$JAVAC]" as a
   # variable reference
   printf '%s "%s" "$@"\n' "$FIXPATH" "$JAVAC" >> $tool_file
   chmod +x $tool_file

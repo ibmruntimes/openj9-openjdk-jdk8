@@ -64,7 +64,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     ],
     [
       case "$OPENJ9_PLATFORM_CODE" in
-        ap64|oa64|xa64|xl64|xr64|xz64)
+        ap64|oa64|wa64|xa64|xl64|xr64|xz64)
           if test "x$COMPILE_TYPE" != xcross ; then
             with_cmake=cmake
           else
@@ -108,6 +108,10 @@ AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
   AC_ARG_WITH(openj9-developer-dir, [AS_HELP_STRING([--with-openj9-developer-dir], [build OpenJ9 with a specific Xcode version])],
     [OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir],
     [OPENJ9_DEVELOPER_DIR=])
+
+  if test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    BASIC_REQUIRE_PROGS([OPENJ9_CLANG], [clang])
+  fi
 
   AC_SUBST(OPENJ9_CC)
   AC_SUBST(OPENJ9_CXX)
@@ -521,10 +525,10 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
 AC_DEFUN([CONFIGURE_OPENSSL],
 [
   AC_ARG_WITH(openssl, [AS_HELP_STRING([--with-openssl],
-    [Use either fetched | system | <path to openssl 1.0.2 (and above)])])
+    [Use either fetched | system | <path to openssl version 1.0.2 or later>])])
 
   AC_ARG_ENABLE(openssl-bundling, [AS_HELP_STRING([--enable-openssl-bundling],
-      [enable bundling of the openssl crypto library with the jdk build])])
+    [enable bundling of the openssl crypto library with the jdk build])])
 
   WITH_OPENSSL=yes
 
@@ -666,8 +670,8 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 ])
 
 # Create a tool wrapper for use by cmake.
-# Consists of a shell script which wraps commands with an invocation of fixpath.
-# OPENJ9_GENERATE_TOOL_WRAPER(<name_of_wrapper>, <command_to_call>)
+# Consists of a shell script which wraps commands with an invocation of a wrapper command.
+# OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
 AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPER],
 [
   tool_file="$OPENJ9_TOOL_DIR/$1"
@@ -675,7 +679,7 @@ AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPER],
   echo "#!/bin/sh" > $tool_file
   # We need to insert an empty string ([]), to stop M4 treating "$@" as a
   # variable reference
-  printf '%s "%s" "$[]@"\n' "$FIXPATH" "$2" >> $tool_file
+  printf '%s "%s" "$[]@"\n' "$2" "$3" >> $tool_file
   chmod +x $tool_file
 ])
 
@@ -684,17 +688,21 @@ AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPERS],
 [
   MSVC_BIN_DIR=$($DIRNAME $CC)
   SDK_BIN_DIR=$($DIRNAME $RC)
+  FIXPATH2="$SRC_ROOT/closed/fixpath2.sh"
 
   mkdir -p "$OPENJ9_TOOL_DIR"
-  OPENJ9_GENERATE_TOOL_WRAPPER([cl], [$CC])
-  OPENJ9_GENERATE_TOOL_WRAPPER([lib], [$AR])
-  OPENJ9_GENERATE_TOOL_WRAPPER([link], [$LD])
-  OPENJ9_GENERATE_TOOL_WRAPPER([ml], [$MSVC_BIN_DIR/ml])
-  OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$MSVC_BIN_DIR/ml64])
-  OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$RC])
-  OPENJ9_GENERATE_TOOL_WRAPPER([mc], [$SDK_BIN_DIR/mc])
-  OPENJ9_GENERATE_TOOL_WRAPPER([nasm], [$NASM])
-  OPENJ9_GENERATE_TOOL_WRAPPER([java], [$JAVA])
-  OPENJ9_GENERATE_TOOL_WRAPPER([jar], [$JAR])
-  OPENJ9_GENERATE_TOOL_WRAPPER([javac], [$JAVAC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([cl], [$FIXPATH2], [$CC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([clang], [$FIXPATH2], [$OPENJ9_CLANG])
+  OPENJ9_GENERATE_TOOL_WRAPPER([lib], [$FIXPATH2], [$AR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([link], [$FIXPATH2], [$LD])
+  OPENJ9_GENERATE_TOOL_WRAPPER([mc], [$FIXPATH2], [$SDK_BIN_DIR/mc])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml], [$FIXPATH2], [$MSVC_BIN_DIR/ml])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$FIXPATH2], [$MSVC_BIN_DIR/ml64])
+  OPENJ9_GENERATE_TOOL_WRAPPER([nasm], [$FIXPATH2], [$NASM])
+  OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$FIXPATH2], [$RC])
+
+  # fixpath2 can't handle classpaths, or @<file_name> arguments
+  OPENJ9_GENERATE_TOOL_WRAPPER([jar], [$FIXPATH], [$JAR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([java], [$FIXPATH], [$JAVA])
+  OPENJ9_GENERATE_TOOL_WRAPPER([javac], [$FIXPATH],[$JAVAC])
 ])
