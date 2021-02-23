@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
  * ===========================================================================
  */
 
@@ -50,8 +50,8 @@
 #define X_PPC           8
 #define X_PPC64         9
 #define X_PPC64LE      10
-#define X_S390X        11
-#define X_AARCH64      12
+#define X_AARCH64      11
+#define X_S390X        12
 
 // **********************************
 // Make sure you set X_PLATFORM and X_ARCH defines correctly.

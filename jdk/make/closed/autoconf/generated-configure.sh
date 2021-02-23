@@ -4554,7 +4554,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1613592276
+DATE_WHEN_GENERATED=1614026434
 
 ###############################################################################
 #
@@ -55639,6 +55639,9 @@ $as_echo "$OUTPUT_DIR_IS_LOCAL" >&6; }
 
 
 # At the end, call the custom hook. (Dummy macro if no custom sources available)
+
+  # You're here because you want OpenJ9, not some other implementation.
+  BUILD_HOTSPOT=false
 
 
 
