@@ -4554,7 +4554,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1613493478
+DATE_WHEN_GENERATED=1614175790
 
 ###############################################################################
 #
@@ -15225,23 +15225,25 @@ fi
   # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
   OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
 
-  OMR_MIXED_REFERENCES_MODE=off
-  if test "x$with_mixedrefs" != x -a "x$with_mixedrefs" != xno; then
-    if test "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic; then
+  if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 -o "x$with_mixedrefs" = xno -o "x$COMPILE_TYPE" = xcross ; then
+    OMR_MIXED_REFERENCES_MODE=off
+    if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+      OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
+      OPENJ9_LIBS_SUBDIR=default
+    else
+      OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
+      OPENJ9_LIBS_SUBDIR=compressedrefs
+    fi
+  else
+    if test "x$with_mixedrefs" = x -o "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic ; then
       OMR_MIXED_REFERENCES_MODE=static
-    elif test "x$with_mixedrefs" = xdynamic; then
+    elif test "x$with_mixedrefs" = xdynamic ; then
       OMR_MIXED_REFERENCES_MODE=dynamic
     else
       as_fn_error $? "OpenJ9 supports --with-mixedrefs=static and --with-mixedrefs=dynamic" "$LINENO" 5
     fi
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
     OPENJ9_LIBS_SUBDIR=default
-  elif test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32; then
-    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
-    OPENJ9_LIBS_SUBDIR=default
-  else
-    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
-    OPENJ9_LIBS_SUBDIR=compressedrefs
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
@@ -54767,9 +54769,18 @@ $as_echo "$as_me: The path of CYGWIN_WINDOWSSDKDIR, which resolves as \"$path\",
       fi
       UCRT_DLL_DIR="$CYGWIN_WINDOWSSDKDIR/Redist/ucrt/DLLs/$dll_subdir"
       if test -z "$(ls -d "$UCRT_DLL_DIR/"*.dll 2> /dev/null)"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+        # Try with version subdir
+        UCRT_DLL_DIR="`ls -d $CYGWIN_WINDOWSSDKDIR/Redist/*/ucrt/DLLs/$dll_subdir \
+            2> /dev/null | $SORT -d | $HEAD -n1`"
+        if test -z "$UCRT_DLL_DIR" \
+            || test -z "$(ls -d "$UCRT_DLL_DIR/"*.dll 2> /dev/null)"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-        as_fn_error $? "Could not find any dlls in $UCRT_DLL_DIR" "$LINENO" 5
+          as_fn_error $? "Could not find any dlls in $UCRT_DLL_DIR" "$LINENO" 5
+        else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $UCRT_DLL_DIR" >&5
+$as_echo "$UCRT_DLL_DIR" >&6; }
+        fi
       else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $UCRT_DLL_DIR" >&5
 $as_echo "$UCRT_DLL_DIR" >&6; }
@@ -55637,6 +55648,9 @@ $as_echo "$OUTPUT_DIR_IS_LOCAL" >&6; }
 
 
 # At the end, call the custom hook. (Dummy macro if no custom sources available)
+
+  # You're here because you want OpenJ9, not some other implementation.
+  BUILD_HOTSPOT=false
 
 
 

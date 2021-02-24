@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -23,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2011, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2011, 2021 All Rights Reserved
 # ===========================================================================
 
 LIBJSOUND_SRC_DIRS := \
@@ -140,21 +141,20 @@ else
   endif
 
   ifeq ($(OPENJDK_TARGET_CPU), ppc64)
-    LIBJSOUND_CFLAGS += -DX_ARCH=X_PPC64
+       LIBJSOUND_CFLAGS += -DX_ARCH=X_PPC64
   endif
 
   ifeq ($(OPENJDK_TARGET_CPU), ppc64le)
-    LIBJSOUND_CFLAGS += -DX_ARCH=X_PPC64LE
-  endif
-
-  ifeq ($(OPENJDK_TARGET_CPU), s390x)
-    LIBJSOUND_CFLAGS += -DX_ARCH=X_S390X
+       LIBJSOUND_CFLAGS += -DX_ARCH=X_PPC64LE
   endif
 
   ifeq ($(OPENJDK_TARGET_CPU), aarch64)
     LIBJSOUND_CFLAGS += -DX_ARCH=X_AARCH64
   endif
 
+  ifeq ($(OPENJDK_TARGET_CPU), s390x)
+    LIBJSOUND_CFLAGS += -DX_ARCH=X_S390X
+  endif
 endif
 
 LIBJSOUND_CFLAGS += -DEXTRA_SOUND_JNI_LIBS='"$(EXTRA_SOUND_JNI_LIBS)"'

@@ -23,10 +23,6 @@
  * questions.
  */
 
-/*
- * This file is backported from OpenJDK11
- */
-
 /**
  * Parse function returns a JSON object representing ECMAScript code passed.
  * name is optional name for the code source and location param tells whether to
