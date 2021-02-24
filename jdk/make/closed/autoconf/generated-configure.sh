@@ -4554,7 +4554,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1614175790
+DATE_WHEN_GENERATED=1614187756
 
 ###############################################################################
 #
@@ -15308,7 +15308,7 @@ if test "${with_cmake+set}" = set; then :
 else
 
       case "$OPENJ9_PLATFORM_CODE" in
-        ap64|oa64|wa64|xa64|xl64|xr64|xz64)
+        ap64|oa64|wa64|wi32|xa64|xl64|xr64|xz64)
           if test "x$COMPILE_TYPE" != xcross ; then
             with_cmake=cmake
           else
