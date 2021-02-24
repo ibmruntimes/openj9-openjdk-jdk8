@@ -23,10 +23,6 @@
  * questions.
  */
 
-/*
- * This file is backported from OpenJDK11
- */
-
 #import <JavaNativeFoundation/JavaNativeFoundation.h>
 
 #import "AWTFont.h"
@@ -111,10 +107,9 @@ JNF_COCOA_ENTER(env);
         AllocateGlyphBuffer(env, awtFont, count,
                            (UniChar *)unicodesAsChars, glyphs);
 
-        (*env)->ReleasePrimitiveArrayCritical(env, unicodes,
-                                              unicodesAsChars, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, unicodes,
+                                          unicodesAsChars, JNI_ABORT);
     }
 
 JNF_COCOA_EXIT(env);
 }
-
