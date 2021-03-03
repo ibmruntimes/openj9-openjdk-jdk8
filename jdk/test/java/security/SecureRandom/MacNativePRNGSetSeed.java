@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -22,30 +20,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package java.util.prefs;
 
-/**
- * Implementation of  <tt>PreferencesFactory</tt> to return
- * WindowsPreferences objects.
- *
- * @author  Konstantin Kladko
- * @see Preferences
- * @see WindowsPreferences
- * @since 1.4
+import java.security.SecureRandom;
+
+/* @test
+ * @bug 8156709
+ * @summary Cannot call setSeed on NativePRNG on Mac if EGD is /dev/urandom
+ * @requires os.name == "Mac OS X"
+ * @run main/othervm -Djava.security.egd=file:/dev/urandom MacNativePRNGSetSeed
  */
-class WindowsPreferencesFactory implements PreferencesFactory  {
-
-    /**
-     * Returns WindowsPreferences.userRoot
-     */
-    public Preferences userRoot() {
-        return WindowsPreferences.getUserRoot();
-    }
-
-    /**
-     * Returns WindowsPreferences.systemRoot
-     */
-    public Preferences systemRoot() {
-        return WindowsPreferences.getSystemRoot();
+public class MacNativePRNGSetSeed {
+    public static void main(String[] args) throws Exception {
+        SecureRandom sr = SecureRandom.getInstance("NativePRNG");
+        sr.setSeed(1);
     }
 }
