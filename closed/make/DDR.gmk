@@ -113,12 +113,19 @@ $(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_TOOLS_MARKER)
 		-o $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
-$(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_TOOLS_MARKER)
+# Any new references to constants must be paired with additions to the compatibility
+# list unless those constants were defined long ago.
+DDR_COMPATIBILITY_FILE := $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/CompatibilityConstants29.dat
+DDR_RESTRICT_FILE := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/data/superset-constants.dat
+
+$(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPATIBILITY_FILE) $(DDR_TOOLS_MARKER)
 	@$(ECHO) Generating DDR structure stub source files
 	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.StructureStubGenerator \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
 		-p com.ibm.j9ddr.vm29.structure \
+		-r $(DDR_RESTRICT_FILE) \
+		-c $(DDR_COMPATIBILITY_FILE) \
 		-o $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
@@ -148,8 +155,9 @@ DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
 # Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
 
-# The list of structure alias files that must be included in the jar.
-DDR_ALIAS_FILES := \
+# The list of support files that must be included in the jar.
+DDR_SUPPORT_FILES := \
+	com/ibm/j9ddr/CompatibilityConstants29.dat \
 	com/ibm/j9ddr/StructureAliases29.dat \
 	com/ibm/j9ddr/StructureAliases29-edg.dat \
 	#
@@ -167,7 +175,7 @@ DDR_SOURCE_FILES := $(shell \
 # because it doesn't properly handle source file names with '$'.
 $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 	$(RM) -rf $(DDR_MAIN_BIN)
-	$(MKDIR) -p $(DDR_MAIN_BIN) $(addprefix $(DDR_MAIN_BIN)/, $(dir $(DDR_ALIAS_FILES)))
+	$(MKDIR) -p $(DDR_MAIN_BIN) $(addprefix $(DDR_MAIN_BIN)/, $(dir $(DDR_SUPPORT_FILES)))
 	@$(ECHO) "Compiling $(words $(DDR_SOURCE_FILES)) files for j9ddr.jar"
 	$(GENERATE_JDKBYTECODE_JVM) $(GENERATE_JDKBYTECODE_JAVAC) \
 		$(GENERATE_JDKBYTECODE_FLAGS) \
@@ -176,7 +184,7 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 		-implicit:none \
 		-sourcepath "$(DDR_VM_SRC_ROOT)$(PATH_SEP)$(DDR_GENSRC_DIR)" \
 		@$(DDR_SRC_LIST_FILE)
-	$(foreach file, $(DDR_ALIAS_FILES), \
+	$(foreach file, $(DDR_SUPPORT_FILES), \
 		$(CP) $(DDR_VM_SRC_ROOT)/$(file) $(DDR_MAIN_BIN)/$(file) ;)
 	$(TOUCH) $@
 
