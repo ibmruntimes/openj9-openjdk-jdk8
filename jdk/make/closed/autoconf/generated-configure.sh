@@ -893,6 +893,7 @@ CONF_NAME
 SPEC
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
+HEALTHCENTER_JAR
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -1087,6 +1088,7 @@ with_cuda
 with_gdk
 enable_cuda
 enable_ddr
+with_healthcenter
 enable_jitserver
 enable_openjdk_methodhandles
 with_conf_name
@@ -1962,6 +1964,7 @@ Optional Packages:
                           build OpenJ9 with a specific Xcode version
   --with-cuda             use this directory as CUDA_HOME
   --with-gdk              use this directory as GDK_HOME
+  --with-healthcenter     import healthcenter artifacts from this archive
   --with-conf-name        use this as the name of the configuration [generated
                           from important configuration options]
   --with-toolchain-version
@@ -4544,6 +4547,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4554,7 +4559,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1614187756
+DATE_WHEN_GENERATED=1615843596
 
 ###############################################################################
 #
@@ -16120,6 +16125,161 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
   else
     as_fn_error $? "--enable-ddr accepts no argument" "$LINENO" 5
   fi
+
+
+
+
+  HEALTHCENTER_JAR=
+
+# Check whether --with-healthcenter was given.
+if test "${with_healthcenter+set}" = set; then :
+  withval=$with_healthcenter;
+      if test "x$with_healthcenter" != xno ; then
+        healthcenter_dir="`$DIRNAME "$with_healthcenter"`"
+
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+
+  # Input might be given as Windows format, start by converting to
+  # unix format.
+  path="$healthcenter_dir"
+  new_path=`$CYGPATH -u "$path"`
+
+  # Cygwin tries to hide some aspects of the Windows file system, such that binaries are
+  # named .exe but called without that suffix. Therefore, "foo" and "foo.exe" are considered
+  # the same file, most of the time (as in "test -f"). But not when running cygpath -s, then
+  # "foo.exe" is OK but "foo" is an error.
+  #
+  # This test is therefore slightly more accurate than "test -f" to check for file precense.
+  # It is also a way to make sure we got the proper file name for the real test later on.
+  test_shortpath=`$CYGPATH -s -m "$new_path" 2> /dev/null`
+  if test "x$test_shortpath" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: The path of healthcenter_dir, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of healthcenter_dir, which resolves as \"$path\", is invalid." >&6;}
+    as_fn_error $? "Cannot locate the the path of healthcenter_dir" "$LINENO" 5
+  fi
+
+  # Call helper function which possibly converts this using DOS-style short mode.
+  # If so, the updated path is stored in $new_path.
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-._/a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    shortmode_path=`$CYGPATH -s -m -a "$input_path"`
+    path_after_shortmode=`$CYGPATH -u "$shortmode_path"`
+    if test "x$path_after_shortmode" != "x$input_to_shortpath"; then
+      # Going to short mode and back again did indeed matter. Since short mode is
+      # case insensitive, let's make it lowercase to improve readability.
+      shortmode_path=`$ECHO "$shortmode_path" | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+      # Now convert it back to Unix-style (cygpath)
+      input_path=`$CYGPATH -u "$shortmode_path"`
+      new_path="$input_path"
+    fi
+  fi
+
+  test_cygdrive_prefix=`$ECHO $input_path | $GREP ^/cygdrive/`
+  if test "x$test_cygdrive_prefix" = x; then
+    # As a simple fix, exclude /usr/bin since it's not a real path.
+    if test "x`$ECHO $new_path | $GREP ^/usr/bin/`" = x; then
+      # The path is in a Cygwin special directory (e.g. /home). We need this converted to
+      # a path prefixed by /cygdrive for fixpath to work.
+      new_path="$CYGWIN_ROOT_PATH$input_path"
+    fi
+  fi
+
+
+  if test "x$path" != "x$new_path"; then
+    healthcenter_dir="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting healthcenter_dir to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting healthcenter_dir to \"$new_path\"" >&6;}
+  fi
+
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+
+  path="$healthcenter_dir"
+  has_colon=`$ECHO $path | $GREP ^.:`
+  new_path="$path"
+  if test "x$has_colon" = x; then
+    # Not in mixed or Windows style, start by that.
+    new_path=`cmd //c echo $path`
+  fi
+
+
+  input_path="$new_path"
+  # Check if we need to convert this using DOS-style short mode. If the path
+  # contains just simple characters, use it. Otherwise (spaces, weird characters),
+  # take no chances and rewrite it.
+  # Note: m4 eats our [], so we need to use [ and ] instead.
+  has_forbidden_chars=`$ECHO "$input_path" | $GREP [^-_/:a-zA-Z0-9]`
+  if test "x$has_forbidden_chars" != x; then
+    # Now convert it to mixed DOS-style, short mode (no spaces, and / instead of \)
+    new_path=`cmd /c "for %A in (\"$input_path\") do @echo %~sA"|$TR \\\\\\\\ / | $TR 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+  fi
+
+
+  windows_path="$new_path"
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+    unix_path=`$CYGPATH -u "$windows_path"`
+    new_path="$unix_path"
+  elif test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.msys"; then
+    unix_path=`$ECHO "$windows_path" | $SED -e 's,^\\(.\\):,/\\1,g' -e 's,\\\\,/,g'`
+    new_path="$unix_path"
+  fi
+
+  if test "x$path" != "x$new_path"; then
+    healthcenter_dir="$new_path"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Rewriting healthcenter_dir to \"$new_path\"" >&5
+$as_echo "$as_me: Rewriting healthcenter_dir to \"$new_path\"" >&6;}
+  fi
+
+  # Save the first 10 bytes of this path to the storage, so fixpath can work.
+  all_fixpath_prefixes=("${all_fixpath_prefixes[@]}" "${new_path:0:10}")
+
+  else
+    # We're on a posix platform. Hooray! :)
+    path="$healthcenter_dir"
+    has_space=`$ECHO "$path" | $GREP " "`
+    if test "x$has_space" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: The path of healthcenter_dir, which resolves as \"$path\", is invalid." >&5
+$as_echo "$as_me: The path of healthcenter_dir, which resolves as \"$path\", is invalid." >&6;}
+      as_fn_error $? "Spaces are not allowed in this path." "$LINENO" 5
+    fi
+
+    # Use eval to expand a potential ~
+    eval path="$path"
+    if test ! -f "$path" && test ! -d "$path"; then
+      as_fn_error $? "The path of healthcenter_dir, which resolves as \"$path\", is not found." "$LINENO" 5
+    fi
+
+    healthcenter_dir="`cd "$path"; $THEPWDCMD -L`"
+  fi
+
+        healthcenter_jar="$healthcenter_dir/`$BASENAME "$with_healthcenter"`"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking healthcenter" >&5
+$as_echo_n "checking healthcenter... " >&6; }
+        if ! test -f "$healthcenter_jar" ; then
+          as_fn_error $? "healthcenter archive not found at $with_healthcenter" "$LINENO" 5
+        else
+          if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+            # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+            healthcenter_jar="`$CYGPATH -m $healthcenter_jar`"
+          fi
+          if test "$healthcenter_jar" = "$with_healthcenter" ; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_healthcenter" >&5
+$as_echo "$with_healthcenter" >&6; }
+          else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_healthcenter [$healthcenter_jar]" >&5
+$as_echo "$with_healthcenter [$healthcenter_jar]" >&6; }
+          fi
+          HEALTHCENTER_JAR=$healthcenter_jar
+        fi
+      fi
+
+fi
 
 
 

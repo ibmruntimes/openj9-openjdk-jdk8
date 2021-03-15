@@ -228,3 +228,73 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 		$(OPENJ9_VM_BUILD_DIR) \
 		$(OPENJ9_LIBS_DIR)/$(OPENJ9_LIBS_SUBDIR)))
 endif # OPENJ9_ENABLE_DDR
+
+ifneq (,$(HEALTHCENTER_JAR))
+
+# Extract the contents of HEALTHCENTER_JAR to HEALTHCENTER_HOME.
+
+HEALTHCENTER_HOME := $(JDK_OUTPUTDIR)/healthcenter
+HEALTHCENTER_EXTRACT := $(HEALTHCENTER_HOME)/extract_marker
+HEALTHCENTER_FILES := \
+	$(addprefix $(HEALTHCENTER_HOME)/, \
+		healthcenter.jar \
+		healthcenter.properties \
+		monitoring-api.jar \
+		$(call SHARED_LIBRARY,healthcenter) \
+		plugins/$(call SHARED_LIBRARY,hcapiplugin) \
+	)
+
+$(HEALTHCENTER_EXTRACT) : $(HEALTHCENTER_JAR)
+	@$(ECHO) Extracting contents of $<
+	@$(RM) -rf $(@D)
+	$(MKDIR) -p $(@D)
+	$(UNZIP) -q $< -d $(@D)
+	@$(TOUCH) $@
+
+$(HEALTHCENTER_FILES) : $(HEALTHCENTER_EXTRACT)
+
+# Copy the properties file, changing the default transport to jrmp.
+
+TRANSPORT_PROPERTY_NAME       := com.ibm.java.diagnostics.healthcenter.agent.transport
+TRANSPORT_PROPERTY_REGEX      := $(subst .,\.,$(TRANSPORT_PROPERTY_NAME))
+TRANSPORT_PROPERTY_SED_SCRIPT := -e 's|$(TRANSPORT_PROPERTY_REGEX)\s*=.*|$(TRANSPORT_PROPERTY_NAME)=jrmp|'
+
+all : $(JDK_OUTPUTDIR)/lib/healthcenter.properties
+
+$(JDK_OUTPUTDIR)/lib/healthcenter.properties : $(HEALTHCENTER_HOME)/healthcenter.properties
+	$(MKDIR) -p $(@D)
+	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) < $< > $@
+
+# Copy the jars, removing unwanted content.
+
+all : $(JDK_OUTPUTDIR)/lib/ext/healthcenter.jar
+
+$(JDK_OUTPUTDIR)/lib/ext/healthcenter.jar : $(HEALTHCENTER_HOME)/healthcenter.jar
+	$(call install-file)
+	$(ZIP) -d -q $@ "com/ibm/tools/attach/*" "com/sun/tools/attach/*"
+
+all : $(JDK_OUTPUTDIR)/lib/tools/monitoring-api.jar
+
+$(JDK_OUTPUTDIR)/lib/tools/monitoring-api.jar : $(HEALTHCENTER_HOME)/monitoring-api.jar
+	$(call install-file)
+	$(ZIP) -d -q $@ "com/ibm/jvm/*"
+
+# Copy the available shared libraries.
+
+HEALTHCENTER_COPY := $(HEALTHCENTER_HOME)/copy_marker
+
+# Not all components are available on all platforms, hence the use of $(wildcard).
+# Also note that evaluation must be delayed, so we use '=' instead of ':='.
+HEALTHCENTER_LIBRARIES = \
+	$(HEALTHCENTER_HOME)/$(call SHARED_LIBRARY,healthcenter) \
+	$(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcapiplugin) \
+	$(wildcard $(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcmqtt))
+
+all : $(HEALTHCENTER_COPY)
+
+$(HEALTHCENTER_COPY) : $(HEALTHCENTER_EXTRACT)
+	$(MKDIR) -p $(OPENJ9_LIBS_DIR)
+	$(CP) -f $(HEALTHCENTER_LIBRARIES) $(OPENJ9_LIBS_DIR)/
+	@$(TOUCH) $@
+
+endif # HEALTHCENTER_JAR

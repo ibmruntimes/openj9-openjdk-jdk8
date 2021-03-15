@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -122,3 +122,17 @@ OPENJ9_MANAGEMENT_TYPES := \
 PROFILE_1_RTJAR_EXCLUDE_TYPES += $(OPENJ9_MANAGEMENT_TYPES)
 PROFILE_2_RTJAR_EXCLUDE_TYPES += $(OPENJ9_MANAGEMENT_TYPES)
 PROFILE_3_RTJAR_EXCLUDE_TYPES += # no extra exclusions
+
+ifneq (,$(HEALTHCENTER_JAR))
+
+JARS += $(IMAGES_OUTPUTDIR)/lib/ext/healthcenter.jar
+
+$(IMAGES_OUTPUTDIR)/lib/ext/healthcenter.jar : $(JDK_OUTPUTDIR)/lib/ext/healthcenter.jar
+	$(call install-file)
+
+JARS += $(IMAGES_OUTPUTDIR)/lib/tools/monitoring-api.jar
+
+$(IMAGES_OUTPUTDIR)/lib/tools/monitoring-api.jar : $(JDK_OUTPUTDIR)/lib/tools/monitoring-api.jar
+	$(call install-file)
+
+endif # HEALTHCENTER_JAR
