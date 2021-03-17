@@ -23,7 +23,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
  * ===========================================================================
  */
 
@@ -1654,6 +1654,9 @@ public class Basic {
             list.add(2, "-Xdump:system:none");
             list.add(3, "-Xdump:heap:none");
             list.add(4, "-Xdump:system:events=gpf+abort+traceassert+corruptcache");
+            // Limit max heap to 500MB. If there is too much heap OpenJ9 can succeed instead
+            // of throwing OOM. We know 16GB (25% of 64GB) is too much, and up to 8GB is fine.
+            list.add(5, "-Xmx500m");
             list.add("ArrayOOME");
             ProcessResults r = run(new ProcessBuilder(list));
             check(r.err().contains("java.lang.OutOfMemoryError:"));
