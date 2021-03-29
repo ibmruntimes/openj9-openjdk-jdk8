@@ -39,6 +39,9 @@ ifneq (,@OPENJ9_GDK_HOME@)
 export GDK_HOME         := @OPENJ9_GDK_HOME@
 endif
 
+# Archive from which to import Health Center content.
+HEALTHCENTER_JAR := @HEALTHCENTER_JAR@
+
 # OpenSSL
 OPENSSL_DIR             := @OPENSSL_DIR@
 BUILD_OPENSSL           := @BUILD_OPENSSL@
