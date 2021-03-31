@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,8 +18,8 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-# only include jextract in jre/bin
-NOT_JDK_BIN_FILES  := jextract$(EXE_SUFFIX)
+# only include jextract, jpackcore in jre/bin
+NOT_JDK_BIN_FILES  := jextract$(EXE_SUFFIX) jpackcore$(EXE_SUFFIX)
 JDK_BIN_STRIP_LIST := $(filter-out $(addprefix %, $(addsuffix .stripped, $(NOT_JDK_BIN_FILES))), $(JDK_BIN_STRIP_LIST))
 JDK_BIN_TARGETS    := $(filter-out $(addprefix %, $(NOT_JDK_BIN_FILES)), $(JDK_BIN_TARGETS))
 
