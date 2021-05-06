@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2000, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2000, 2021 All Rights Reserved
  * ===========================================================================
  */
 
@@ -734,7 +734,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                   definePackage(pkgname, null, null, null, null, null, null, null);
                 }
             } catch (IllegalArgumentException iae) {
-                // https://github.com/eclipse/openj9/issues/3038
+                // https://github.com/eclipse-openj9/openj9/issues/3038
                 // Detect and ignore race between two threads defining different classes in the same package.
                 if (getAndVerifyPackage(pkgname, man, url) == null) {
                     // Should never happen

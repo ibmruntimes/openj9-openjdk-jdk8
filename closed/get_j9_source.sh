@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -26,12 +26,12 @@ usage() {
 	echo "Usage: $0 [-h|--help] [-openj9-repo=<j9vm repo url>] [-openj9-branch=<branch>] [-openj9-sha=<commit sha>] [... other OpenJ9 repositories and branches options] [-parallel=<true|false>]"
 	echo "where:"
 	echo "  -h|--help         print this help, then exit"
-	echo "  -openj9-repo      the OpenJ9 repository url: https://github.com/eclipse/openj9.git"
+	echo "  -openj9-repo      the OpenJ9 repository url: https://github.com/eclipse-openj9/openj9.git"
 	echo "                    or git@github.com:<namespace>/openj9.git"
 	echo "  -openj9-branch    the OpenJ9 git branch: master"
 	echo "  -openj9-sha       a commit SHA for the OpenJ9 repository"
 	echo "  -openj9-reference a local repo to use as a clone reference"
-	echo "  -omr-repo         the OpenJ9/omr repository url: https://github.com/eclipse/openj9-omr.git"
+	echo "  -omr-repo         the OpenJ9/omr repository url: https://github.com/eclipse-openj9/openj9-omr.git"
 	echo "                    or git@github.com:<namespace>/openj9-omr.git"
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
 	echo "  -omr-sha          a commit SHA for the omr repository"
@@ -49,7 +49,7 @@ fi
 
 declare -A j9repos
 declare -A branches
-declare -A default_j9repos=( [openj9]=eclipse/openj9 [omr]=eclipse/openj9-omr )
+declare -A default_j9repos=( [openj9]=eclipse-openj9/openj9 [omr]=eclipse-openj9/openj9-omr )
 declare -A default_branches=( [openj9]=master [omr]=openj9 )
 declare -A commands
 declare -A shas
