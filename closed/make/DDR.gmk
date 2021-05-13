@@ -103,9 +103,14 @@ $(DDR_TOOLS_MARKER) : $(DDR_TOOLS_SOURCES)
 
 #############################################################################
 
-$(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_TOOLS_MARKER)
+# Only fields listed in this file can be directly accessed by hand-written DDR code;
+# its contents influence the generated class files.
+DDR_FIELDS_FILE := $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/AuxFieldInfo29.dat
+
+$(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_FIELDS_FILE) $(DDR_TOOLS_MARKER)
 	@$(ECHO) Generating DDR pointer class source files
 	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.PointerGenerator \
+		-a $(DDR_FIELDS_FILE) \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
 		-p com.ibm.j9ddr.vm29.pointer.generated \
@@ -131,7 +136,7 @@ $(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPA
 
 # When StructureReader opens the blob, it must be able to find StructureAliases*.dat,
 # which requires that $(DDR_VM_SRC_ROOT) be on the classpath.
-$(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(DDR_TOOLS_MARKER)
+$(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(DDR_FIELDS_FILE) $(DDR_TOOLS_MARKER)
 	@$(ECHO) Generating DDR pointer and structure class files
 	@$(RM) -rf $(DDR_CLASSES_BIN)
 	@$(JAVA) -cp "$(DDR_TOOLS_BIN)$(PATH_SEP)$(DDR_VM_SRC_ROOT)" \
@@ -155,13 +160,6 @@ DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
 # Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
 
-# The list of support files that must be included in the jar.
-DDR_SUPPORT_FILES := \
-	com/ibm/j9ddr/CompatibilityConstants29.dat \
-	com/ibm/j9ddr/StructureAliases29.dat \
-	com/ibm/j9ddr/StructureAliases29-edg.dat \
-	#
-
 # Generate the list of all Java source files to be compiled
 # and capture it in a variable for make.
 DDR_SOURCE_FILES := $(shell \
@@ -175,7 +173,7 @@ DDR_SOURCE_FILES := $(shell \
 # because it doesn't properly handle source file names with '$'.
 $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 	$(RM) -rf $(DDR_MAIN_BIN)
-	$(MKDIR) -p $(DDR_MAIN_BIN) $(addprefix $(DDR_MAIN_BIN)/, $(dir $(DDR_SUPPORT_FILES)))
+	$(MKDIR) -p $(DDR_MAIN_BIN)/com/ibm/j9ddr
 	@$(ECHO) "Compiling $(words $(DDR_SOURCE_FILES)) files for j9ddr.jar"
 	$(GENERATE_JDKBYTECODE_JVM) $(GENERATE_JDKBYTECODE_JAVAC) \
 		$(GENERATE_JDKBYTECODE_FLAGS) \
@@ -184,8 +182,7 @@ $(DDR_COMPILE_MARKER) : $(DDR_SOURCE_FILES)
 		-implicit:none \
 		-sourcepath "$(DDR_VM_SRC_ROOT)$(PATH_SEP)$(DDR_GENSRC_DIR)" \
 		@$(DDR_SRC_LIST_FILE)
-	$(foreach file, $(DDR_SUPPORT_FILES), \
-		$(CP) $(DDR_VM_SRC_ROOT)/$(file) $(DDR_MAIN_BIN)/$(file) ;)
+	$(CP) $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/*.dat $(DDR_MAIN_BIN)/com/ibm/j9ddr/
 	$(TOUCH) $@
 
 # Compile DDR code again, to ensure compatibility with class files
