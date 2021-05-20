@@ -4559,7 +4559,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1615843596
+DATE_WHEN_GENERATED=1621482042
 
 ###############################################################################
 #
@@ -28291,8 +28291,28 @@ fi
   # Use indirect variable referencing
   toolchain_var_name=VALID_TOOLCHAINS_$OPENJDK_BUILD_OS
   VALID_TOOLCHAINS=${!toolchain_var_name}
-  # First toolchain type in the list is the default
-  DEFAULT_TOOLCHAIN=${VALID_TOOLCHAINS%% *}
+
+  if test "x$OPENJDK_TARGET_OS" = xmacosx; then
+    # On Mac OS X, default toolchain to clang after Xcode 5
+    XCODE_VERSION_OUTPUT=`xcodebuild -version 2>&1 | $HEAD -n 1`
+    $ECHO "$XCODE_VERSION_OUTPUT" | $GREP "Xcode " > /dev/null
+    if test $? -ne 0; then
+      as_fn_error $? "Failed to determine Xcode version." "$LINENO" 5
+    fi
+    XCODE_MAJOR_VERSION=`$ECHO $XCODE_VERSION_OUTPUT | \
+        $SED -e 's/^Xcode \([1-9][0-9.]*\)/\1/' | \
+        $CUT -f 1 -d .`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Xcode major version: $XCODE_MAJOR_VERSION" >&5
+$as_echo "$as_me: Xcode major version: $XCODE_MAJOR_VERSION" >&6;}
+    if test $XCODE_MAJOR_VERSION -ge 5; then
+        DEFAULT_TOOLCHAIN="clang"
+    else
+        DEFAULT_TOOLCHAIN="gcc"
+    fi
+  else
+    # First toolchain type in the list is the default
+    DEFAULT_TOOLCHAIN=${VALID_TOOLCHAINS%% *}
+  fi
 
   if test "x$with_toolchain_type" = xlist; then
     # List all toolchains
