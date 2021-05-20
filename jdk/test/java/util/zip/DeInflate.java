@@ -20,6 +20,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+ * ===========================================================================
+ */
 
 /**
  * @test
@@ -110,7 +115,7 @@ public class DeInflate {
 
         byte[] dataIn = new byte[1024 * 512];
         new Random().nextBytes(dataIn);
-        byte[] dataOut1 = new byte[dataIn.length + 1024];
+        byte[] dataOut1 = new byte[dataIn.length + (32 * 1024)]; // See https://github.com/eclipse-openj9/openj9/issues/12740
         byte[] dataOut2 = new byte[dataIn.length];
 
         Deflater defNotWrap = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
