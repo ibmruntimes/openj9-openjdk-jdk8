@@ -249,6 +249,9 @@ $(HEALTHCENTER_EXTRACT) : $(HEALTHCENTER_JAR)
 	@$(RM) -rf $(@D)
 	$(MKDIR) -p $(@D)
 	$(UNZIP) -q $< -d $(@D)
+  ifeq (zos,$(OPENJDK_TARGET_OS))
+	$(CHTAG) -c ISO8859-1 -t $(HEALTHCENTER_HOME)/healthcenter.properties
+  endif
 	@$(TOUCH) $@
 
 $(HEALTHCENTER_FILES) : $(HEALTHCENTER_EXTRACT)
@@ -259,11 +262,18 @@ TRANSPORT_PROPERTY_NAME       := com.ibm.java.diagnostics.healthcenter.agent.tra
 TRANSPORT_PROPERTY_REGEX      := $(subst .,\.,$(TRANSPORT_PROPERTY_NAME))
 TRANSPORT_PROPERTY_SED_SCRIPT := -e 's|$(TRANSPORT_PROPERTY_REGEX)\s*=.*|$(TRANSPORT_PROPERTY_NAME)=jrmp|'
 
+# User-configurable .properties files should be encoded in EBCDIC on z/OS.
+ifeq (zos,$(OPENJDK_TARGET_OS))
+  FIX_ENCODING := | $(ICONV) -f ISO8859-1 -t IBM-1047
+else
+  FIX_ENCODING :=
+endif
+
 all : $(JDK_OUTPUTDIR)/lib/healthcenter.properties
 
 $(JDK_OUTPUTDIR)/lib/healthcenter.properties : $(HEALTHCENTER_HOME)/healthcenter.properties
 	$(MKDIR) -p $(@D)
-	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) < $< > $@
+	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) < $< $(FIX_ENCODING) > $@
 
 # Copy the jars, removing unwanted content.
 
