@@ -256,6 +256,7 @@ generate-j9-version-headers :
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 CMAKE_ARGS := \
 	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
+	-DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain.cmake" \
 	-DBOOT_JDK=$(BOOT_JDK) \
 	-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
 	-DBUILD_ID=$(BUILD_ID) \
@@ -266,26 +267,16 @@ CMAKE_ARGS := \
 	-DOPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 	#
 
-ifeq (windows,$(OPENJDK_TARGET_OS))
-  CMAKE_ARGS += -DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain-win.cmake"
-else
-  # We grab the C/C++ compilers detected by autoconf or provided by user, not
-  # the CC/CXX variables defined by the makefiles, which potentially include
-  # the ccache command which will throw off cmake.
+# Windows can't specify compiler overrides since we already generated wrapper scripts.
+ifneq (windows,$(OPENJDK_TARGET_OS))
+  # Override the compilers if an OPENJ9_* value is specified.
+  # Otherwise, toolchain.cmake has the default values.
   ifneq (,$(OPENJ9_CC))
     CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
-  else
-    CMAKE_ARGS += -DCMAKE_C_COMPILER="$(ac_cv_prog_CC)"
   endif
 
   ifneq (,$(OPENJ9_CXX))
     CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
-  else
-    CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
-  endif
-
-  ifneq (,$(NASM))
-    CMAKE_ARGS += -DCMAKE_ASM_NASM_COMPILER="$(NASM)"
   endif
 endif # windows
 
