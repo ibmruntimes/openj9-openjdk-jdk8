@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1645,7 +1645,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
     msg_len = (*OSSL_RSA_private_encrypt)(kLen, kNative, mNative, rsaKey, RSA_NO_PADDING);
 
     if ((-1 != verify) && (-1 != msg_len)) {
-        if (verify == kLen) {
+        if ((verify == kLen) || (verify == (kLen + 1))) {
             k2 = malloc(kLen * (sizeof(unsigned char)));
             if (NULL != k2) {
 
@@ -1654,10 +1654,29 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
                 if (-1 != msg_len2) {
 
                     int i;
-                    for (i = 0; i < verify; i++) {
-                        if (kNative[i] != k2[i]) {
+                    /*
+                     * For certain key sizes, the decrypted message retrieved from the RSA_public_decrypt
+                     * includes a 1 byte padding at the beginning of the message. In these cases, this
+                     * padding must be zero. And the comparison to the original message should not include
+                     * this first byte.
+                     */
+                    if (verify == (kLen + 1)) {
+                        if (0 != k2[0]) {
                             msg_len = -2;
-                            break;
+                        } else {
+                            for (i = 0; i < kLen; i++) {
+                                if (kNative[i] != k2[i + 1]) {
+                                    msg_len = -2;
+                                    break;
+                                }
+                            }
+                        }
+                    } else { // if verify == kLen
+                        for (i = 0; i < verify; i++) {
+                            if (kNative[i] != k2[i]) {
+                                msg_len = -2;
+                                break;
+                            }
                         }
                     }
                 } else {
