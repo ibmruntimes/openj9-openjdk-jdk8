@@ -899,6 +899,7 @@ OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
 OPENJ9_ENABLE_CUDA
+OPENJ9_ENABLE_CRIU_SUPPORT
 OPENJ9_DEVELOPER_DIR
 OPENJ9_CXX
 OPENJ9_CC
@@ -1085,6 +1086,7 @@ with_cmake
 with_openj9_cc
 with_openj9_cxx
 with_openj9_developer_dir
+enable_criu_support
 with_cuda
 with_gdk
 enable_cuda
@@ -1908,6 +1910,7 @@ Optional Features:
                           [disabled]
   --enable-debug          set the debug level to fastdebug (shorthand for
                           --with-debug-level=fastdebug) [disabled]
+  --enable-criu-support   enable CRIU support [disabled]
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
   --enable-jitserver      enable JITServer support [disabled]
@@ -4550,6 +4553,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4560,7 +4565,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1623078565
+DATE_WHEN_GENERATED=1623442039
 
 ###############################################################################
 #
@@ -15764,6 +15769,30 @@ $as_echo "$tool_specified" >&6; }
 
 
 
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CRIU support" >&5
+$as_echo_n "checking for CRIU support... " >&6; }
+  # Check whether --enable-criu-support was given.
+if test "${enable_criu_support+set}" = set; then :
+  enableval=$enable_criu_support;
+fi
+
+  OPENJ9_ENABLE_CRIU_SUPPORT=false
+  if test "x$enable_criu_support" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_CRIU_SUPPORT=true
+  elif test "x$enable_criu_support" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_criu_support" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-criu-support accepts no argument" "$LINENO" 5
+  fi
 
 
 
