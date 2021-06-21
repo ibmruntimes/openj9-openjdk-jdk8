@@ -899,6 +899,7 @@ OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
 OPENJ9_ENABLE_CUDA
+OPENJ9_ENABLE_CRIU_SUPPORT
 OPENJ9_DEVELOPER_DIR
 OPENJ9_CXX
 OPENJ9_CC
@@ -1085,6 +1086,7 @@ with_cmake
 with_openj9_cc
 with_openj9_cxx
 with_openj9_developer_dir
+enable_criu_support
 with_cuda
 with_gdk
 enable_cuda
@@ -1908,6 +1910,7 @@ Optional Features:
                           [disabled]
   --enable-debug          set the debug level to fastdebug (shorthand for
                           --with-debug-level=fastdebug) [disabled]
+  --enable-criu-support   enable CRIU support [disabled]
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
   --enable-jitserver      enable JITServer support [disabled]
@@ -1982,8 +1985,8 @@ Optional Packages:
   --with-toolchain-path   prepend these directories when searching for
                           toolchain binaries (compilers etc)
   --with-extra-path       prepend these directories to the default path
-  --with-xcode-path       explicit path to Xcode (Xcode 4 is supported;
-                          generally for building on 10.9 and later)
+  --with-xcode-path       explicit path to Xcode application (generally for
+                          building on 10.9 and later)
   --with-macosx-codesign-identity
                           specify the code signing identity
   --with-builddeps-conf   use this configuration file for the builddeps
@@ -4550,6 +4553,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4560,7 +4565,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1623078565
+DATE_WHEN_GENERATED=1624285267
 
 ###############################################################################
 #
@@ -14176,7 +14181,7 @@ $as_echo "$COMPILE_TYPE" >&6; }
       OPENJDK_TARGET_CPU_JLI_CFLAGS="$OPENJDK_TARGET_CPU_JLI_CFLAGS -DLIBARCH32NAME='\"i386\"' -DLIBARCH64NAME='\"amd64\"'"
     fi
   elif test "x$OPENJDK_TARGET_OS" = xmacosx && test "x$TOOLCHAIN_TYPE" = xclang ; then
-    OPENJDK_TARGET_CPU_JLI_CFLAGS="$OPENJDK_TARGET_CPU_JLI_CFLAGS -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
+    OPENJDK_TARGET_CPU_JLI_CFLAGS="$OPENJDK_TARGET_CPU_JLI_CFLAGS -stdlib=libc++ -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
   fi
 
 
@@ -15764,6 +15769,30 @@ $as_echo "$tool_specified" >&6; }
 
 
 
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CRIU support" >&5
+$as_echo_n "checking for CRIU support... " >&6; }
+  # Check whether --enable-criu-support was given.
+if test "${enable_criu_support+set}" = set; then :
+  enableval=$enable_criu_support;
+fi
+
+  OPENJ9_ENABLE_CRIU_SUPPORT=false
+  if test "x$enable_criu_support" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_CRIU_SUPPORT=true
+  elif test "x$enable_criu_support" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_criu_support" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-criu-support accepts no argument" "$LINENO" 5
+  fi
 
 
 
@@ -29704,7 +29733,7 @@ $as_echo "$as_me: or run \"bash.exe -l\" from a VS command prompt and then run c
   # Before we locate the compilers, we need to sanitize the Xcode build environment
   if test "x$OPENJDK_TARGET_OS" = "xmacosx"; then
     # determine path to Xcode developer directory
-    # can be empty in which case all the tools will rely on a sane Xcode 4 installation
+    # can be empty in which case all the tools will rely on a sane Xcode installation
     SET_DEVELOPER_DIR=
 
     if test -n "$XCODE_PATH"; then
@@ -29776,14 +29805,14 @@ fi
       as_fn_error $? "The xcodebuild tool was not found, the Xcode command line tools are required to build on Mac OS X" "$LINENO" 5
     fi
 
-    # Fail-fast: verify we're building on Xcode 4, we cannot build with Xcode 5 or later
+    # Fail-fast: verify we're building on a supported Xcode version
     XCODE_VERSION=`$XCODEBUILD -version | grep '^Xcode ' | sed 's/Xcode //'`
     XC_VERSION_PARTS=( ${XCODE_VERSION//./ } )
-    if test "${XC_VERSION_PARTS[0]}" != "4" -a "${XC_VERSION_PARTS[0]}" != "9" -a "${XC_VERSION_PARTS[0]}" != "10" -a "${XC_VERSION_PARTS[0]}" != "11" ; then
-      as_fn_error $? "Xcode 4, 9, 10 or 11 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode or make Xcode active by using xcode-select." "$LINENO" 5
+    if test "${XC_VERSION_PARTS[0]}" != "6" -a "${XC_VERSION_PARTS[0]}" != "9" -a "${XC_VERSION_PARTS[0]}" != "10" -a "${XC_VERSION_PARTS[0]}" != "11" -a "${XC_VERSION_PARTS[0]}" != "12" ; then
+      as_fn_error $? "Xcode 6, 9-12 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode or make Xcode active by using xcode-select." "$LINENO" 5
     fi
 
-    # Some versions of Xcode 5 command line tools install gcc and g++ as symlinks to
+    # Some versions of Xcode command line tools install gcc and g++ as symlinks to
     # clang and clang++, which will break the build. So handle that here if we need to.
     if test -L "/usr/bin/gcc" -o -L "/usr/bin/g++"; then
       # use xcrun to find the real gcc and add it's directory to PATH
@@ -29810,7 +29839,7 @@ $as_echo "(none, will use system headers and frameworks)" >&6; }
 
     # Perform a basic sanity test
     if test ! -f "$SDKPATH/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h"; then
-      as_fn_error $? "Unable to find required framework headers, provide a valid path to Xcode 4 using --with-xcode-path" "$LINENO" 5
+      as_fn_error $? "Unable to find required framework headers, provide a valid path to Xcode using --with-xcode-path" "$LINENO" 5
     fi
 
     # if SDKPATH is non-empty then we need to add -isysroot and -iframework for gcc and g++
@@ -45508,6 +45537,22 @@ $as_echo "$supports" >&6; }
       # command line.
       CCXXFLAGS_JDK="$CCXXFLAGS_JDK -DMAC_OS_X_VERSION_MAX_ALLOWED=\$(subst .,,\$(MACOSX_VERSION_MIN)) -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
       LDFLAGS_JDK="$LDFLAGS_JDK -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
+    elif test "x$TOOLCHAIN_TYPE" = xclang; then
+      # FIXME: This needs to be exported in spec.gmk due to closed legacy code.
+      # FIXME: clean this up, and/or move it elsewhere.
+
+      # Setting these parameters makes it an error to link to macosx APIs that are
+      # newer than the given OS version and makes the linked binaries compatible
+      # even if built on a newer version of the OS.
+      # The expected format is X.Y.Z
+      MACOSX_VERSION_MIN=10.9.0
+
+
+      # The macro takes the version with no dots, ex: 1070
+      # Let the flags variables get resolved in make for easier override on make
+      # command line.
+      CCXXFLAGS_JDK="$CCXXFLAGS_JDK -DMAC_OS_X_VERSION_MAX_ALLOWED=\$(subst .,,\$(MACOSX_VERSION_MIN)) -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
+      LDFLAGS_JDK="$LDFLAGS_JDK -mmacosx-version-min=\$(MACOSX_VERSION_MIN)"
     fi
   fi
 
@@ -45559,7 +45604,7 @@ $as_echo "$supports" >&6; }
     fi
     LDFLAGS_JDKEXE="${LDFLAGS_JDK} /STACK:$LDFLAGS_STACK_SIZE"
   else
-    if test "x$TOOLCHAIN_TYPE" = xgcc; then
+    if test "x$TOOLCHAIN_TYPE" = xgcc -o test "x$TOOLCHAIN_TYPE" = xclang; then
       # If this is a --hash-style=gnu system, use --hash-style=both, why?
       # We have previously set HAS_GNU_HASH if this is the case
       if test -n "$HAS_GNU_HASH"; then
@@ -52250,7 +52295,7 @@ fi
     if test "x$TOOLCHAIN_TYPE" = xgcc; then
       LIBCXX="-lstdc++"
     elif test "x$TOOLCHAIN_TYPE" = xclang; then
-      LIBCXX="-std=libc++"
+      LIBCXX="-stdlib=libc++"
     fi
   fi
 

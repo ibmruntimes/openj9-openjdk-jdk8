@@ -154,6 +154,13 @@ endif
 # Disable windows rebase.
 SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
 
+# Adjust CRIU Support enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_criuSupport)
+else # OPENJ9_ENABLE_CRIU_SUPPORT
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_criuSupport)
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
+
 # Adjust OpenJDK MethodHandles enablement flags.
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   FEATURE_SED_SCRIPT += $(call SedEnable,opt_openjdkMethodhandle)
@@ -325,6 +332,12 @@ else
   CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=OFF
 endif # OPENJ9_ENABLE_JITSERVER
 
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=ON
+else # OPENJ9_ENABLE_CRIU_SUPPORT
+  CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=OFF
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
+
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=ON
   CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=OFF
@@ -416,6 +429,10 @@ AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 JPP_DEST := $(J9JCL_SOURCES_DIR)/jdk/src/share/classes
 JPP_JAR  := $(J9TOOLS_DIR)/jpp.jar
 JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  JPP_TAGS += CRIU_SUPPORT
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
 
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
