@@ -40,6 +40,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJDK_VERSION_DETAILS
   OPENJ9_CONFIGURE_CMAKE
   OPENJ9_CONFIGURE_COMPILERS
+  OPENJ9_CONFIGURE_CRIU_SUPPORT
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_HEALTHCENTER
@@ -117,6 +118,24 @@ AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
   AC_SUBST(OPENJ9_CC)
   AC_SUBST(OPENJ9_CXX)
   AC_SUBST(OPENJ9_DEVELOPER_DIR)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_CRIU_SUPPORT],
+[
+  AC_MSG_CHECKING([for CRIU support])
+  AC_ARG_ENABLE([criu-support], [AS_HELP_STRING([--enable-criu-support], [enable CRIU support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_CRIU_SUPPORT=false
+  if test "x$enable_criu_support" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_CRIU_SUPPORT=true
+  elif test "x$enable_criu_support" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_criu_support" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-criu-support accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_CRIU_SUPPORT)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
@@ -526,8 +545,9 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
     OPENJ9_TOOL_DIR="$OUTPUT_ROOT/tools"
     AC_SUBST([OPENJ9_TOOL_DIR])
     OPENJ9_GENERATE_TOOL_WRAPPERS
-    AC_CONFIG_FILES([$OUTPUT_ROOT/toolchain-win.cmake:$CLOSED_AUTOCONF_DIR/toolchain-win.cmake.in])
   fi
+  AC_SUBST([SYSROOT])
+  AC_CONFIG_FILES([$OUTPUT_ROOT/toolchain.cmake:$CLOSED_AUTOCONF_DIR/toolchain.cmake.in])
 ])
 
 AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVCP_DLL],
