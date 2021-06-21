@@ -41,8 +41,8 @@ include $(SRC_ROOT)/make/common/MakeBase.gmk
 include $(SRC_ROOT)/make/common/JavaCompilation.gmk
 include $(SRC_ROOT)/jdk/make/Setup.gmk
 
-# The main source directory.
-DDR_VM_SRC_ROOT := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+# The main (pre-processed) source directory.
+DDR_VM_SRC_ROOT := $(J9JCL_SOURCES_DIR)/ddr
 
 # The top-level directory for intermediate artifacts.
 DDR_SUPPORT_DIR := $(JDK_OUTPUTDIR)/ddr
@@ -192,8 +192,11 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
 	BIN := $(DDR_TEST_BIN), \
 	ADD_JAVAC_FLAGS := -cp $(DDR_CLASSES_BIN), \
-	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
-	EXCLUDES := $(DDR_SRC_EXCLUDES), \
+	SRC := $(DDR_VM_SRC_ROOT), \
+	EXCLUDES := \
+		$(DDR_SRC_EXCLUDES) \
+		com/ibm/j9ddr/vm29/pointer/generated \
+		com/ibm/j9ddr/vm29/structure, \
 	DEPENDS := $(DDR_CLASSES_MARKER) \
 	))
 
