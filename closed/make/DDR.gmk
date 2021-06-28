@@ -41,8 +41,8 @@ include $(SRC_ROOT)/make/common/MakeBase.gmk
 include $(SRC_ROOT)/make/common/JavaCompilation.gmk
 include $(SRC_ROOT)/jdk/make/Setup.gmk
 
-# The main source directory.
-DDR_VM_SRC_ROOT := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+# The main (pre-processed) source directory.
+DDR_VM_SRC_ROOT := $(J9JCL_SOURCES_DIR)/ddr
 
 # The top-level directory for intermediate artifacts.
 DDR_SUPPORT_DIR := $(JDK_OUTPUTDIR)/ddr
@@ -158,14 +158,10 @@ ifneq (,$(wildcard $(DDR_GENSRC_DIR)))
 # This file will contain the list of Java source files to be compiled.
 DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
 
-# Packages to be excluded from compilation.
-DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
-
 # Generate the list of all Java source files to be compiled
 # and capture it in a variable for make.
 DDR_SOURCE_FILES := $(shell \
 	$(FIND) $(DDR_VM_SRC_ROOT) $(DDR_GENSRC_DIR) -name "*.java" -type f -print \
-		$(foreach package, $(DDR_SRC_EXCLUDES), | $(GREP) -F -v $(DDR_VM_SRC_ROOT)/$(package)/) \
 		| $(SORT) > $(DDR_SRC_LIST_FILE) \
 	&& $(CAT) $(DDR_SRC_LIST_FILE) \
 	)
@@ -192,8 +188,10 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
 	BIN := $(DDR_TEST_BIN), \
 	ADD_JAVAC_FLAGS := -cp $(DDR_CLASSES_BIN), \
-	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
-	EXCLUDES := $(DDR_SRC_EXCLUDES), \
+	SRC := $(DDR_VM_SRC_ROOT), \
+	EXCLUDES := \
+		com/ibm/j9ddr/vm29/pointer/generated \
+		com/ibm/j9ddr/vm29/structure, \
 	DEPENDS := $(DDR_CLASSES_MARKER) \
 	))
 
