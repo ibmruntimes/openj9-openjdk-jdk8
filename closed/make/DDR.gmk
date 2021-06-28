@@ -158,14 +158,10 @@ ifneq (,$(wildcard $(DDR_GENSRC_DIR)))
 # This file will contain the list of Java source files to be compiled.
 DDR_SRC_LIST_FILE := $(DDR_SUPPORT_DIR)/src.list
 
-# Packages to be excluded from compilation.
-DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
-
 # Generate the list of all Java source files to be compiled
 # and capture it in a variable for make.
 DDR_SOURCE_FILES := $(shell \
 	$(FIND) $(DDR_VM_SRC_ROOT) $(DDR_GENSRC_DIR) -name "*.java" -type f -print \
-		$(foreach package, $(DDR_SRC_EXCLUDES), | $(GREP) -F -v $(DDR_VM_SRC_ROOT)/$(package)/) \
 		| $(SORT) > $(DDR_SRC_LIST_FILE) \
 	&& $(CAT) $(DDR_SRC_LIST_FILE) \
 	)
@@ -194,7 +190,6 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	ADD_JAVAC_FLAGS := -cp $(DDR_CLASSES_BIN), \
 	SRC := $(DDR_VM_SRC_ROOT), \
 	EXCLUDES := \
-		$(DDR_SRC_EXCLUDES) \
 		com/ibm/j9ddr/vm29/pointer/generated \
 		com/ibm/j9ddr/vm29/structure, \
 	DEPENDS := $(DDR_CLASSES_MARKER) \
