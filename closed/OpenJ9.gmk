@@ -470,6 +470,23 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
 			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+  ifeq (true,$(OPENJ9_ENABLE_DDR))
+	@$(ECHO) Generating DDR_VM sources
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-includeIfUnsure \
+			-noWarnIncludeIf \
+			-verdict \
+			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR)/debugtools)/" \
+			-config DDR_VM \
+			-srcRoot DDR_VM/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)/" \
+			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR)/ddr)" \
+			-macro:define "JAVA_SPEC_VERSION=8" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+  endif # OPENJ9_ENABLE_DDR
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 
