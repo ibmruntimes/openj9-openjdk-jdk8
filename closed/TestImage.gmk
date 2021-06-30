@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -60,6 +60,7 @@ $(foreach file, \
 		vmtest \
 		) \
 	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/$(call SHARED_LIBRARY,%), \
+		anntests \
 		balloon29 \
 		bcuwhite \
 		bcvrelationships \
