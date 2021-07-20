@@ -1068,6 +1068,8 @@ with_milestone
 with_update_version
 with_user_release_suffix
 with_build_number
+with_launcher_name
+with_product_name
 with_vendor_name
 with_vendor_url
 with_vendor_bug_url
@@ -1920,6 +1922,10 @@ Optional Packages:
                           Add a custom string to the version string if build
                           number isn't set.[username_builddateb00]
   --with-build-number     Set build number value for build [b00]
+  --with-launcher-name    Set launcher name (included in the -version and
+                          -fullversion output). [not specified]
+  --with-product-name     Set product name. Among other uses, defines the
+                          'java.runtime.name' system property. [not specified]
   --with-vendor-name      Set vendor name. Among others, used to set the
                           'java.vendor' and 'java.vm.vendor' system
                           properties. [not specified]
@@ -3965,7 +3971,7 @@ pkgadd_help() {
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
 # ===========================================================================
 
 
@@ -4415,7 +4421,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1624975642
+DATE_WHEN_GENERATED=1625676282
 
 ###############################################################################
 #
@@ -19977,6 +19983,40 @@ fi
 
 
 
+
+  # The launcher name, if any
+
+# Check whether --with-launcher-name was given.
+if test "${with_launcher_name+set}" = set; then :
+  withval=$with_launcher_name;
+fi
+
+  if test "x$with_launcher_name" = xyes; then
+    as_fn_error $? "--with-launcher-name must have a value" "$LINENO" 5
+  elif  ! [[ $with_launcher_name =~ ^[[:print:]]*$ ]] ; then
+    as_fn_error $? "--with-launcher-name contains non-printing characters: $with_launcher_name" "$LINENO" 5
+  elif test "x$with_launcher_name" != x -a "x$with_launcher_name" != xno; then
+    # Only set LAUNCHER_NAME if '--with-launcher-name' was used and is not empty.
+    # Otherwise we will use the value from "version-numbers" included above.
+    LAUNCHER_NAME="$with_launcher_name"
+  fi
+
+  # The product name, if any
+
+# Check whether --with-product-name was given.
+if test "${with_product_name+set}" = set; then :
+  withval=$with_product_name;
+fi
+
+  if test "x$with_product_name" = xyes; then
+    as_fn_error $? "--with-product-name must have a value" "$LINENO" 5
+  elif  ! [[ $with_product_name =~ ^[[:print:]]*$ ]] ; then
+    as_fn_error $? "--with-product-name contains non-printing characters: $with_product_name" "$LINENO" 5
+  elif test "x$with_product_name" != x -a "x$with_product_name" != xno; then
+    # Only set PRODUCT_NAME if '--with-product-name' was used and is not empty.
+    # Otherwise we will use the value from "version-numbers" included above.
+    PRODUCT_NAME="$with_product_name"
+  fi
 
   # The vendor name, if any
 
