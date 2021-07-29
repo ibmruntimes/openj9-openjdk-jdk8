@@ -163,6 +163,7 @@ $(call openj9_copy_files_and_debuginfos, \
 
 $(call openj9_copy_shlibs, \
 	cuda4j29 \
+	$(if $(filter true,$(OPENJ9_ENABLE_CRIU_SUPPORT)),j9criu29) \
 	j9dmp29 \
 	j9jextract \
 	j9gc29 \
