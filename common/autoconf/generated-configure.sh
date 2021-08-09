@@ -1070,6 +1070,7 @@ with_user_release_suffix
 with_build_number
 with_launcher_name
 with_product_name
+with_product_suffix
 with_vendor_name
 with_vendor_url
 with_vendor_bug_url
@@ -1926,6 +1927,9 @@ Optional Packages:
                           -fullversion output). [not specified]
   --with-product-name     Set product name. Among other uses, defines the
                           'java.runtime.name' system property. [not specified]
+  --with-product-suffix   Set product suffix. Among other uses, contributes to
+                          the 'java.runtime.name' system property. [not
+                          specified]
   --with-vendor-name      Set vendor name. Among others, used to set the
                           'java.vendor' and 'java.vm.vendor' system
                           properties. [not specified]
@@ -3512,6 +3516,9 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
+# Code to run after AC_OUTPUT
+
+
 #
 # Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -3941,6 +3948,8 @@ pkgadd_help() {
 # printing --help. If so, we will print out additional information that can
 # only be extracted within the autoconf script, and then exit. This must be
 # called at the very beginning in configure.ac.
+
+
 
 
 
@@ -4421,7 +4430,7 @@ VS_SDK_PLATFORM_NAME_2017=
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1625676282
+DATE_WHEN_GENERATED=1628518348
 
 ###############################################################################
 #
@@ -15215,9 +15224,9 @@ $as_echo "in current directory" >&6; }
       # is performed.
       filtered_files=`$ECHO "$files_present" \
           | $SED -e 's/config.log//g' \
-	      -e 's/confdefs.h//g' \
-	      -e 's/fixpath.exe//g' \
-	      -e 's/ //g' \
+              -e 's/configure.log//g' \
+              -e 's/confdefs.h//g' \
+              -e 's/ //g' \
           | $TR -d '\n'`
       if test "x$filtered_files" != x; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: Current directory is $CURDIR." >&5
@@ -20016,6 +20025,23 @@ fi
     # Only set PRODUCT_NAME if '--with-product-name' was used and is not empty.
     # Otherwise we will use the value from "version-numbers" included above.
     PRODUCT_NAME="$with_product_name"
+  fi
+
+  # The product suffix, if any
+
+# Check whether --with-product-suffix was given.
+if test "${with_product_suffix+set}" = set; then :
+  withval=$with_product_suffix;
+fi
+
+  if test "x$with_product_suffix" = xyes; then
+    as_fn_error $? "--with-product-suffix must have a value" "$LINENO" 5
+  elif  ! [[ $with_product_suffix =~ ^[[:print:]]*$ ]] ; then
+    as_fn_error $? "--with-product-suffix contains non-printing characters: $with_product_suffix" "$LINENO" 5
+  elif test "x$with_product_suffix" != x -a "x$with_product_suffix" != xno; then
+    # Only set PRODUCT_SUFFIX if '--with-product-suffix' was used and is not empty.
+    # Otherwise we will use the value from "version-numbers" included above.
+    PRODUCT_SUFFIX="$with_product_suffix"
   fi
 
   # The vendor name, if any
@@ -54772,14 +54798,31 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
+# After AC_OUTPUT, we need to do final work
 
-# Try to move the config.log file to the output directory.
-if test -e ./config.log; then
-  $MV -f ./config.log "$OUTPUT_ROOT/config.log" 2> /dev/null
-fi
 
-# Make the compare script executable
-$CHMOD +x $OUTPUT_ROOT/compare.sh
+  # Try to move the config.log file to the output directory.
+  if test -e ./config.log; then
+    $MV -f ./config.log "$OUTPUT_ROOT/config.log" 2> /dev/null
+  fi
+
+  # Rotate our log file (configure.log)
+  if test -e "$OUTPUT_ROOT/configure.log.old"; then
+    $RM -f "$OUTPUT_ROOT/configure.log.old"
+  fi
+  if test -e "$OUTPUT_ROOT/configure.log"; then
+    $MV -f "$OUTPUT_ROOT/configure.log" "$OUTPUT_ROOT/configure.log.old" 2> /dev/null
+  fi
+
+  # Move configure.log from current directory to the build output root
+  if test -e ./configure.log; then
+    echo found it
+    $MV -f ./configure.log "$OUTPUT_ROOT/configure.log" 2> /dev/null
+  fi
+
+  # Make the compare script executable
+  $CHMOD +x $OUTPUT_ROOT/compare.sh
+
 
 # Finally output some useful information to the user
 
@@ -54854,5 +54897,21 @@ $CHMOD +x $OUTPUT_ROOT/compare.sh
     printf "WARNING: The toolchain version used is known to have issues. Please\n"
     printf "consider using a supported version unless you know what you are doing.\n"
     printf "\n"
+  fi
+
+
+  # Locate config.log.
+  if test -e "./config.log"; then
+    CONFIG_LOG_PATH="."
+  fi
+
+  if test -e "$CONFIG_LOG_PATH/config.log"; then
+    $GREP '^configure:.*: WARNING:' "$CONFIG_LOG_PATH/config.log" > /dev/null 2>&1
+    if test $? -eq 0; then
+      printf "The following warnings were produced. Repeated here for convenience:\n"
+      # We must quote sed expression (using []) to stop m4 from eating the [].
+      $GREP '^configure:.*: WARNING:' "$CONFIG_LOG_PATH/config.log" | $SED -e  's/^configure:[0-9]*: //'
+      printf "\n"
+    fi
   fi
 
