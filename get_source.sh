@@ -28,6 +28,9 @@
 # (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 
+# exit immediately if any unexpected error occurs
+set -e
+
 usage() {
 	echo "Usage: $0 [-h|--help] [... other j9 options] [-parallel=<true|false>] [--openssl-version=<openssl version to download>]"
 	echo "where:"
