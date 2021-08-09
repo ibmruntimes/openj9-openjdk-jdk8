@@ -1121,6 +1121,7 @@ with_user_release_suffix
 with_build_number
 with_launcher_name
 with_product_name
+with_product_suffix
 with_vendor_name
 with_vendor_url
 with_vendor_bug_url
@@ -2010,6 +2011,9 @@ Optional Packages:
                           -fullversion output). [not specified]
   --with-product-name     Set product name. Among other uses, defines the
                           'java.runtime.name' system property. [not specified]
+  --with-product-suffix   Set product suffix. Among other uses, contributes to
+                          the 'java.runtime.name' system property. [not
+                          specified]
   --with-vendor-name      Set vendor name. Among others, used to set the
                           'java.vendor' and 'java.vm.vendor' system
                           properties. [not specified]
@@ -4577,7 +4581,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1628518099
+DATE_WHEN_GENERATED=1628518348
 
 ###############################################################################
 #
@@ -22938,6 +22942,23 @@ fi
     # Only set PRODUCT_NAME if '--with-product-name' was used and is not empty.
     # Otherwise we will use the value from "version-numbers" included above.
     PRODUCT_NAME="$with_product_name"
+  fi
+
+  # The product suffix, if any
+
+# Check whether --with-product-suffix was given.
+if test "${with_product_suffix+set}" = set; then :
+  withval=$with_product_suffix;
+fi
+
+  if test "x$with_product_suffix" = xyes; then
+    as_fn_error $? "--with-product-suffix must have a value" "$LINENO" 5
+  elif  ! [[ $with_product_suffix =~ ^[[:print:]]*$ ]] ; then
+    as_fn_error $? "--with-product-suffix contains non-printing characters: $with_product_suffix" "$LINENO" 5
+  elif test "x$with_product_suffix" != x -a "x$with_product_suffix" != xno; then
+    # Only set PRODUCT_SUFFIX if '--with-product-suffix' was used and is not empty.
+    # Otherwise we will use the value from "version-numbers" included above.
+    PRODUCT_SUFFIX="$with_product_suffix"
   fi
 
   # The vendor name, if any
