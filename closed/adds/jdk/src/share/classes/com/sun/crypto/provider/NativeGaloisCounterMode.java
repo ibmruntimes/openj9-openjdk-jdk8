@@ -221,20 +221,22 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * cipher can be reused (with its original key and iv).
      */
     void reset() {
-        if (aadBuffer == null) {
-            aadBuffer = new ByteArrayOutputStream();
-        } else {
-            aadBuffer.reset();
-        }
-        //if (gctrPAndC != null) gctrPAndC.reset();
-        //if (ghashAllToS != null) ghashAllToS.reset();
-        processed = 0;
-        sizeOfAAD = 0;
-        if (ibuffer != null) {
-            ibuffer.reset();
-        }
-        if (ibuffer_enc != null) {
-            ibuffer_enc.reset();
+        synchronized (this) {
+            if (aadBuffer == null) {
+                aadBuffer = new ByteArrayOutputStream();
+            } else {
+                aadBuffer.reset();
+            }
+            //if (gctrPAndC != null) gctrPAndC.reset();
+            //if (ghashAllToS != null) ghashAllToS.reset();
+            processed = 0;
+            sizeOfAAD = 0;
+            if (ibuffer != null) {
+                ibuffer.reset();
+            }
+            if (ibuffer_enc != null) {
+                ibuffer_enc.reset();
+            }
         }
     }
 
@@ -242,18 +244,20 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * Save the current content of this cipher.
      */
     void save() {
-        processedSave = processed;
-        sizeOfAADSave = sizeOfAAD;
-        aadBufferSave =
-            ((aadBuffer == null || aadBuffer.size() == 0)?
-             null : aadBuffer.toByteArray());
-        //if (gctrPAndC != null) gctrPAndC.save();
-        //if (ghashAllToS != null) ghashAllToS.save();
-        if (ibuffer != null) {
-            ibufferSave = ibuffer.toByteArray();
-        }
-        if (ibuffer_enc != null) {
-            ibufferSave_enc = ibuffer_enc.toByteArray();
+        synchronized (this) {
+            processedSave = processed;
+            sizeOfAADSave = sizeOfAAD;
+            aadBufferSave =
+                ((aadBuffer == null || aadBuffer.size() == 0)?
+                null : aadBuffer.toByteArray());
+            //if (gctrPAndC != null) gctrPAndC.save();
+            //if (ghashAllToS != null) ghashAllToS.save();
+            if (ibuffer != null) {
+                ibufferSave = ibuffer.toByteArray();
+            }
+            if (ibuffer_enc != null) {
+                ibufferSave_enc = ibuffer_enc.toByteArray();
+            }
         }
     }
 
@@ -261,23 +265,25 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * Restores the content of this cipher to the previous saved one.
      */
     void restore() {
-        processed = processedSave;
-        sizeOfAAD = sizeOfAADSave;
-        if (aadBuffer != null) {
-            aadBuffer.reset();
-            if (aadBufferSave != null) {
-                aadBuffer.write(aadBufferSave, 0, aadBufferSave.length);
+        synchronized (this) {
+            processed = processedSave;
+            sizeOfAAD = sizeOfAADSave;
+            if (aadBuffer != null) {
+                aadBuffer.reset();
+                if (aadBufferSave != null) {
+                    aadBuffer.write(aadBufferSave, 0, aadBufferSave.length);
+                }
             }
-        }
-        //If (gctrPAndC != null) gctrPAndC.restore();
-        //If (ghashAllToS != null) ghashAllToS.restore();
-        if (ibuffer != null && ibufferSave != null) {
-            ibuffer.reset();
-            ibuffer.write(ibufferSave, 0, ibufferSave.length);
-        }
-        if (ibuffer_enc != null && ibufferSave_enc != null) {
-            ibuffer_enc.reset();
-            ibuffer_enc.write(ibufferSave_enc, 0, ibufferSave_enc.length);
+            //If (gctrPAndC != null) gctrPAndC.restore();
+            //If (ghashAllToS != null) ghashAllToS.restore();
+            if (ibuffer != null && ibufferSave != null) {
+                ibuffer.reset();
+                ibuffer.write(ibufferSave, 0, ibufferSave.length);
+            }
+            if (ibuffer_enc != null && ibufferSave_enc != null) {
+                ibuffer_enc.reset();
+                ibuffer_enc.write(ibufferSave_enc, 0, ibufferSave_enc.length);
+            }
         }
     }
 
@@ -337,23 +343,24 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
         //gctrPAndC = new GCTR(embeddedCipher, j0Plus1);
         //ghashAllToS = new GHASH(subkeyH);
 
-        this.key = keyValue.clone();
-        this.iv = ivValue.clone();
-        this.tagLenBytes = tagLenBytes;
-        this.decrypting = decrypting;
+        synchronized (this) {
+            this.key = keyValue.clone();
+            this.iv = ivValue.clone();
+            this.tagLenBytes = tagLenBytes;
+            this.decrypting = decrypting;
 
-        if (aadBuffer == null) {
-            aadBuffer = new ByteArrayOutputStream();
-        } else {
-            aadBuffer.reset();
-        }
-        //processed = 0;
-        //sizeOfAAD = 0;
-        if (decrypting) {
-            ibuffer = new ByteArrayOutputStream();
-        }
-        if (!decrypting) {
-            ibuffer_enc = new ByteArrayOutputStream();
+            if (aadBuffer == null) {
+                aadBuffer = new ByteArrayOutputStream();
+            } else {
+                aadBuffer.reset();
+            }
+            //processed = 0;
+            //sizeOfAAD = 0;
+            if (decrypting) {
+                ibuffer = new ByteArrayOutputStream();
+            } else {
+                ibuffer_enc = new ByteArrayOutputStream();
+            }
         }
     }
 
@@ -382,12 +389,14 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * @since 1.8
      */
     void updateAAD(byte[] src, int offset, int len) {
-        if (aadBuffer != null) {
-            aadBuffer.write(src, offset, len);
-        } else {
-            // update has already been called
-            throw new IllegalStateException
-                ("Update has been called; no more AAD data");
+        synchronized (this) {
+            if (aadBuffer != null) {
+                aadBuffer.write(src, offset, len);
+            } else {
+                // update has already been called
+                throw new IllegalStateException
+                    ("Update has been called; no more AAD data");
+            }
         }
     }
 
@@ -410,18 +419,19 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * @return the number of bytes placed into the <code>out</code> buffer
      */
     int encrypt(byte[] in, int inOfs, int len, byte[] out, int outOfs) {
+        synchronized (this) {
+            checkDataLength(ibuffer_enc.size(), len);
 
-        checkDataLength(ibuffer_enc.size(), len);
+            if ((len % blockSize) != 0) {
+                throw new ProviderException("Internal error in input buffering");
+            }
 
-        if ((len % blockSize) != 0) {
-             throw new ProviderException("Internal error in input buffering");
-        }
-
-        if (len > 0) {
-            // store internally until encryptFinal is called because
-            // spec mentioned that only return recovered data after tag
-            // is successfully verified
-            ibuffer_enc.write(in, inOfs, len);
+            if (len > 0) {
+                // store internally until encryptFinal is called because
+                // spec mentioned that only return recovered data after tag
+                // is successfully verified
+                ibuffer_enc.write(in, inOfs, len);
+            }
         }
 
         return 0;
@@ -439,37 +449,51 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      */
     int encryptFinal(byte[] in, int inOfs, int len, byte[] out, int outOfs)
         throws IllegalBlockSizeException, ShortBufferException {
-        if (len > MAX_BUF_SIZE - tagLenBytes) {
-            throw new ShortBufferException
-                ("Can't fit both data and tag into one buffer");
+        byte[] keyCopy;
+        byte[] ivCopy;
+        byte[] aad;
+        int localTagLenBytes;
+        int ret;
+        synchronized (this) {
+            localTagLenBytes = tagLenBytes;
+
+            if (len > (MAX_BUF_SIZE - localTagLenBytes)) {
+                throw new ShortBufferException
+                    ("Can't fit both data and tag into one buffer");
+            }
+
+            if ((out.length - outOfs) < (len + localTagLenBytes)) {
+                throw new ShortBufferException("Output buffer too small");
+            }
+
+            checkDataLength(ibuffer_enc.size(), len);
+
+            if (len > 0) {
+                ibuffer_enc.write(in, inOfs, len);
+            }
+
+            // refresh 'in' to all buffered-up bytes
+            in = ibuffer_enc.toByteArray();
+            ibuffer_enc.reset();
+
+            aad = (((aadBuffer == null) || (aadBuffer.size() == 0)) ? emptyAAD : aadBuffer.toByteArray());
+
+            // avoid any race conditions in OpenSSL when the key/iv are used concurrently
+            keyCopy = key.clone();
+            ivCopy = iv.clone();
+
+            ret = nativeCrypto.GCMEncrypt(keyCopy, keyCopy.length,
+                    ivCopy, ivCopy.length,
+                    in, 0, in.length,
+                    out, outOfs,
+                    aad, aad.length, localTagLenBytes);
         }
 
-        if (len != 0) {
-            ibuffer_enc.write(in, inOfs, len);
-        }
-
-        // refresh 'in' to all buffered-up bytes
-        in = ibuffer_enc.toByteArray();
-        inOfs = 0;
-        len = in.length;
-        ibuffer_enc.reset();
-
-        if (out.length - outOfs < (len + tagLenBytes)) {
-            throw new ShortBufferException("Output buffer too small");
-        }
-
-        byte[] aad = ((aadBuffer == null || aadBuffer.size() == 0) ? emptyAAD : aadBuffer.toByteArray());
-
-        int ret = nativeCrypto.GCMEncrypt(key, key.length,
-                iv, iv.length,
-                in, inOfs, len,
-                out, outOfs,
-                aad, aad.length, tagLenBytes);
         if (ret == -1) {
             throw new ProviderException("Error in Native GaloisCounterMode");
         }
 
-        return (len + tagLenBytes);
+        return in.length + localTagLenBytes;
     }
 
     /**
@@ -490,18 +514,20 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
      * @return the number of bytes placed into the <code>out</code> buffer
      */
     int decrypt(byte[] in, int inOfs, int len, byte[] out, int outOfs) {
-        checkDataLength(ibuffer.size(), len);
+        synchronized (this) {
+            checkDataLength(ibuffer.size(), len);
 
-        if ((len % blockSize) != 0) {
-             throw new ProviderException("Internal error in input buffering");
-        }
-        //processAAD();
+            if ((len % blockSize) != 0) {
+                throw new ProviderException("Internal error in input buffering");
+            }
+            //processAAD();
 
-        if (len > 0) {
-            // store internally until decryptFinal is called because
-            // spec mentioned that only return recovered data after tag
-            // is successfully verified
-            ibuffer.write(in, inOfs, len);
+            if (len > 0) {
+                // store internally until decryptFinal is called because
+                // spec mentioned that only return recovered data after tag
+                // is successfully verified
+                ibuffer.write(in, inOfs, len);
+            }
         }
 
         return 0;
@@ -527,44 +553,58 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
                      byte[] out, int outOfs)
         throws IllegalBlockSizeException, AEADBadTagException,
         ShortBufferException {
-        if (len < tagLenBytes) {
-            throw new AEADBadTagException("Input too short - need tag");
+        byte[] keyCopy;
+        byte[] ivCopy;
+        byte[] aad;
+        int localTagLenBytes;
+        int ret;
+        // need to synchronize this block as if there are concurrent calls to decryptFinal
+        // the shared variables aadBuffer and ibuffer may corrupt input and cause a segfault
+        // in openssl code
+        synchronized (this) {
+            int bufSize = ibuffer.size();
+            localTagLenBytes = tagLenBytes;
+
+            if (len < (localTagLenBytes - bufSize)) {
+                throw new AEADBadTagException("Input too short - need tag");
+            }
+
+            if (len > (MAX_BUF_SIZE - bufSize)) {
+                throw new ProviderException("SunJCE provider only supports "
+                    + "a positive input size up to " + MAX_BUF_SIZE + " bytes");
+            }
+
+            if ((out.length - outOfs) < (len + bufSize - localTagLenBytes)) {
+                throw new ShortBufferException("Output buffer too small");
+            }
+
+            if (len > 0) {
+                ibuffer.write(in, inOfs, len);
+            }
+
+            // refresh 'in' to all buffered-up bytes
+            in = ibuffer.toByteArray();
+            ibuffer.reset();
+
+            // avoid any race conditions in OpenSSL when the key/iv are used concurrently
+            keyCopy = key.clone();
+            ivCopy = iv.clone();
+            aad = ((aadBuffer == null) || (aadBuffer.size() == 0)) ?
+                emptyAAD : aadBuffer.toByteArray();
+            aadBuffer = null;
+
+            ret = nativeCrypto.GCMDecrypt(keyCopy, keyCopy.length,
+                    ivCopy, ivCopy.length,
+                    in, 0, in.length,
+                    out, outOfs,
+                    aad, aad.length, localTagLenBytes);
         }
-        // do this check here can also catch the potential integer overflow
-        // scenario for the subsequent output buffer capacity check.
-        checkDataLength(ibuffer.size(), (len - tagLenBytes));
-
-        if (out.length - outOfs < ((ibuffer.size() + len) - tagLenBytes)) {
-            throw new ShortBufferException("Output buffer too small");
-        }
-
-        byte[] aad = ((aadBuffer == null || aadBuffer.size() == 0) ?
-                       emptyAAD : aadBuffer.toByteArray());
-
-        aadBuffer = null;
-
-        if (len != 0) {
-            ibuffer.write(in, inOfs, len);
-        }
-
-        // refresh 'in' to all buffered-up bytes
-        in = ibuffer.toByteArray();
-        inOfs = 0;
-        len = in.length;
-        ibuffer.reset();
-
-        int ret = nativeCrypto.GCMDecrypt(key, key.length,
-                iv, iv.length,
-                in, inOfs, len,
-                out, outOfs,
-                aad, aad.length, tagLenBytes);
 
         if (ret == -2) {
             throw new AEADBadTagException("Tag mismatch!");
         } else if (ret == -1) {
             throw new ProviderException("Error in Native GaloisCounterMode");
         }
-
 
         return ret;
     }
@@ -576,12 +616,14 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
     }
 
     int getBufferedLength() {
-        if (ibuffer != null && decrypting) {
-            return ibuffer.size();
-        }
+        synchronized (this) {
+            if (ibuffer != null && decrypting) {
+                return ibuffer.size();
+            }
 
-        if (ibuffer_enc != null && !decrypting) {
-            return ibuffer_enc.size();
+            if (ibuffer_enc != null && !decrypting) {
+                return ibuffer_enc.size();
+            }
         }
 
         return 0;
