@@ -33,6 +33,12 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util.concurrent;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -2194,7 +2200,8 @@ public class ForkJoinPool extends AbstractExecutorService {
             int p = (pool = (wt = (ForkJoinWorkerThread)t).pool).
                 config & SMASK;
             int n = (q = wt.workQueue).top - q.base;
-            int a = (int)(pool.ctl >> AC_SHIFT) + p;
+            // use max to ignore transient negative
+            int a = p + Math.max((int)(pool.ctl >> RC_SHIFT), 0);
             return n - (a > (p >>>= 1) ? 0 :
                         a > (p >>>= 1) ? 1 :
                         a > (p >>>= 1) ? 2 :
