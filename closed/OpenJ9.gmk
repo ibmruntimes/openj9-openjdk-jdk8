@@ -457,7 +457,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
-			-tag:define "$(JPP_TAGS)"
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
 	@$(ECHO) Generating J9JCL tools
 	@$(BOOT_JDK)/bin/java \
 		-cp "$(call FixPath,$(JPP_JAR))" \
