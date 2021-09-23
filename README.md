@@ -1,5 +1,5 @@
 <!--
-(c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+(c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 
 This code is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 2 only, as
@@ -22,6 +22,6 @@ You should have received a copy of the GNU General Public License version
 
 ## How to Build Eclipse OpenJ9
 
-1. For details of how to build Eclipse OpenJ9 see https://www.eclipse.org/openj9/oj9_build.html
+1. For details of how to build Eclipse OpenJ9 see https://github.com/eclipse-openj9/openj9/tree/master/doc/build-instructions
 
 
