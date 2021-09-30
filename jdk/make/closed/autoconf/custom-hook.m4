@@ -46,6 +46,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_HEALTHCENTER
   OPENJ9_CONFIGURE_JITSERVER
   OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
+  OPENJ9_CONFIGURE_WARNINGS
 
   if test "x$OPENJDK_TARGET_OS" = xwindows ; then
     BASIC_SETUP_OUTPUT_DIR
@@ -329,6 +330,43 @@ AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_OPENJDK_METHODHANDLES)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_WARNINGS],
+[
+  AC_ARG_ENABLE([warnings-as-errors-omr], [AS_HELP_STRING([--disable-warnings-as-errors-omr],
+      [do not consider OMR compile warnings to be errors @<:@enabled@:>@])])
+  AC_MSG_CHECKING([if OMR compile warnings are considered errors])
+  if test "x$enable_warnings_as_errors_omr" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly set)])
+    WARNINGS_AS_ERRORS_OMR=true
+  elif test "x$enable_warnings_as_errors_omr" = xno ; then
+    AC_MSG_RESULT([no])
+    WARNINGS_AS_ERRORS_OMR=false
+  elif test "x$enable_warnings_as_errors_omr" = x ; then
+    AC_MSG_RESULT([yes (default)])
+    WARNINGS_AS_ERRORS_OMR=true
+  else
+    AC_MSG_ERROR([--disable-warnings-as-errors-omr accepts no argument])
+  fi
+  AC_SUBST(WARNINGS_AS_ERRORS_OMR)
+
+  AC_ARG_ENABLE([warnings-as-errors-openj9], [AS_HELP_STRING([--disable-warnings-as-errors-openj9],
+      [do not consider OpenJ9 native compile warnings to be errors @<:@enabled@:>@])])
+  AC_MSG_CHECKING([if OpenJ9 native compile warnings are considered errors])
+  if test "x$enable_warnings_as_errors_openj9" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly set)])
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  elif test "x$enable_warnings_as_errors_openj9" = xno ; then
+    AC_MSG_RESULT([no])
+    WARNINGS_AS_ERRORS_OPENJ9=false
+  elif test "x$enable_warnings_as_errors_openj9" = x ; then
+    AC_MSG_RESULT([yes (default)])
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  else
+    AC_MSG_ERROR([--disable-warnings-as-errors-openj9 accepts no argument])
+  fi
+  AC_SUBST(WARNINGS_AS_ERRORS_OPENJ9)
 ])
 
 AC_DEFUN([OPENJ9_PLATFORM_SETUP],
