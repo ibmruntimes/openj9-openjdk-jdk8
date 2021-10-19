@@ -351,6 +351,16 @@ ifneq (,$(filter debug trace, $(LOG_LEVEL)))
   CMAKE_ARGS += -DCMAKE_VERBOSE_MAKEFILE=ON
 endif
 
+  # Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
+  ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
+    CMAKE_ARGS += -DOMR_WARNINGS_AS_ERRORS=OFF
+  endif
+
+  # Propagate configure option '--disable-warnings-as-errors-openj9' to OpenJ9.
+  ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
+    CMAKE_ARGS += -DJ9VM_WARNINGS_AS_ERRORS=OFF
+ endif
+
   # Do this last so extra args take precedence.
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 

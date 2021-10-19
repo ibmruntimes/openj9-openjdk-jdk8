@@ -893,6 +893,8 @@ CYGWIN_LINK
 OUTPUT_ROOT
 CONF_NAME
 SPEC
+WARNINGS_AS_ERRORS_OPENJ9
+WARNINGS_AS_ERRORS_OMR
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 HEALTHCENTER_JAR
@@ -1095,6 +1097,8 @@ enable_ddr
 with_healthcenter
 enable_jitserver
 enable_openjdk_methodhandles
+enable_warnings_as_errors_omr
+enable_warnings_as_errors_openj9
 with_conf_name
 with_toolchain_version
 with_freemarker_jar
@@ -1920,6 +1924,12 @@ Optional Features:
   --enable-jitserver      enable JITServer support [disabled]
   --enable-openjdk-methodhandles
                           enable support for OpenJDK MethodHandles [disabled]
+  --disable-warnings-as-errors-omr
+                          do not consider OMR compile warnings to be errors
+                          [enabled]
+  --disable-warnings-as-errors-openj9
+                          do not consider OpenJ9 native compile warnings to be
+                          errors [enabled]
   --disable-headful       disable building headful support (graphical UI
                           support) [enabled]
   --enable-hotspot-test-in-build
@@ -4571,6 +4581,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4581,7 +4593,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1628518348
+DATE_WHEN_GENERATED=1633021491
 
 ###############################################################################
 #
@@ -16385,6 +16397,55 @@ $as_echo "no (default)" >&6; }
     as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
   fi
 
+
+
+
+  # Check whether --enable-warnings-as-errors-omr was given.
+if test "${enable_warnings_as_errors_omr+set}" = set; then :
+  enableval=$enable_warnings_as_errors_omr;
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if OMR compile warnings are considered errors" >&5
+$as_echo_n "checking if OMR compile warnings are considered errors... " >&6; }
+  if test "x$enable_warnings_as_errors_omr" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly set)" >&5
+$as_echo "yes (explicitly set)" >&6; }
+    WARNINGS_AS_ERRORS_OMR=true
+  elif test "x$enable_warnings_as_errors_omr" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    WARNINGS_AS_ERRORS_OMR=false
+  elif test "x$enable_warnings_as_errors_omr" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
+$as_echo "yes (default)" >&6; }
+    WARNINGS_AS_ERRORS_OMR=true
+  else
+    as_fn_error $? "--disable-warnings-as-errors-omr accepts no argument" "$LINENO" 5
+  fi
+
+
+  # Check whether --enable-warnings-as-errors-openj9 was given.
+if test "${enable_warnings_as_errors_openj9+set}" = set; then :
+  enableval=$enable_warnings_as_errors_openj9;
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if OpenJ9 native compile warnings are considered errors" >&5
+$as_echo_n "checking if OpenJ9 native compile warnings are considered errors... " >&6; }
+  if test "x$enable_warnings_as_errors_openj9" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly set)" >&5
+$as_echo "yes (explicitly set)" >&6; }
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  elif test "x$enable_warnings_as_errors_openj9" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    WARNINGS_AS_ERRORS_OPENJ9=false
+  elif test "x$enable_warnings_as_errors_openj9" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
+$as_echo "yes (default)" >&6; }
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  else
+    as_fn_error $? "--disable-warnings-as-errors-openj9 accepts no argument" "$LINENO" 5
+  fi
 
 
 
