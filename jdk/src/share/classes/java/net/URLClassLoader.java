@@ -1078,17 +1078,23 @@ final class ClassFinder implements PrivilegedExceptionAction
         this.classloader = loader;                                               
      }                                                                           
                                                                                  
-     public Object run() throws ClassNotFoundException {                         
-	String path = name.replace('.', '/').concat(".class");                   
-        try {                                                                    
-            Resource res = ucp.getResource(path, false, classloader, showClassLoading(name)); 
-            if (res != null)                                                     
-                return defineClass(name, res);                                   
-        } catch (IOException e) {                                                
-                throw new ClassNotFoundException(name, e);                       
-        }                                                                        
-        return null;                                                             
-     }                                                                           
+     public Object run() throws ClassNotFoundException {                                     
+        String path = name.replace('.', '/').concat(".class");                               
+        Resource res = ucp.getResource(path, false, classloader, showClassLoading(name));    
+        if (res != null) {                                                                   
+            try {                                                                            
+                return defineClass(name, res);                                               
+            } catch (IOException e) {                                                        
+                throw new ClassNotFoundException(name, e);                                   
+            } catch (ClassFormatError e2) {                                                  
+                if (res.getDataError() != null) {                                            
+                    e2.addSuppressed(res.getDataError());                                    
+                }                                                                            
+                throw e2;                                                                    
+            }                                                                                
+        }                                                                                    
+        return null;                                                                         
+     }                                                                                       
   }                                                                              
 }
 
