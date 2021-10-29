@@ -898,6 +898,7 @@ WARNINGS_AS_ERRORS_OMR
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 HEALTHCENTER_JAR
+OPENJ9_ENABLE_DEMOS
 OPENJ9_ENABLE_DDR
 OPENJ9_GDK_HOME
 OPENJ9_CUDA_HOME
@@ -1094,6 +1095,7 @@ with_cuda
 with_gdk
 enable_cuda
 enable_ddr
+enable_demos
 with_healthcenter
 enable_jitserver
 enable_openjdk_methodhandles
@@ -1921,6 +1923,7 @@ Optional Features:
   --enable-criu-support   enable CRIU support [disabled]
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
+  --enable-demos          include demos in jdk image [disabled]
   --enable-jitserver      enable JITServer support [disabled]
   --enable-openjdk-methodhandles
                           enable support for OpenJDK MethodHandles [disabled]
@@ -4583,6 +4586,8 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4593,7 +4598,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1633021491
+DATE_WHEN_GENERATED=1635449047
 
 ###############################################################################
 #
@@ -16182,6 +16187,26 @@ $as_echo "no (default for $OPENJ9_PLATFORM_CODE)" >&6; }
     esac
   else
     as_fn_error $? "--enable-ddr accepts no argument" "$LINENO" 5
+  fi
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if demos should be included in jdk image" >&5
+$as_echo_n "checking if demos should be included in jdk image... " >&6; }
+  # Check whether --enable-demos was given.
+if test "${enable_demos+set}" = set; then :
+  enableval=$enable_demos;
+fi
+
+  if test "x$enable_demos" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    OPENJ9_ENABLE_DEMOS=true
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    OPENJ9_ENABLE_DEMOS=false
   fi
 
 
