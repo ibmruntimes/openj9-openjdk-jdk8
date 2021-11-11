@@ -524,8 +524,12 @@ $(JDK_IMAGE_DIR)/demo/%: $(JDK_OUTPUTDIR)/demo/%
 	fi
 
 # Find all files including directories
-JDK_DEMO_TARGETS := $(patsubst $(JDK_OUTPUTDIR)/demo/%, $(JDK_IMAGE_DIR)/demo/%, \
+ifeq (true,$(OPENJ9_ENABLE_DEMOS))
+  JDK_DEMO_TARGETS := $(patsubst $(JDK_OUTPUTDIR)/demo/%, $(JDK_IMAGE_DIR)/demo/%, \
     $(shell $(FIND) $(JDK_OUTPUTDIR)/demo ! \( -name "_the*" -o -name "javac_state" \) ))
+else
+  JDK_DEMO_TARGETS :=
+endif
 
 
 
