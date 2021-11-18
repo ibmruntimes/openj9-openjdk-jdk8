@@ -60,6 +60,7 @@ OPENJ9_UNWANTED_MAN_PAGES := \
 	jcmd \
 	jhat \
 	jinfo \
+	jmap \
 	jps \
 	jstack \
 	jstat \
