@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -47,24 +47,19 @@ endif
 HEALTHCENTER_JAR := @HEALTHCENTER_JAR@
 
 # OpenSSL
-OPENSSL_DIR             := @OPENSSL_DIR@
 BUILD_OPENSSL           := @BUILD_OPENSSL@
-OPENSSL_CFLAGS          := @OPENSSL_CFLAGS@
 OPENSSL_BUNDLE_LIB_PATH := @OPENSSL_BUNDLE_LIB_PATH@
+OPENSSL_CFLAGS          := @OPENSSL_CFLAGS@
+OPENSSL_DIR             := @OPENSSL_DIR@
+PERL                    := @PERL@
 WITH_OPENSSL            := @WITH_OPENSSL@
 
-# DDR
-OPENJ9_ENABLE_DDR       := @OPENJ9_ENABLE_DDR@
-
-OPENJ9_ENABLE_DEMOS     := @OPENJ9_ENABLE_DEMOS@
-
-# JITSERVER
-OPENJ9_ENABLE_JITSERVER := @OPENJ9_ENABLE_JITSERVER@
-
-# CRIU Support
-OPENJ9_ENABLE_CRIU_SUPPORT := @OPENJ9_ENABLE_CRIU_SUPPORT@
-
-# OpenJDK MethodHandles
+# feature enablement flags
+OPENJ9_ENABLE_CRIU_SUPPORT          := @OPENJ9_ENABLE_CRIU_SUPPORT@
+OPENJ9_ENABLE_DDR                   := @OPENJ9_ENABLE_DDR@
+OPENJ9_ENABLE_DEMOS                 := @OPENJ9_ENABLE_DEMOS@
+OPENJ9_ENABLE_INLINE_TYPES          := @OPENJ9_ENABLE_INLINE_TYPES@
+OPENJ9_ENABLE_JITSERVER             := @OPENJ9_ENABLE_JITSERVER@
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES := @OPENJ9_ENABLE_OPENJDK_METHODHANDLES@
 
 # for constructing version output
