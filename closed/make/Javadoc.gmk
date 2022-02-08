@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
 # ===========================================================================
 
 #############################################################################
@@ -60,7 +60,7 @@ OPENJ9_FULL_COMPANY_NAME := IBM Corp.
 OPENJ9_JAVADOC_BOTTOM = \
     <a href="$(OPENJ9_BASE_URL)" target="_blank">Eclipse OpenJ9 website.</a><br> \
     To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)" target="_blank">Eclipse OpenJ9 issue.</a><br> \
-    Copyright &copy; $(FIRST_COPYRIGHT_YEAR), $(COPYRIGHT_YEAR), $(OPENJ9_FULL_COMPANY_NAME) and others.
+    Copyright &copy; $(FIRST_COPYRIGHT_YEAR), $(COPYRIGHT_YEAR) $(OPENJ9_FULL_COMPANY_NAME) and others.
 
 #############################################################################
 #
