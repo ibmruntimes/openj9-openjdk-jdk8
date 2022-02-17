@@ -58,6 +58,8 @@ else ifeq ($(OPENJDK_TARGET_OS), linux)
 else ifeq ($(OPENJDK_TARGET_OS), macosx)
   ifneq (,$(filter arm64 x86_64, $(OPENJDK_TARGET_CPU)))
     OPENSSL_TARGET := darwin64-$(OPENJDK_TARGET_CPU)-cc
+  else ifeq ($(OPENJDK_TARGET_CPU), aarch64)
+    OPENSSL_TARGET := darwin64-arm64-cc
   endif
 else ifeq ($(OPENJDK_TARGET_OS), windows)
   ifeq ($(OPENJDK_TARGET_CPU), x86_64)
