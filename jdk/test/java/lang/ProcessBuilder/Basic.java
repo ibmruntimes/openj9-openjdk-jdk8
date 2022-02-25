@@ -23,7 +23,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -279,6 +279,7 @@ public class Basic {
         for (Map.Entry<String,String> e : environment.entrySet())
             // Ignore magic environment variables added by the launcher
             if (! e.getKey().equals("NLSPATH") &&
+                ! e.getKey().equals("OPENJ9_JAVA_COMMAND_LINE") &&
                 ! e.getKey().equals("XFILESEARCHPATH") &&
                 ! e.getKey().equals("LD_LIBRARY_PATH"))
                 sb.append(e.getKey())
