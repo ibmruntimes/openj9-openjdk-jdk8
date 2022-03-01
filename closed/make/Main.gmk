@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -35,9 +35,9 @@ clean-j9vm :
 # Override definition from MakeBase.gmk for OpenJ9.
 define GetSourceTips
 	$(PRINTF) "%s:%s\n" \
-		OpenJDK "$(shell git -C $(TOPDIR) rev-parse --short HEAD)" \
-		OpenJ9  "$(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)" \
-		OMR     "$(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)" \
+		OpenJDK "$(shell $(GIT) -C $(TOPDIR) rev-parse --short HEAD)" \
+		OpenJ9  "$(shell $(GIT) -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)" \
+		OMR     "$(shell $(GIT) -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)" \
 		> $@
 endef
 
