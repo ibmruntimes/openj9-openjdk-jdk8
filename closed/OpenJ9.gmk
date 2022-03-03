@@ -262,7 +262,7 @@ generate-j9-version-headers :
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 CMAKE_ARGS := \
-	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
+	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
 	-DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain.cmake" \
 	-DBOOT_JDK=$(BOOT_JDK) \
 	-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
