@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -258,6 +258,16 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         if ((plainLen % blockSize) != 0) {
             throw new ProviderException("Internal error in input buffering");
+        }
+
+        /**
+         * OpenSSL doesn't support overlapping buffers, make a copy of plain.
+         */
+        if (plain == cipher) {
+            byte[] copyOfInput = new byte[plainLen];
+            System.arraycopy(plain, plainOffset, copyOfInput, 0, plainLen);
+            plain = copyOfInput;
+            plainOffset = 0;
         }
 
         int ret;
