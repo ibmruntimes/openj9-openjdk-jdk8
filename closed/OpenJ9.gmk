@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -30,20 +30,20 @@ ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
 endif
 
-OPENJDK_SHA := $(shell git -C $(TOPDIR) rev-parse --short HEAD)
+OPENJDK_SHA := $(shell $(GIT) -C $(TOPDIR) rev-parse --short HEAD)
 ifeq (,$(OPENJDK_SHA))
   $(error Could not determine OpenJDK SHA)
 endif
 
-OPENJ9_SHA := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
+OPENJ9_SHA := $(shell $(GIT) -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
 ifeq (,$(OPENJ9_SHA))
   $(error Could not determine OpenJ9 SHA)
 endif
 
 # Find OpenJ9 tag associated with current commit (suppressing stderr in case there is no such tag).
-OPENJ9_TAG := $(shell git -C $(OPENJ9_TOPDIR) describe --exact-match HEAD 2>/dev/null)
+OPENJ9_TAG := $(shell $(GIT) -C $(OPENJ9_TOPDIR) describe --exact-match HEAD 2>/dev/null)
 ifeq (,$(OPENJ9_TAG))
-  OPENJ9_BRANCH := $(shell git -C $(OPENJ9_TOPDIR) rev-parse --abbrev-ref HEAD)
+  OPENJ9_BRANCH := $(shell $(GIT) -C $(OPENJ9_TOPDIR) rev-parse --abbrev-ref HEAD)
   ifeq (,$(OPENJ9_BRANCH))
     $(error Could not determine OpenJ9 branch)
   endif
@@ -52,7 +52,7 @@ else
   OPENJ9_VERSION_STRING := $(OPENJ9_TAG)
 endif
 
-OPENJ9OMR_SHA := $(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
+OPENJ9OMR_SHA := $(shell $(GIT) -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
 ifeq (,$(OPENJ9OMR_SHA))
   $(error Could not determine OMR SHA)
 endif
@@ -262,7 +262,7 @@ generate-j9-version-headers :
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 CMAKE_ARGS := \
-	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
+	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
 	-DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain.cmake" \
 	-DBOOT_JDK=$(BOOT_JDK) \
 	-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
