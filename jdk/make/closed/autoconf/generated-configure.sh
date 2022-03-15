@@ -895,9 +895,9 @@ CYGWIN_LINK
 OUTPUT_ROOT
 CONF_NAME
 SPEC
+OPENJ9_ENABLE_MICROJIT
 WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
-OPENJ9_ENABLE_MICROJIT
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 HEALTHCENTER_JAR
@@ -4558,6 +4558,8 @@ VS_SDK_PLATFORM_NAME_2017=
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
+
+
 
 
 
@@ -16432,38 +16434,6 @@ $as_echo "no (default)" >&6; }
 
 
 
-  # Check whether --enable-microjit was given.
-if test "${enable_microjit+set}" = set; then :
-  enableval=$enable_microjit;
-fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for microjit" >&5
-$as_echo_n "checking for microjit... " >&6; }
-  OPENJ9_ENABLE_MICROJIT=false
-  if test "x$enable_microjit" = xyes ; then
-    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
-$as_echo "yes (explicitly enabled)" >&6; }
-      OPENJ9_ENABLE_MICROJIT=true
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (unsupported platform)" >&5
-$as_echo "no (unsupported platform)" >&6; }
-      as_fn_error $? "MicroJIT is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
-    fi
-  elif test "x$enable_microjit" = xno ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
-$as_echo "no (explicitly disabled)" >&6; }
-  elif test "x$enable_microjit" = x ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
-$as_echo "no (default)" >&6; }
-  else
-    as_fn_error $? "--enable-microjit accepts no argument" "$LINENO" 5
-  fi
-
-
-
-
   # Check whether --enable-warnings-as-errors-omr was given.
 if test "${enable_warnings_as_errors_omr+set}" = set; then :
   enableval=$enable_warnings_as_errors_omr;
@@ -16510,6 +16480,38 @@ $as_echo "yes (default)" >&6; }
   else
     as_fn_error $? "--disable-warnings-as-errors-openj9 accepts no argument" "$LINENO" 5
   fi
+
+
+
+  # Check whether --enable-microjit was given.
+if test "${enable_microjit+set}" = set; then :
+  enableval=$enable_microjit;
+fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for microjit" >&5
+$as_echo_n "checking for microjit... " >&6; }
+  OPENJ9_ENABLE_MICROJIT=false
+  if test "x$enable_microjit" = xyes ; then
+    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+      OPENJ9_ENABLE_MICROJIT=true
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (unsupported platform)" >&5
+$as_echo "no (unsupported platform)" >&6; }
+      as_fn_error $? "MicroJIT is unsupported for $OPENJDK_TARGET_OS" "$LINENO" 5
+    fi
+  elif test "x$enable_microjit" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_microjit" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-microjit accepts no argument" "$LINENO" 5
+  fi
+
 
 
 
