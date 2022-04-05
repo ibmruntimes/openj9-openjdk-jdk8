@@ -3865,7 +3865,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 
 
@@ -4604,7 +4604,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1645802074
+DATE_WHEN_GENERATED=1649125886
 
 ###############################################################################
 #
@@ -45240,8 +45240,8 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
     fi
   elif test "x$TOOLCHAIN_TYPE" = xxlc; then
     LDFLAGS_JDK="${LDFLAGS_JDK} -q64 -brtl -bnolibpath -liconv -bexpall"
-    CFLAGS_JDK="${CFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt"
-    CXXFLAGS_JDK="${CXXFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt"
+    CFLAGS_JDK="${CFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt -qstackprotect"
+    CXXFLAGS_JDK="${CXXFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt -qstackprotect"
   elif test "x$TOOLCHAIN_TYPE" = xgcc; then
     LEGACY_EXTRA_CFLAGS="$LEGACY_EXTRA_CFLAGS -fstack-protector"
     LEGACY_EXTRA_CXXFLAGS="$LEGACY_EXTRA_CXXFLAGS -fstack-protector"
