@@ -4604,7 +4604,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1649125886
+DATE_WHEN_GENERATED=1649165785
 
 ###############################################################################
 #
@@ -46045,23 +46045,6 @@ $as_echo "$supports" >&6; }
     LDFLAGS_JDKEXE="${LDFLAGS_JDK} /STACK:$LDFLAGS_STACK_SIZE"
   else
     if test "x$TOOLCHAIN_TYPE" = xgcc -o "x$TOOLCHAIN_TYPE" = xclang; then
-      # If this is a --hash-style=gnu system, use --hash-style=both, why?
-      # We have previously set HAS_GNU_HASH if this is the case
-      if test -n "$HAS_GNU_HASH"; then
-        LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker --hash-style=both "
-      fi
-      if test "x$OPENJDK_TARGET_OS" = xlinux; then
-        # And since we now know that the linker is gnu, then add:
-        #   -z defs, to forbid undefined symbols in object files
-        #   -z noexecstack, to mark stack regions as non-executable
-        LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker -z -Xlinker defs -Xlinker -z -Xlinker noexecstack"
-        if test "x$DEBUG_LEVEL" = "xrelease"; then
-          # When building release libraries, tell the linker optimize them.
-          # Should this be supplied to the OSS linker as well?
-          LDFLAGS_JDK="${LDFLAGS_JDK} -Xlinker -O1"
-        fi
-      fi
-    elif test "x$TOOLCHAIN_TYPE" = xclang; then
       # If this is a --hash-style=gnu system, use --hash-style=both, why?
       # We have previously set HAS_GNU_HASH if this is the case
       if test -n "$HAS_GNU_HASH"; then
