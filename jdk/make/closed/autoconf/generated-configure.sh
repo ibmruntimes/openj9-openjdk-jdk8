@@ -4604,7 +4604,7 @@ VS_SDK_PLATFORM_NAME_2017=
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1649165785
+DATE_WHEN_GENERATED=1649701470
 
 ###############################################################################
 #
@@ -15820,9 +15820,7 @@ fi
 
   OPENJ9_ENABLE_CRIU_SUPPORT=false
   if test "x$enable_criu_support" = xyes ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
-$as_echo "yes (explicitly enabled)" >&6; }
-    OPENJ9_ENABLE_CRIU_SUPPORT=true
+    as_fn_error $? "--enable-criu-support is temporarily disabled on jdk8" "$LINENO" 5
   elif test "x$enable_criu_support" = xno ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
 $as_echo "no (explicitly disabled)" >&6; }

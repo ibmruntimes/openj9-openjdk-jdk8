@@ -128,8 +128,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CRIU_SUPPORT],
   AC_ARG_ENABLE([criu-support], [AS_HELP_STRING([--enable-criu-support], [enable CRIU support @<:@disabled@:>@])])
   OPENJ9_ENABLE_CRIU_SUPPORT=false
   if test "x$enable_criu_support" = xyes ; then
-    AC_MSG_RESULT([yes (explicitly enabled)])
-    OPENJ9_ENABLE_CRIU_SUPPORT=true
+    AC_MSG_ERROR([--enable-criu-support is temporarily disabled on jdk8])
   elif test "x$enable_criu_support" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_criu_support" = x ; then
