@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,7 +37,7 @@ static jboolean GetApplicationHome(char *buf, jint bufsize);
 static int JLI_Snprintf(char* buffer, size_t size, const char* format, ...);
 
 /* Load the crypto library (return NULL on error) */
-void * load_crypto_library() {
+void * load_crypto_library(jboolean traceEnabled) {
     void * result = NULL;
     const char *libname;
     const char *oldname = "libeay32.dll";
