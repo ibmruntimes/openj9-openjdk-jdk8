@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -36,7 +42,15 @@ import javax.crypto.spec.GCMParameterSpec;
  */
 public class GCMParameterSpecTest {
 
-    private static final int[] IV_LENGTHS = { 96, 8, 1024 };
+    /*
+     * OpenSSL3 only supports IV lengths up to 16 bytes.
+     * When the IV length is set to be larger than 16 bytes, an error is thrown.
+     * According to the OpenSSL docs([1]), in OpenSSL1.1.1 and older, there is
+     * no error thrown but unpredictable behavior will happen for large IV sizes.
+     *
+     * [1] https://www.openssl.org/docs/man1.1.1/man3/EVP_CIPHER_CTX_block_size.html
+     */
+    private static final int[] IV_LENGTHS = { 96, 8 };
     private static final int[] KEY_LENGTHS = { 128, 192, 256 };
     private static final int[] DATA_LENGTHS = { 0, 128, 1024 };
     private static final int[] AAD_LENGTHS = { 0, 128, 1024 };

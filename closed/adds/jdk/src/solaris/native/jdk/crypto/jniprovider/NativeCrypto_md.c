@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,13 +29,18 @@
 #include <dlfcn.h>
 #include "NativeCrypto_md.h"
 
+#if defined(__linux__)
+#include <link.h>
+#endif /* defined(__linux__) */
+
 /* Load the crypto library (return NULL on error) */
-void * load_crypto_library() {
+void * load_crypto_library(jboolean traceEnabled)
+{
     void * result = NULL;
     int flags = RTLD_NOW;
     size_t i = 0;
 
-    // Library names for OpenSSL 1.1.1, 1.1.0, 1.0.2 and symbolic links
+    // Library names for OpenSSL 3.x, 1.1.1, 1.1.0, 1.0.2 and symbolic links
     static const char * const libNames[] = {
 #if defined(_AIX)
     "libcrypto.a(libcrypto64.so.1.1)",
@@ -47,6 +52,7 @@ void * load_crypto_library() {
     "libcrypto.1.0.0.dylib",
     "libcrypto.dylib"
 #else
+    "libcrypto.so.3", // 3.x library name
     "libcrypto.so.1.1",
     "libcrypto.so.1.0.0",
     "libcrypto.so.10",
@@ -66,6 +72,15 @@ void * load_crypto_library() {
 
         result = dlopen (libName,  flags);
     }
+
+#if defined(__linux__)
+    if (traceEnabled && (NULL != result)) {
+        struct link_map *map = NULL;
+        dlinfo(result, RTLD_DI_LINKMAP, &map);
+        fprintf(stderr, "Attempt to load OpenSSL %s\n", map->l_name);
+        fflush(stderr);
+    }
+#endif /* defined(__linux__) */
 
     return result;
 }

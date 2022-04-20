@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,6 +38,9 @@
 
 #define OPENSSL_VERSION_1_0 "OpenSSL 1.0."
 #define OPENSSL_VERSION_1_1 "OpenSSL 1.1."
+/* Per new OpenSSL naming convention starting from OpenSSL 3, all major versions are ABI and API compatible. */
+#define OPENSSL_VERSION_3_X "OpenSSL 3."
+
 /* needed for OpenSSL 1.0.2 Thread handling routines */
 # define CRYPTO_LOCK 1
 
@@ -188,10 +191,11 @@ static void *crypto_library = NULL;
 /*
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    loadCrypto
- * Signature: ()I
+ * Signature: (Z)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
-  (JNIEnv *env, jclass thisObj){
+  (JNIEnv *env, jclass thisObj, jboolean traceEnabled)
+{
 
     typedef const char* OSSL_version_t(int);
 
@@ -201,19 +205,20 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     int ossl_ver;
 
     /* Load OpenSSL Crypto library */
-    crypto_library = load_crypto_library();
+    crypto_library = load_crypto_library(traceEnabled);
     if (NULL == crypto_library) {
-#if 0
-        fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
-        fflush(stderr);
-#endif /* 0 */
+        if (traceEnabled) {
+            fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
+            fflush(stderr);
+        }
         return -1;
     }
 
-    /* Different symbols are used by OpenSSL with 1.0 and 1.1.
-     * The symbol 'OpenSSL_version' is used by OpenSSL 1.1 where as
+    /*
+     * Different symbols are used by OpenSSL with 1.0 and 1.1 and later.
+     * The symbol 'OpenSSL_version' is used by OpenSSL 1.1 and later where as
      * the symbol "SSLeay_version" is used by OpenSSL 1.0.
-     * Currently only openssl 1.0.x and 1.1.x are supported.
+     * Currently only openssl 1.0.x, 1.1.x and 3.x.x are supported.
      */
     OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "OpenSSL_version");
 
@@ -221,10 +226,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "SSLeay_version");
 
         if (NULL == OSSL_version)  {
-#if 0
-            fprintf(stderr, "Only openssl 1.0.x and 1.1.x are supported\n");
-            fflush(stderr);
-#endif /* 0 */
+            if (traceEnabled) {
+                fprintf(stderr, "Only OpenSSL 1.0.x, 1.1.x and 3.x are supported\n");
+                fflush(stderr);
+            }
             unload_crypto_library(crypto_library);
             crypto_library = NULL;
             return -1;
@@ -232,10 +237,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
             /* Ensure the OpenSSL version is "OpenSSL 1.0.x" */
             if (0 != strncmp(openssl_version, OPENSSL_VERSION_1_0, strlen(OPENSSL_VERSION_1_0))) {
-#if 0
-                fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
-                fflush(stderr);
-#endif /* 0 */
+                if (traceEnabled) {
+                    fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
+                    fflush(stderr);
+                }
                 unload_crypto_library(crypto_library);
                 crypto_library = NULL;
                 return -1;
@@ -244,17 +249,24 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         }
     } else {
         openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
-        /* Ensure the OpenSSL version is "OpenSSL 1.1.x". */
-        if (0 != strncmp(openssl_version,OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1))) {
-#if 0
-            fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
-            fflush(stderr);
-#endif /* 0 */
+        /* Ensure the OpenSSL version is "OpenSSL 1.1.x" or "OpenSSL 3.x.x". */
+        if ((0 != strncmp(openssl_version, OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1)))
+        && (0 != strncmp(openssl_version, OPENSSL_VERSION_3_X, strlen(OPENSSL_VERSION_3_X)))
+        ) {
+            if (traceEnabled) {
+                fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version);
+                fflush(stderr);
+            }
             unload_crypto_library(crypto_library);
             crypto_library = NULL;
             return -1;
         }
         ossl_ver = 1;
+    }
+
+    if (traceEnabled) {
+        fprintf(stderr, "Supported OpenSSL version: %s\n", openssl_version);
+        fflush(stderr);
     }
 
     /* Load the function symbols for OpenSSL errors. */
