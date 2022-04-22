@@ -27,23 +27,38 @@ endif
 include $(SPEC)
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
-  # Special setup required for Windows:
-  # - OpenSSL generates an nmake-style makefile so we must use nmake
+  # Configure normally demands that we use an implementation of perl that produces
+  # paths with backslashes; CONFIGURE_INSIST bypasses that requirement.
+  # PERL must be an absolute path that will be usable by nmake (i.e. start with
+  # a drive letter and a colon).
+  OPENSSL_CONFIG_SETUP := export CONFIGURE_INSIST=true PERL='$(shell $(CYGPATH) -m $(PERL))' &&
+
+  # Configure produces a makefile intended for use with nmake.
   OPENSSL_MAKE := nmake
-  # - CONFIGURE_INSIST bypasses the requirement that perl use Windows-style paths (with backslashes)
-  # - LIB cannot have the surrounding double-quotes provided by custom-spec.gmk
-  # - PERL must be a Windows-style path that will be usable by nmake
-  # - MAKEFLAGS uses unix-style options (with a dash) which won't be understood by nmake
-  OPENSSL_SETUP := export \
-		CONFIGURE_INSIST=true \
-		LIB='$(subst ",,$(LIB))' \
-		PERL='$(shell $(CYGPATH) -m $(PERL))' \
-	&& unset MAKEFLAGS \
-	&&
-else
+
+  # LIB cannot have the surrounding double-quotes provided by custom-spec.gmk.
+  # MAKEFLAGS uses unix-style options (with a dash) which won't be understood by nmake.
+  OPENSSL_MAKE_SETUP := export LIB='$(subst ",,$(LIB))' && unset MAKEFLAGS &&
+
+  # The makefile produced by OpenSSL 3+ during the configure step needs to be
+  # patched. Patching involves adding double-quotes around the name of perl
+  # script files. For example,
+  #   "$(PERL)" util/mkdef.pl
+  # must change to
+  #   "$(PERL)" "util/mkdef.pl"
+  # otherwise nmake appears not to invoke perl as intended.
+  # Patching has no effect for earlier versions.
+  OPENSSL_PATCH := \
+	( $(CD) $(OPENSSL_DIR) \
+		&& $(MV) -f makefile makefile.orig \
+		&& $(SED) -e 's|\("$$(PERL)"\) \([A-Za-z0-9_/-]*\.pl\)|\1 "\2"|' < makefile.orig > makefile \
+	)
+else # windows
+  OPENSSL_CONFIG_SETUP :=
   OPENSSL_MAKE := $(MAKE)
-  OPENSSL_SETUP :=
-endif
+  OPENSSL_MAKE_SETUP :=
+  OPENSSL_PATCH :=
+endif # windows
 
 # Identify the desired openssl target configuration.
 OPENSSL_TARGET :=
@@ -76,7 +91,9 @@ endif # OPENSSL_TARGET
 build_openssl :
 ifeq ($(BUILD_OPENSSL), yes)
 	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)
-	( $(OPENSSL_SETUP) $(CD) $(OPENSSL_DIR) && ./Configure $(OPENSSL_TARGET) shared && $(OPENSSL_MAKE) )
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_TARGET) shared )
+	$(OPENSSL_PATCH)
+	( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 endif # BUILD_OPENSSL
 
 .PHONY : build_openssl
