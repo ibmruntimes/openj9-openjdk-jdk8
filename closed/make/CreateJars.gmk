@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -86,8 +86,6 @@ EXPORTED_PRIVATE_PKGS += \
 	jdk.internal.org.objectweb.asm.util \
 	openj9.lang.management \
 	openj9.lang.management.internal \
-	openj9.internal.tools.attach.diagnostics.base \
-	openj9.tools.attach.diagnostics.info \
 	#
 
 RT_JAR_EXCLUDES += \
