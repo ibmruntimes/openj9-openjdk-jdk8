@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 #
 
@@ -158,7 +158,7 @@ build_update_version="$(echo $openjdk_tag | sed -e 's/-b[0-9][0-9]*$//')"
 jdk_build_number="$(echo $openjdk_tag | sed -e 's/^[0-9][0-9]*-b//')"
 
 conf_milestone=
-conf_processed_arguments=("--with-custom-make-dir=$TOPDIR/closed/make" "--with-add-source-root=$TOPDIR/closed/adds" "--with-update-version=$build_update_version")
+conf_processed_arguments=("--with-custom-make-dir=$TOPDIR/closed/make" "--with-update-version=$build_update_version")
 conf_quoted_arguments=()
 conf_openjdk_target=
 
