@@ -434,7 +434,12 @@ build-j9vm : run-preprocessors-j9
 J9JCL_SOURCES_DONEFILE := $(J9JCL_SOURCES_DIR)/j9jcl.done
 
 recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
-AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
+JppSourceDirs := $(OPENJ9_TOPDIR)/jcl/src
+JppSourceDirs += $(TOPDIR)/closed/adds/jdk/src
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  JppSourceDirs += $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+endif # OPENJ9_ENABLE_DDR
 
 JPP_DEST := $(J9JCL_SOURCES_DIR)/jdk/src/share/classes
 JPP_JAR  := $(J9TOOLS_DIR)/jpp.jar
@@ -448,7 +453,29 @@ ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
-$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
+# invoke JPP to preprocess java source files
+# $1 - configuration
+# $2 - source directory
+# $3 - destination subdirec
+# more arguments can be appended after the expanded RunJPP such as $(IncludeIfUnsure)
+define RunJPP
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-config $1 \
+			-baseDir "$(call FixPath,$(dir $2))" \
+			-srcRoot $(notdir $2)/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)" \
+			-dest "$(call FixPath,$(strip $3))" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+endef # RunJPP
+
+IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
+
+$(J9JCL_SOURCES_DONEFILE) : \
+		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*.java))
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
@@ -457,45 +484,16 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 		JAVA_HOME=$(BOOT_JDK) \
 		preprocessor
 	@$(ECHO) Generating J9JCL sources
-	$(BOOT_JDK)/bin/java \
-		-cp "$(call FixPath,$(JPP_JAR))" \
-		-Dfile.encoding=US-ASCII \
-		com.ibm.jpp.commandline.CommandlineBuilder \
-			-verdict \
-			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
-			-config SIDECAR18-SE-OPENJ9 \
-			-srcRoot jcl/ \
-			-xml jpp_configuration.xml \
-			-dest "$(call FixPath,$(JPP_DEST))" \
-			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+	$(call RunJPP, GENERIC, $(TOPDIR)/closed/adds/jdk/src/share/classes, $(JPP_DEST)) \
+		$(IncludeIfUnsure)
+	$(call RunJPP, SIDECAR18-SE-OPENJ9, $(OPENJ9_TOPDIR)/jcl, $(JPP_DEST))
 	@$(ECHO) Generating J9JCL tools
-	@$(BOOT_JDK)/bin/java \
-		-cp "$(call FixPath,$(JPP_JAR))" \
-		-Dfile.encoding=US-ASCII \
-		com.ibm.jpp.commandline.CommandlineBuilder \
-			-verdict \
-			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
-			-config SIDECAR18-TOOLS-OPENJ9 \
-			-srcRoot jcl/ \
-			-xml jpp_configuration.xml \
-			-dest "$(call FixPath,$(JPP_DEST))" \
-			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+	$(call RunJPP, SIDECAR18-TOOLS-OPENJ9, $(OPENJ9_TOPDIR)/jcl, $(JPP_DEST))
   ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Generating DDR_VM sources
-	@$(BOOT_JDK)/bin/java \
-		-cp "$(call FixPath,$(JPP_JAR))" \
-		-Dfile.encoding=US-ASCII \
-		com.ibm.jpp.commandline.CommandlineBuilder \
-			-includeIfUnsure \
-			-noWarnIncludeIf \
-			-verdict \
-			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR)/debugtools)/" \
-			-config DDR_VM \
-			-srcRoot DDR_VM/ \
-			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)/" \
-			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR)/ddr)" \
-			-macro:define "JAVA_SPEC_VERSION=8" \
-			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+	$(call RunJPP, GENERIC, $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, $(J9JCL_SOURCES_DIR)/ddr) \
+		$(IncludeIfUnsure) \
+		-macro:define "JAVA_SPEC_VERSION=8"
   endif # OPENJ9_ENABLE_DDR
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
