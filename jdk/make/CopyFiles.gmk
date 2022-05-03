@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 
 INCLUDEDIR = $(JDK_OUTPUTDIR)/include
@@ -254,14 +254,14 @@ endif
 # To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq ($(OPENJDK_TARGET_OS), linux)
-    LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0
+    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
-    LIBCRYPTO_NAMES := libcrypto.1.1.dylib libcrypto.1.0.0.dylib
+    LIBCRYPTO_NAMES := libcrypto.3.dylib libcrypto.1.1.dylib libcrypto.1.0.0.dylib
   else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
-      LIBCRYPTO_NAMES := libcrypto-1_1-x64.dll
+      LIBCRYPTO_NAMES := libcrypto-3-x64.dll libcrypto-1_1-x64.dll
     else
-      LIBCRYPTO_NAMES := libcrypto-1_1.dll
+      LIBCRYPTO_NAMES := libcrypto-3.dll libcrypto-1_1.dll
     endif
     LIBCRYPTO_NAMES += libeay32.dll
   else ifeq ($(OPENJDK_TARGET_OS), aix)
@@ -269,7 +269,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     # instead of 'libcrypto.so' files.
     # For reference, corresponding OpenSSL PR is
     #     https://github.com/openssl/openssl/pull/6487
-    LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
+    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
   else
     LIBCRYPTO_NAMES := libcrypto.so
   endif
@@ -298,7 +298,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
 
   ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
     ifeq ($(OPENJDK_TARGET_OS), linux)
-      LIBSSL_NAMES := libssl.so.1.1 libssl.so.1.0.0
+      LIBSSL_NAMES := libssl.so.3 libssl.so.1.1 libssl.so.1.0.0
       LIBSSL_PATH := $(firstword $(wildcard $(addprefix $(OPENSSL_BUNDLE_LIB_PATH)/, $(LIBSSL_NAMES))))
 
       ifneq ($(LIBSSL_PATH), )

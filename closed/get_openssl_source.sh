@@ -1,12 +1,12 @@
 #!/bin/sh
-  
+
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
-# 
+#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
@@ -19,7 +19,7 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # ===========================================================================
 
 usage() {
@@ -59,18 +59,23 @@ do
 	esac
 done
 
-if [ "${OPENSSL_VERSION:0:5}" != "1.0.2" -a "${OPENSSL_VERSION:0:4}" != "1.1." ] ; 
-then
-	usage
-fi
-
-OPENSSL_SOURCE_TAG=$(echo "OpenSSL.${OPENSSL_VERSION}" | sed -e 's/\./_/g' )
+case "$OPENSSL_VERSION" in
+	1.0.2* | 1.1.*)
+		OPENSSL_SOURCE_TAG=$(echo "OpenSSL.$OPENSSL_VERSION" | sed -e 's/\./_/g')
+		;;
+	3.*)
+		OPENSSL_SOURCE_TAG="openssl-$OPENSSL_VERSION"
+		;;
+	*)
+		usage
+		;;
+esac
 
 if [ -f "openssl/openssl_version.txt" ]; then
 	DOWNLOADED_VERSION=$(cat openssl/openssl_version.txt)
 	if [ $OPENSSL_SOURCE_TAG = $DOWNLOADED_VERSION ]; then
 		echo ""
-		echo "OpenSSL of version $OPENSSL_VERSION is already downloaded"
+		echo "OpenSSL version $OPENSSL_VERSION is already downloaded"
 		exit 0
 	else
 		echo ""
@@ -78,10 +83,9 @@ if [ -f "openssl/openssl_version.txt" ]; then
 		rm -rf openssl
 	fi
 fi
-	
+
 echo ""
-echo "Cloning OpenSSL of version $OPENSSL_VERSION"
-git clone --depth=1 -b ${OPENSSL_SOURCE_TAG} ${GIT_URL}
+echo "Cloning OpenSSL version $OPENSSL_VERSION"
+git clone --depth=1 -b $OPENSSL_SOURCE_TAG $GIT_URL
 
 echo $OPENSSL_SOURCE_TAG > openssl/openssl_version.txt
-
