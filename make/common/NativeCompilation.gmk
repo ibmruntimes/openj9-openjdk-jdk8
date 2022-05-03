@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2022 All Rights Reserved
 # ===========================================================================
 
 # When you read this source. Remember that $(sort ...) has the side effect
@@ -522,14 +522,6 @@ define SetupNativeCompilation
               $$($1_OBJECT_DIR)/$$($1_BASENAME).dSYM/Contents/Resources/DWARF/$$($1_BASENAME)
             $$($1_DEBUGINFO_FILES): $$($1_TARGET)
 		$(DSYMUTIL) --out $$($1_OBJECT_DIR)/$$($1_BASENAME).dSYM $$<
-          endif
-        else ifeq ($(OPENJDK_TARGET_OS), aix)
-          ifneq ($$($1_STRIP_POLICY), no_strip)
-            $1_DEBUGINFO_FILES := $$($1_OBJECT_DIR)/$$($1_NOSUFFIX).debuginfo
-            $$($1_DEBUGINFO_FILES): $$($1_TARGET)
-			$(RM) $$@
-			$(CP) -f $$< $$@
-			$(TOUCH) $$@
           endif
         endif
 
