@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
 
 /*
  * Native method support for java.util.zip.Adler32
@@ -34,13 +39,15 @@
 
 #include "java_util_zip_Adler32.h"
 
+#define unsigned_jint_to_jlong(value) (((jlong)(value)) & 0xffffffffL)
+
 JNIEXPORT jint JNICALL
 Java_java_util_zip_Adler32_update(JNIEnv *env, jclass cls, jint adler, jint b)
 {
     Bytef buf[1];
 
     buf[0] = (Bytef)b;
-    return adler32(adler, buf, 1);
+    return (jint)adler32(unsigned_jint_to_jlong(adler), buf, 1);
 }
 
 JNIEXPORT jint JNICALL
@@ -49,7 +56,7 @@ Java_java_util_zip_Adler32_updateBytes(JNIEnv *env, jclass cls, jint adler,
 {
     Bytef *buf = (*env)->GetPrimitiveArrayCritical(env, b, 0);
     if (buf) {
-        adler = adler32(adler, buf + off, len);
+        adler = (jint)adler32(unsigned_jint_to_jlong(adler), buf + off, len);
         (*env)->ReleasePrimitiveArrayCritical(env, b, buf, 0);
     }
     return adler;
@@ -62,7 +69,7 @@ Java_java_util_zip_Adler32_updateByteBuffer(JNIEnv *env, jclass cls, jint adler,
 {
     Bytef *buf = (Bytef *)jlong_to_ptr(address);
     if (buf) {
-        adler = adler32(adler, buf + off, len);
+        adler = (jint)adler32(unsigned_jint_to_jlong(adler), buf + off, len);
     }
     return adler;
 }

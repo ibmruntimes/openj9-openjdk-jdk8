@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
 
 /*
  * Native method support for java.util.zip.CRC32
@@ -33,13 +38,15 @@
 
 #include "java_util_zip_CRC32.h"
 
+#define unsigned_jint_to_jlong(value) (((jlong)(value)) & 0xffffffffL)
+
 JNIEXPORT jint JNICALL
 Java_java_util_zip_CRC32_update(JNIEnv *env, jclass cls, jint crc, jint b)
 {
     Bytef buf[1];
 
     buf[0] = (Bytef)b;
-    return crc32(crc, buf, 1);
+    return (jint)crc32(unsigned_jint_to_jlong(crc), buf, 1);
 }
 
 JNIEXPORT jint JNICALL
@@ -48,7 +55,7 @@ Java_java_util_zip_CRC32_updateBytes(JNIEnv *env, jclass cls, jint crc,
 {
     Bytef *buf = (*env)->GetPrimitiveArrayCritical(env, b, 0);
     if (buf) {
-        crc = crc32(crc, buf + off, len);
+        crc = (jint)crc32(unsigned_jint_to_jlong(crc), buf + off, len);
         (*env)->ReleasePrimitiveArrayCritical(env, b, buf, 0);
     }
     return crc;
@@ -57,7 +64,7 @@ Java_java_util_zip_CRC32_updateBytes(JNIEnv *env, jclass cls, jint crc,
 JNIEXPORT jint JNICALL
 ZIP_CRC32(jint crc, const jbyte *buf, jint len)
 {
-    return crc32(crc, (Bytef*)buf, len);
+    return (jint)crc32(unsigned_jint_to_jlong(crc), (Bytef*)buf, len);
 }
 
 JNIEXPORT jint JNICALL
@@ -66,7 +73,7 @@ Java_java_util_zip_CRC32_updateByteBuffer(JNIEnv *env, jclass cls, jint crc,
 {
     Bytef *buf = (Bytef *)jlong_to_ptr(address);
     if (buf) {
-        crc = crc32(crc, buf + off, len);
+        crc = (jint)crc32(unsigned_jint_to_jlong(crc), buf + off, len);
     }
     return crc;
 }
