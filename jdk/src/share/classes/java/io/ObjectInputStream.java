@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 1996, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 1996, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -374,13 +374,13 @@ public class ObjectInputStream
      * read* requests
      */
 
-    /* ClassCache Entry for caching class.forName results upon enableClassCaching */
-    private static final ClassCache classCache;
+    /* ClassByNameCache Entry for caching class.forName results upon enableClassCaching */
+    private static final ClassByNameCache classByNameCache;
     private static final boolean isClassCachingEnabled;
     static {
         isClassCachingEnabled =
             AccessController.doPrivileged(new GetClassCachingSettingAction());
-        classCache = (isClassCachingEnabled ? new ClassCache() : null);
+        classByNameCache = (isClassCachingEnabled ? new ClassByNameCache() : null);
     }
 
     /** if true LUDCL/forName results would be cached, true by default starting Java8 */
@@ -868,14 +868,14 @@ public class ObjectInputStream
     {
         String name = desc.getName();
         try {
-            if (null == classCache) {
+            if (null == classByNameCache) {
                 return Class.forName(name, false, latestUserDefinedLoader());
             } else {
                 if (refreshLudcl) {
                     cachedLudcl = latestUserDefinedLoader();
                     refreshLudcl = false;
                 }
-                return classCache.get(name, cachedLudcl);
+                return classByNameCache.get(name, cachedLudcl);
             }
         } catch (ClassNotFoundException ex) {
             Class<?> cl = primClasses.get(name);
