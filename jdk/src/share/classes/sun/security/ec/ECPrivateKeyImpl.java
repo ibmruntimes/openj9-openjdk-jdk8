@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.ec;
 
 import java.io.IOException;
@@ -31,6 +37,8 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.*;
 import java.security.spec.*;
+
+import jdk.crypto.jniprovider.NativeCrypto;
 
 import sun.security.util.ArrayUtil;
 import sun.security.util.DerInputStream;
@@ -67,10 +75,12 @@ import sun.security.pkcs.PKCS8Key;
 public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
 
     private static final long serialVersionUID = 88695385615075129L;
+    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
 
     private BigInteger s;       // private value
     private byte[] arrayS;      // private value as a little-endian array
     private ECParameterSpec params;
+    private long nativeECKey;
 
     /**
      * Construct a key from its encoding. Called by the ECKeyFactory.
@@ -212,5 +222,53 @@ public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
         } catch (InvalidParameterSpecException e) {
             throw new InvalidKeyException("Invalid EC private key", e);
         }
+    }
+
+    /**
+     * Returns true if this key's EC field is an instance of ECFieldF2m.
+     * @return true if the field is an instance of ECFieldF2m, false otherwise
+     */
+    boolean isECFieldF2m() {
+        return this.params.getCurve().getField() instanceof ECFieldF2m;
+    }
+
+    /**
+     * Returns the native EC public key context pointer.
+     * @return the native EC public key context pointer or -1 on error
+     */
+    long getNativePtr() {
+        if (nativeECKey == 0x0) {
+            synchronized (this) {
+                if (nativeECKey == 0x0) {
+                    ECPoint generator = this.params.getGenerator();
+                    EllipticCurve curve = this.params.getCurve();
+                    ECField field = curve.getField();
+                    byte[] a = curve.getA().toByteArray();
+                    byte[] b = curve.getB().toByteArray();
+                    byte[] gx = generator.getAffineX().toByteArray();
+                    byte[] gy = generator.getAffineY().toByteArray();
+                    byte[] n = this.params.getOrder().toByteArray();
+                    byte[] h = BigInteger.valueOf(this.params.getCofactor()).toByteArray();
+                    byte[] p = new byte[0];
+                    if (field instanceof ECFieldFp) {
+                        p = ((ECFieldFp)field).getP().toByteArray();
+                        nativeECKey = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
+                    } else if (field instanceof ECFieldF2m) {
+                        p = ((ECFieldF2m)field).getReductionPolynomial().toByteArray();
+                        nativeECKey = nativeCrypto.ECEncodeGF2m(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
+                    } else {
+                        nativeECKey = -1;
+                    }
+                    if (nativeECKey != -1) {
+                        nativeCrypto.createECKeyCleaner(this, nativeECKey);
+                        byte[] value = this.getS().toByteArray();
+                        if (nativeCrypto.ECCreatePrivateKey(nativeECKey, value, value.length) == -1) {
+                            nativeECKey = -1;
+                        }
+                    }
+                }
+            }
+        }
+        return nativeECKey;
     }
 }

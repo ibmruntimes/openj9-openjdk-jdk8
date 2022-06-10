@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -98,7 +98,7 @@ final class SunEntries {
      *
      * The property 'jdk.nativeDigest' is used to disable Native digest alone
      * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, and RSA).
+     * CBC, GCM, RSA, and EC).
      */
     private static boolean useNativeDigest = true;
 

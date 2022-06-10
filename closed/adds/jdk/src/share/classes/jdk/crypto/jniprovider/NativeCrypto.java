@@ -28,6 +28,7 @@ import java.security.*;
 
 import com.ibm.oti.vm.VM;
 
+import sun.misc.Cleaner;
 import sun.misc.Unsafe;
 import sun.reflect.Reflection;
 import sun.reflect.CallerSensitive;
@@ -77,6 +78,15 @@ public class NativeCrypto {
             throw new SecurityException("NativeCrypto");
         }
         return new NativeCrypto();
+    }
+
+    public void createECKeyCleaner(Object owner, long key) {
+        Cleaner.create(owner, new Runnable() {
+            @Override
+            public void run() {
+                NativeCrypto.this.ECDestroyKey(key);
+            }
+        });
     }
 
     /* Native digest interfaces */
@@ -190,5 +200,57 @@ public class NativeCrypto {
                                   int kLen,
                                   byte[] m,
                                   long RSAPublicKey);
+
+    /* Native EC interfaces */
+    public final native int ECCreatePublicKey(long key,
+                                              byte[] x,
+                                              int xLen,
+                                              byte[] y,
+                                              int yLen,
+                                              int field);
+
+    public final native int ECCreatePrivateKey(long key,
+                                               byte[] s,
+                                               int sLen);
+
+    public final native long ECEncodeGFp(byte[] a,
+                                         int aLen,
+                                         byte[] b,
+                                         int bLen,
+                                         byte[] p,
+                                         int pLen,
+                                         byte[] x,
+                                         int xLen,
+                                         byte[] y,
+                                         int yLen,
+                                         byte[] n,
+                                         int nLen,
+                                         byte[] h,
+                                         int hLen);
+
+    public final native long ECEncodeGF2m(byte[] a,
+                                          int aLen,
+                                          byte[] b,
+                                          int bLen,
+                                          byte[] p,
+                                          int pLen,
+                                          byte[] x,
+                                          int xLen,
+                                          byte[] y,
+                                          int yLen,
+                                          byte[] n,
+                                          int nLen,
+                                          byte[] h,
+                                          int hLen);
+
+    public final native int ECDestroyKey(long key);
+
+    public final native int ECDeriveKey(long publicKey,
+                                        long privateKey,
+                                        byte[] secret,
+                                        int secretOffset,
+                                        int secretLen);
+
+    public final native boolean ECNativeGF2m();
 
 }

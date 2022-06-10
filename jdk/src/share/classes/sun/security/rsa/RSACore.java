@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -65,7 +65,7 @@ public final class RSACore {
      *
      * The property 'jdk.nativeRSA' is used to disable Native RSA alone,
      * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, and RSA).
+     * CBC, GCM, RSA, and EC).
      */
     private static boolean useNativeCrypto = true;
 
