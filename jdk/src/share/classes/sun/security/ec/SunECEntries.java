@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.ec;
 
 import java.util.Collection;
@@ -32,12 +38,29 @@ import java.util.regex.Pattern;
 import sun.security.util.CurveDB;
 import sun.security.util.NamedCurve;
 
+import sun.security.action.GetPropertyAction;
+import jdk.crypto.jniprovider.NativeCrypto;
+
 /**
  * Defines the entries of the SunEC provider.
  *
  * @since 1.7
  */
 final class SunECEntries {
+
+    /*
+     * Check whether native crypto is disabled with property.
+     *
+     * By default, the native crypto is enabled and uses the native
+     * crypto library implementation.
+     *
+     * The property 'jdk.nativeEC' is used to disable Native EC alone and
+     * 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
+     * CBC, GCM, RSA, and EC).
+     */
+    private static boolean useNativeCrypto;
+
+    private static boolean useNativeEC;
 
     private SunECEntries() {
         // empty
@@ -162,10 +185,53 @@ final class SunECEntries {
         /*
          * Key Agreement engine
          */
-        map.put("KeyAgreement.ECDH", "sun.security.ec.ECDHKeyAgreement");
+        if (useNativeEC) {
+            map.put("KeyAgreement.ECDH", "sun.security.ec.NativeECDHKeyAgreement");
+        } else {
+            map.put("KeyAgreement.ECDH", "sun.security.ec.ECDHKeyAgreement");
+        }
 
         map.put("KeyAgreement.ECDH SupportedKeyClasses", ecKeyClasses);
 
         map.put("KeyAgreement.ECDH ImplementedIn", "Software");
+    }
+
+    static {
+        String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
+        String nativeCryptStr   = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
+        String nativeECStr      = GetPropertyAction.privilegedGetProperty("jdk.nativeEC");
+
+        useNativeCrypto = (nativeCryptStr == null) || Boolean.parseBoolean(nativeCryptStr);
+
+        if (!useNativeCrypto) {
+            useNativeEC = false;
+        } else {
+            useNativeEC = (nativeECStr == null) || Boolean.parseBoolean(nativeECStr);
+        }
+
+        if (useNativeEC) {
+            /*
+             * User want to use native crypto implementation.
+             * Make sure the native crypto libraries are loaded successfully.
+             * Otherwise, throw a warning message and fall back to the in-built
+             * java crypto implementation.
+             */
+            if (!NativeCrypto.isLoaded()) {
+                useNativeEC = false;
+
+                if (nativeCryptTrace != null) {
+                    System.err.println("Warning: Native crypto library load failed." +
+                            " Using Java crypto implementation");
+                }
+            } else {
+                if (nativeCryptTrace != null) {
+                    System.err.println("SunECEntries Load - using native crypto library.");
+                }
+            }
+        } else {
+            if (nativeCryptTrace != null) {
+                System.err.println("SunECEntries Load - native crypto library disabled.");
+            }
+        }
     }
 }
