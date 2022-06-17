@@ -26,6 +26,7 @@
 #include <openssl/aes.h>
 #include <openssl/err.h>
 #include <openssl/rsa.h>
+#include <openssl/ecdh.h>
 
 #include <jni.h>
 #include <stdio.h>
@@ -54,6 +55,11 @@
 int OSSL102_RSA_set0_key(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_factors(RSA *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_crt_params(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
+
+/* Header for EC algorithm */
+jboolean OSSL_ECGF2M;
+int setECPublicCoordinates(EC_KEY *, BIGNUM *, BIGNUM *, int);
+int setECPublicKey(EC_KEY *, BIGNUM *, BIGNUM *, int);
 
 /* Type definitions for function pointers */
 typedef char * OSSL_error_string_t(unsigned long, char *);
@@ -92,6 +98,28 @@ typedef int OSSL_RSA_private_encrypt_t (int, const unsigned char *, unsigned cha
 typedef BIGNUM* OSSL_BN_bin2bn_t (const unsigned char *, int, BIGNUM *);
 typedef void OSSL_BN_set_negative_t (BIGNUM *, int);
 typedef void OSSL_BN_free_t (BIGNUM *);
+
+typedef void OSSL_EC_KEY_free_t(EC_KEY *);
+typedef int OSSL_ECDH_compute_key_t(void *, size_t, const EC_POINT *, EC_KEY *, void *(*KDF)(const void *, size_t, void *, size_t *));
+typedef const EC_POINT* OSSL_EC_KEY_get0_public_key_t(const EC_KEY *);
+typedef EC_KEY* OSSL_EC_KEY_new_t(void);
+typedef int OSSL_EC_KEY_set_public_key_affine_coordinates_t(EC_KEY *, BIGNUM *, BIGNUM *);
+typedef int OSSL_EC_KEY_set_private_key_t(EC_KEY *, const BIGNUM *);
+typedef BN_CTX* OSSL_BN_CTX_new_t(void);
+typedef EC_GROUP* OSSL_EC_GROUP_new_curve_GFp_t(const BIGNUM *, const BIGNUM *, const BIGNUM *, BN_CTX *);
+typedef EC_GROUP* OSSL_EC_GROUP_new_curve_GF2m_t(const BIGNUM *, const BIGNUM *, const BIGNUM *, BN_CTX *);
+typedef int OSSL_EC_KEY_set_group_t(EC_KEY *, const EC_GROUP *);
+typedef EC_POINT* OSSL_EC_POINT_new_t(const EC_GROUP *);
+typedef int OSSL_EC_POINT_set_affine_coordinates_GFp_t(const EC_GROUP *, EC_POINT *, const BIGNUM *, const BIGNUM *, BN_CTX *);
+typedef int OSSL_EC_POINT_set_affine_coordinates_GF2m_t(const EC_GROUP *, EC_POINT *, const BIGNUM *, const BIGNUM *, BN_CTX *);
+typedef int OSSL_EC_GROUP_set_generator_t(EC_GROUP *, const EC_POINT *, const BIGNUM *, const BIGNUM *);
+typedef const EC_GROUP* OSSL_EC_KEY_get0_group_t(const EC_KEY *);
+typedef void OSSL_EC_POINT_free_t(EC_POINT *);
+typedef void OSSL_EC_GROUP_free_t(EC_GROUP *);
+typedef void OSSL_BN_CTX_free_t(BN_CTX *);
+typedef int OSSL_EC_KEY_set_public_key_t(EC_KEY *, const EC_POINT *);
+typedef int OSSL_EC_KEY_check_key_t(const EC_KEY *);
+typedef int EC_set_public_key_t(EC_KEY *, BIGNUM *, BIGNUM *, int);
 
 typedef int OSSL_CRYPTO_num_locks_t();
 typedef void OSSL_CRYPTO_THREADID_set_numeric_t(CRYPTO_THREADID *id, unsigned long val);
@@ -166,6 +194,29 @@ OSSL_RSA_private_encrypt_t* OSSL_RSA_private_encrypt;
 OSSL_BN_bin2bn_t* OSSL_BN_bin2bn;
 OSSL_BN_set_negative_t* OSSL_BN_set_negative;
 OSSL_BN_free_t* OSSL_BN_free;
+
+/* Define pointers for OpenSSL functions to handle EC algorithm. */
+OSSL_EC_KEY_free_t* OSSL_EC_KEY_free;
+OSSL_ECDH_compute_key_t* OSSL_ECDH_compute_key;
+OSSL_EC_KEY_get0_public_key_t* OSSL_EC_KEY_get0_public_key;
+OSSL_EC_KEY_new_t* OSSL_EC_KEY_new;
+OSSL_EC_KEY_set_public_key_affine_coordinates_t* OSSL_EC_KEY_set_public_key_affine_coordinates;
+OSSL_EC_KEY_set_private_key_t* OSSL_EC_KEY_set_private_key;
+OSSL_BN_CTX_new_t* OSSL_BN_CTX_new;
+OSSL_EC_GROUP_new_curve_GFp_t* OSSL_EC_GROUP_new_curve_GFp;
+OSSL_EC_GROUP_new_curve_GF2m_t* OSSL_EC_GROUP_new_curve_GF2m;
+OSSL_EC_KEY_set_group_t* OSSL_EC_KEY_set_group;
+OSSL_EC_POINT_new_t* OSSL_EC_POINT_new;
+OSSL_EC_POINT_set_affine_coordinates_GFp_t* OSSL_EC_POINT_set_affine_coordinates_GFp;
+OSSL_EC_POINT_set_affine_coordinates_GF2m_t* OSSL_EC_POINT_set_affine_coordinates_GF2m;
+OSSL_EC_GROUP_set_generator_t* OSSL_EC_GROUP_set_generator;
+OSSL_EC_KEY_get0_group_t* OSSL_EC_KEY_get0_group;
+OSSL_EC_POINT_free_t* OSSL_EC_POINT_free;
+OSSL_EC_GROUP_free_t* OSSL_EC_GROUP_free;
+OSSL_BN_CTX_free_t* OSSL_BN_CTX_free;
+OSSL_EC_KEY_set_public_key_t* OSSL_EC_KEY_set_public_key;
+OSSL_EC_KEY_check_key_t* OSSL_EC_KEY_check_key;
+EC_set_public_key_t* EC_set_public_key;
 
 /* Structure for OpenSSL Digest context */
 typedef struct OpenSSLMDContext {
@@ -274,7 +325,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_error_string = (OSSL_error_string_t*)find_crypto_symbol(crypto_library, "ERR_error_string");
     OSSL_get_error = (OSSL_get_error_t*)find_crypto_symbol(crypto_library, "ERR_get_error");
 
-	/* Load Threading routines for OpenSSL 1.0.2 */
+    /* Load Threading routines for OpenSSL 1.0.2 */
     if (0 == ossl_ver) {
         OSSL_CRYPTO_num_locks = (OSSL_CRYPTO_num_locks_t*)find_crypto_symbol(crypto_library, "CRYPTO_num_locks");
         OSSL_CRYPTO_THREADID_set_numeric = (OSSL_CRYPTO_THREADID_set_numeric_t*)find_crypto_symbol(crypto_library, "CRYPTO_THREADID_set_numeric");
@@ -324,7 +375,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_DecryptUpdate = (OSSL_DecryptUpdate_t*)find_crypto_symbol(crypto_library, "EVP_DecryptUpdate");
     OSSL_DecryptFinal = (OSSL_DecryptFinal_t*)find_crypto_symbol(crypto_library, "EVP_DecryptFinal");
 
-    /* Load the functions symbols for Openssl RSA algorithm. */
+    /* Load the functions symbols for OpenSSL RSA algorithm. */
     OSSL_RSA_new = (OSSL_RSA_new_t*)find_crypto_symbol(crypto_library, "RSA_new");
 
     if (1 == ossl_ver) {
@@ -342,6 +393,46 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_BN_bin2bn = (OSSL_BN_bin2bn_t *)find_crypto_symbol(crypto_library, "BN_bin2bn");
     OSSL_BN_set_negative = (OSSL_BN_set_negative_t *)find_crypto_symbol(crypto_library, "BN_set_negative");
     OSSL_BN_free = (OSSL_BN_free_t *)find_crypto_symbol(crypto_library, "BN_free");
+
+    /* Load the functions symbols for OpenSSL EC algorithm. */
+    OSSL_EC_KEY_free = (OSSL_EC_KEY_free_t*)find_crypto_symbol(crypto_library, "EC_KEY_free");
+    OSSL_ECDH_compute_key = (OSSL_ECDH_compute_key_t*)find_crypto_symbol(crypto_library, "ECDH_compute_key");
+    OSSL_EC_KEY_get0_public_key = (OSSL_EC_KEY_get0_public_key_t*)find_crypto_symbol(crypto_library, "EC_KEY_get0_public_key");
+    OSSL_EC_KEY_new = (OSSL_EC_KEY_new_t*)find_crypto_symbol(crypto_library, "EC_KEY_new");
+    OSSL_EC_KEY_set_public_key_affine_coordinates = (OSSL_EC_KEY_set_public_key_affine_coordinates_t*)find_crypto_symbol(crypto_library, "EC_KEY_set_public_key_affine_coordinates");
+    OSSL_EC_KEY_set_private_key = (OSSL_EC_KEY_set_private_key_t*)find_crypto_symbol(crypto_library, "EC_KEY_set_private_key");
+    OSSL_BN_CTX_new = (OSSL_BN_CTX_new_t*)find_crypto_symbol(crypto_library, "BN_CTX_new");
+    OSSL_EC_GROUP_new_curve_GFp = (OSSL_EC_GROUP_new_curve_GFp_t*)find_crypto_symbol(crypto_library, "EC_GROUP_new_curve_GFp");
+    OSSL_EC_GROUP_new_curve_GF2m = (OSSL_EC_GROUP_new_curve_GF2m_t*)find_crypto_symbol(crypto_library, "EC_GROUP_new_curve_GF2m");
+    OSSL_EC_KEY_set_group = (OSSL_EC_KEY_set_group_t*)find_crypto_symbol(crypto_library, "EC_KEY_set_group");
+    OSSL_EC_POINT_new = (OSSL_EC_POINT_new_t*)find_crypto_symbol(crypto_library, "EC_POINT_new");
+    OSSL_EC_GROUP_set_generator = (OSSL_EC_GROUP_set_generator_t*)find_crypto_symbol(crypto_library, "EC_GROUP_set_generator");
+    OSSL_EC_KEY_get0_group = (OSSL_EC_KEY_get0_group_t*)find_crypto_symbol(crypto_library, "EC_KEY_get0_group");
+    OSSL_EC_POINT_free = (OSSL_EC_POINT_free_t*)find_crypto_symbol(crypto_library, "EC_POINT_free");
+    OSSL_EC_GROUP_free = (OSSL_EC_GROUP_free_t*)find_crypto_symbol(crypto_library, "EC_GROUP_free");
+    OSSL_BN_CTX_free = (OSSL_BN_CTX_free_t*)find_crypto_symbol(crypto_library, "BN_CTX_free");
+    OSSL_EC_KEY_set_public_key = (OSSL_EC_KEY_set_public_key_t*)find_crypto_symbol(crypto_library, "EC_KEY_set_public_key");
+    OSSL_EC_KEY_check_key = (OSSL_EC_KEY_check_key_t*)find_crypto_symbol(crypto_library, "EC_KEY_check_key");
+    OSSL_EC_POINT_set_affine_coordinates_GFp = (OSSL_EC_POINT_set_affine_coordinates_GFp_t*)find_crypto_symbol(crypto_library, "EC_POINT_set_affine_coordinates");
+    if (NULL == OSSL_EC_KEY_set_public_key_affine_coordinates) {
+        /* method missing in OpenSSL version 1.0.0 */
+        EC_set_public_key = &setECPublicKey;
+    } else {
+        EC_set_public_key = &setECPublicCoordinates;
+    }
+    if (NULL == OSSL_EC_POINT_set_affine_coordinates_GFp) {
+        /* deprecated in OpenSSL version 1.1.1 */
+        OSSL_EC_POINT_set_affine_coordinates_GFp = (OSSL_EC_POINT_set_affine_coordinates_GFp_t*)find_crypto_symbol(crypto_library, "EC_POINT_set_affine_coordinates_GFp");
+        OSSL_EC_POINT_set_affine_coordinates_GF2m = (OSSL_EC_POINT_set_affine_coordinates_GF2m_t*)find_crypto_symbol(crypto_library, "EC_POINT_set_affine_coordinates_GF2m");
+    } else {
+        OSSL_EC_POINT_set_affine_coordinates_GF2m = (OSSL_EC_POINT_set_affine_coordinates_GF2m_t*)find_crypto_symbol(crypto_library, "EC_POINT_set_affine_coordinates");
+    }
+    if ((NULL == OSSL_EC_GROUP_new_curve_GF2m) || (NULL == OSSL_EC_POINT_set_affine_coordinates_GF2m)) {
+        /* the OPENSSL_NO_EC2M flag is set and the EC2m methods are unavailable */
+        OSSL_ECGF2M = JNI_FALSE;
+    } else {
+        OSSL_ECGF2M = JNI_TRUE;
+    }
 
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
@@ -384,6 +475,23 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_BN_bin2bn) ||
         (NULL == OSSL_BN_set_negative) ||
         (NULL == OSSL_BN_free) ||
+        (NULL == OSSL_EC_KEY_free) ||
+        (NULL == OSSL_ECDH_compute_key) ||
+        (NULL == OSSL_EC_KEY_get0_public_key) ||
+        (NULL == OSSL_EC_KEY_new) ||
+        (NULL == OSSL_EC_KEY_set_private_key) ||
+        (NULL == OSSL_BN_CTX_new) ||
+        (NULL == OSSL_EC_GROUP_new_curve_GFp) ||
+        (NULL == OSSL_EC_KEY_set_group) ||
+        (NULL == OSSL_EC_POINT_new) ||
+        (NULL == OSSL_EC_POINT_set_affine_coordinates_GFp) ||
+        (NULL == OSSL_EC_GROUP_set_generator) ||
+        (NULL == OSSL_EC_KEY_get0_group) ||
+        (NULL == OSSL_EC_POINT_free) ||
+        (NULL == OSSL_EC_GROUP_free) ||
+        (NULL == OSSL_BN_CTX_free) ||
+        (NULL == OSSL_EC_KEY_set_public_key) ||
+        (NULL == OSSL_EC_KEY_check_key) ||
         ((NULL == OSSL_CRYPTO_num_locks) && (0 == ossl_ver)) ||
         ((NULL == OSSL_CRYPTO_THREADID_set_numeric) && (0 == ossl_ver)) ||
         ((NULL == OSSL_OPENSSL_malloc) && (0 == ossl_ver)) ||
@@ -1855,3 +1963,551 @@ int OSSL102_RSA_set0_crt_params(RSA *r2, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqm
     return 1;
 }
 
+/* Returns false if EC 2m is disabled, and true otherwise.
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECNativeGF2m
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECNativeGF2m
+  (JNIEnv *env, jclass obj)
+{
+    return OSSL_ECGF2M;
+}
+
+/* Create an EC Public Key
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECCreatePublicKey
+ * Signature: (J[BI[BII)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECCreatePublicKey
+  (JNIEnv *env, jclass obj, jlong key, jbyteArray x, jint xLen, jbyteArray y, jint yLen, jint field)
+{
+    unsigned char *nativeX = NULL;
+    unsigned char *nativeY = NULL;
+    EC_KEY *publicKey = (EC_KEY*)(intptr_t) key;
+    BIGNUM *xBN = NULL;
+    BIGNUM *yBN = NULL;
+    int ret = 0;
+
+    nativeX = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, x, 0));
+    if (NULL == nativeX) {
+        return -1;
+    }
+
+    nativeY = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, y, 0));
+    if (NULL == nativeY) {
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        return -1;
+    }
+
+    xBN = convertJavaBItoBN(nativeX, xLen);
+    yBN = convertJavaBItoBN(nativeY, yLen);
+
+    if ((NULL == xBN) || (NULL == yBN)) {
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        return -1;
+    }
+
+    ret = (*EC_set_public_key)(publicKey, xBN, yBN, field);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+
+    if (0 == ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/* Create an EC Private Key
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECCreatePrivateKey
+ * Signature: (J[BI)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECCreatePrivateKey
+  (JNIEnv *env, jclass obj, jlong key, jbyteArray s, jint sLen)
+{
+    unsigned char *nativeS = NULL;
+    EC_KEY *privateKey = (EC_KEY*)(intptr_t) key;
+    BIGNUM *sBN = NULL;
+    int ret = 0;
+
+    nativeS = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, s, 0));
+    if (NULL == nativeS) {
+        return -1;
+    }
+
+    sBN = convertJavaBItoBN(nativeS, sLen);
+
+    if (NULL == sBN) {
+        (*env)->ReleasePrimitiveArrayCritical(env, s, nativeS, JNI_ABORT);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_KEY_set_private_key)(privateKey, sBN);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, s, nativeS, JNI_ABORT);
+
+    if (0 == ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/* Encode an EC Elliptic Curve over a Prime Field
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECEncodeGFp
+ * Signature: ([BI[BI[BI[BI[BI[BI[BI)J
+ */
+JNIEXPORT jlong JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGFp
+  (JNIEnv *env, jclass obj, jbyteArray a, jint aLen, jbyteArray b, jint bLen, jbyteArray p, jint pLen, jbyteArray x, jint xLen, jbyteArray y, jint yLen, jbyteArray n, jint nLen, jbyteArray h, jint hLen)
+{
+    EC_KEY *key = NULL;
+    unsigned char *nativeA = NULL;
+    unsigned char *nativeB = NULL;
+    unsigned char *nativeP = NULL;
+    unsigned char *nativeX = NULL;
+    unsigned char *nativeY = NULL;
+    unsigned char *nativeN = NULL;
+    unsigned char *nativeH = NULL;
+    BIGNUM *aBN = NULL;
+    BIGNUM *bBN = NULL;
+    BIGNUM *pBN = NULL;
+    BIGNUM *xBN = NULL;
+    BIGNUM *yBN = NULL;
+    BIGNUM *nBN = NULL;
+    BIGNUM *hBN = NULL;
+    EC_GROUP *group = NULL;
+    EC_POINT *generator = NULL;
+    BN_CTX *ctx = NULL;
+    int ret = 0;
+
+    nativeA = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, a, 0));
+    if (NULL == nativeA) {
+        return -1;
+    }
+
+    nativeB = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, b, 0));
+    if (NULL == nativeB) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        return -1;
+    }
+
+    nativeP = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, p, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        return -1;
+    }
+
+    nativeX = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, x, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        return -1;
+    }
+
+    nativeY = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, y, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        return -1;
+    }
+
+    nativeN = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, n, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        return -1;
+    }
+
+    nativeH = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, h, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        return -1;
+    }
+
+    key = (*OSSL_EC_KEY_new)();
+    ctx = (*OSSL_BN_CTX_new)();
+
+    aBN = convertJavaBItoBN(nativeA, aLen);
+    bBN = convertJavaBItoBN(nativeB, bLen);
+    pBN = convertJavaBItoBN(nativeP, pLen);
+    xBN = convertJavaBItoBN(nativeX, xLen);
+    yBN = convertJavaBItoBN(nativeY, yLen);
+    nBN = convertJavaBItoBN(nativeN, nLen);
+    hBN = convertJavaBItoBN(nativeH, hLen);
+
+    if ((NULL == key) || (NULL == ctx) || (NULL == aBN) || (NULL == bBN) || (NULL == pBN) || (NULL == xBN) || (NULL == yBN) || (NULL == nBN) || (NULL == hBN)) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    group = (*OSSL_EC_GROUP_new_curve_GFp)(pBN, aBN, bBN, ctx);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+
+    generator = (*OSSL_EC_POINT_new)(group);
+
+    if ((NULL == group) || (NULL == generator)) {
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_POINT_set_affine_coordinates_GFp)(group, generator, xBN, yBN, ctx);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+    (*OSSL_BN_CTX_free)(ctx);
+
+    if (0 == ret) {
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_GROUP_set_generator)(group, generator, nBN, hBN);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+
+    if (0 == ret) {
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_KEY_set_group)(key, group);
+
+    if (0 == ret) {
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    return (jlong)(intptr_t)key;
+}
+
+/* Encode an EC Elliptic Curve over a Binary Field
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECEncodeGF2m
+ * Signature: ([BI[BI[BI[BI[BI[BI[BI)J
+ */
+JNIEXPORT jlong JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGF2m
+  (JNIEnv *env, jclass obj, jbyteArray a, jint aLen, jbyteArray b, jint bLen, jbyteArray p, jint pLen, jbyteArray x, jint xLen, jbyteArray y, jint yLen, jbyteArray n, jint nLen, jbyteArray h, jint hLen)
+{
+    EC_KEY *key = NULL;
+    unsigned char *nativeA = NULL;
+    unsigned char *nativeB = NULL;
+    unsigned char *nativeP = NULL;
+    unsigned char *nativeX = NULL;
+    unsigned char *nativeY = NULL;
+    unsigned char *nativeN = NULL;
+    unsigned char *nativeH = NULL;
+    BIGNUM *aBN = NULL;
+    BIGNUM *bBN = NULL;
+    BIGNUM *pBN = NULL;
+    BIGNUM *xBN = NULL;
+    BIGNUM *yBN = NULL;
+    BIGNUM *nBN = NULL;
+    BIGNUM *hBN = NULL;
+    EC_GROUP *group = NULL;
+    EC_POINT *generator = NULL;
+    BN_CTX *ctx = NULL;
+    int ret = 0;
+
+    if (JNI_FALSE == OSSL_ECGF2M) {
+        return -1;
+    }
+
+    nativeA = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, a, 0));
+    if (NULL == nativeA) {
+        return -1;
+    }
+
+    nativeB = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, b, 0));
+    if (NULL == nativeB) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        return -1;
+    }
+
+    nativeP = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, p, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        return -1;
+    }
+
+    nativeX = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, x, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        return -1;
+    }
+
+    nativeY = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, y, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        return -1;
+    }
+
+    nativeN = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, n, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        return -1;
+    }
+
+    nativeH = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, h, 0));
+    if (NULL == nativeP) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        return -1;
+    }
+
+    key = (*OSSL_EC_KEY_new)();
+    ctx = (*OSSL_BN_CTX_new)();
+
+    aBN = convertJavaBItoBN(nativeA, aLen);
+    bBN = convertJavaBItoBN(nativeB, bLen);
+    pBN = convertJavaBItoBN(nativeP, pLen);
+    xBN = convertJavaBItoBN(nativeX, xLen);
+    yBN = convertJavaBItoBN(nativeY, yLen);
+    nBN = convertJavaBItoBN(nativeN, nLen);
+    hBN = convertJavaBItoBN(nativeH, hLen);
+
+    if ((NULL == key) || (NULL == ctx) || (NULL == aBN) || (NULL == bBN) || (NULL == pBN) || (NULL == xBN) || (NULL == yBN) || (NULL == nBN) || (NULL == hBN)) {
+        (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    group = (*OSSL_EC_GROUP_new_curve_GF2m)(pBN, aBN, bBN, ctx);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, a, nativeA, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, b, nativeB, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, p, nativeP, JNI_ABORT);
+
+    generator = (*OSSL_EC_POINT_new)(group);
+
+    if ((NULL == group) || (NULL == generator)) {
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_POINT_set_affine_coordinates_GF2m)(group, generator, xBN, yBN, ctx);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+    (*OSSL_BN_CTX_free)(ctx);
+
+    if (0 == ret) {
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_GROUP_set_generator)(group, generator, nBN, hBN);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nativeN, JNI_ABORT);
+    (*env)->ReleasePrimitiveArrayCritical(env, h, nativeH, JNI_ABORT);
+
+    if (0 == ret) {
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    ret = (*OSSL_EC_KEY_set_group)(key, group);
+
+    if (0 == ret) {
+        (*OSSL_EC_POINT_free)(generator);
+        (*OSSL_EC_GROUP_free)(group);
+        (*OSSL_EC_KEY_free)(key);
+        return -1;
+    }
+
+    return (jlong)(intptr_t)key;
+}
+
+/* Free EC Public/Private Key
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECDestroyKey
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECDestroyKey
+  (JNIEnv *env, jclass obj, jlong key)
+{
+    EC_KEY *nativeKey = (EC_KEY*)(intptr_t) key;
+    if (NULL == nativeKey) {
+        return -1;
+    }
+    /* no need to call EC_GROUP_free/EC_POINT_free as EC_KEY_free calls them internally */
+    (*OSSL_EC_KEY_free)(nativeKey);
+    return 0;
+}
+
+/* ECDH key agreement, derive shared secret key
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECDeriveKey
+ * Signature: (JJ[BII)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECDeriveKey
+  (JNIEnv *env, jclass obj, jlong publicKey, jlong privateKey, jbyteArray secret, jint secretOffset, jint secretLen)
+{
+    EC_KEY *nativePublicKey = (EC_KEY*)(intptr_t) publicKey;
+    EC_KEY *nativePrivateKey = (EC_KEY*)(intptr_t) privateKey;
+    unsigned char* nativeSecret = NULL;
+    int ret = 0;
+
+    nativeSecret = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, secret, 0));
+    if (NULL == nativeSecret) {
+        return -1;
+    }
+
+    /* Derive the shared secret */
+    ret = (*OSSL_ECDH_compute_key)((nativeSecret + secretOffset), secretLen, (*OSSL_EC_KEY_get0_public_key)(nativePublicKey), nativePrivateKey, NULL);
+
+    (*env)->ReleasePrimitiveArrayCritical(env, secret, nativeSecret, 0);
+
+    if (0 == ret) {
+        return -1;
+    }
+
+    return secretLen;
+}
+
+/** Wrapper for OSSL_EC_KEY_set_public_key_affine_coordinates
+ */
+int
+setECPublicCoordinates(EC_KEY *key, BIGNUM *x, BIGNUM *y, int field)
+{
+    return (*OSSL_EC_KEY_set_public_key_affine_coordinates)(key, x, y);
+}
+
+/** Sets an EC public key from affine coordindates.
+ *  Field is 0 for Fp and 1 for F2m.
+ *  Returns 1 on success and 0 otherwise.
+ */
+int
+setECPublicKey(EC_KEY *key, BIGNUM *x, BIGNUM *y, int field)
+{
+    const EC_GROUP *group = (*OSSL_EC_KEY_get0_group)(key);
+    BN_CTX *ctx = (*OSSL_BN_CTX_new)();
+    EC_POINT *publicKey = (*OSSL_EC_POINT_new)(group);
+    int ret = 0;
+
+    if ((JNI_FALSE == OSSL_ECGF2M) && (0 != field)) {
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_POINT_free)(publicKey);
+        return ret;
+    }
+
+    if ((NULL == ctx) || (NULL == group) || (NULL == publicKey)) {
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_POINT_free)(publicKey);
+        return ret;
+    }
+
+    if (0 == field) {
+        ret = (*OSSL_EC_POINT_set_affine_coordinates_GFp)(group, publicKey, x, y, ctx);
+    } else {
+        ret = (*OSSL_EC_POINT_set_affine_coordinates_GF2m)(group, publicKey, x, y, ctx);
+    }
+
+    if (0 == ret) {
+        (*OSSL_BN_CTX_free)(ctx);
+        (*OSSL_EC_POINT_free)(publicKey);
+        return ret;
+    }
+
+    ret = (*OSSL_EC_KEY_set_public_key)(key, publicKey);
+
+    (*OSSL_BN_CTX_free)(ctx);
+    (*OSSL_EC_POINT_free)(publicKey);
+
+    if (1 == ret) {
+        ret = (*OSSL_EC_KEY_check_key)(key);
+    }
+
+    return ret;
+}
