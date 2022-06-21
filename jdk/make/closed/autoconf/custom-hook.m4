@@ -319,7 +319,15 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
   elif test "x$enable_jitserver" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_jitserver" = x ; then
-    AC_MSG_RESULT([no (default)])
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64|xl64|xz64)
+        AC_MSG_RESULT([yes (default)])
+        OPENJ9_ENABLE_JITSERVER=true
+        ;;
+      *)
+        AC_MSG_RESULT([no (default)])
+        ;;
+    esac
   else
     AC_MSG_ERROR([--enable-jitserver accepts no argument])
   fi
