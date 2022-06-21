@@ -4618,7 +4618,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1654089923
+DATE_WHEN_GENERATED=1655751341
 
 ###############################################################################
 #
@@ -16408,8 +16408,17 @@ $as_echo "no (unsupported platform)" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
 $as_echo "no (explicitly disabled)" >&6; }
   elif test "x$enable_jitserver" = x ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64|xl64|xz64)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
+$as_echo "yes (default)" >&6; }
+        OPENJ9_ENABLE_JITSERVER=true
+        ;;
+      *)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
 $as_echo "no (default)" >&6; }
+        ;;
+    esac
   else
     as_fn_error $? "--enable-jitserver accepts no argument" "$LINENO" 5
   fi
