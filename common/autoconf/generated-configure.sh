@@ -4051,7 +4051,7 @@ fi
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
 # ===========================================================================
 
 
@@ -4447,7 +4447,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1655751341
+DATE_WHEN_GENERATED=1656101123
 
 ###############################################################################
 #
@@ -44818,6 +44818,25 @@ $as_echo "$as_me: WARNING: Can't find an msbuild.exe executable (you may try to 
 
   # Ready to go..
   if test "x$BUILD_FREETYPE" = xyes; then
+
+    eval toolchain_name="\${VS_DESCRIPTION_$TOOLCHAIN_VERSION}"
+    vcxproj_patch="$SRC_ROOT/.github/workflows/freetype.vcxproj"
+    if test "$TOOLCHAIN_VERSION" -lt 2017 ; then
+      # The project file only needs to be patched for Visual Studio 2017 or newer.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Not patching $vcxproj_path for $toolchain_name" >&5
+$as_echo "$as_me: Not patching $vcxproj_path for $toolchain_name" >&6;}
+    elif $CMP -s "$vcxproj_path" "$vcxproj_patch" ; then
+      # The file has the desired content - perhaps it was already patched?
+      { $as_echo "$as_me:${as_lineno-$LINENO}: No need to patch $vcxproj_path for $toolchain_name" >&5
+$as_echo "$as_me: No need to patch $vcxproj_path for $toolchain_name" >&6;}
+    elif $RM -f "$vcxproj_path" && $CP "$vcxproj_patch" "$vcxproj_path" ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Patched $vcxproj_path for $toolchain_name" >&5
+$as_echo "$as_me: Patched $vcxproj_path for $toolchain_name" >&6;}
+    else
+      # The file may not be writable, so offer a warning.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to patch $vcxproj_path for $toolchain_name; build may fail" >&5
+$as_echo "$as_me: WARNING: Unable to patch $vcxproj_path for $toolchain_name; build may fail" >&2;}
+    fi
 
     # msbuild requires trailing slashes for output directories
     freetype_lib_path="$FREETYPE_SRC_PATH/lib$OPENJDK_TARGET_CPU_BITS/"
