@@ -4,6 +4,10 @@
 /openj9
 /openssl
 
+# ignore files produced when "--with-freetype-src=..." is used
+/freetype.bat
+/freetype.log
+
 /build/
 /dist/
 /.idea/

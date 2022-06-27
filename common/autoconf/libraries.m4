@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([LIB_SETUP_INIT],
@@ -281,6 +281,21 @@ AC_DEFUN([LIB_BUILD_FREETYPE],
 
   # Ready to go..
   if test "x$BUILD_FREETYPE" = xyes; then
+
+    eval toolchain_name="\${VS_DESCRIPTION_$TOOLCHAIN_VERSION}"
+    vcxproj_patch="$SRC_ROOT/.github/workflows/freetype.vcxproj"
+    if test "$TOOLCHAIN_VERSION" -lt 2017 ; then
+      # The project file only needs to be patched for Visual Studio 2017 or newer.
+      AC_MSG_NOTICE([Not patching $vcxproj_path for $toolchain_name])
+    elif $CMP -s "$vcxproj_path" "$vcxproj_patch" ; then
+      # The file has the desired content - perhaps it was already patched?
+      AC_MSG_NOTICE([No need to patch $vcxproj_path for $toolchain_name])
+    elif $RM -f "$vcxproj_path" && $CP "$vcxproj_patch" "$vcxproj_path" ; then
+      AC_MSG_NOTICE([Patched $vcxproj_path for $toolchain_name])
+    else
+      # The file may not be writable, so offer a warning.
+      AC_MSG_WARN([Unable to patch $vcxproj_path for $toolchain_name; build may fail])
+    fi
 
     # msbuild requires trailing slashes for output directories
     freetype_lib_path="$FREETYPE_SRC_PATH/lib$OPENJDK_TARGET_CPU_BITS/"
