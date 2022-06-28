@@ -4618,7 +4618,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1656101123
+DATE_WHEN_GENERATED=1656426326
 
 ###############################################################################
 #
@@ -15371,18 +15371,7 @@ if test "${with_cmake+set}" = set; then :
 
 else
 
-      case "$OPENJ9_PLATFORM_CODE" in
-        ap64|oa64|wa64|wi32|xa64|xl64|xr64|xz64)
-          if test "x$COMPILE_TYPE" != xcross ; then
-            with_cmake=cmake
-          else
-            with_cmake=no
-          fi
-          ;;
-        *)
-          with_cmake=no
-          ;;
-      esac
+      with_cmake=cmake
 
 fi
 
