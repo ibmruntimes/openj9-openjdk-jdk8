@@ -4618,7 +4618,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1656426326
+DATE_WHEN_GENERATED=1656536820
 
 ###############################################################################
 #
@@ -47820,23 +47820,13 @@ $as_echo "$as_me: WARNING: Can't find an msbuild.exe executable (you may try to 
   # Ready to go..
   if test "x$BUILD_FREETYPE" = xyes; then
 
-    eval toolchain_name="\${VS_DESCRIPTION_$TOOLCHAIN_VERSION}"
-    vcxproj_patch="$SRC_ROOT/.github/workflows/freetype.vcxproj"
-    if test "$TOOLCHAIN_VERSION" -lt 2017 ; then
-      # The project file only needs to be patched for Visual Studio 2017 or newer.
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Not patching $vcxproj_path for $toolchain_name" >&5
-$as_echo "$as_me: Not patching $vcxproj_path for $toolchain_name" >&6;}
-    elif $CMP -s "$vcxproj_path" "$vcxproj_patch" ; then
-      # The file has the desired content - perhaps it was already patched?
-      { $as_echo "$as_me:${as_lineno-$LINENO}: No need to patch $vcxproj_path for $toolchain_name" >&5
-$as_echo "$as_me: No need to patch $vcxproj_path for $toolchain_name" >&6;}
-    elif $RM -f "$vcxproj_path" && $CP "$vcxproj_patch" "$vcxproj_path" ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Patched $vcxproj_path for $toolchain_name" >&5
-$as_echo "$as_me: Patched $vcxproj_path for $toolchain_name" >&6;}
+    # Figure out which configuration we need to build. Older versions use
+    # configurations named "Release Multithreaded", while in newer versions
+    # they're simply called "Release".
+    if grep -q "Release Multithreaded" "$vcxproj_path" ; then
+      vc_configuration="Release Multithreaded"
     else
-      # The file may not be writable, so offer a warning.
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to patch $vcxproj_path for $toolchain_name; build may fail" >&5
-$as_echo "$as_me: WARNING: Unable to patch $vcxproj_path for $toolchain_name; build may fail" >&2;}
+      vc_configuration="Release"
     fi
 
     # msbuild requires trailing slashes for output directories
@@ -47889,8 +47879,9 @@ $as_echo "$as_me: Trying to compile freetype sources with PlatformToolset=$PLATF
     # First we try to build the freetype.dll
     $ECHO -e "@echo off\n"\
 	     "$MSBUILD $vcxproj_path "\
+		       "/p:WindowsTargetPlatformVersion=10.0.17763.0 "\
 		       "/p:PlatformToolset=$PLATFORM_TOOLSET "\
-		       "/p:Configuration=\"Release Multithreaded\" "\
+		       "/p:Configuration=\"$vc_configuration\" "\
 		       "/p:Platform=$freetype_platform "\
 		       "/p:ConfigurationType=DynamicLibrary "\
 		       "/p:TargetName=freetype "\
@@ -47902,8 +47893,9 @@ $as_echo "$as_me: Trying to compile freetype sources with PlatformToolset=$PLATF
       # If that succeeds we also build freetype.lib
       $ECHO -e "@echo off\n"\
 	       "$MSBUILD $vcxproj_path "\
+			 "/p:WindowsTargetPlatformVersion=10.0.17763.0 "\
 			 "/p:PlatformToolset=$PLATFORM_TOOLSET "\
-			 "/p:Configuration=\"Release Multithreaded\" "\
+			 "/p:Configuration=\"$vc_configuration\" "\
 			 "/p:Platform=$freetype_platform "\
 			 "/p:ConfigurationType=StaticLibrary "\
 			 "/p:TargetName=freetype "\
@@ -51487,7 +51479,7 @@ $as_echo "$as_me: The path of FREETYPE_LIB_PATH, which resolves as \"$path\", is
   fi
 
       if test "x$OPENJDK_TARGET_OS" = xwindows; then
-        FREETYPE_LIBS="$FREETYPE_LIB_PATH/freetype.lib"
+        FREETYPE_LIBS="$FREETYPE_LIB_PATH/freetype.lib /MD"
       else
         FREETYPE_LIBS="-L$FREETYPE_LIB_PATH -lfreetype"
       fi

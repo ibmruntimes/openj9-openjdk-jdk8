@@ -282,19 +282,13 @@ AC_DEFUN([LIB_BUILD_FREETYPE],
   # Ready to go..
   if test "x$BUILD_FREETYPE" = xyes; then
 
-    eval toolchain_name="\${VS_DESCRIPTION_$TOOLCHAIN_VERSION}"
-    vcxproj_patch="$SRC_ROOT/.github/workflows/freetype.vcxproj"
-    if test "$TOOLCHAIN_VERSION" -lt 2017 ; then
-      # The project file only needs to be patched for Visual Studio 2017 or newer.
-      AC_MSG_NOTICE([Not patching $vcxproj_path for $toolchain_name])
-    elif $CMP -s "$vcxproj_path" "$vcxproj_patch" ; then
-      # The file has the desired content - perhaps it was already patched?
-      AC_MSG_NOTICE([No need to patch $vcxproj_path for $toolchain_name])
-    elif $RM -f "$vcxproj_path" && $CP "$vcxproj_patch" "$vcxproj_path" ; then
-      AC_MSG_NOTICE([Patched $vcxproj_path for $toolchain_name])
+    # Figure out which configuration we need to build. Older versions use
+    # configurations named "Release Multithreaded", while in newer versions
+    # they're simply called "Release".
+    if grep -q "Release Multithreaded" "$vcxproj_path" ; then
+      vc_configuration="Release Multithreaded"
     else
-      # The file may not be writable, so offer a warning.
-      AC_MSG_WARN([Unable to patch $vcxproj_path for $toolchain_name; build may fail])
+      vc_configuration="Release"
     fi
 
     # msbuild requires trailing slashes for output directories
@@ -319,8 +313,9 @@ AC_DEFUN([LIB_BUILD_FREETYPE],
     # First we try to build the freetype.dll
     $ECHO -e "@echo off\n"\
 	     "$MSBUILD $vcxproj_path "\
+		       "/p:WindowsTargetPlatformVersion=10.0.17763.0 "\
 		       "/p:PlatformToolset=$PLATFORM_TOOLSET "\
-		       "/p:Configuration=\"Release Multithreaded\" "\
+		       "/p:Configuration=\"$vc_configuration\" "\
 		       "/p:Platform=$freetype_platform "\
 		       "/p:ConfigurationType=DynamicLibrary "\
 		       "/p:TargetName=freetype "\
@@ -332,8 +327,9 @@ AC_DEFUN([LIB_BUILD_FREETYPE],
       # If that succeeds we also build freetype.lib
       $ECHO -e "@echo off\n"\
 	       "$MSBUILD $vcxproj_path "\
+			 "/p:WindowsTargetPlatformVersion=10.0.17763.0 "\
 			 "/p:PlatformToolset=$PLATFORM_TOOLSET "\
-			 "/p:Configuration=\"Release Multithreaded\" "\
+			 "/p:Configuration=\"$vc_configuration\" "\
 			 "/p:Platform=$freetype_platform "\
 			 "/p:ConfigurationType=StaticLibrary "\
 			 "/p:TargetName=freetype "\
@@ -600,7 +596,7 @@ AC_DEFUN_ONCE([LIB_SETUP_FREETYPE],
     if test "x$FREETYPE_LIBS" = x; then
       BASIC_FIXUP_PATH(FREETYPE_LIB_PATH)
       if test "x$OPENJDK_TARGET_OS" = xwindows; then
-        FREETYPE_LIBS="$FREETYPE_LIB_PATH/freetype.lib"
+        FREETYPE_LIBS="$FREETYPE_LIB_PATH/freetype.lib /MD"
       else
         FREETYPE_LIBS="-L$FREETYPE_LIB_PATH -lfreetype"
       fi
