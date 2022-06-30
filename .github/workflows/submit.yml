@@ -878,12 +878,6 @@ jobs:
       - name: Fix OpenJDK permissions
         run: bash -c "chmod -R 0777 jdk"
 
-      - name: Copy FreeType project file
-        run: >
-          Remove-Item "$env:GITHUB_WORKSPACE\freetype\builds\windows\vc2010\freetype.vcxproj" ;
-          Copy-Item -Path "$env:GITHUB_WORKSPACE\jdk\.github\workflows\freetype.vcxproj"
-          -Destination "$env:GITHUB_WORKSPACE\freetype\builds\windows\vc2010\freetype.vcxproj" ;
-
       - name: Configure
         run: >
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
@@ -1028,12 +1022,6 @@ jobs:
 
       - name: Fix OpenJDK permissions
         run: bash -c "chmod -R 0777 jdk"
-
-      - name: Copy FreeType project file
-        run: >
-          Remove-Item "$env:GITHUB_WORKSPACE\freetype\builds\windows\vc2010\freetype.vcxproj" ;
-          Copy-Item -Path "$env:GITHUB_WORKSPACE\jdk\.github\workflows\freetype.vcxproj"
-          -Destination "$env:GITHUB_WORKSPACE\freetype\builds\windows\vc2010\freetype.vcxproj" ;
 
       - name: Configure
         run: >
