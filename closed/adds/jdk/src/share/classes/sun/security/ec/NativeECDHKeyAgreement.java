@@ -164,8 +164,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         /* attempt to translate the key if it is not an ECKey */
         this.publicKey = (ECPublicKeyImpl) ECKeyFactory.toECKey(key);
 
-        ECParameterSpec params = this.publicKey.getParams();
-        int keyLenBits = params.getCurve().getField().getFieldSize();
+        int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
         this.secretLen = (keyLenBits + 7) >> 3;
 
         return null;
@@ -228,6 +227,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         if (ret == -1) {
             throw new ProviderException("Could not derive key");
         }
+        this.publicKey = null;
         return this.secretLen;
     }
 
