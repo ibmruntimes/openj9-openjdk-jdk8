@@ -40,6 +40,7 @@ import java.security.PrivateKey;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.interfaces.ECKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
@@ -100,34 +101,43 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 ("Key must be an instance of PrivateKey");
         }
         /* attempt to translate the key if it is not an ECKey */
-        this.privateKey = (ECPrivateKeyImpl) ECKeyFactory.toECKey(key);
-        this.publicKey = null;
+        ECKey ecKey = ECKeyFactory.toECKey(key);
+        if (ecKey instanceof ECPrivateKeyImpl) {
+            this.privateKey = (ECPrivateKeyImpl) ecKey;
+            this.publicKey = null;
 
-        ECParameterSpec params = this.privateKey.getParams();
-        if (params instanceof NamedCurve) {
-            this.curve = ((NamedCurve) params).getName();
-        } else {
-            /* use the OID */
-            try {
-                AlgorithmParameters algParams = AlgorithmParameters.getInstance("EC");
-                algParams.init(this.privateKey.getParams());
-                this.curve = algParams.getParameterSpec(ECGenParameterSpec.class).getName();
-            } catch (InvalidParameterSpecException | NoSuchAlgorithmException e) {
-                /* should not happen */
-                throw new InternalError(e);
+            ECParameterSpec params = this.privateKey.getParams();
+            if (params instanceof NamedCurve) {
+                this.curve = ((NamedCurve) params).getName();
+            } else {
+                /* use the OID */
+                try {
+                    AlgorithmParameters algParams = AlgorithmParameters.getInstance("EC");
+                    algParams.init(params);
+                    this.curve = algParams.getParameterSpec(ECGenParameterSpec.class).getName();
+                } catch (InvalidParameterSpecException | NoSuchAlgorithmException e) {
+                    /* should not happen */
+                    throw new InternalError(e);
+                }
             }
-        }
 
-        if ((!nativeGF2m) && this.privateKey.isECFieldF2m()) {
-            /* only print the first time a curve is used */
-            if ((curveSupported.putIfAbsent("EC2m", Boolean.FALSE) == null) && (nativeCryptTrace != null)) {
-                System.err.println("EC2m is not supported by OpenSSL, using Java crypto implementation.");
+            if ((!nativeGF2m) && this.privateKey.isECFieldF2m()) {
+                /* only print the first time a curve is used */
+                if ((curveSupported.putIfAbsent("EC2m", Boolean.FALSE) == null) && (nativeCryptTrace != null)) {
+                    System.err.println("EC2m is not supported by OpenSSL, using Java crypto implementation.");
+                }
+                this.initializeJavaImplementation(key, random);
+            } else if (Boolean.FALSE.equals(curveSupported.get(this.curve))) {
+                this.initializeJavaImplementation(key, random);
+            } else {
+                this.javaImplementation = null;
+            }
+        } else {
+            if ((curveSupported.putIfAbsent("ECKeyImpl", Boolean.FALSE) == null) && (nativeCryptTrace != null)) {
+                System.err.println("Only ECPrivateKeyImpl and ECPublicKeyImpl are supported by the native implementation,"
+                        + " using Java crypto implementation.");
             }
             this.initializeJavaImplementation(key, random);
-        } else if (Boolean.FALSE.equals(curveSupported.get(this.curve))) {
-            this.initializeJavaImplementation(key, random);
-        } else {
-            this.javaImplementation = null;
         }
     }
 
@@ -162,12 +172,22 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 ("Key must be an instance of PublicKey");
         }
         /* attempt to translate the key if it is not an ECKey */
-        this.publicKey = (ECPublicKeyImpl) ECKeyFactory.toECKey(key);
+        ECKey ecKey = ECKeyFactory.toECKey(key);
+        if (ecKey instanceof ECPublicKeyImpl) {
+            this.publicKey = (ECPublicKeyImpl) ecKey;
 
-        int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
-        this.secretLen = (keyLenBits + 7) >> 3;
+            int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
+            this.secretLen = (keyLenBits + 7) >> 3;
 
-        return null;
+            return null;
+        } else {
+            if ((curveSupported.putIfAbsent("ECKeyImpl", Boolean.FALSE) == null) && (nativeCryptTrace != null)) {
+                System.err.println("Only ECPrivateKeyImpl and ECPublicKeyImpl are supported by the native implementation,"
+                        + " using Java crypto implementation.");
+            }
+            this.initializeJavaImplementation(this.privateKey, null);
+            return this.javaImplementation.engineDoPhase(key, lastPhase);
+        }
     }
 
     @Override
