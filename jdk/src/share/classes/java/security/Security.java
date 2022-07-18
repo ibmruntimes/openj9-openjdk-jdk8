@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.security;
 
 import java.lang.reflect.*;
@@ -34,6 +40,8 @@ import sun.security.util.Debug;
 import sun.security.util.PropertyExpander;
 
 import sun.security.jca.*;
+
+import openj9.internal.security.FIPSConfigurator;
 
 /**
  * <p>This class centralizes all security properties and common security
@@ -187,6 +195,17 @@ public final class Security {
             }
         }
 
+        // Load FIPS properties
+        if (loadedProps) {
+            boolean fipsEnabled = FIPSConfigurator.configureFIPS(props);
+            if (sdebug != null) {
+                if (fipsEnabled) {
+                    sdebug.println("FIPS mode enabled.");
+                } else {
+                    sdebug.println("FIPS mode disabled.");
+                }
+            }
+        }
     }
 
     /*
