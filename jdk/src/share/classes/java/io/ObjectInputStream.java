@@ -563,18 +563,18 @@ public class ObjectInputStream
 
         if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
             oldCachedLudcl = cachedLudcl;
+            setCached = true;
 
             // If caller is not provided, follow the standard path to get the cachedLudcl.
             // Otherwise use the class loader provided by JIT as the cachedLudcl.
 
             if (caller == null) {
-                 cachedLudcl = latestUserDefinedLoader();
+                 refreshLudcl = true;
             }else{
                  cachedLudcl = caller.getClassLoader();
+                 refreshLudcl = false;
             }
 
-            setCached = true;
-            refreshLudcl = false;
             if (null == startingLudclObject) {
                 startingLudclObject = this;
             }
@@ -684,9 +684,8 @@ public class ObjectInputStream
 
         if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
             oldCachedLudcl = cachedLudcl;
-            cachedLudcl = latestUserDefinedLoader();
             setCached = true;
-            refreshLudcl = false;
+            refreshLudcl = true;
             if (null == startingLudclObject) {
                 startingLudclObject = this;
             }
