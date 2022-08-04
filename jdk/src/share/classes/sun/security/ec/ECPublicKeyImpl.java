@@ -153,9 +153,9 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
      * @return the native EC public key context pointer or -1 on error
      */
     long getNativePtr() {
-        if (nativeECKey == 0x0) {
+        if (this.nativeECKey == 0x0) {
             synchronized (this) {
-                if (nativeECKey == 0x0) {
+                if (this.nativeECKey == 0x0) {
                     ECPoint generator = this.params.getGenerator();
                     EllipticCurve curve = this.params.getCurve();
                     ECField field = curve.getField();
@@ -165,29 +165,30 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
                     byte[] gy = generator.getAffineY().toByteArray();
                     byte[] n = this.params.getOrder().toByteArray();
                     byte[] h = BigInteger.valueOf(this.params.getCofactor()).toByteArray();
-                    byte[] p = new byte[0];
+                    long nativePointer;
                     int fieldType = 0;
                     if (field instanceof ECFieldFp) {
-                        p = ((ECFieldFp)field).getP().toByteArray();
-                        nativeECKey = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
+                        byte[] p = ((ECFieldFp)field).getP().toByteArray();
+                        nativePointer = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
                     } else if (field instanceof ECFieldF2m) {
                         fieldType = 1;
-                        p = ((ECFieldF2m)field).getReductionPolynomial().toByteArray();
-                        nativeECKey = nativeCrypto.ECEncodeGF2m(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
+                        byte[] p = ((ECFieldF2m)field).getReductionPolynomial().toByteArray();
+                        nativePointer = nativeCrypto.ECEncodeGF2m(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
                     } else {
-                        nativeECKey = -1;
+                        nativePointer = -1;
                     }
-                    if (nativeECKey != -1) {
-                        nativeCrypto.createECKeyCleaner(this, nativeECKey);
+                    if (nativePointer != -1) {
+                        nativeCrypto.createECKeyCleaner(this, nativePointer);
                         byte[] x = this.w.getAffineX().toByteArray();
                         byte[] y = this.w.getAffineY().toByteArray();
-                        if (nativeCrypto.ECCreatePublicKey(nativeECKey, x, x.length, y, y.length, fieldType) == -1) {
-                            nativeECKey = -1;
+                        if (nativeCrypto.ECCreatePublicKey(nativePointer, x, x.length, y, y.length, fieldType) == -1) {
+                            nativePointer = -1;
                         }
                     }
+                    this.nativeECKey = nativePointer;
                 }
             }
         }
-        return nativeECKey;
+        return this.nativeECKey;
     }
 }
