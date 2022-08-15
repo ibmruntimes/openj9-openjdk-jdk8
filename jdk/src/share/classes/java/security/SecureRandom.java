@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.security;
 
 import java.util.*;
@@ -33,6 +39,8 @@ import java.security.Provider.Service;
 import sun.security.jca.*;
 import sun.security.jca.GetInstance.Instance;
 import sun.security.util.Debug;
+
+import openj9.internal.security.FIPSConfigurator;
 
 /**
  * This class provides a cryptographically strong random number
@@ -191,7 +199,23 @@ public class SecureRandom extends java.util.Random {
     }
 
     private void getDefaultPRNG(boolean setSeed, byte[] seed) {
-        String prng = getPrngAlgorithm();
+        String prng;
+
+        // If in FIPS mode, use the SecureRandom from the FIPS provider.
+        if (FIPSConfigurator.enableFIPS()) {
+            Provider p = Security.getProvider("SunPKCS11-NSS-FIPS");
+            prng = "PKCS11";
+            if (p == null) {
+                throw new RuntimeException("could not find SunPKCS11-NSS-FIPS provider for FIPS mode");
+            }
+            Service prngService = p.getService("SecureRandom", prng);
+            if (prngService == null) {
+                throw new RuntimeException("could not find SecureRandom implementation from SunPKCS11-NSS-FIPS");
+            }
+        } else {
+            prng = getPrngAlgorithm();
+        }
+
         if (prng == null) {
             // bummer, get the SUN implementation
             prng = "SHA1PRNG";
