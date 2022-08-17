@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -23,5 +23,4 @@
 COMPANY_NAME="Eclipse OpenJ9"
 VENDOR_URL="http://www.eclipse.org/openj9"
 
-JDK_MOD_VERSION=0
-JDK_FIX_VERSION=HEAD
+JDK_FIX_VERSION=0
