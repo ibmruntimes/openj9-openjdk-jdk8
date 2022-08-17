@@ -38,6 +38,8 @@ import java.security.*;
 import sun.security.action.GetPropertyAction;
 import jdk.crypto.jniprovider.NativeCrypto;
 
+import openj9.internal.security.FIPSConfigurator;
+
 /**
  * Defines the entries of the SUN provider.
  *
@@ -108,6 +110,56 @@ final class SunEntries {
 
     static void putEntries(Map<Object, Object> map) {
 
+        /*
+         * Certificates
+         */
+        map.put("CertificateFactory.X.509",
+            "sun.security.provider.X509Factory");
+        map.put("Alg.Alias.CertificateFactory.X509", "X.509");
+
+        /*
+         * CertStores
+         */
+        map.put("CertStore.LDAP",
+            "sun.security.provider.certpath.ldap.LDAPCertStore");
+        map.put("CertStore.LDAP LDAPSchema", "RFC2587");
+        map.put("CertStore.Collection",
+            "sun.security.provider.certpath.CollectionCertStore");
+        map.put("CertStore.com.sun.security.IndexedCollection",
+            "sun.security.provider.certpath.IndexedCollectionCertStore");
+
+        /*
+         * Policy
+         */
+        map.put("Policy.JavaPolicy", "sun.security.provider.PolicySpiFile");
+
+        /*
+         * Configuration
+         */
+        map.put("Configuration.JavaLoginConfig",
+                        "sun.security.provider.ConfigFile$Spi");
+
+        /*
+         * CertPathBuilder
+         */
+        map.put("CertPathBuilder.PKIX",
+            "sun.security.provider.certpath.SunCertPathBuilder");
+        map.put("CertPathBuilder.PKIX ValidationAlgorithm",
+            "RFC5280");
+
+        /*
+         * CertPathValidator
+         */
+        map.put("CertPathValidator.PKIX",
+            "sun.security.provider.certpath.PKIXCertPathValidator");
+        map.put("CertPathValidator.PKIX ValidationAlgorithm",
+            "RFC5280");
+
+        if (FIPSConfigurator.enableFIPS()) {
+            return;
+        }
+
+        map.clear();
         /*
          * SecureRandom
          *
@@ -278,13 +330,6 @@ final class SunEntries {
         map.put("Alg.Alias.KeyFactory.1.3.14.3.2.12", "DSA");
 
         /*
-         * Certificates
-         */
-        map.put("CertificateFactory.X.509",
-            "sun.security.provider.X509Factory");
-        map.put("Alg.Alias.CertificateFactory.X509", "X.509");
-
-        /*
          * KeyStore
          */
         map.put("KeyStore.JKS",
@@ -292,44 +337,6 @@ final class SunEntries {
         map.put("KeyStore.CaseExactJKS",
                         "sun.security.provider.JavaKeyStore$CaseExactJKS");
         map.put("KeyStore.DKS", "sun.security.provider.DomainKeyStore$DKS");
-
-        /*
-         * Policy
-         */
-        map.put("Policy.JavaPolicy", "sun.security.provider.PolicySpiFile");
-
-        /*
-         * Configuration
-         */
-        map.put("Configuration.JavaLoginConfig",
-                        "sun.security.provider.ConfigFile$Spi");
-
-        /*
-         * CertPathBuilder
-         */
-        map.put("CertPathBuilder.PKIX",
-            "sun.security.provider.certpath.SunCertPathBuilder");
-        map.put("CertPathBuilder.PKIX ValidationAlgorithm",
-            "RFC5280");
-
-        /*
-         * CertPathValidator
-         */
-        map.put("CertPathValidator.PKIX",
-            "sun.security.provider.certpath.PKIXCertPathValidator");
-        map.put("CertPathValidator.PKIX ValidationAlgorithm",
-            "RFC5280");
-
-        /*
-         * CertStores
-         */
-        map.put("CertStore.LDAP",
-            "sun.security.provider.certpath.ldap.LDAPCertStore");
-        map.put("CertStore.LDAP LDAPSchema", "RFC2587");
-        map.put("CertStore.Collection",
-            "sun.security.provider.certpath.CollectionCertStore");
-        map.put("CertStore.com.sun.security.IndexedCollection",
-            "sun.security.provider.certpath.IndexedCollectionCertStore");
 
         /*
          * KeySize
