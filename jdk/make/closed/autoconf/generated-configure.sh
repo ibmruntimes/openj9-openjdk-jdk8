@@ -914,7 +914,6 @@ OPENJ9_ENABLE_CMAKE
 CMAKE
 USERNAME
 JDK_FIX_VERSION
-JDK_MOD_VERSION
 OMR_MIXED_REFERENCES_MODE
 OPENJ9_LIBS_SUBDIR
 OPENJ9_PLATFORM_CODE
@@ -4618,7 +4617,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1656536820
+DATE_WHEN_GENERATED=1660749156
 
 ###############################################################################
 #
@@ -15346,7 +15345,6 @@ fi
   fi
 
   OPENJ9_BUILDSPEC="${OPENJ9_BUILD_OS}_${OPENJ9_BUILD_MODE_ARCH}"
-
 
 
 
