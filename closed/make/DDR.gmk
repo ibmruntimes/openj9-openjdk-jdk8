@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -137,7 +137,7 @@ $(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPA
 
 # When StructureReader opens the blob, it must be able to find StructureAliases*.dat,
 # which requires that $(DDR_VM_SRC_ROOT) be on the classpath.
-$(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(DDR_FIELDS_FILE) $(DDR_TOOLS_MARKER)
+$(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(DDR_COMPATIBILITY_FILE) $(DDR_FIELDS_FILE) $(DDR_TOOLS_MARKER)
 	@$(ECHO) Generating DDR pointer and structure class files
 	@$(RM) -rf $(DDR_CLASSES_BIN)
 	@$(JAVA) -cp "$(DDR_TOOLS_BIN)$(PATH_SEP)$(DDR_VM_SRC_ROOT)" \

@@ -485,7 +485,7 @@ endef # RunJPP
 IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
 
 $(J9JCL_SOURCES_DONEFILE) : \
-		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*.java))
+		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*))
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
