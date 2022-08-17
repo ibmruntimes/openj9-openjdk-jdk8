@@ -23,5 +23,4 @@
 COMPANY_NAME="Eclipse OpenJ9"
 VENDOR_URL="http://www.eclipse.org/openj9"
 
-JDK_MOD_VERSION=345
-JDK_FIX_VERSION=0
+JDK_FIX_VERSION=1
