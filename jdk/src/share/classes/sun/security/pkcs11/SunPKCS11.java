@@ -23,15 +23,29 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11;
 
 import java.io.*;
 import java.util.*;
 
 import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.interfaces.*;
+import java.util.function.Consumer;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.*;
+import javax.crypto.spec.IvParameterSpec;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
@@ -42,10 +56,13 @@ import javax.security.auth.callback.ConfirmationCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 
+import openj9.internal.security.FIPSConfigurator;
+
 import sun.security.util.Debug;
 import sun.security.util.ResourcesMgr;
 
 import sun.security.pkcs11.Secmod.*;
+import sun.security.pkcs11.TemplateManager;
 
 import sun.security.pkcs11.wrapper.*;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.*;
@@ -88,6 +105,11 @@ public final class SunPKCS11 extends AuthProvider {
     private volatile Token token;
 
     private TokenPoller poller;
+
+    // This is the SunPKCS11 provider instance
+    // there can only be a single PKCS11 provider in
+    // FIPS mode.
+    static SunPKCS11 mysunpkcs11;
 
     Token getToken() {
         return token;
@@ -368,6 +390,29 @@ public final class SunPKCS11 extends AuthProvider {
             if (nssModule != null) {
                 nssModule.setProvider(this);
             }
+
+            // When FIPS mode is enabled, configure p11 object to FIPS mode
+            // and pass the parent object so it can callback.
+            if (FIPSConfigurator.enableFIPS()) {
+                if (debug != null) {
+                    System.out.println("FIPS mode in SunPKCS11");
+                }
+
+                @SuppressWarnings("unchecked")
+                Consumer<SunPKCS11> consumer = (Consumer<SunPKCS11>) p11;
+                consumer.accept(this);
+                mysunpkcs11 = this;
+
+                Session session = null;
+                try {
+                    session = token.getOpSession();
+                    p11.C_Login(session.id(), CKU_USER, new char[] {});
+                } catch (PKCS11Exception e) {
+                    throw e;
+                } finally {
+                    token.releaseSession(session);
+                }
+            }
         } catch (Exception e) {
             if (config.getHandleStartupErrors() == Config.ERR_IGNORE_ALL) {
                 throw new UnsupportedOperationException
@@ -402,6 +447,94 @@ public final class SunPKCS11 extends AuthProvider {
 
     private static String[] s(String ...aliases) {
         return aliases;
+    }
+
+    byte[] exportKey(long hSession, CK_ATTRIBUTE[] attributes, long keyId) throws PKCS11Exception {
+        // Generating the secret key that will be used for wrapping and unwrapping.
+        CK_ATTRIBUTE[] wrapKeyAttributes = token.getAttributes(TemplateManager.O_GENERATE, CKO_SECRET_KEY, CKK_AES, new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(CKA_CLASS, CKO_SECRET_KEY), new CK_ATTRIBUTE(CKA_VALUE_LEN, 256 >> 3) });
+        Session wrapKeyGenSession = token.getObjSession();
+        P11Key wrapKey;
+
+        try {
+            long genKeyId = token.p11.C_GenerateKey(wrapKeyGenSession.id(), new CK_MECHANISM(CKM_AES_KEY_GEN), wrapKeyAttributes);
+            wrapKey = (P11Key)P11Key.secretKey(wrapKeyGenSession, genKeyId, "AES", 256 >> 3, null);
+        } catch (PKCS11Exception e) {
+            throw e;
+        } finally {
+            token.releaseSession(wrapKeyGenSession);
+        }
+
+        // Wrapping the private key inside the PKCS11 device using the generated secret key.
+        CK_MECHANISM wrapMechanism = new CK_MECHANISM(CKM_AES_CBC_PAD, new byte[16]);
+        long wrapKeyId = wrapKey.getKeyID();
+        byte[] wrappedKeyBytes = token.p11.C_WrapKey(hSession, wrapMechanism, wrapKeyId, keyId);
+
+        // Unwrapping to obtain the private key.
+        byte[] unwrappedKeyBytes;
+        try {
+            Cipher unwrapCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            unwrapCipher.init(Cipher.DECRYPT_MODE, wrapKey, new IvParameterSpec((byte[])wrapMechanism.pParameter), null);
+            unwrappedKeyBytes = unwrapCipher.doFinal(wrappedKeyBytes);
+            return unwrappedKeyBytes;
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException e) {
+            throw new PKCS11Exception(CKR_GENERAL_ERROR);
+        } finally {
+            wrapKey.releaseKeyID();
+        }
+    }
+
+    long importKey(long hSession, CK_ATTRIBUTE[] attributes) throws PKCS11Exception {
+        long unwrappedKeyId, keyClass = 0, keyType = 0;
+        byte[] keyBytes = null;
+        // Extract key information.
+        for (CK_ATTRIBUTE attr : attributes) {
+            if (attr.type == CKA_CLASS) {
+                keyClass = attr.getLong();
+            }
+            if (attr.type == CKA_KEY_TYPE) {
+                keyType = attr.getLong();
+            }
+            if (attr.type == CKA_VALUE) {
+                keyBytes = attr.getByteArray();
+            }
+        }
+
+        if ((keyClass == CKO_SECRET_KEY) && (keyBytes != null) && (keyBytes.length > 0)) {
+            // Generate key used for wrapping and unwrapping of the secret key.
+            CK_ATTRIBUTE[] wrapKeyAttributes = token.getAttributes(TemplateManager.O_GENERATE, CKO_SECRET_KEY, CKK_AES, new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(CKA_CLASS, CKO_SECRET_KEY), new CK_ATTRIBUTE(CKA_VALUE_LEN, 256 >> 3)});
+            Session wrapKeyGenSession = token.getObjSession();
+            P11Key wrapKey;
+
+            try {
+                long keyId = token.p11.C_GenerateKey(wrapKeyGenSession.id(), new CK_MECHANISM(CKM_AES_KEY_GEN), wrapKeyAttributes);
+                wrapKey = (P11Key)P11Key.secretKey(wrapKeyGenSession, keyId, "AES", 256 >> 3, null);
+            } catch (PKCS11Exception e) {
+                throw e;
+            } finally {
+                token.releaseSession(wrapKeyGenSession);
+            }
+
+            long wrapKeyId = wrapKey.getKeyID();
+            try {
+                // Wrap the external secret key.
+                CK_MECHANISM wrapMechanism = new CK_MECHANISM(CKM_AES_CBC_PAD, new byte[16]);
+                Cipher wrapCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                wrapCipher.init(Cipher.ENCRYPT_MODE, wrapKey, new IvParameterSpec((byte[])wrapMechanism.pParameter), null);
+                byte[] wrappedBytes = wrapCipher.doFinal(keyBytes);
+
+                // Unwrap the secret key.
+                CK_ATTRIBUTE[] unwrapAttributes = token.getAttributes(TemplateManager.O_IMPORT, keyClass, keyType, attributes);
+                unwrappedKeyId = token.p11.C_UnwrapKey(hSession, wrapMechanism, wrapKeyId, wrappedBytes, unwrapAttributes);
+            } catch (PKCS11Exception | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException e) {
+                throw new PKCS11Exception(CKR_GENERAL_ERROR);
+            } finally {
+                wrapKey.releaseKeyID();
+            }
+        } else {
+            // Unsupported key type or invalid bytes.
+            throw new PKCS11Exception(CKR_GENERAL_ERROR);
+        }
+        return Long.valueOf(unwrappedKeyId);
     }
 
     private static final class Descriptor {

@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11;
 
 import java.io.*;
@@ -366,6 +372,21 @@ abstract class P11Key implements Key, Length {
             new CK_ATTRIBUTE(CKA_SENSITIVE),
             new CK_ATTRIBUTE(CKA_EXTRACTABLE),
         });
+        if ((SunPKCS11.mysunpkcs11 != null) && "RSA".equals(algorithm)) {
+            if (attributes[0].getBoolean() || attributes[1].getBoolean() || (attributes[2].getBoolean() == false)) {
+                try {
+                    byte[] key = SunPKCS11.mysunpkcs11.exportKey(session.id(), attributes, keyID);
+                    RSAPrivateKey rsaPrivKey = RSAPrivateCrtKeyImpl.newKey(key);
+                    if (rsaPrivKey instanceof RSAPrivateCrtKeyImpl) {
+                        return new P11RSAPrivateKeyFIPS(session, keyID, algorithm, keyLength, attributes, (RSAPrivateCrtKeyImpl)rsaPrivKey);
+                    } else {
+                        return new P11RSAPrivateNonCRTKeyFIPS(session, keyID, algorithm, keyLength, attributes, rsaPrivKey);
+                    }
+                } catch (PKCS11Exception | InvalidKeyException e) {
+                    // Attempt failed, create a P11PrivateKey object.
+                }
+            }
+        }
         if (attributes[1].getBoolean() || (attributes[2].getBoolean() == false)) {
             return new P11PrivateKey
                 (session, keyID, algorithm, keyLength, attributes);
@@ -500,6 +521,70 @@ abstract class P11Key implements Key, Length {
         }
     }
 
+    // RSA CRT private key when in FIPS mode
+    private static final class P11RSAPrivateKeyFIPS extends P11Key
+                implements RSAPrivateCrtKey {
+
+        private static final long serialVersionUID = 9215872438913515220L;
+        private final RSAPrivateCrtKeyImpl key;
+
+        P11RSAPrivateKeyFIPS(Session session, long keyID, String algorithm,
+                int keyLength, CK_ATTRIBUTE[] attrs, RSAPrivateCrtKeyImpl key) {
+            super(PRIVATE, session, keyID, algorithm, keyLength, attrs);
+            this.key = key;
+        }
+
+        @Override
+        public String getFormat() {
+            return "PKCS#8";
+        }
+
+        @Override
+        synchronized byte[] getEncodedInternal() {
+            return key.getEncoded();
+        }
+
+        @Override
+        public BigInteger getModulus() {
+            return key.getModulus();
+        }
+
+        @Override
+        public BigInteger getPublicExponent() {
+            return key.getPublicExponent();
+        }
+
+        @Override
+        public BigInteger getPrivateExponent() {
+            return key.getPrivateExponent();
+        }
+
+        @Override
+        public BigInteger getPrimeP() {
+            return key.getPrimeP();
+        }
+
+        @Override
+        public BigInteger getPrimeQ() {
+            return key.getPrimeQ();
+        }
+
+        @Override
+        public BigInteger getPrimeExponentP() {
+            return key.getPrimeExponentP();
+        }
+
+        @Override
+        public BigInteger getPrimeExponentQ() {
+            return key.getPrimeExponentQ();
+        }
+
+        @Override
+        public BigInteger getCrtCoefficient() {
+            return key.getCrtCoefficient();
+        }
+    }
+
     // RSA CRT private key
     private static final class P11RSAPrivateKey extends P11Key
                 implements RSAPrivateCrtKey {
@@ -585,6 +670,40 @@ abstract class P11Key implements Key, Length {
         public BigInteger getCrtCoefficient() {
             fetchValues();
             return coeff;
+        }
+    }
+
+    // RSA non-CRT private key in FIPS mode
+    private static final class P11RSAPrivateNonCRTKeyFIPS extends P11Key
+                implements RSAPrivateKey {
+
+        private static final long serialVersionUID = 1137764983777411481L;
+        private final RSAPrivateKey key;
+
+        P11RSAPrivateNonCRTKeyFIPS(Session session, long keyID, String algorithm,
+                int keyLength, CK_ATTRIBUTE[] attributes, RSAPrivateKey key) {
+            super(PRIVATE, session, keyID, algorithm, keyLength, attributes);
+            this.key = key;
+        }
+
+        @Override
+        public String getFormat() {
+            return "PKCS#8";
+        }
+
+        @Override
+        synchronized byte[] getEncodedInternal() {
+            return key.getEncoded();
+        }
+
+        @Override
+        public BigInteger getModulus() {
+            return key.getModulus();
+        }
+
+        @Override
+        public BigInteger getPrivateExponent() {
+            return key.getPrivateExponent();
         }
     }
 
