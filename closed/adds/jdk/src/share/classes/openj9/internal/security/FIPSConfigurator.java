@@ -116,6 +116,11 @@ public final class FIPSConfigurator {
                 props.put("keystore.type", "PKCS11");
                 System.setProperty("javax.net.ssl.keyStore", "NONE");
 
+                // Add trust store information.
+                System.setProperty("truststore.type", "PKCS11");
+                System.setProperty("javax.net.ssl.trustStore", "NONE");
+                System.setProperty("javax.net.ssl.trustStoreProvider", "SunPKCS11-NSS-FIPS");
+
                 // Add FIPS disabled algorithms.
                 String disabledAlgorithms = props.get("jdk.tls.disabledAlgorithms")
                         + ", X25519, X448"
