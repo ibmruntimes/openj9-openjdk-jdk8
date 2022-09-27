@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+# ===========================================================================
+
 ################################################################################
 # The order of these defines the priority by which we try to find them.
 VALID_VS_VERSIONS="2010 2012 2013 2015 2017 2019"
@@ -507,7 +511,6 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL],
     if $ECHO "$MSVC_DLL_FILETYPE" | $GREP "$CORRECT_MSVCR_ARCH" 2>&1 > /dev/null; then
       AC_MSG_RESULT([ok])
       MSVC_DLL="$POSSIBLE_MSVC_DLL"
-      BASIC_FIXUP_PATH(MSVC_DLL)
       AC_MSG_CHECKING([for $DLL_NAME])
       AC_MSG_RESULT([$MSVC_DLL])
     else
