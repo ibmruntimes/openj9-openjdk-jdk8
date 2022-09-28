@@ -17,3 +17,845 @@
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
+#
+# Exclude tests list from sanity.openjdk
+#
+# java.security.NoSuchProviderException: no such provider: SunRsaSign
+java/math/BigInteger/ModPow65537.java.ModPow65537
+
+# Existing Jars sign related
+java/util/jar/JarFile/ScanSignedJar.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/util/jar/JarFile/TurkCert.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/util/jar/JarInputStream/ScanSignedJar.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/util/jar/JarInputStream/TestIndexedJarWithBadSignature.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# -keystore ks -storepass changeit -keypass changeit -keyalg rsa -alias a -dname CN=A -genkeypair
+# keytool error: java.security.KeyStoreException:
+# sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ATTRIBUTE_VALUE_INVALID
+java/util/jar/JarInputStream/ExtraFileInMetaInf.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Related to issue https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/613
+sun/reflect/ReflectionFactory/ReflectionFactoryTest.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+#
+# Exclude tests list from extended.openjdk
+#
+# java.security.KeyStoreException: JCEKS not found
+sun/security/tools/jarsigner/TsacertOptionTest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.security.KeyStoreException: JKS not found
+# java.security.NoSuchAlgorithmException: JKS KeyStore not available
+java/security/KeyStore/CheckInputStream.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/KeyStoreBuilder.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PBETest.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/CheckDefaults.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/WriteP12Test.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/TestKeyStoreBasic.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/TestKeystoreCompat.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Policy/SignedJar/SignedJarTest.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ALPN/SSLEngineAlpnTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ALPN/SSLServerSocketAlpnTest.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ALPN/SSLSocketAlpnTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ciphersuites/ECCurvesconstraints.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/compatibility/ClientHelloProcessing.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/FixingJavadocs/KMTMGetNothing.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/FixingJavadocs/SSLSessionNulls.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/interop/ClientHelloBufferUnderflowException.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/interop/ClientHelloChromeInterOp.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/sanity/ciphersuites/SystemPropCipherSuitesOrder.java  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/sanity/ciphersuites/TLSCipherSuitesOrder.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/sanity/interop/ClientJSSEServerJSSE.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLEngineExplorer.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLEngineExplorerMatchedSNI.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLEngineExplorerUnmatchedSNI.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLEngineExplorerWithSrv.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketSNISensitive.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/ArgCheck.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/Arrays.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/ExtendedKeyEngine.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/ExtendedKeySocket.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/LargeBufs.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/LargePacket.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLEngine/NoAuthClientAuth.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/RenegotiateTLS13.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/ResumeTLS13withSNI.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/SessionCacheSizeTests.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/SessionTimeOutTests.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/SSLCtxAccessToSessCtx.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/TestEnabledProtocols.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSocket/InputStreamClosure.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSocket/OutputStreamClosure.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSocket/Tls13PacketSize.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/templates/SSLEngineTemplate.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/templates/SSLSocketSSLEngineTemplate.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/templates/SSLSocketTemplate.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TestJSSEClientDefaultProtocol.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TestJSSEClientProtocol.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TestJSSENoCommonProtocols.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TestJSSEServerProtocol.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSDataExchangeTest.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSEnginesClosureTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSHandshakeTest.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSMFLNTest.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSNotEnabledRC4Test.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSRehandshakeTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSRehandshakeWithCipherChangeTest.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSRehandshakeWithDataExTest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLS/TLSUnsupportedCiphersTest.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSDataExchangeTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSEnginesClosureTest.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSHandshakeTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSMFLNTest.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSNotEnabledRC4Test.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSRehandshakeTest.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSRehandshakeWithCipherChangeTest.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSRehandshakeWithDataExTest.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv1/TLSUnsupportedCiphersTest.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/EmptyCertificateAuthorities.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSDataExchangeTest.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSEnginesClosureTest.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSHandshakeTest.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSMFLNTest.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSNotEnabledRC4Test.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSRehandshakeTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSRehandshakeWithCipherChangeTest.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSRehandshakeWithDataExTest.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/TLSUnsupportedCiphersTest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/DisabledShortDSAKeys.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/DisabledShortRSAKeys.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/ShortRSAKey512.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/ShortRSAKeyGCM.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/SignatureAlgorithms.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/TLSEnginesClosureTest.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/rsa/TestKeyFactory.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/rsa/TestSignatures.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/KeyStore/CaseSensitiveAliases.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/KeyStore/TestJKSWithSecretKey.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/KeyStore/WrongPassword.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/X509Factory/BadPem.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/X509Factory/BigCRL.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestKeyFactory.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestSignatures.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ALPN/AlpnGreaseTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/CertPathRestrictions/TLSRestrictions.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ClientHandshaker/LengthCheckTest.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ClientHandshaker/RSAExport.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/DHKeyExchange/DHEKeySizing.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/DHKeyExchange/UseStrongDHSizes.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/EngineArgs/DebugReportsOneExtraByte.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/GenSSLConfigs/main.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/HandshakeOutStream/NullCerts.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/InputRecord/ClientHelloRead.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ServerHandshaker/AnonCipherWithWantClientAuth.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ServerHandshaker/GetPeerHost.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ServerHandshaker/HelloExtensionsTest.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SignatureScheme/CustomizedClientSchemes.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SignatureScheme/CustomizedServerSchemes.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SignatureScheme/Tls13NamedGroups.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLContextImpl/MD2InTrustAnchor.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLContextImpl/TrustTrustedCert.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/CloseEngineException.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/CloseStart.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/DelegatedTaskWrongException.java     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/EmptyExtensionData.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/EngineEnforceUseClientMode.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/RehandshakeFinished.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/SSLEngineBadBufferArrayAccess.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/SSLEngineDeadlock.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/SSLEngineFailedALPN.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/SSLEngineKeyLimit.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLEngineImpl/TLS13BeginHandshake.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ClientSocketCloseHang.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/SSLExceptionForIOIssue.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/SSLSocketBruceForceClose.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/SSLSocketClose.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/SSLSocketKeyLimit.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509KeyManager/CertificateAuthorities.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509KeyManager/PreferredKey.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509KeyManager/SelectOneKeyOutOfMany.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/BasicConstraints.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/CertRequestOverflow.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/CheckNullEntity.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/ComodoHacker.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/PKIXExtendedTM.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/SelfIssuedCert.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/SunX509ExtendedTM.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/TooManyCAs.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/X509TrustManagerImpl/X509ExtendedTMEnabled.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/StartDateTest.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: DSA for provider SUN
+java/security/KeyRep/Serial.java                                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyRep/SerialDSAPubKey.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Signature/ByteBuffers.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Signature/TestInitSignWithMyOwnRandom.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/SignedObject/Copy.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs/pkcs8/TestLeadingZeros.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/SupportedDSAParamGen.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestAlgParameterGenerator.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestDSA.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestDSA2.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestKeyPairGenerator.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestLegacyDSAKeyPairGenerator.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/NSASuiteB/TestDSAGenParameterSpec.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/NSASuiteB/TestSHAwithDSASignatureOids.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Hard code provider SunJCE
+com/sun/crypto/provider/CICO/CICODESFuncTest.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/CICO/PBEFunc/CICOPBEFuncTest.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/Encrypt.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/SameBuffer.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestCopySafe.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBESameBuffer/PBESameBuffer.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBESealedObject.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PKCS12Cipher.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PKCS12CipherKAT.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/TestCipherKeyWrapperPBEKey.java  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/TestCipherPBECons.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RC2ArcFour/CipherKAT.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestOAEP.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestOAEP_KAT.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestOAEPPadding.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestOAEPParameterSpec.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestOAEPWithParams.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/RSA/TestRSA.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/HmacSaltLengths.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/MacKAT.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/TLS/TestKeyMaterial.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/TLS/TestMasterSecret.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/TLS/TestPremaster.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/TLS/TestPRF.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/TLS/TestPRF12.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Security/removing/RemoveStaticProvider.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CryptoPermission/AllPermCheck.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CryptoPermission/LowercasePermCheck.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CryptoPermission/RC2PermCheck.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CryptoPermission/RC4AliasPermCheck.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CryptoPermission/RSANoLimit.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/EncryptedPrivateKeyInfo/GetKeySpec.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecInvalidEncoding.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such provider: SunJCE
+com/sun/crypto/provider/Cipher/AEAD/GCMLargeDataKAT.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/GCMParameterSpecTest.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/KeyWrapper.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/ReadWriteSkip.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/SealedObjectTest.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AEAD/WrongAAD.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/CICO.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/CTR.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/Padding.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestAESCipher.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestAESCiphers/TestAESWithDefaultProvider.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestCICOWithGCM.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestCICOWithGCMAndAAD.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestGCMKeyAndIvCheck.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestISO10126Padding.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestKATForGCM.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestNonexpanding.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestSameBuffer.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/AES/TestShortBuffer.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/Blowfish/TestCipherBlowfish.java     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/CTR/CounterMode.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/CTS/CTSMode.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/DESSecretKeySpec.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/KeyWrapping.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/PaddingTest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/TestCipherDES.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/TestCipherDESede.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/TextPKCS5PaddingTest.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/KeyWrap/NISTWrapKAT.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/KeyWrap/XMLEncKAT.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/DecryptWithoutParameters.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/NegativeLength.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBEKeysAlgorithmNames.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PKCS12Oid.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/UTIL/StrongOrUnlimited.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/DHGenSecretKey.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/DHKeyAgreement2.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/SameDHKeyStressTest.java       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/SupportedDHKeys.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/SupportedDHParamGens.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/TestExponentSize.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyAgreement/UnsupportedDHKeys.java         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyFactory/PBKDF2HmacSHA1FactoryTest.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/KeyFactory/TestProviderLeak.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/EmptyByteBufferTest.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/HmacPBESHA1.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/LargeByteBufferTest.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/MacClone.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/MacSameTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Mac/NullByteBufferTest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/NSASuiteB/TestAESOids.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/NSASuiteB/TestAESWrapOids.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/NSASuiteB/TestHmacSHAOids.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/ConvertP12Test.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/TestKeyStoreEntry.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Signature/NONEwithRSA.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/Cipher/CipherInputStreamExceptions.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/Cipher/GetMaxAllowed.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/Cipher/TestCipherMode.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/CipherSpi/DirectBBRemaining.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/EncryptedPrivateKeyInfo/GetAlgName.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/KeyGenerator/TestGetInstance.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/Mac/TestGetInstance.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/SecretKeyFactory/SecKFTranslateTest.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/spec/DESKeySpec/CheckParity.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/spec/RC2ParameterSpec/RC2AlgorithmParameters.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/EncryptionPadding.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestPKCS5PaddingError.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestRawRSACipher.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestRSACipher.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestRSACipherWrap.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestSymmCiphers.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestSymmCiphersNoPad.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/KeyAgreement/TestInterop.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such provider: SunRsaSign
+java/security/KeyFactory/GenerateRSAPrivateCrtKey.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyPairGenerator/GenerateRSAKeyPair.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Policy/GetInstance/GetInstance.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/security/auth/login/Configuration/GetInstance.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/SigInteropPSS.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/KeySizeTest.java                                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/PrivateKeyEqualityTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/PSSKeyCompatibility.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/PSSParametersTest.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/SerializedPSSKey.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/TestPSSKeySupport.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/SignatureTest.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/SignedObjectChain.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/SpecTest.java                                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestKeyPairGeneratorInit.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestKeyPairGeneratorLength.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.lang.RuntimeException: Provider SunRsaSign not found.
+sun/security/x509/X509CertImpl/Verify.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/x509/X509CRLImpl/Verify.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Hard code provider SunRsaSign
+java/security/Signature/SignatureGetInstance.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestKeyPairGenerator.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/TestSigGen15.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/TestSigGenPSS.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# SunJGSS provider & krb5 related
+sun/security/jgss/GssMemoryIssues.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/jgss/spnego/MSOID.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/jgss/spnego/NotPreferredMech.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/KrbCredSubKey.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/RFC396xTest.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/ServiceCredsCombination.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/AcceptPermissions.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/AcceptorSubKey.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Addresses.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/AddressesAndNameType.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/AlwaysEncPaReq.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Basic.java                                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/BasicKrb5Test.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/BasicProc.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/BogusKDC.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/CleanState.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/CrossRealm.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/DiffNameSameKey.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/DiffSaltParams.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/DupEtypes.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/DynamicKeytab.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/EmptyPassword.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/FileKeyTab.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/ForwardableCheck.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Forwarded.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/GSS.java                                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/GSSUnbound.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/HttpNegotiateServer.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/IgnoreChannelBinding.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KPEquals.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KdcPolicy.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KerberosHashEqualsTest.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KeyPermissions.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KeyTabCompat.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KrbTicket.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/KvnoNA.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/LifeTimeInSeconds.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/LoginModuleOptions.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/LoginNoPass.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/LongLife.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/MSOID2.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/MoreKvno.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NewSalt.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NoAddresses.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NoInitNoKeytab.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NonMutualSpnego.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NoneReplayCacheTest.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/NullRenewUntil.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/OkAsDelegate.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/OkAsDelegateXRealm.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/OnlyDesLogin.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/PrincipalNameEquals.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/RRC.java                                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/ReferralsTest.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/RefreshKrb5Config.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Renew.java                                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Renewal.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/ReplayCacheTest.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2proxy.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2proxyGSS.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2self.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2selfAsServer.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2selfAsServerGSS.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/S4U2selfGSS.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SPNEGO.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SSL.java                                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SaslBasic.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SaslUnbound.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SpnegoLifeTime.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/SpnegoReqFlags.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/Test5653.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/TicketSName.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/TwoOrThree.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/TwoPrinces.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/TwoTab.java                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/UnboundSSL.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/UnboundSSLMultipleKeys.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/UnboundSSLPrincipalProperty.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/UnboundService.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/UseCacheAndStoreKey.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/W83.java                                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/auto/principalProperty/PrincipalSystemPropTest.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/ktab/FileKeyTab.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/ktab/KeyTabIndex.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/krb5/runNameEquals.sh                                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# XMLDSig related
+# DOM XMLSignatureFactory not available
+# DOM mechanism not available
+# DOM KeyInfoFactory not available
+javax/xml/crypto/dsig/ErrorHandlerPermissions.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/GenerationTests.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/LineFeedOnlyTest.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/SecurityManager/XMLDSigWithSecMgr.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/TransformService/NullParent.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/ValidationTests.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/xml/crypto/dsig/keyinfo/KeyInfo/Marshal.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# failed to load PKCS12 keystore related
+# PBE AlgorithmParameters not available
+# PBES2 AlgorithmParameters not available
+java/security/KeyStore/PKCS12/EntryProtectionTest.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/MetadataEmptyTest.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/MetadataStoreLoadTest.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/PKCS12/ReadP12Test.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ec/TestEC.java                                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/ec/ReadPKCS12.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/Bug6415637.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/WrongPBES2.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/PBES2Encoding.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS doesnt support DES secret key
+com/sun/crypto/provider/Cipher/DES/FlushBug.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/DES/Sealtest.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# check if a provider exactly equals to Sun
+java/security/SecureRandom/DefaultProvider.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: MD2 for provider SUN
+sun/security/provider/MessageDigest/DigestKAT.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/MessageDigest/Offsets.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: MD5 for provider SUN
+java/security/MessageDigest/ByteBuffers.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/MessageDigest/ReinitDigest.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: NONEwithDSA for provider SUN
+java/security/Signature/Offsets.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: PKCS11 for provider SUN
+sun/security/ssl/SSLContextImpl/BadKSProvider.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLContextImpl/GoodProvider.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: SHA for provider SUN
+java/security/MessageDigest/TestSameValue.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Security/CaseInsensitiveAlgNames.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/MessageDigest/TestSHAClone.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# no such algorithm: SHA-256 for provider SUN
+sun/security/provider/NSASuiteB/TestSHAOids.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# NativePRNG SecureRandom not available
+sun/security/provider/SecureRandom/StrongSeedReader.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# SHA1PRNG SecureRandom not available
+java/security/SecureRandom/GetAlgorithm.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Security/ClassLoaderDeadlock/Deadlock.sh              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/SecureRandom/SelfSeed.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/SecureRandom/StrongSecureRandom.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/SeedGenerator/SeedGeneratorChoice.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# SHA-512/224 MessageDigest not available
+sun/security/provider/MessageDigest/SHA512.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# SHA-512/256 MessageDigest not available
+java/security/SignedObject/Chain.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# DSS Signature not available
+java/security/Signature/SignWithOutputBuffer.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# SunPKCS11-Solaris provider related
+sun/security/pkcs11/Cipher/JNICheck.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# unrecognized algorithm name: PBKDF2WITHHMACSHA1
+sun/security/x509/AlgorithmId/OidTableInit.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# unrecognized algorithm name: PBEWITHMD5ANDDES
+sun/security/x509/AlgorithmId/TurkishRegion.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# RSASSA-PSS AlgorithmParameters not available
+sun/security/x509/AlgorithmId/AlgorithmIdEqualsHashCode.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# failed to save PKCS12 keystore related. PBEWithSHA1AndRC2_40 AlgorithmParameters not available
+java/security/KeyStore/PKCS12/StoreTrustedCertAPITest.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# load PBE SecretKeyFactory not available
+sun/security/pkcs12/StorePasswordTest.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/StorePasswords.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# RSASSA-PSS KeyPairGenerator not available
+java/security/cert/X509Certificate/GetSigAlgParams.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/SignatureTest2.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/rsa/pss/SignatureTestPSS.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/PSS.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# failed to translate a DSA public key from P11DSAKeyFactory
+java/security/cert/CertificateFactory/openssl/OpenSSLCert.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertificateFactory/ReturnStream.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertificateFactory/slowstream.sh                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertPath/Serialize.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertPathEncodingTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertPathValidator/nameConstraintsRFC822/ValidateCertPath.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/CertPathValidatorException/Serial.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/PolicyNode/GetPolicyQualifiers.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/cert/X509CertSelectorTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/CodeSigner/Serialize.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/KeyStore/EntryMethods.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/UnresolvedPermission/AccessorMethods.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs/pkcs7/PKCS7VerifyTest.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/certpath/SunCertPathBuilderExceptionTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/validator/EndEntityExtensionCheck.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# failed to translate a DSA private key from P11DSAKeyFactory
+java/security/KeyRep/SerialOld.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs/pkcs8/PKCS8Test.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/TestDSA.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Failed to translate a DSA private key get from KeyPairGenerator
+java/security/KeyPairGenerator/Failover.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Could not create RSA private key due to the CKA_CLASS is CKO_PRIVATE_KEY
+# Caused by: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ATTRIBUTE_VALUE_INVALID
+sun/security/ssl/rsa/SignatureOffsets.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/rsa/SignedObjectChain.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# sun.security.pkcs11.P11Key$P11PrivateKey incompatible with sun.security.provider.DSAPrivateKey
+java/security/KeyPairGenerator/SolarisShortDSA.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cant create a PKCS12 keystore related
+java/security/KeyStore/PKCS12/StoreTrustedCertKeytool.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/ParamsTest.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/PKCS12SameKeyId.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cannot find any provider supporting AESWrap
+com/sun/crypto/provider/Cipher/KeyWrap/TestCipherKeyWrapperTest.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# DES/DESede SecretKey algorithms is not supported
+sun/security/pkcs12/StoreSecretKeyTest.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# PBEWithSHA1AndRC2_40 AlgorithmParameters not available
+sun/security/pkcs12/StoreTrustedCertTest.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# PBEWithMD5AndDES SecretKeyFactory not available
+com/sun/crypto/provider/Cipher/PBE/PBEInvalidParamsTest.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBEKeyTest.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBEParametersTest.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# PBEWithHmacSHA1AndAES_128 SecretKeyFactory not available
+com/sun/crypto/provider/Cipher/PBE/PBES2Test.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# PBKDF2WithHmacSHA1/PBKDF2WithHmacSHA224/PBKDF2WithHmacSHA256/PBKDF2WithHmacSHA384/PBKDF2WithHmacSHA512 SecretKeyFactory not available
+com/sun/crypto/provider/Cipher/PBE/PBMacBuffer.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBMacDoFinalVsUpdate.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/crypto/provider/Cipher/PBE/PBKDF2Translate.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/crypto/SecretKeyFactory/PBKDF2TranslateTest.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# pbeWithMD5ANDdes SecretKeyFactory not available
+com/sun/crypto/provider/Cipher/PBE/TestCipherPBE.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# PBEWithSHA1AndDESede AlgorithmParameters not available
+javax/net/ssl/Stapling/HttpsUrlConnClient.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/Stapling/SSLEngineWithStapling.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/Stapling/StapleEnableProps.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSCommon/TLSTest.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSCommon/TestSessionLocalPrincipal.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs12/EmptyPassword.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS does not support DES/ECB/PKCS5Padding
+com/sun/crypto/provider/Cipher/TextLength/TestCipherTextLength.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cannot find any provider supporting PBEWithMD5AndTripleDES
+javax/crypto/Cipher/TestGetInstance.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cannot find any provider supporting Blowfish
+javax/crypto/Cipher/Turkish.java                                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# unrecognized algorithm name: PBEWithMD5AndDES
+javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException2.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# P11KeyPairGenerator doesnt support DesEDE
+javax/crypto/KeyGenerator/TestKGParity.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Could not create DH private key
+sun/security/pkcs11/tls/TestLeadingZeroesP11.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# sun.security.pkcs11.P11Key$P11DSAPublicKey incompatible with sun.security.x509.X509Key
+sun/security/pkcs/pkcs10/PKCS10AttrEncoding.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs/pkcs7/SignerOrder.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# XMLSignature provider is disabled in FIPS mode
+com/sun/org/apache/xml/internal/security/TruncateHMAC.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Module java.security.sasl related.
+# Unable to find client impl for CRAM-MD5 or DIGEST-MD5.
+# NTLM should not support auth-conf
+com/sun/security/sasl/Cram.java                                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/AuthNoUtf8.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/AuthOnly.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/AuthRealmChoices.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/AuthRealms.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/CheckNegotiatedQOPs.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/Integrity.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/NoQuoteParams.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/Privacy.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/PrivacyRc4.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/digest/Unbound.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/ntlm/Conformance.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/sasl/ntlm/NTLMTest.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/security/sasl/Sasl/ClientServerTest.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/security/sasl/Sasl/DisabledMechanisms.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.security.ProviderException: Could not derive key
+#	at sun.security.pkcs11.P11ECDHKeyAgreement.engineGenerateSecret(P11ECDHKeyAgreement.java:145)
+#	at javax.crypto.KeyAgreement.generateSecret(KeyAgreement.java:586)
+sun/security/pkcs11/ec/TestCurves.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.security.spec.InvalidKeySpecException: Could not create EC private key
+sun/security/pkcs11/ec/TestECDH2.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/ec/TestECDSA2.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.security.KeyStoreException: Key protection algorithm not found: java.lang.NullPointerException
+#	at sun.security.pkcs12.PKCS12KeyStore.setKeyEntry(PKCS12KeyStore.java:687)
+#	at sun.security.pkcs12.PKCS12KeyStore.engineSetEntry(PKCS12KeyStore.java:1408)
+#	at java.security.KeyStore.setEntry(KeyStore.java:1557)
+sun/security/pkcs12/P12SecretKey.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.security.spec.InvalidKeySpecException: Could not create DH private key
+#	at sun.security.pkcs11.P11DHKeyFactory.engineGeneratePrivate(P11DHKeyFactory.java:166)
+#	at java.security.KeyFactory.generatePrivate(KeyFactory.java:366)
+#	Caused by: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ATTRIBUTE_VALUE_INVALID
+#	at sun.security.pkcs11.wrapper.PKCS11.C_CreateObject(Native Method)
+#	at sun.security.pkcs11.wrapper.PKCS11$InnerPKCS11.C_CreateObject(PKCS11.java:183)
+#	at sun.security.pkcs11.P11DHKeyFactory.generatePrivate(P11DHKeyFactory.java:207)
+#	at sun.security.pkcs11.P11DHKeyFactory.engineGeneratePrivate(P11DHKeyFactory.java:160)
+sun/security/pkcs11/KeyAgreement/TestShort.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Initialization failed PKCS11Exception: CKR_SLOT_ID_INVALID.
+# All the below tests will call PKCS11Test.getSunPKCS11(PKCS11Test.java:105) to get the SunPKCS11 provider.
+# When testing in the FIPS mode, the SunPKCS11 will first be initialized as a FIPS provider SunPKCS11-NSS-FIPS.
+# And then in the test code PKCS11Test, line 480 and 486. It will try to configure the SunPKCS11 using the p11-nss.txt to the NSS mode.
+# But in the FIPS mode, there can only be a single PKCS11 provider. So configure the SunPKCS11 to the NSS mode will failed.
+sun/security/pkcs11/Cipher/ReinitCipher.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/Test4512704.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestCICOWithGCM.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestCICOWithGCMAndAAD.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestGCMKeyAndIvCheck.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Cipher/TestKATForGCM.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/ec/ReadCertificates.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/KeyAgreement/UnsupportedDHKeys.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/KeyGenerator/TestKeyGenerator.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/MessageDigest/ByteBuffers.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/MessageDigest/DigestKAT.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/MessageDigest/TestCloning.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Provider/ConfigQuotedString.sh                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Provider/Login.sh                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/rsa/KeyWrap.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/SampleTest.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/SecureRandom/Basic.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/SecureRandom/TestDeserialization.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Serialize/SerializeProvider.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/ByteBuffers.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/InitAgainPSS.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/KeyAndParamCheckForPSS.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/ReinitSignature.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/SignatureTestPSS.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/TestDSA2.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Signature/TestRSAKeyLength.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/tls/TestPremaster.java                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# java.lang.IllegalArgumentException: if keyStoreType is PKCS11, then keyStore must be NONE
+javax/net/ssl/SSLSession/JSSERenegotiate.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/HttpsURLConnection/CriticalSubjectAltName.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLParameters/UseCipherSuitesOrder.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/GenericBlockCipher.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv11/GenericStreamCipher.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ClientHandshaker/CipherSuiteOrder.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/ProtocolVersion/HttpsProtocols.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/JarSigningNonAscii.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/LargeJarEntry.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# javax.security.auth.login.LoginException: if keyStoreType is PKCS11 then keyStoreURL must be NONE
+com/sun/security/auth/module/KeyStoreLoginModule/OptionTest.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+com/sun/security/auth/module/KeyStoreLoginModule/ReadOnly.java      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Could not generate keyPair for DH
+# java.security.ProviderException: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ARGUMENTS_BAD
+sun/security/pkcs11/KeyAgreement/SupportedDHKeys.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/KeyAgreement/TestDH.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/KeyPairGenerator/TestDH2048.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# All the below hard coded static String keyStoreFile = "keystore", and set the system property;
+# However, in the test codes. In FIPS mode, keystore must be NONE.
+# javax.net.ssl.SSLHandshakeException: no cipher suites in common
+javax/net/ssl/ciphersuites/DisabledAlgorithms.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/FixingJavadocs/ImplicitHandshake.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/HttpsURLConnection/GetResponseCode.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/BestEffortOnLazyConnected.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketConsistentSNI.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketExplorer.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketExplorerFailure.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketExplorerMatchedSNI.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketExplorerWithCliSNI.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/ServerName/SSLSocketExplorerWithSrvSNI.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/SSLSession/HttpsURLConnectionLocalCertificateChain.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/Stapling/SSLSocketWithStapling.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+javax/net/ssl/TLSv12/ProtocolFilter.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/AppInputStream/ReadZeroBytes.java                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/AppInputStream/RemoveMarkReset.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/AppOutputStream/NoExceptionOnClose.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/InputRecord/SSLSocketTimeoutNulls.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SocketCreation/SocketCreation.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/spi/ProviderInit.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSessionImpl/HashCodeMissing.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSessionImpl/ResumeChecksClient.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSessionImpl/ResumeChecksServer.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/AsyncSSLSocketClose.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ClientModeClientAuth.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/CloseSocketException.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/InvalidateServerSessionRenegotiate.java  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/LargePacketAfterHandshakeTest.java   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/NewSocketMethods.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/NoImpactServerRenego.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/NotifyHandshakeTest.sh               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/RejectClientRenego.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ReuseAddr.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ReverseNameLookup.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ServerRenegoWithTwoVersions.java     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/ServerTimeout.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSocketImpl/UnconnectedSocketWrongExceptions.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/Stapling/StatusResponseManager.sh                  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/printssl.sh                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/util/HostnameMatcher/NullHostnameCheck.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# NSS module initial failures.
+# It using "nss.cfg"/"nsstrust.cfg"/"nsscrypto.cfg" as the configure file and in the FIPS mode, there can only be a single PKCS11 provider.
+# java.security.ProviderException: NSS library directory /usr/lib64 invalid, NSS already initialized with /usr/lib64/
+sun/security/pkcs11/Secmod/AddPrivateKey.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Secmod/Crypto.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Secmod/LoadKeystore.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Secmod/TrustAnchors.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS doesnt support ECB mode in AES/ECB/PKCS5Padding cipher
+# java.security.InvalidKeyException: Could not create key
+sun/security/pkcs11/Cipher/CancelMultipart.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# com.sun.exp.provider.EXP related
+java/security/Security/signedfirst/Dyn.sh                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+java/security/Security/signedfirst/Static.sh                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS doesnt support DES secret key
+javax/crypto/Cipher/ByteBuffers.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Failed to create a PKCS12 keystore
+javax/net/ssl/TLSCommon/ConcurrentClientAccessTest.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS doesnt support DESede algorithms
+com/sun/crypto/provider/CICO/CICOSkipTest.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cipher suites mismatch
+javax/net/ssl/sanity/ciphersuites/CheckCipherSuites.java            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# FIPS doesnt support DKS keystore
+sun/security/provider/KeyStore/DKSTest.sh                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Policy file related. Failed due to related to the keystore files.
+sun/security/provider/PolicyFile/Alias.java                         https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/PolicyFile/AliasExpansion.java                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/PolicyFile/TokenStore.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/PolicyFile/TrustedCert.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Hard code checking if the provider is "MyProvider()"
+sun/security/ssl/HandshakeHash/HandshakeHashCloneExhaustion.java    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# keytool error: java.security.KeyStoreException: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ATTRIBUTE_VALUE_INVALID
+sun/security/tools/keytool/CloseFile.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/NewSize7.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/UnknownAndUnparseable.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Cant create a keystore in FIPS
+sun/security/tools/jarsigner/certpolicy.sh                          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/concise_jarsigner.sh                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/DefaultSigalg.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/EntriesOrder.java                      https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/Test4431684.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/TimestampCheck.java                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/jarsigner/weaksize.sh                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/autotest.sh                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/keyalg.sh                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/standard.sh                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/tools/keytool/WeakAlg.java                             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/validator/certreplace.sh                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/validator/samedn.sh                                    https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Could not import DSA private key when invoke kpg.initialize(1024) after
+# KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+java/security/Provider/SupportsParameter.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# We can generate DES secret keys but cant import it
+sun/security/pkcs11/KeyGenerator/DESParity.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# testMDChange failed at:MD2/2500
+# This is failed because the BUFFER_SIZE is defined as 96 in P11Digest engine class for FIPS.
+# The length (2500) of the data which is over the buffer size.
+java/security/MessageDigest/TestDigestIOStream.java                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Exception in thread "main" java.security.ProviderException: Unknown mechanism: 20
+java/security/Signature/SignatureLength.java                        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/provider/DSA/TestMaxLengthDER.java                     https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/x509/X509CertImpl/V3Certificate.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Can generate a TlsMasterSecret key via (TlsMasterSecret)kg.generateKey(), but cant import a TlsMasterSecret key;
+sun/security/pkcs11/tls/TestMasterSecret.java                       https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# When FIPS mode is enabled, cacerts in ${JAVA_HOME}/jre/lib/security/cacerts is empty.
+javax/net/ssl/sanity/CacertsExplorer.java                           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Related to issue https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/613
+javax/security/auth/PrivateCredentialPermission/MoreThenOnePrincipals.java  https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# Caused by: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_KEY_TYPE_INCONSISTENT
+#  at sun.security.pkcs11.wrapper.PKCS11.C_SignInit(Native Method)
+javax/crypto/Mac/ByteBuffers.java                                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Mac/MacKAT.java                                 https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Mac/MacSameTest.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/Mac/ReinitMac.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/pkcs11/tls/TestPRF.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/internal/TestRun.sh                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
