@@ -23,22 +23,27 @@
 # ===========================================================================
 
 usage() {
-	echo "Usage: $0 [-h|--help] [--openssl-version=<openssl version 1.0.2 and above to download>]"
+	echo "Usage: $0 [-h|--help] [--openssl-repo=<repo URL>] [--openssl-version=<openssl version 1.0.2 and above to download>]"
 	echo "where:"
 	echo "  -h|--help             print this help, then exit"
+	echo "  --openssl-repo        OpenSSL repository. By default, https://github.com/openssl/openssl.git"
 	echo "  --openssl-version     OpenSSL version to download. For example, 1.1.1"
 	echo ""
 	exit 1
 }
 
 OPENSSL_VERSION=""
-GIT_URL="https://github.com/openssl/openssl.git"
+OPENSSL_URL="https://github.com/openssl/openssl.git"
 
 for i in "$@"
 do
 	case $i in
 		-h | --help )
 		usage
+		;;
+
+		--openssl-repo=* )
+		OPENSSL_URL="${i#*=}"
 		;;
 
 		--openssl-version=* )
@@ -85,7 +90,7 @@ if [ -f "openssl/openssl_version.txt" ]; then
 fi
 
 echo ""
-echo "Cloning OpenSSL version $OPENSSL_VERSION"
-git clone --depth=1 -b $OPENSSL_SOURCE_TAG $GIT_URL
+echo "Cloning OpenSSL version $OPENSSL_VERSION from $OPENSSL_URL"
+git clone --depth=1 -b $OPENSSL_SOURCE_TAG $OPENSSL_URL
 
 echo $OPENSSL_SOURCE_TAG > openssl/openssl_version.txt
