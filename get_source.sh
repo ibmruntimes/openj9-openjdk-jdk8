@@ -25,7 +25,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 
 # exit immediately if any unexpected error occurs
@@ -47,6 +47,7 @@ usage() {
 	echo "  -omr-sha          a commit SHA for the omr repository"
 	echo "  -omr-reference    a local repo to use as a clone reference"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
+	echo "  --openssl-repo    Specify the OpenSSL repository to download from"
 	echo "  --openssl-version Specify the version of OpenSSL source to download"
 	echo ""
 	exit 1
@@ -64,6 +65,10 @@ for i in "$@" ; do
 
 		-openj9-repo=* | -openj9-branch=* | -openj9-sha=* | -openj9-reference=* | -omr-repo=* | -omr-branch=* | -omr-sha=* | -omr-reference=* | -parallel=* )
 			j9options="${j9options} ${i}"
+			;;
+
+		--openssl-repo=* )
+			openssloptions="${openssloptions} ${i}"
 			;;
 
 		--openssl-version=* )

@@ -859,3 +859,20 @@ sun/security/pkcs11/Mac/MacSameTest.java                            https://gith
 sun/security/pkcs11/Mac/ReinitMac.java                              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/pkcs11/tls/TestPRF.java                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/internal/TestRun.sh                                https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# javax.crypto.BadPaddingException: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ENCRYPTED_DATA_INVALID
+#	at sun.security.pkcs11.P11AEADCipher.handleException(P11AEADCipher.java:749)
+#	at sun.security.pkcs11.P11AEADCipher.implDoFinal(P11AEADCipher.java:722)
+#	at sun.security.pkcs11.P11AEADCipher.engineDoFinal(P11AEADCipher.java:548)
+#	at javax.crypto.Cipher.doFinal(Cipher.java:2463)
+# Caused by: sun.security.pkcs11.wrapper.PKCS11Exception: CKR_ENCRYPTED_DATA_INVALID
+#	at sun.security.pkcs11.wrapper.PKCS11.C_Decrypt(Native Method)
+#	at sun.security.pkcs11.P11AEADCipher.implDoFinal(P11AEADCipher.java:708)
+# Decryption and Encryption are single PKCS#11 operations (eg: not multi-part). This is necessary for AES-GCM.
+javax/crypto/CipherSpi/TestGCMWithByteBuffer.java                   https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# -Djava.ext.dirs related.
+# if we assign a directory to -Djava.ext.dirs jvm options,
+# the ExtClassLoader will not load the jar file under ${JAVA_HOME}/jre/lib/ext.
+# One solution that fix this issue is expanding -Djava.ext.dirs with {JAVA_HOME}/jre/lib/ext.
+sun/rmi/rmic/manifestClassPath/run.sh                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
