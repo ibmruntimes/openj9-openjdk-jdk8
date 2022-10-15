@@ -21,7 +21,7 @@
 # Exclude tests list from sanity.openjdk
 #
 # java.security.NoSuchProviderException: no such provider: SunRsaSign
-java/math/BigInteger/ModPow65537.java.ModPow65537
+java/math/BigInteger/ModPow65537.java                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 
 # Existing Jars sign related
 java/util/jar/JarFile/ScanSignedJar.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
@@ -876,3 +876,8 @@ javax/crypto/CipherSpi/TestGCMWithByteBuffer.java                   https://gith
 # the ExtClassLoader will not load the jar file under ${JAVA_HOME}/jre/lib/ext.
 # One solution that fix this issue is expanding -Djava.ext.dirs with {JAVA_HOME}/jre/lib/ext.
 sun/rmi/rmic/manifestClassPath/run.sh                               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+
+# sun.security.pkcs11.wrapper.PKCS11Exception: CKR_KEY_SIZE_RANGE
+# The minimum length for an MD5 HMAC key is 16 bytes.
+# However, this test uses a 4 bytes length key for HmacMD5.
+com/sun/crypto/provider/Mac/HmacMD5.java                            https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
