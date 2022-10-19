@@ -92,17 +92,10 @@ final class SunEntries {
         Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty
             ("jdk.security.legacyDSAKeyPairGenerator"));
 
-    /*
-     * Check whether native crypto is enabled with property.
-     *
-     * By default, the native crypto is enabled and uses the native
-     * crypto library implementation.
-     *
-     * The property 'jdk.nativeDigest' is used to disable Native digest alone
-     * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, RSA, and EC).
+    /* The property 'jdk.nativeDigest' is used to control enablement of the native
+     * digest implementation.
      */
-    private static boolean useNativeDigest = true;
+    private static final boolean useNativeDigest = NativeCrypto.isAlgorithmEnabled("jdk.nativeDigest", "MessageDigest");
 
     private SunEntries() {
         // empty
@@ -434,48 +427,6 @@ final class SunEntries {
              * We can try using the URL path.
              */
             return new File(device.getPath());
-        }
-    }
-
-    static {
-
-        String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
-        String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
-        String nativeDigestStr = GetPropertyAction.privilegedGetProperty("jdk.nativeDigest");
-
-        if (Boolean.parseBoolean(nativeCryptStr) || nativeCryptStr == null) {
-                /* nativeCrypto is enabled */
-                if (!(Boolean.parseBoolean(nativeDigestStr) || nativeDigestStr == null)) {
-                        useNativeDigest = false;
-                }
-        } else {
-                /* nativeCrypto is disabled */
-                useNativeDigest = false;
-        }
-
-        if (useNativeDigest) {
-            /*
-             * User want to use native crypto implementation.
-             * Make sure the native crypto libraries are loaded successfully.
-             * Otherwise, throw a warning message and fall back to the in-built
-             * java crypto implementation.
-             */
-            if (!NativeCrypto.isLoaded()) {
-                useNativeDigest = false;
-
-                if (nativeCryptTrace != null) {
-                   System.err.println("Warning: Native crypto library load failed." +
-                                   " Using Java crypto implementation");
-                }
-            } else {
-                if (nativeCryptTrace != null) {
-                   System.err.println("MessageDigest load - using Native crypto library.");
-                }
-            }
-        } else {
-            if (nativeCryptTrace != null) {
-               System.err.println("MessageDigest load - Native crypto library disabled.");
-            }
         }
     }
 }

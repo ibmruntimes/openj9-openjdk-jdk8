@@ -37,7 +37,6 @@ import java.security.SecureRandom;
 import java.security.interfaces.*;
 
 import javax.crypto.BadPaddingException;
-import sun.security.action.GetPropertyAction;
 import jdk.crypto.jniprovider.NativeCrypto;
 
 import sun.security.jca.JCAUtil;
@@ -57,19 +56,10 @@ import sun.security.jca.JCAUtil;
  */
 public final class RSACore {
 
-    /*
-     * Check whether native crypto is disabled with property.
-     *
-     * By default, the native crypto is enabled and uses the native
-     * crypto library implementation.
-     *
-     * The property 'jdk.nativeRSA' is used to disable Native RSA alone,
-     * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, RSA, and EC).
+    /* The property 'jdk.nativeRSA' is used to control enablement of the native
+     * RSA implementation.
      */
-    private static boolean useNativeCrypto = true;
-
-    private static boolean useNativeRsa = true;
+    private static boolean useNativeRsa = NativeCrypto.isAlgorithmEnabled("jdk.nativeRSA", "RSACore");
 
     // globally enable/disable use of blinding
     private final static boolean ENABLE_BLINDING = true;
@@ -275,48 +265,6 @@ public final class RSACore {
         System.arraycopy(b, 0, t, (len - n), n);
         Arrays.fill(b, (byte)0);
         return t;
-    }
-
-    static {
-
-        String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
-        String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
-        String nativeRsaStr = GetPropertyAction.privilegedGetProperty("jdk.nativeRSA");
-
-        if (Boolean.parseBoolean(nativeCryptStr) || nativeCryptStr == null) {
-                /* nativeCrypto is enabled */
-                if (!(Boolean.parseBoolean(nativeRsaStr) || nativeRsaStr == null)) {
-                        useNativeRsa = false;
-                }
-        } else {
-                /* nativeCrypto is disabled */
-                useNativeRsa = false;
-        }
-
-        if (useNativeRsa) {
-            /*
-             * User want to use native crypto implementation.
-             * Make sure the native crypto libraries are loaded successfully.
-             * Otherwise, throw a warning message and fall back to the in-built
-             * java crypto implementation.
-             */
-            if (!NativeCrypto.isLoaded()) {
-                useNativeRsa = false;
-
-                if (nativeCryptTrace != null) {
-                   System.err.println("Warning: Native crypto library load failed." +
-                                   " Using Java crypto implementation");
-                }
-            } else {
-                if (nativeCryptTrace != null) {
-                   System.err.println("RSACore load - using Native crypto library.");
-                }
-            }
-        } else {
-            if (nativeCryptTrace != null) {
-               System.err.println("RSACore load - Native crypto library disabled.");
-            }
-        }
     }
 
     /**

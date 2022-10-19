@@ -27,6 +27,7 @@
 #include <openssl/err.h>
 #include <openssl/rsa.h>
 #include <openssl/ecdh.h>
+#include <openssl/pkcs12.h>
 
 #include <jni.h>
 #include <stdio.h>
@@ -120,6 +121,8 @@ typedef void OSSL_BN_CTX_free_t(BN_CTX *);
 typedef int OSSL_EC_KEY_set_public_key_t(EC_KEY *, const EC_POINT *);
 typedef int OSSL_EC_KEY_check_key_t(const EC_KEY *);
 typedef int EC_set_public_key_t(EC_KEY *, BIGNUM *, BIGNUM *, int);
+
+typedef int OSSL_PKCS12_key_gen_t(const char *, int, unsigned char *, int, int, int, int, unsigned char *, const EVP_MD *);
 
 typedef int OSSL_CRYPTO_num_locks_t();
 typedef void OSSL_CRYPTO_THREADID_set_numeric_t(CRYPTO_THREADID *id, unsigned long val);
@@ -218,7 +221,10 @@ OSSL_EC_KEY_set_public_key_t* OSSL_EC_KEY_set_public_key;
 OSSL_EC_KEY_check_key_t* OSSL_EC_KEY_check_key;
 EC_set_public_key_t* EC_set_public_key;
 
-/* Structure for OpenSSL Digest context */
+/* Define pointers for OpenSSL functions to handle PBE algorithm. */
+OSSL_PKCS12_key_gen_t* OSSL_PKCS12_key_gen;
+
+/* Structure for OpenSSL Digest context. */
 typedef struct OpenSSLMDContext {
     EVP_MD_CTX *ctx;
     const EVP_MD *digestAlg;
@@ -434,6 +440,9 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_ECGF2M = JNI_TRUE;
     }
 
+    /* Load the functions symbols for OpenSSL PBE algorithm. */
+    OSSL_PKCS12_key_gen = (OSSL_PKCS12_key_gen_t*)find_crypto_symbol(crypto_library, "PKCS12_key_gen_uni");
+
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
         (NULL == OSSL_get_error) ||
@@ -492,6 +501,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_BN_CTX_free) ||
         (NULL == OSSL_EC_KEY_set_public_key) ||
         (NULL == OSSL_EC_KEY_check_key) ||
+        (NULL == OSSL_PKCS12_key_gen) ||
         ((NULL == OSSL_CRYPTO_num_locks) && (0 == ossl_ver)) ||
         ((NULL == OSSL_CRYPTO_THREADID_set_numeric) && (0 == ossl_ver)) ||
         ((NULL == OSSL_OPENSSL_malloc) && (0 == ossl_ver)) ||
@@ -669,19 +679,19 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
     OpenSSLMDContext *context = NULL;
 
     switch (algoIdx) {
-        case 0:
+        case jdk_crypto_jniprovider_NativeCrypto_SHA1_160:
             digestAlg = (*OSSL_sha1)();
             break;
-        case 1:
-            digestAlg = (*OSSL_sha256)();
-            break;
-        case 2:
+        case jdk_crypto_jniprovider_NativeCrypto_SHA2_224:
             digestAlg = (*OSSL_sha224)();
             break;
-        case 3:
+        case jdk_crypto_jniprovider_NativeCrypto_SHA2_256:
+            digestAlg = (*OSSL_sha256)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_384:
             digestAlg = (*OSSL_sha384)();
             break;
-        case 4:
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_512:
             digestAlg = (*OSSL_sha512)();
             break;
         default:
@@ -2507,6 +2517,73 @@ setECPublicKey(EC_KEY *key, BIGNUM *x, BIGNUM *y, int field)
 
     if (1 == ret) {
         ret = (*OSSL_EC_KEY_check_key)(key);
+    }
+
+    return ret;
+}
+
+/* Password-based encryption algorithm.
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    PBEDerive
+ * Signature: (J[BI[BI[BIIII)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_PBEDerive
+    (JNIEnv *env, jclass obj, jbyteArray password, jint passwordLength, jbyteArray salt, jint saltLength, jbyteArray key, jint iterations, jint n, jint id, jint hashAlgorithm)
+{
+    const EVP_MD *digestAlgorithm = NULL;
+    char *nativePassword = NULL;
+    unsigned char *nativeSalt = NULL;
+    unsigned char *nativeKey = NULL;
+    jint ret = -1;
+
+    switch (hashAlgorithm) {
+        case jdk_crypto_jniprovider_NativeCrypto_SHA1_160:
+            digestAlgorithm = (*OSSL_sha1)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA2_224:
+            digestAlgorithm = (*OSSL_sha224)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA2_256:
+            digestAlgorithm = (*OSSL_sha256)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_384:
+            digestAlgorithm = (*OSSL_sha384)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_512:
+            digestAlgorithm = (*OSSL_sha512)();
+            break;
+        default:
+            goto cleanup;
+    }
+
+    nativePassword = (char*)((*env)->GetPrimitiveArrayCritical(env, password, 0));
+    if (NULL == nativePassword) {
+        goto cleanup;
+    }
+    nativeSalt = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, salt, 0));
+    if (NULL == nativeSalt) {
+        goto cleanup;
+    }
+    nativeKey = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, key, 0));
+    if (NULL == nativeKey) {
+        goto cleanup;
+    }
+
+    if (1 == (*OSSL_PKCS12_key_gen)(nativePassword, passwordLength, nativeSalt, saltLength, id, iterations, n, nativeKey, digestAlgorithm)) {
+        ret = 0;
+    }
+
+cleanup:
+    if (NULL != nativePassword) {
+        (*env)->ReleasePrimitiveArrayCritical(env, password, nativePassword, JNI_ABORT);
+    }
+    if (NULL != nativeSalt) {
+        (*env)->ReleasePrimitiveArrayCritical(env, salt, nativeSalt, JNI_ABORT);
+    }
+    if (NULL != nativeKey) {
+        (*env)->ReleasePrimitiveArrayCritical(env, key, nativeKey, JNI_ABORT);
     }
 
     return ret;
