@@ -4444,7 +4444,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1666101944
+DATE_WHEN_GENERATED=1670354166
 
 ###############################################################################
 #
@@ -27095,8 +27095,8 @@ fi
     # Fail-fast: verify we're building on a supported Xcode version
     XCODE_VERSION=`$XCODEBUILD -version | grep '^Xcode ' | sed 's/Xcode //'`
     XC_VERSION_PARTS=( ${XCODE_VERSION//./ } )
-    if test "${XC_VERSION_PARTS[0]}" != "6" -a "${XC_VERSION_PARTS[0]}" != "9" -a "${XC_VERSION_PARTS[0]}" != "10" -a "${XC_VERSION_PARTS[0]}" != "11" -a "${XC_VERSION_PARTS[0]}" != "12" -a "${XC_VERSION_PARTS[0]}" != "13" ; then
-      as_fn_error $? "Xcode 6, 9-13 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode or make Xcode active by using xcode-select." "$LINENO" 5
+    if test "${XC_VERSION_PARTS[0]}" != "6" -a "${XC_VERSION_PARTS[0]}" != "9" -a "${XC_VERSION_PARTS[0]}" != "10" -a "${XC_VERSION_PARTS[0]}" != "11" -a "${XC_VERSION_PARTS[0]}" != "12" -a "${XC_VERSION_PARTS[0]}" != "13" -a "${XC_VERSION_PARTS[0]}" != "14" ; then
+      as_fn_error $? "Xcode 6, 9-14 is required to build JDK 8, the version found was $XCODE_VERSION. Use --with-xcode-path to specify the location of Xcode or make Xcode active by using xcode-select." "$LINENO" 5
     fi
 
     # Some versions of Xcode command line tools install gcc and g++ as symlinks to
