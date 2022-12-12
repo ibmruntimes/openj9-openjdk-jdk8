@@ -166,6 +166,7 @@ sun/security/ssl/SSLEngineImpl/SSLEngineDeadlock.java               https://gith
 sun/security/ssl/SSLEngineImpl/SSLEngineFailedALPN.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/SSLEngineImpl/SSLEngineKeyLimit.java               https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/SSLEngineImpl/TLS13BeginHandshake.java             https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
+sun/security/ssl/SSLSessionImpl/InvalidateSession.java              https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/SSLSocketImpl/ClientSocketCloseHang.java           https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/SSLSocketImpl/SSLExceptionForIOIssue.java          https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
 sun/security/ssl/SSLSocketImpl/SSLSocketBruceForceClose.java        https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611   linux-x64
