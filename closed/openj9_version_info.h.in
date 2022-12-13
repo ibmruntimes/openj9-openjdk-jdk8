@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,7 @@
 #define OPENJ9_VERSION_INFO_H
 
 #define J9COMPILER_VERSION_STRING "@COMPILER_VERSION_STRING@"
-#define J9PRODUCT_NAME            "@PRODUCT_NAME@"
+#define J9PRODUCT_NAME            "@PRODUCT_NAME@ @PRODUCT_SUFFIX@"
 #define J9TARGET_CPU_BITS         "@OPENJDK_TARGET_CPU_BITS@"
 #define J9TARGET_CPU_OSARCH       "@OPENJDK_TARGET_CPU_OSARCH@"
 #define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
