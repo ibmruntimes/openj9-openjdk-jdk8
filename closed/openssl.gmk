@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -88,12 +88,18 @@ ifeq (,$(OPENSSL_TARGET))
   $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
 endif # OPENSSL_TARGET
 
+ifneq (,$(CCACHE))
+  # If ccache is enabled and the environment contains either CC or CXX, their
+  # values (as defined in this make) are propagated to the instance of make
+  # which will build openssl causing it to fail. Instead, pass along CC and
+  # CXX without the ccache wrapper.
+  OPENSSL_MAKE += CC=$(ac_cv_prog_CC) CXX=$(ac_cv_prog_CXX)
+endif # CCACHE
+
 build_openssl :
-ifeq ($(BUILD_OPENSSL), yes)
 	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)
 	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_TARGET) shared )
 	$(OPENSSL_PATCH)
 	( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
-endif # BUILD_OPENSSL
 
 .PHONY : build_openssl
