@@ -141,16 +141,6 @@ public class LocalVirtualMachine {
                 String name = vmid.toString(); // default to pid if name not available
                 boolean attachable = false;
                 String address = null;
-                try {
-                     MonitoredVm mvm = host.getMonitoredVm(new VmIdentifier(name));
-                     // use the command line as the display name
-                     name =  MonitoredVmUtil.commandLine(mvm);
-                     attachable = MonitoredVmUtil.isAttachable(mvm);
-                     address = ConnectorAddressLink.importFrom(pid);
-                     mvm.detach();
-                } catch (Exception x) {
-                     // ignore
-                }
                 map.put((Integer) vmid,
                         new LocalVirtualMachine(pid, name, attachable, address));
             }
