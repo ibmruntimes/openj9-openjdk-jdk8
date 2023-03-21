@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,16 +44,19 @@ public class NativeCrypto {
     public static final int SHA5_384 = 3;
     public static final int SHA5_512 = 4;
 
+    public static final long OPENSSL_VERSION_1_0_0 = 0x1_00_00_000L;
+    public static final long OPENSSL_VERSION_1_1_0 = 0x1_01_00_000L;
+    public static final long OPENSSL_VERSION_3_0_0 = 0x3_00_00_000L;
+
     private static final boolean useNativeCrypto = Boolean.parseBoolean(
             GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto", "true"));
 
     private static final boolean traceEnabled = Boolean.parseBoolean(
             GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace", "false"));
 
-    //ossl_ver:
+    //ossl_vers will be either:
     // -1 : library load failed
-    //  0 : openssl 1.0.x
-    //  1 : openssl 1.1.x or newer
+    // or one of the OPENSSL_VERSION_x_x_x constants
     private static final boolean loaded = AccessController.doPrivileged(
             (PrivilegedAction<Boolean>) () -> {
             Boolean isLoaded = Boolean.FALSE;
@@ -61,7 +64,7 @@ public class NativeCrypto {
             try {
                 System.loadLibrary("jncrypto"); // check for native library
                 // load OpenSSL crypto library dynamically.
-                int ossl_ver = loadCrypto(traceEnabled);
+                long ossl_ver = loadCrypto(traceEnabled);
                 if (ossl_ver != -1) {
                     isLoaded = Boolean.TRUE;
                 }
@@ -190,7 +193,8 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
-    private static final native int loadCrypto(boolean traceEnabled);
+
+    private static final native long loadCrypto(boolean trace);
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
@@ -213,6 +217,7 @@ public class NativeCrypto {
     public final native void DigestReset(long context);
 
     /* Native CBC interfaces */
+
     public final native long CBCCreateContext();
 
     public final native int CBCDestroyContext(long context);
@@ -239,6 +244,7 @@ public class NativeCrypto {
                                             int outputOffset);
 
     /* Native GCM interfaces */
+
     public final native int GCMEncrypt(byte[] key,
                                        int keylen,
                                        byte[] iv,
