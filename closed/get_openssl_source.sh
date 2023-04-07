@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -72,7 +72,7 @@ case "$OPENSSL_VERSION" in
 		OPENSSL_SOURCE_TAG="openssl-$OPENSSL_VERSION"
 		;;
 	*)
-		usage
+		OPENSSL_SOURCE_TAG=$OPENSSL_VERSION
 		;;
 esac
 
