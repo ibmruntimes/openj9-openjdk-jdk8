@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -133,5 +133,10 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 else
   OPENJ9_VM_BUILD_DIR = $(OUTPUT_ROOT)/vm
 endif
+
+# Enable use of j9cfg.h in openjdk native code.
+$(foreach var, \
+	CFLAGS_JDKEXE CFLAGS_JDKLIB CXXFLAGS_JDKEXE CXXFLAGS_JDKLIB, \
+	$(eval $(var) += -I$(JDK_OUTPUTDIR)/openj9_include))
 
 J9JCL_SOURCES_DIR := $(JDK_OUTPUTDIR)/j9jcl

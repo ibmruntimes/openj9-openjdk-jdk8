@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -99,6 +99,7 @@ endif
 	build-j9vm \
 	generate-j9jcl-sources \
 	generate-j9-version-headers \
+	openj9-config-headers \
 	run-preprocessors-j9 \
 	stage-j9 \
 	#
@@ -120,6 +121,23 @@ define openj9_copy_tree_impl
 		| $(TAR) --extract --directory=$1 -m
 	@$(TOUCH) $1/$(OPENJ9_MARKER_FILE)
 endef
+
+ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+  CONFIG_HEADERS := j9cfg.h omr/omrcfg.h
+else
+  CONFIG_HEADERS := include/j9cfg.h omr/include_core/omrcfg.h
+endif
+
+define openj9_config_header_rules
+  openj9-config-headers : $(JDK_OUTPUTDIR)/openj9_include/$(notdir $1)
+
+  $(JDK_OUTPUTDIR)/openj9_include/$(notdir $1) : $1
+	$$(call install-file)
+endef
+
+$(foreach file, \
+	$(CONFIG_HEADERS), \
+	$(eval $(call openj9_config_header_rules, $(OPENJ9_VM_BUILD_DIR)/$(file))))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
