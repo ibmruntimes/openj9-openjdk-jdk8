@@ -48,6 +48,7 @@ build-j9vm : start-make
 	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/openssl.gmk
   endif # BUILD_OPENSSL
 	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/OpenJ9.gmk build-j9vm
+	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/OpenJ9.gmk openj9-config-headers
 	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/CopyToBuildJdk.gmk
 
 all : debug-image
