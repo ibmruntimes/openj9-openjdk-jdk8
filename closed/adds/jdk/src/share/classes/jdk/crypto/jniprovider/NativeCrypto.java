@@ -44,6 +44,10 @@ public class NativeCrypto {
     public static final int SHA5_384 = 3;
     public static final int SHA5_512 = 4;
 
+    /* Define constants for the EC field types. */
+    public static final int ECField_Fp = 0;
+    public static final int ECField_F2m = 1;
+
     public static final long OPENSSL_VERSION_1_0_0 = 0x1_00_00_000L;
     public static final long OPENSSL_VERSION_1_1_0 = 0x1_01_00_000L;
     public static final long OPENSSL_VERSION_3_0_0 = 0x3_00_00_000L;
@@ -320,6 +324,15 @@ public class NativeCrypto {
                                   long RSAPublicKey);
 
     /* Native EC interfaces */
+    public final native int ECGenerateKeyPair(long key,
+                                              byte[] x,
+                                              int xLen,
+                                              byte[] y,
+                                              int yLen,
+                                              byte[] s,
+                                              int sLen,
+                                              int fieldType);
+
     public final native int ECCreatePublicKey(long key,
                                               byte[] x,
                                               int xLen,
@@ -331,35 +344,21 @@ public class NativeCrypto {
                                                byte[] s,
                                                int sLen);
 
-    public final native long ECEncodeGFp(byte[] a,
-                                         int aLen,
-                                         byte[] b,
-                                         int bLen,
-                                         byte[] p,
-                                         int pLen,
-                                         byte[] x,
-                                         int xLen,
-                                         byte[] y,
-                                         int yLen,
-                                         byte[] n,
-                                         int nLen,
-                                         byte[] h,
-                                         int hLen);
-
-    public final native long ECEncodeGF2m(byte[] a,
-                                          int aLen,
-                                          byte[] b,
-                                          int bLen,
-                                          byte[] p,
-                                          int pLen,
-                                          byte[] x,
-                                          int xLen,
-                                          byte[] y,
-                                          int yLen,
-                                          byte[] n,
-                                          int nLen,
-                                          byte[] h,
-                                          int hLen);
+    public final native long ECEncodeGF(int fieldType,
+                                        byte[] a,
+                                        int aLen,
+                                        byte[] b,
+                                        int bLen,
+                                        byte[] p,
+                                        int pLen,
+                                        byte[] x,
+                                        int xLen,
+                                        byte[] y,
+                                        int yLen,
+                                        byte[] n,
+                                        int nLen,
+                                        byte[] h,
+                                        int hLen);
 
     public final native int ECDestroyKey(long key);
 

@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -54,7 +54,7 @@ import sun.security.x509.*;
 public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
 
     private static final long serialVersionUID = -2462037275160462289L;
-    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
+    private static NativeCrypto nativeCrypto;
 
     private ECPoint w;
     private ECParameterSpec params;
@@ -141,14 +141,6 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
     }
 
     /**
-     * Returns true if this key's EC field is an instance of ECFieldF2m.
-     * @return true if the field is an instance of ECFieldF2m, false otherwise
-     */
-    boolean isECFieldF2m() {
-        return this.params.getCurve().getField() instanceof ECFieldF2m;
-    }
-
-    /**
      * Returns the native EC public key context pointer.
      * @return the native EC public key context pointer or -1 on error
      */
@@ -156,33 +148,26 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
         if (this.nativeECKey == 0x0) {
             synchronized (this) {
                 if (this.nativeECKey == 0x0) {
-                    ECPoint generator = this.params.getGenerator();
-                    EllipticCurve curve = this.params.getCurve();
-                    ECField field = curve.getField();
-                    byte[] a = curve.getA().toByteArray();
-                    byte[] b = curve.getB().toByteArray();
-                    byte[] gx = generator.getAffineX().toByteArray();
-                    byte[] gy = generator.getAffineY().toByteArray();
-                    byte[] n = this.params.getOrder().toByteArray();
-                    byte[] h = BigInteger.valueOf(this.params.getCofactor()).toByteArray();
-                    long nativePointer;
-                    int fieldType = 0;
-                    if (field instanceof ECFieldFp) {
-                        byte[] p = ((ECFieldFp)field).getP().toByteArray();
-                        nativePointer = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
-                    } else if (field instanceof ECFieldF2m) {
-                        fieldType = 1;
-                        byte[] p = ((ECFieldF2m)field).getReductionPolynomial().toByteArray();
-                        nativePointer = nativeCrypto.ECEncodeGF2m(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
-                    } else {
-                        nativePointer = -1;
+                    if (nativeCrypto == null) {
+                        nativeCrypto = NativeCrypto.getNativeCrypto();
                     }
-                    if (nativePointer != -1) {
-                        nativeCrypto.createECKeyCleaner(this, nativePointer);
-                        byte[] x = this.w.getAffineX().toByteArray();
-                        byte[] y = this.w.getAffineY().toByteArray();
-                        if (nativeCrypto.ECCreatePublicKey(nativePointer, x, x.length, y, y.length, fieldType) == -1) {
-                            nativePointer = -1;
+                    long nativePointer = NativeECUtil.encodeGroup(this.params);
+                    try {
+                        if (nativePointer != -1) {
+                            byte[] x = this.w.getAffineX().toByteArray();
+                            byte[] y = this.w.getAffineY().toByteArray();
+                            int fieldType = NativeCrypto.ECField_Fp;
+                            if (this.params.getCurve().getField() instanceof ECFieldF2m) {
+                                fieldType = NativeCrypto.ECField_F2m;
+                            }
+                            if (nativeCrypto.ECCreatePublicKey(nativePointer, x, x.length, y, y.length, fieldType) == -1) {
+                                nativeCrypto.ECDestroyKey(nativePointer);
+                                nativePointer = -1;
+                            }
+                        }
+                    } finally {
+                        if (nativePointer != -1) {
+                            nativeCrypto.createECKeyCleaner(this, nativePointer);
                         }
                     }
                     this.nativeECKey = nativePointer;

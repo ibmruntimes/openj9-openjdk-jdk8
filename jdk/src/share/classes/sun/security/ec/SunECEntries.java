@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -46,11 +46,22 @@ import jdk.crypto.jniprovider.NativeCrypto;
  * @since 1.7
  */
 final class SunECEntries {
+    /* Flag indicating whether the debug trace for the crypto library is enabled. */
+    private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
+
+    /* Flag indicating whether the operating system is AIX. */
+    private static final boolean isAIX = "AIX".equals(System.getProperty("os.name"));
 
     /* The property 'jdk.nativeEC' is used to control enablement of the native
-     * EC implementation.
+     * ECDH implementation.
      */
-    private static final boolean useNativeEC = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "SunEC");
+    private static final boolean useNativeECDH = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "SunEC");
+
+    /* The property 'jdk.nativeECKeyGen' is used to control enablement of the native
+     * ECKeyGeneration implementation.
+     * OpenSSL 1.1.0 or above is required for EC key generation support.
+     */
+    private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "SunEC");
 
     private SunECEntries() {
         // empty
@@ -165,7 +176,14 @@ final class SunECEntries {
         /*
          *  Key Pair Generator engine
          */
-        map.put("KeyPairGenerator.EC", "sun.security.ec.ECKeyPairGenerator");
+        if (useNativeECKeyGen
+            && (NativeCrypto.getVersion() >= NativeCrypto.OPENSSL_VERSION_1_1_0)
+            && !isAIX
+        ) {
+            map.put("KeyPairGenerator.EC", "sun.security.ec.NativeECKeyPairGenerator");
+        } else {
+            map.put("KeyPairGenerator.EC", "sun.security.ec.ECKeyPairGenerator");
+        }
         map.put("Alg.Alias.KeyPairGenerator.EllipticCurve", "EC");
 
         map.put("KeyPairGenerator.EC KeySize", "256");
@@ -175,7 +193,7 @@ final class SunECEntries {
         /*
          * Key Agreement engine
          */
-        if (useNativeEC) {
+        if (useNativeECDH) {
             map.put("KeyAgreement.ECDH", "sun.security.ec.NativeECDHKeyAgreement");
         } else {
             map.put("KeyAgreement.ECDH", "sun.security.ec.ECDHKeyAgreement");

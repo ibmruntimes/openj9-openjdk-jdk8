@@ -23,6 +23,12 @@
  * questions.
  */
 
+ /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.ec;
 
 import java.io.IOException;
@@ -117,7 +123,7 @@ public final class ECKeyPairGenerator extends KeyPairGeneratorSpi {
         this.random = random;
     }
 
-    private static void ensureCurveIsSupported(ECParameterSpec ecSpec)
+    static void ensureCurveIsSupported(ECParameterSpec ecSpec)
         throws InvalidAlgorithmParameterException {
 
         AlgorithmParameters ecParams = ECUtil.getECParameters(null);
