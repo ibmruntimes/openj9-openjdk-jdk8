@@ -296,6 +296,9 @@ generate-j9-version-headers :
 	$(call create_or_update, \
 		@$(SED) $(OPENJ9_VERSION_SCRIPT) < $(SRC_ROOT)/closed/openj9_version_info.h.in, \
 		$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h)
+	@$(ECHO) "==== openj9_version_info.h ===="
+	@$(GREP) define $(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
+	@$(ECHO) "===="
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 CMAKE_ARGS := \
