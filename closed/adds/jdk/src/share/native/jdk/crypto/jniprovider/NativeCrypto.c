@@ -555,7 +555,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
                 return -1;
             }
         }
-        return 0;
+        return ossl_ver;
     }
  }
 

@@ -54,32 +54,44 @@ public class NativeCrypto {
     private static final boolean traceEnabled = Boolean.parseBoolean(
             GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace", "false"));
 
-    //ossl_vers will be either:
+    //ossl_ver will be either:
     // -1 : library load failed
     // or one of the OPENSSL_VERSION_x_x_x constants
-    private static final boolean loaded = AccessController.doPrivileged(
-            (PrivilegedAction<Boolean>) () -> {
-            Boolean isLoaded = Boolean.FALSE;
-
+    private static final long ossl_ver = AccessController.doPrivileged(
+            (PrivilegedAction<Long>) () -> {
+            long osslVersion;
             try {
                 System.loadLibrary("jncrypto"); // check for native library
                 // load OpenSSL crypto library dynamically.
-                long ossl_ver = loadCrypto(traceEnabled);
-                if (ossl_ver != -1) {
-                    isLoaded = Boolean.TRUE;
+                osslVersion = loadCrypto(traceEnabled);
+                if (traceEnabled && (osslVersion != -1)) {
+                    System.err.println("Native crypto library load succeeded - using native crypto library.");
                 }
-            } catch (UnsatisfiedLinkError usle) { 
+            } catch (UnsatisfiedLinkError usle) {
                 if (traceEnabled) {
-                        System.err.println("UnsatisfiedLinkError: Failure attempting to load jncrypto JNI library");
+                    System.err.println("UnsatisfiedLinkError: Failure attempting to load jncrypto JNI library");
+                    System.err.println("Warning: Native crypto library load failed." +
+                            " Using Java crypto implementation.");
                 }
-                // Return that isLoaded is false (default set above)
+                 // signal load failure
+                osslVersion = -1;
             }
-            
-            return isLoaded;
-        }).booleanValue();
-    
+
+            return osslVersion;
+        }).longValue();
+
+    /**
+     * Return the OpenSSL version. It will return -1 if the library isn't
+     * successfully loaded.
+     *
+     * @return the OpenSSL library version or -1, if not loaded.
+     */
+    public static final long getVersion() {
+        return ossl_ver;
+    }
+
     public static final boolean isLoaded() {
-        return loaded;
+        return getVersion() >= 0;
     }
 
     /**
@@ -132,7 +144,7 @@ public class NativeCrypto {
              * native crypto library is loaded successfully. Otherwise, issue a warning
              * message and fall back to the built-in java crypto implementation.
              */
-            if (loaded) {
+            if (isLoaded()) {
                 if (satisfied) {
                     if (traceEnabled) {
                         System.err.println(name + " - using native crypto library.");
