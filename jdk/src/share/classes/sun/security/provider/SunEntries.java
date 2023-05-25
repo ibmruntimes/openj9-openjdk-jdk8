@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -37,8 +37,6 @@ import java.util.Map;
 import java.security.*;
 import sun.security.action.GetPropertyAction;
 import jdk.crypto.jniprovider.NativeCrypto;
-
-import openj9.internal.security.FIPSConfigurator;
 
 /**
  * Defines the entries of the SUN provider.
@@ -147,10 +145,6 @@ final class SunEntries {
             "sun.security.provider.certpath.PKIXCertPathValidator");
         map.put("CertPathValidator.PKIX ValidationAlgorithm",
             "RFC5280");
-
-        if (FIPSConfigurator.enableFIPS()) {
-            return;
-        }
 
         /*
          * SecureRandom

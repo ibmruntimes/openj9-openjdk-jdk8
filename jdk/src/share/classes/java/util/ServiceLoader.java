@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util;
 
 import java.io.BufferedReader;
@@ -39,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * A simple service-provider loading facility.
@@ -355,6 +362,24 @@ public final class ServiceLoader<S>
                     return false;
                 }
                 pending = parse(service, configs.nextElement());
+
+                // In restricted security mode, get each provider class without
+                // initializing and only add the allowed ones.
+                if (RestrictedSecurity.isEnabled()) {
+                    ArrayList<String> provNames = new ArrayList<>();
+                    while (pending.hasNext()) {
+                        String className = pending.next();
+                        try {
+                            Class<?> clazz = Class.forName(className, false, loader);
+                            if (RestrictedSecurity.isProviderAllowed(clazz)) {
+                                provNames.add(className);
+                            }
+                        } catch (ClassNotFoundException x) {
+                            // If class not found, then don't add it.
+                        }
+                    }
+                    pending = provNames.iterator();
+                }
             }
             nextName = pending.next();
             return true;

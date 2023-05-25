@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -56,7 +56,7 @@ import javax.security.auth.callback.ConfirmationCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 
-import openj9.internal.security.FIPSConfigurator;
+import openj9.internal.security.RestrictedSecurity;
 
 import sun.security.util.Debug;
 import sun.security.util.ResourcesMgr;
@@ -393,9 +393,9 @@ public final class SunPKCS11 extends AuthProvider {
 
             // When FIPS mode is enabled, configure p11 object to FIPS mode
             // and pass the parent object so it can callback.
-            if (FIPSConfigurator.enableFIPS()) {
+            if (RestrictedSecurity.isFIPSEnabled()) {
                 if (debug != null) {
-                    System.out.println("FIPS mode in SunPKCS11");
+                    debug.println("FIPS mode in SunPKCS11");
                 }
 
                 @SuppressWarnings("unchecked")
