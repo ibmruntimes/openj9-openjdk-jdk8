@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.security;
 
 import java.io.*;
@@ -33,6 +39,8 @@ import java.lang.reflect.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * This class represents a "provider" for the
@@ -920,7 +928,7 @@ public abstract class Provider extends Properties {
         for (Iterator<Map.Entry<ServiceKey, Service>> t =
                 map.entrySet().iterator(); t.hasNext(); ) {
             Service s = t.next().getValue();
-            if (s.isValid() == false) {
+            if ((s.isValid() == false) || !RestrictedSecurity.isServiceAllowed(s)) {
                 t.remove();
             }
         }
@@ -1127,6 +1135,11 @@ public abstract class Provider extends Properties {
         if (s.getProvider() != this) {
             throw new IllegalArgumentException
                     ("service.getProvider() must match this Provider object");
+        }
+        if (!RestrictedSecurity.isServiceAllowed(s)) {
+            // We're in restricted security mode which does not allow this service,
+            // return without registering.
+            return;
         }
         if (serviceMap == null) {
             serviceMap = new LinkedHashMap<ServiceKey,Service>();

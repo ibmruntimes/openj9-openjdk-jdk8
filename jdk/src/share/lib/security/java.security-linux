@@ -75,6 +75,70 @@ security.provider.8=org.jcp.xml.dsig.internal.dom.XMLDSigRI
 security.provider.9=sun.security.smartcardio.SunPCSC
 
 #
+# Java Restricted Security Mode
+#
+RestrictedSecurity1.desc.name = Red Hat Enterprise Linux 8 NSS Cryptographic Module FIPS 140-2
+RestrictedSecurity1.desc.number = Certificate #4413
+RestrictedSecurity1.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4413
+RestrictedSecurity1.desc.sunsetDate = 2026-09-21
+
+RestrictedSecurity1.tls.disabledNamedCurves =
+RestrictedSecurity1.tls.disabledAlgorithms = \
+    SSLv3, \
+    TLS_AES_128_GCM_SHA256, \
+    TLS_AES_256_GCM_SHA384, \
+    TLS_CHACHA20_POLY1305_SHA256, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_256_GCM_SHA384, \
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, \
+    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, \
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, \
+    TLS_DHE_RSA_WITH_AES_256_GCM_SHA384, \
+    TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_EMPTY_RENEGOTIATION_INFO_SCSV, \
+    TLS_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_RSA_WITH_AES_128_CBC_SHA256, \
+    TLS_RSA_WITH_AES_128_GCM_SHA256, \
+    TLS_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_RSA_WITH_AES_256_CBC_SHA256, \
+    TLS_RSA_WITH_AES_256_GCM_SHA384, \
+    TLSv1, \
+    TLSv1.1, \
+    X25519, \
+    X448
+RestrictedSecurity1.tls.ephemeralDHKeySize =
+RestrictedSecurity1.tls.legacyAlgorithms =
+
+RestrictedSecurity1.jce.certpath.disabledAlgorithms =
+RestrictedSecurity1.jce.legacyAlgorithms =
+RestrictedSecurity1.jce.provider.1 = sun.security.pkcs11.SunPKCS11 ${java.home}/lib/security/nss.fips.cfg
+RestrictedSecurity1.jce.provider.2 = sun.security.provider.Sun \
+    [{CertificateFactory, X.509, ImplementedIn=Software}, \
+    {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {CertStore, Collection, ImplementedIn=Software}, \
+    {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
+    {Configuration, JavaLoginConfig, *}, \
+    {Policy, JavaPolicy, *}]
+RestrictedSecurity1.jce.provider.3 = sun.security.ec.SunEC \
+    [{AlgorithmParameters, EC, *}, \
+    {KeyFactory, EC, ImplementedIn=Software}]
+RestrictedSecurity1.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity1.keystore.type = PKCS11
+RestrictedSecurity1.javax.net.ssl.keyStore = NONE
+
+RestrictedSecurity1.securerandom.algorithm = PKCS11
+
+#
 # Sun Provider SecureRandom seed source.
 #
 # Select the primary source of seed data for the "SHA1PRNG" and

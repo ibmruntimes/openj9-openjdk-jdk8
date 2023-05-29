@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.jca;
 
 import java.io.File;
@@ -31,6 +37,8 @@ import java.lang.reflect.*;
 import java.security.*;
 
 import sun.security.util.PropertyExpander;
+
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * Class representing a configured provider. Encapsulates configuration
@@ -164,6 +172,11 @@ final class ProviderConfig {
      * Get the provider object. Loads the provider if it is not already loaded.
      */
     synchronized Provider getProvider() {
+        if (!RestrictedSecurity.isProviderAllowed(className)) {
+            // We're in restricted security mode which does not allow this provider,
+            // return without loading.
+            return null;
+        }
         // volatile variable load
         Provider p = provider;
         if (p != null) {

@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -41,7 +41,7 @@ import sun.security.util.PropertyExpander;
 
 import sun.security.jca.*;
 
-import openj9.internal.security.FIPSConfigurator;
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * <p>This class centralizes all security properties and common security
@@ -195,16 +195,11 @@ public final class Security {
             }
         }
 
-        // Load FIPS properties
-        if (loadedProps) {
-            boolean fipsEnabled = FIPSConfigurator.configureFIPS(props);
-            if (sdebug != null) {
-                if (fipsEnabled) {
-                    sdebug.println("FIPS mode enabled.");
-                } else {
-                    sdebug.println("FIPS mode disabled.");
-                }
-            }
+        // Load restricted security mode properties.
+        boolean restrictedSecurityEnabled = RestrictedSecurity.configure(props);
+        if (sdebug != null) {
+            sdebug.println(restrictedSecurityEnabled ? "Restricted security mode enabled."
+                    : "Restricted security mode disabled.");
         }
     }
 
