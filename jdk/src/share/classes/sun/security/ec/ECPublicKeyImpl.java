@@ -141,14 +141,6 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
     }
 
     /**
-     * Returns true if this key's EC field is an instance of ECFieldF2m.
-     * @return true if the field is an instance of ECFieldF2m, false otherwise
-     */
-    boolean isECFieldF2m() {
-        return this.params.getCurve().getField() instanceof ECFieldF2m;
-    }
-
-    /**
      * Returns the native EC public key context pointer.
      * @return the native EC public key context pointer or -1 on error
      */
