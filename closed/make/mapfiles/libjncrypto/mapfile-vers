@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -41,10 +41,10 @@ SUNWprivate_1.1 {
 		Java_jdk_crypto_jniprovider_NativeCrypto_destroyRSAKey;
 		Java_jdk_crypto_jniprovider_NativeCrypto_RSADP;
 		Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP;
+		Java_jdk_crypto_jniprovider_NativeCrypto_ECGenerateKeyPair;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECCreatePublicKey;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECCreatePrivateKey;
-		Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGFp;
-		Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGF2m;
+		Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGF;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDestroyKey;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDeriveKey;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECNativeGF2m;
