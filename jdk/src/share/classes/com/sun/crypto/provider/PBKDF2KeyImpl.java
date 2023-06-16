@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.crypto.provider;
 
@@ -39,6 +44,8 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.PBEKeySpec;
+
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * This class represents a PBE key derived using PBKDF2 defined
@@ -109,7 +116,11 @@ final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
             throw new InvalidKeySpecException("Key length is negative");
         }
         try {
-            this.prf = Mac.getInstance(prfAlgo, SunJCE.getInstance());
+            if (RestrictedSecurity.isFIPSEnabled()) {
+                this.prf = Mac.getInstance(prfAlgo);
+            } else {
+                this.prf = Mac.getInstance(prfAlgo, SunJCE.getInstance());
+            }
             this.key = deriveKey(prf, passwdBytes, salt, iterCount, keyLength);
         } catch (NoSuchAlgorithmException nsae) {
             // not gonna happen; re-throw just in case
