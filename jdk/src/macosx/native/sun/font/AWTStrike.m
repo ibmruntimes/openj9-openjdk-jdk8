@@ -107,7 +107,7 @@ static CGAffineTransform sInverseTX = { 1, 0, 0, -1, 0, 0 };
 #define AWT_FONT_CLEANUP_FINISH                                         \
     if (_fontThrowJavaException == YES) {                               \
         char s[512];                                                    \
-        sprintf(s, "%s-%s:%d", THIS_FILE, __FUNCTION__, __LINE__);       \
+        snprintf(s, sizeof(s), "%s-%s:%d", THIS_FILE, __FUNCTION__, __LINE__);       \
         [JNFException raise:env as:kRuntimeException reason:s];         \
     }
 
