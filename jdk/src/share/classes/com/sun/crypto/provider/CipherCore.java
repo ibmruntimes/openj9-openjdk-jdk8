@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -892,12 +892,26 @@ final class CipherCore {
         try {
             checkReinit();
             byte[] output = new byte[getOutputSizeByOperation(inputLen, true)];
-            byte[] finalBuf = prepareInputBuffer(input, inputOffset,
-                    inputLen, output, 0);
+            int outputOffset = 0;
+            int outLen = 0;
+
+            if (inputLen > 0) {
+                /*
+                 * Call the update() method to get rid of as many bytes as
+                 * possible before potentially copying array.
+                 */
+                int updateOutLen = update(input, inputOffset, inputLen, output, outputOffset);
+                inputOffset = inputLen;
+                inputLen = 0;
+                outputOffset += updateOutLen;
+                outLen = updateOutLen;
+            }
+
+            byte[] finalBuf = prepareInputBuffer(input, inputOffset, inputLen, output, outputOffset);
             int finalOffset = (finalBuf == input) ? inputOffset : 0;
             int finalBufLen = (finalBuf == input) ? inputLen : finalBuf.length;
 
-            int outLen = fillOutputBuffer(finalBuf, finalOffset, output, 0,
+            outLen += fillOutputBuffer(finalBuf, finalOffset, output, outputOffset,
                     finalBufLen, input);
 
             endDoFinal();
@@ -962,13 +976,6 @@ final class CipherCore {
         int estOutSize = getOutputSizeByOperation(inputLen, true);
         int outputCapacity = checkOutputCapacity(output, outputOffset,
                 estOutSize);
-        int offset = decrypting ? 0 : outputOffset; // 0 for decrypting
-        byte[] finalBuf = prepareInputBuffer(input, inputOffset,
-                inputLen, output, outputOffset);
-        byte[] outWithPadding = null; // for decrypting only
-
-        int finalOffset = (finalBuf == input) ? inputOffset : 0;
-        int finalBufLen = (finalBuf == input) ? inputLen : finalBuf.length;
 
         if (decrypting) {
             // if the size of specified output buffer is less than
@@ -979,14 +986,41 @@ final class CipherCore {
             if (outputCapacity < estOutSize) {
                 cipher.save();
             }
+        }
+
+        int outLen = 0;
+        int estFinalBuffSize = estOutSize;
+        if (inputLen > 0) {
+            /*
+             * Call the update() method to get rid of as many bytes as
+             * possible before potentially copying array.
+             */
+            int updateOutLen = update(input, inputOffset, inputLen, output, outputOffset);
+            inputOffset = inputLen;
+            inputLen = 0;
+            outputOffset += updateOutLen;
+            outLen += updateOutLen;
+            estFinalBuffSize -= updateOutLen;
+        }
+
+        int offset = decrypting ? 0 : outputOffset; // 0 for decrypting
+        byte[] finalBuf = prepareInputBuffer(input, inputOffset,
+                inputLen, output, outputOffset);
+        byte[] outWithPadding = null; // for decrypting only
+
+        int finalOffset = (finalBuf == input) ? inputOffset : 0;
+        int finalBufLen = (finalBuf == input) ? inputLen : finalBuf.length;
+
+        if (decrypting) {
             // create temporary output buffer so that only "real"
             // data bytes are passed to user's output buffer.
-            outWithPadding = new byte[estOutSize];
+            outWithPadding = new byte[estFinalBuffSize];
         }
         byte[] outBuffer = decrypting ? outWithPadding : output;
 
-        int outLen = fillOutputBuffer(finalBuf, finalOffset, outBuffer,
+        int outBuffLen = fillOutputBuffer(finalBuf, finalOffset, outBuffer,
                 offset, finalBufLen, input);
+        outLen += outBuffLen;
 
         if (decrypting) {
 
@@ -999,7 +1033,7 @@ final class CipherCore {
                                                + " bytes needed");
             }
             // copy the result into user-supplied output buffer
-            System.arraycopy(outWithPadding, 0, output, outputOffset, outLen);
+            System.arraycopy(outWithPadding, 0, output, outputOffset, outBuffLen);
             // decrypt mode. Zero out output data that's not required
             Arrays.fill(outWithPadding, (byte) 0x00);
         }
@@ -1015,16 +1049,15 @@ final class CipherCore {
         }
     }
 
-    private int unpad(int outLen, byte[] outWithPadding)
+    private int unpad(int outLen, int off, byte[] outWithPadding)
             throws BadPaddingException {
-        int padStart = padding.unpad(outWithPadding, 0, outLen);
+        int padStart = padding.unpad(outWithPadding, off, outLen);
         if (padStart < 0) {
             throw new BadPaddingException("Given final block not " +
             "properly padded. Such issues can arise if a bad key " +
             "is used during decryption.");
         }
-        outLen = padStart;
-        return outLen;
+        return padStart - off;
     }
 
     private byte[] prepareInputBuffer(byte[] input, int inputOffset,
@@ -1100,7 +1133,7 @@ final class CipherCore {
             len = finalNoPadding(finalBuf, finalOffset, output,
                     outOfs, finalBufLen);
             if (decrypting && padding != null) {
-                len = unpad(len, output);
+                len = unpad(len, outOfs, output);
             }
             return len;
         } finally {
