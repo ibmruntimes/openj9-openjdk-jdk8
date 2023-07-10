@@ -619,7 +619,7 @@ void PORT_GetControls(void* id, INT32 portIndex, PortControlCreator* creator) {
                     CFRelease(cfname);
                 } else {
                     channelName = (char *)malloc(16);
-                    sprintf(channelName, "Ch %d", ch);
+                    snprintf(channelName, 16, "Ch %d", ch);
                 }
 
                 void* jControls[2];
