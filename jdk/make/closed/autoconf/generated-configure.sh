@@ -4440,7 +4440,7 @@ TOOLCHAIN_DESCRIPTION_xlc="IBM XL C/C++"
 
 ################################################################################
 # The order of these defines the priority by which we try to find them.
-VALID_VS_VERSIONS="2010 2012 2013 2015 2017 2019"
+VALID_VS_VERSIONS="2010 2012 2013 2015 2017 2019 2022"
 
 VS_DESCRIPTION_2010="Microsoft Visual Studio 2010"
 VS_VERSION_INTERNAL_2010=100
@@ -4512,6 +4512,21 @@ VS_VS_PLATFORM_NAME_2019="v142"
 VS_SDK_PLATFORM_NAME_2019=
 VS_SUPPORTED_2019=false
 VS_TOOLSET_SUPPORTED_2019=false
+
+VS_DESCRIPTION_2022="Microsoft Visual Studio 2022"
+VS_VERSION_INTERNAL_2022=143
+VS_MSVCR_2022=vcruntime140.dll
+VS_VCRUNTIME_1_2022=vcruntime140_1.dll
+VS_MSVCP_2022=msvcp140.dll
+VS_ENVVAR_2022="VS170COMNTOOLS"
+VS_USE_UCRT_2022="true"
+VS_VS_INSTALLDIR_2022="Microsoft Visual Studio/2022"
+VS_EDITIONS_2022="BuildTools Community Professional Enterprise"
+VS_SDK_INSTALLDIR_2022=
+VS_VS_PLATFORM_NAME_2022="v143"
+VS_SDK_PLATFORM_NAME_2022=
+VS_SUPPORTED_2022=true
+VS_TOOLSET_SUPPORTED_2022=true
 
 ################################################################################
 
@@ -4619,7 +4634,7 @@ VS_TOOLSET_SUPPORTED_2019=false
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1675177578
+DATE_WHEN_GENERATED=1692401469
 
 ###############################################################################
 #
@@ -16464,7 +16479,7 @@ $as_echo "no (unsupported platform)" >&6; }
 $as_echo "no (explicitly disabled)" >&6; }
   elif test "x$enable_jitserver" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xz64)
+      xa64|xl64|xr64|xz64)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
 $as_echo "yes (default)" >&6; }
         OPENJ9_ENABLE_JITSERVER=true
