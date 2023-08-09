@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -497,6 +503,7 @@ class TimerThread extends Thread {
     private TaskQueue queue;
 
     TimerThread(TaskQueue queue) {
+        super("java.util.TimerThread");
         this.queue = queue;
     }
 
