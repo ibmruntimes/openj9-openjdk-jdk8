@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
 # ===========================================================================
 
 INCLUDEDIR = $(JDK_OUTPUTDIR)/include
@@ -234,7 +234,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     # instead of 'libcrypto.so' files.
     # For reference, corresponding OpenSSL PR is
     #     https://github.com/openssl/openssl/pull/6487
-    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
+    LIBCRYPTO_NAMES := libcrypto64.so.3 libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0
   else
     LIBCRYPTO_NAMES := libcrypto.so
   endif
