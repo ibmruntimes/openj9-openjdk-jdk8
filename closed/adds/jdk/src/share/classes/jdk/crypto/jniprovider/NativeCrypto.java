@@ -243,7 +243,8 @@ public class NativeCrypto {
                                     byte[] iv,
                                     int ivlen,
                                     byte[] key,
-                                    int keylen);
+                                    int keylen,
+                                    boolean doReset);
 
     public final native int CBCUpdate(long context,
                                       byte[] input,

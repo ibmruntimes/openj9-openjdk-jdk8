@@ -991,7 +991,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContex
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
   (JNIEnv *env, jclass thisObj, jlong c, jint mode, jbyteArray iv, jint iv_len,
-  jbyteArray key, jint key_len) {
+  jbyteArray key, jint key_len, jboolean doReset) {
 
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
     unsigned char* ivNative = NULL;
@@ -1002,18 +1002,20 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
         return -1;
     }
 
-    switch(key_len) {
-        case 16:
-            evp_cipher1 = (*OSSL_aes_128_cbc)();
-            break;
-        case 24:
-            evp_cipher1 = (*OSSL_aes_192_cbc)();
-            break;
-        case 32:
-            evp_cipher1 = (*OSSL_aes_256_cbc)();
-            break;
-        default:
-            break;
+    if (JNI_FALSE == doReset) {
+        switch (key_len) {
+            case 16:
+                evp_cipher1 = (*OSSL_aes_128_cbc)();
+                break;
+            case 24:
+                evp_cipher1 = (*OSSL_aes_192_cbc)();
+                break;
+            case 32:
+                evp_cipher1 = (*OSSL_aes_256_cbc)();
+                break;
+            default:
+                break;
+        }
     }
 
     ivNative = (unsigned char*)((*env)->GetByteArrayElements(env, iv, 0));
@@ -1034,7 +1036,9 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
         return -1;
     }
 
-    (*OSSL_CIPHER_CTX_set_padding)(ctx, 0);
+    if (JNI_FALSE == doReset) {
+        (*OSSL_CIPHER_CTX_set_padding)(ctx, 0);
+    }
 
     (*env)->ReleaseByteArrayElements(env, iv, (jbyte*)ivNative, JNI_ABORT);
     (*env)->ReleaseByteArrayElements(env, key, (jbyte*)keyNative, JNI_ABORT);
