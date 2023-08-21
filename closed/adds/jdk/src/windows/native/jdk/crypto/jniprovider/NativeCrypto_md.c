@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -46,36 +46,40 @@ static int JLI_Snprintf(char* buffer, size_t size, const char* format, ...);
 /* Load the crypto library (return NULL on error) */
 void * load_crypto_library(jboolean traceEnabled) {
     void * result = NULL;
-    const char *libname;
-    const char *oldname = "libeay32.dll";
     char opensslpath[MAX_PATH];
 
 #if defined (_WIN64)
-    libname = "libcrypto-1_1-x64.dll";
+    static const char * const libNames[] = {
+        "libcrypto-3-x64.dll",
+        "libcrypto-1_1-x64.dll"
+    };
 #else
-    libname = "libcrypto-1_1.dll";
+    static const char * const libNames[] = {
+        "libcrypto-3.dll",
+        "libcrypto-1_1.dll",
+        "libeay32.dll"
+    };
 #endif
 
+    size_t i = 0;
     if (GetJREPath(opensslpath, MAX_PATH)) {
         char libpathname[MAX_PATH];
         int rc;
         struct stat s;
         
-        rc = JLI_Snprintf(libpathname, sizeof(libpathname), "%s\\bin\\%s", opensslpath, libname);
-        if ((rc > 0) && (rc <= MAX_PATH) && (stat(libpathname, &s) == 0)) {
-            result = LoadLibrary(libpathname);
-        }
-        if (result == NULL) {
-            rc = JLI_Snprintf(libpathname, sizeof(libpathname), "%s\\bin\\%s", opensslpath, oldname);
+        // Check to see if we can load the libraries in the order set out above
+        for (i = 0; (NULL == result) && (i < sizeof(libNames) / sizeof(libNames[0])); i++) {
+            const char * libraryName = libNames[i];
+            rc = JLI_Snprintf(libpathname, sizeof(libpathname), "%s\\bin\\%s", opensslpath, libraryName);
             if ((rc > 0) && (rc <= MAX_PATH) && (stat(libpathname, &s) == 0)) {
                 result = LoadLibrary(libpathname);
             }
         }
     } else {
-        result = LoadLibrary(libname);
-
-        if (result == NULL) {
-            result = LoadLibrary(oldname);
+        // Check to see if we can load the libraries in the order set out above
+        for (i = 0; (NULL == result) && (i < sizeof(libNames) / sizeof(libNames[0])); i++) {
+            const char * libraryName = libNames[i];
+            result = LoadLibrary(libraryName);
         }
     }
     return result;
