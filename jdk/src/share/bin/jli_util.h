@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 #ifndef _JLI_UTIL_H
 #define _JLI_UTIL_H
 
@@ -100,5 +106,30 @@ void JLI_CmdToArgs(char *cmdline);
 void     JLI_TraceLauncher(const char* fmt, ...);
 void     JLI_SetTraceLauncher();
 jboolean JLI_IsTraceLauncher();
+
+/*
+ * JLI_List - a dynamic list of char*
+ */
+struct JLI_List_
+{
+    char **elements;
+    size_t size;
+    size_t capacity;
+};
+typedef struct JLI_List_ *JLI_List;
+
+JLI_List JLI_List_new(size_t capacity);
+
+void JLI_List_free(JLI_List l);
+void JLI_List_ensureCapacity(JLI_List l, size_t capacity);
+
+/* e must be JLI_MemFree-able */
+void JLI_List_add(JLI_List l, char *e);
+
+/* a copy is made out of beg */
+void JLI_List_addSubstring(JLI_List l, const char *beg, size_t len);
+char *JLI_List_combine(JLI_List sl);
+
+jboolean JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name);
 
 #endif  /* _JLI_UTIL_H */
