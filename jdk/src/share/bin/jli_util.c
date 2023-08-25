@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -118,4 +118,78 @@ int
 JLI_StrCCmp(const char *s1, const char* s2)
 {
    return JLI_StrNCmp(s1, s2, JLI_StrLen(s2));
+}
+
+JLI_List
+JLI_List_new(size_t capacity)
+{
+    JLI_List l = (JLI_List) JLI_MemAlloc(sizeof(struct JLI_List_));
+    l->capacity = capacity;
+    l->elements = (char **) JLI_MemAlloc(capacity * sizeof(l->elements[0]));
+    l->size = 0;
+    return l;
+}
+
+void
+JLI_List_free(JLI_List sl)
+{
+    if (sl) {
+        if (sl->elements) {
+            size_t i;
+            for (i = 0; i < sl->size; i++)
+                JLI_MemFree(sl->elements[i]);
+            JLI_MemFree(sl->elements);
+        }
+        JLI_MemFree(sl);
+    }
+}
+
+void
+JLI_List_ensureCapacity(JLI_List sl, size_t capacity)
+{
+    if (sl->capacity < capacity) {
+        while (sl->capacity < capacity)
+            sl->capacity *= 2;
+        sl->elements = JLI_MemRealloc(sl->elements,
+            sl->capacity * sizeof(sl->elements[0]));
+    }
+}
+
+void
+JLI_List_add(JLI_List sl, char *str)
+{
+    JLI_List_ensureCapacity(sl, sl->size+1);
+    sl->elements[sl->size++] = str;
+}
+
+void
+JLI_List_addSubstring(JLI_List sl, const char *beg, size_t len)
+{
+    char *str = (char *) JLI_MemAlloc(len+1);
+    memcpy(str, beg, len);
+    str[len] = '\0';
+    JLI_List_ensureCapacity(sl, sl->size+1);
+    sl->elements[sl->size++] = str;
+}
+
+char *
+JLI_List_combine(JLI_List sl)
+{
+    size_t i;
+    size_t size;
+    char *str;
+    char *p;
+    for (i = 0, size = 1; i < sl->size; i++)
+        size += JLI_StrLen(sl->elements[i]);
+
+    str = JLI_MemAlloc(size);
+
+    for (i = 0, p = str; i < sl->size; i++) {
+        size_t len = JLI_StrLen(sl->elements[i]);
+        memcpy(p, sl->elements[i], len);
+        p += len;
+    }
+    *p = '\0';
+
+    return str;
 }

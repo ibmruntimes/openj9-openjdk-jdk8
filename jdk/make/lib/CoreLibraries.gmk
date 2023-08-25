@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+# ===========================================================================
+
 # Include custom extensions if available.
 -include $(CUSTOM_MAKE_DIR)/lib/CoreLibraries.gmk
 
@@ -355,6 +359,7 @@ BUILD_LIBJLI_SRC_DIRS := $(JDK_TOPDIR)/src/share/bin $(JDK_TOPDIR)/src/$(OPENJDK
 LIBJLI_CFLAGS := $(CFLAGS_JDKLIB) $(foreach dir, $(BUILD_LIBJLI_SRC_DIRS), -I$(dir))
 
 BUILD_LIBJLI_FILES := \
+    args.c \
     java.c \
     splashscreen_stubs.c \
     parse_manifest.c \

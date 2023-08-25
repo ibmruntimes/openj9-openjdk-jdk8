@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -124,6 +124,8 @@ static void ShowSettings(JNIEnv* env, char *optString);
 
 static void SetPaths(int argc, char **argv);
 
+static int parse_size(const char *s, jlong *result);
+
 static void DumpState();
 static jboolean RemovableOption(char *option);
 
@@ -173,6 +175,16 @@ static jboolean IsWildCardEnabled();
 static jlong threadStackSize    = 0;  /* stack size of the new thread */
 static jlong maxHeapSize        = 0;  /* max heap size */
 static jlong initialHeapSize    = 0;  /* inital heap size */
+
+/*
+ * A minimum initial-thread stack size suitable for most platforms.
+ * This is the minimum amount of stack needed to load the JVM such
+ * that it can reject a too small -Xss value. If this is too small
+ * JVM initialization would cause a StackOverflowError.
+  */
+#ifndef STACK_SIZE_MINIMUM
+#define STACK_SIZE_MINIMUM (64 * KB)
+#endif
 
 /*
  * Entry point.
@@ -283,6 +295,31 @@ JLI_Launch(int argc, char ** argv,              /* main argc, argc */
             cpath = ".";
         }
         SetClassPath(cpath);
+    }
+
+    {
+        /* Process -Xmso in the OPENJ9_JAVA_OPTIONS environment variable to
+         * set the main thread stack size. May be overridden by a later command
+         * line option.
+         */
+        JLI_List openj9Args = JLI_List_new(8); /* 8 is arbitrary */
+        if (JLI_ParseOpenJ9ArgsFromEnvVar(openj9Args, "OPENJ9_JAVA_OPTIONS")) {
+            size_t i = openj9Args->size;
+            while (i > 0) {
+                i -= 1;
+                if (JLI_StrCCmp(openj9Args->elements[i], "-Xmso") == 0) {
+                    jlong tmp = 0;
+                    if (parse_size(openj9Args->elements[i] + 5, &tmp)) {
+                        threadStackSize = tmp;
+                        if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
+                            threadStackSize = STACK_SIZE_MINIMUM;
+                        }
+                    }
+                    break;
+                }
+            }
+            JLI_List_free(openj9Args);
+        }
     }
 
     /* Parse command line options; if the return value of
@@ -801,6 +838,9 @@ AddOption(char *str, void *info)
         jlong tmp;
         if (parse_size(str + 5, &tmp)) {
             threadStackSize = tmp;
+            if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
+                threadStackSize = STACK_SIZE_MINIMUM;
+            }
         }
     }
 
