@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package com.sun.tools.doclets.formats.html.markup;
 
 import java.io.IOException;
@@ -643,7 +649,7 @@ public class HtmlTree extends Content {
         htmltree.addAttr(HtmlAttr.BORDER, Integer.toString(border));
         htmltree.addAttr(HtmlAttr.CELLPADDING, Integer.toString(cellPadding));
         htmltree.addAttr(HtmlAttr.CELLSPACING, Integer.toString(cellSpacing));
-        htmltree.addAttr(HtmlAttr.SUMMARY, nullCheck(summary));
+        //htmltree.addAttr(HtmlAttr.SUMMARY, nullCheck(summary));
         return htmltree;
     }
 
