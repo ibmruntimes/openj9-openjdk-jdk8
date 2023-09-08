@@ -251,6 +251,7 @@ OSSL_PKCS12_key_gen_t* OSSL_PKCS12_key_gen;
 typedef struct OpenSSLMDContext {
     EVP_MD_CTX *ctx;
     const EVP_MD *digestAlg;
+    EVP_MD_CTX *cachedInitializedDigestContext;
 } OpenSSLMDContext;
 
 /* Handle errors from OpenSSL calls */
@@ -792,23 +793,39 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
     context->ctx = ctx;
     context->digestAlg = digestAlg;
 
+    /*
+     * Create a second initialized openssl digest context. This is being done for performance reasons since
+     * creating and or re-initializing digest contexts later during processing is found to be expensive.
+     * This second context, context->cachedInitializedDigestContext, will be copied over the working context,
+     * context->ctx, using the EVP_MD_CTX_copy_ex API whenever we wish to re-initalize this cipher. This occurs
+     * during an explicit reset of the cipher or whenever a final digest is computed.
+     */
+    context->cachedInitializedDigestContext = (*OSSL_MD_CTX_new)();
+    if (NULL == context->cachedInitializedDigestContext) {
+        goto releaseContexts;
+    }
+
+    if (1 != (*OSSL_MD_CTX_copy_ex)(context->cachedInitializedDigestContext, context->ctx)) {
+        goto releaseContexts;
+    }
+
     if (0 != copyContext) {
         EVP_MD_CTX *contextToCopy = ((OpenSSLMDContext*)(intptr_t)copyContext)->ctx;
         if (NULL == contextToCopy) {
-            (*OSSL_MD_CTX_free)(ctx);
-            free(context);
-            return -1;
+            goto releaseContexts;
         }
         if (0 == (*OSSL_MD_CTX_copy_ex)(ctx, contextToCopy)) {
-            printErrors();
-            (*OSSL_MD_CTX_free)(ctx);
-            free(context);
-            return -1;
+            goto releaseContexts;
         }
 
     }
 
     return (jlong)(intptr_t)context;
+
+releaseContexts:
+    printErrors();
+    Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext(env, thisObj, (jlong)(intptr_t)context);
+    return -1;
 }
 
 /*
@@ -820,11 +837,20 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyCon
   (JNIEnv *env, jclass thisObj, jlong c) {
 
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
-    if ((NULL == context) || (NULL == context->ctx)) {
+    if (NULL == context) {
         return -1;
     }
 
-    (*OSSL_MD_CTX_free)(context->ctx);
+    if (NULL != context->ctx) {
+        (*OSSL_MD_CTX_free)(context->ctx);
+        context->ctx = NULL;
+    }
+
+    if (NULL != context->cachedInitializedDigestContext) {
+        (*OSSL_MD_CTX_free)(context->cachedInitializedDigestContext);
+        context->cachedInitializedDigestContext = NULL;
+    }
+
     free(context);
     return 0;
 }
@@ -881,7 +907,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
     unsigned char* messageNative = NULL;
     unsigned char* digestNative = NULL;
 
-    if ((NULL == context) || (NULL == context->ctx)) {
+    if ((NULL == context) || (NULL == context->ctx) || (NULL == context->cachedInitializedDigestContext)) {
         return -1;
     }
 
@@ -913,10 +939,23 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
 
     (*env)->ReleasePrimitiveArrayCritical(env, digest, digestNative, 0);
 
-    (*OSSL_MD_CTX_reset)(context->ctx);
-
-    if (1 != (*OSSL_DigestInit_ex)(context->ctx, context->digestAlg, NULL)) {
+    /*
+     * Reset the message digest context to the original context. We are then ready to perform
+     * digest operations again using a copy of this cached context.
+     */
+    if (1 != (*OSSL_MD_CTX_copy_ex)(context->ctx, context->cachedInitializedDigestContext)) {
         printErrors();
+
+        if (NULL != context->ctx) {
+            (*OSSL_MD_CTX_free)(context->ctx);
+            context->ctx = NULL;
+        }
+
+        if (NULL != context->cachedInitializedDigestContext) {
+            (*OSSL_MD_CTX_free)(context->cachedInitializedDigestContext);
+            context->cachedInitializedDigestContext = NULL;
+        }
+
         return -1;
     }
 
@@ -927,22 +966,38 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    DigestReset
- * Signature: (J)V
+ * Signature: (J)I
  */
-JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
+JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
   (JNIEnv *env, jclass thisObj, jlong c) {
 
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
 
-    if ((NULL == context) || (NULL == context->ctx)) {
-        return;
+    if ((NULL == context) || (NULL == context->ctx) || (NULL == context->cachedInitializedDigestContext)) {
+        return -1;
     }
 
-    (*OSSL_MD_CTX_reset)(context->ctx);
-
-    if (1 != (*OSSL_DigestInit_ex)(context->ctx, context->digestAlg, NULL)) {
+    /*
+     * Reset the message digest context to the original context. We are then ready to perform
+     * digest operations again using a copy of this cached context.
+     */
+    if (1 != (*OSSL_MD_CTX_copy_ex)(context->ctx, context->cachedInitializedDigestContext)) {
         printErrors();
+
+        if (NULL != context->ctx) {
+            (*OSSL_MD_CTX_free)(context->ctx);
+            context->ctx = NULL;
+        }
+
+        if (NULL != context->cachedInitializedDigestContext) {
+            (*OSSL_MD_CTX_free)(context->cachedInitializedDigestContext);
+            context->cachedInitializedDigestContext = NULL;
+        }
+
+        return -1;
     }
+
+    return 0;
 }
 
 /* Create Cipher context
