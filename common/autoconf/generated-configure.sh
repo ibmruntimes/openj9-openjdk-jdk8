@@ -4050,7 +4050,7 @@ fi
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2023 All Rights Reserved
 # ===========================================================================
 
 
@@ -4464,7 +4464,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 #CUSTOM_AUTOCONF_INCLUDE
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1692401469
+DATE_WHEN_GENERATED=1694614546
 
 ###############################################################################
 #
@@ -46345,12 +46345,12 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for which zlib to use" >&5
 $as_echo_n "checking for which zlib to use... " >&6; }
 
-  DEFAULT_ZLIB=bundled
-  if test "x$OPENJDK_TARGET_OS" = xmacosx -o "x$OPENJDK_TARGET_OS" = xaix; then
+  DEFAULT_ZLIB=system
+  if test "x$OPENJDK_TARGET_OS" = xwindows; then
     #
-    # On macosx and aix default is system...on others default is
+    # On windows default is bundled...on others default is system.
     #
-    DEFAULT_ZLIB=system
+    DEFAULT_ZLIB=bundled
   fi
 
   if test "x${ZLIB_FOUND}" != "xyes"; then
