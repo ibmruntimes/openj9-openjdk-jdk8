@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2023 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([LIB_SETUP_INIT],
@@ -667,12 +667,12 @@ AC_DEFUN_ONCE([LIB_SETUP_MISC_LIBS],
 
   AC_MSG_CHECKING([for which zlib to use])
 
-  DEFAULT_ZLIB=bundled
-  if test "x$OPENJDK_TARGET_OS" = xmacosx -o "x$OPENJDK_TARGET_OS" = xaix; then
+  DEFAULT_ZLIB=system
+  if test "x$OPENJDK_TARGET_OS" = xwindows; then
     #
-    # On macosx and aix default is system...on others default is
+    # On windows default is bundled...on others default is system.
     #
-    DEFAULT_ZLIB=system
+    DEFAULT_ZLIB=bundled
   fi
 
   if test "x${ZLIB_FOUND}" != "xyes"; then
