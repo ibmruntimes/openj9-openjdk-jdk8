@@ -321,8 +321,10 @@ static JLI_List expandArgFile(const char *arg) {
 
     /* arg file cannot be opened */
     if (fptr == NULL || fstat(fileno(fptr), &st) != 0) {
-        JLI_ReportMessage(CFG_ERROR6, arg);
-        exit(1);
+        if (fptr != NULL) {
+            fclose(fptr);
+        }
+        return NULL;
     } else {
         if (st.st_size > MAX_ARGF_SIZE) {
             JLI_ReportMessage(CFG_ERROR10, MAX_ARGF_SIZE);
@@ -331,12 +333,6 @@ static JLI_List expandArgFile(const char *arg) {
     }
 
     rv = readArgFile(fptr);
-
-    /* error occurred reading the file */
-    if (rv == NULL) {
-        JLI_ReportMessage(ARG_ERROR18, arg);
-        exit(1);
-    }
     fclose(fptr);
 
     return rv;
@@ -388,7 +384,14 @@ JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name) {
         return JNI_FALSE;
     }
 
+	argsCount = 1;
     return expand(args, env, var_name);
+}
+
+JLI_List
+JLI_ParseOpenJ9ArgsFile(const char *filename) {
+    argsCount = 1;
+    return expandArgFile(filename);
 }
 
 /*

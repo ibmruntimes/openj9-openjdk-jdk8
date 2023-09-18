@@ -232,11 +232,11 @@ public class NativeCrypto {
 
     public final native int DigestReset(long context);
 
-    /* Native CBC interfaces */
+    /* Native interfaces shared by CBC and GCM. */
 
-    public final native long CBCCreateContext();
+    public final native long CreateContext();
 
-    public final native int CBCDestroyContext(long context);
+    public final native int DestroyContext(long context);
 
     public final native int CBCInit(long context,
                                     int mode,
@@ -262,7 +262,8 @@ public class NativeCrypto {
 
     /* Native GCM interfaces */
 
-    public final native int GCMEncrypt(byte[] key,
+    public final native int GCMEncrypt(long context,
+                                       byte[] key,
                                        int keylen,
                                        byte[] iv,
                                        int ivlen,
@@ -273,9 +274,12 @@ public class NativeCrypto {
                                        int outOffset,
                                        byte[] aad,
                                        int aadLen,
-                                       int tagLen);
+                                       int tagLen,
+                                       boolean newIVLen,
+                                       boolean newKeyLen);
 
-    public final native int GCMDecrypt(byte[] key,
+    public final native int GCMDecrypt(long context,
+                                       byte[] key,
                                        int keylen,
                                        byte[] iv,
                                        int ivlen,
@@ -286,7 +290,9 @@ public class NativeCrypto {
                                        int outOffset,
                                        byte[] aad,
                                        int aadLen,
-                                       int tagLen);
+                                       int tagLen,
+                                       boolean newIVLen,
+                                       boolean newKeyLen);
 
     /* Native RSA interfaces */
     public final native long createRSAPublicKey(byte[] n,

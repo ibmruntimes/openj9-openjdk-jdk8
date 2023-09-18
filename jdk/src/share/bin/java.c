@@ -186,6 +186,53 @@ static jlong initialHeapSize    = 0;  /* inital heap size */
 #define STACK_SIZE_MINIMUM (64 * KB)
 #endif
 
+static jboolean
+parseXmso(JLI_List openj9Args)
+{
+    jboolean result = JNI_FALSE;
+    size_t i = openj9Args->size;
+    while (i > 0) {
+        i -= 1;
+        if (JLI_StrCCmp(openj9Args->elements[i], "-Xmso") == 0) {
+            jlong tmp = 0;
+            if (parse_size(openj9Args->elements[i] + 5, &tmp)) {
+                threadStackSize = tmp;
+                result = JNI_TRUE;
+                if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
+                    threadStackSize = STACK_SIZE_MINIMUM;
+                }
+            }
+            break;
+        }
+    }
+    JLI_List_free(openj9Args);
+    return result;
+}
+
+static void
+parseXmsoInFile(const char *filename)
+{
+    JLI_List openj9Args = JLI_ParseOpenJ9ArgsFile(filename);
+    if (openj9Args != NULL) {
+        jboolean result = parseXmso(openj9Args);
+        if (JLI_IsTraceLauncher() && result) {
+            printf("Set -Xmso%ld from file %s\n", (long)threadStackSize, filename);
+        }
+    }
+}
+
+static void
+parseXmsoInEnv(const char *envVar)
+{
+    JLI_List openj9Args = JLI_List_new(8); /* 8 is arbitrary */
+    if (JLI_ParseOpenJ9ArgsFromEnvVar(openj9Args, envVar)) {
+        jboolean result = parseXmso(openj9Args);
+        if (JLI_IsTraceLauncher() && result) {
+            printf("Set -Xmso%ld from env var %s\n", (long)threadStackSize, envVar);
+        }
+    }
+}
+
 /*
  * Entry point.
  */
@@ -297,29 +344,23 @@ JLI_Launch(int argc, char ** argv,              /* main argc, argc */
         SetClassPath(cpath);
     }
 
+    /* Process -Xmso to set the main thread stack size. May be overridden by
+     * a later command line option.
+     */
     {
-        /* Process -Xmso in the OPENJ9_JAVA_OPTIONS environment variable to
-         * set the main thread stack size. May be overridden by a later command
-         * line option.
-         */
-        JLI_List openj9Args = JLI_List_new(8); /* 8 is arbitrary */
-        if (JLI_ParseOpenJ9ArgsFromEnvVar(openj9Args, "OPENJ9_JAVA_OPTIONS")) {
-            size_t i = openj9Args->size;
-            while (i > 0) {
-                i -= 1;
-                if (JLI_StrCCmp(openj9Args->elements[i], "-Xmso") == 0) {
-                    jlong tmp = 0;
-                    if (parse_size(openj9Args->elements[i] + 5, &tmp)) {
-                        threadStackSize = tmp;
-                        if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
-                            threadStackSize = STACK_SIZE_MINIMUM;
-                        }
-                    }
-                    break;
-                }
-            }
-            JLI_List_free(openj9Args);
-        }
+#if defined(_WIN32)
+#define OPTIONS_DEFAULT_PATH "\\bin\\" OPENJ9_LIBS_SUBDIR "\\options.default"
+#elif defined(MACOSX) /* defined(_WIN32) */
+#define OPTIONS_DEFAULT_PATH "/lib/" OPENJ9_LIBS_SUBDIR "/options.default"
+#else /* defined(MACOSX) */
+#define OPTIONS_DEFAULT_PATH "/lib/" LIBARCHNAME "/" OPENJ9_LIBS_SUBDIR "/options.default"
+#endif /* defined(_WIN32) */
+        char optionsfile[sizeof(jrepath) + sizeof(OPTIONS_DEFAULT_PATH) - 1];
+        JLI_Snprintf(optionsfile, sizeof(optionsfile), "%s" OPTIONS_DEFAULT_PATH, jrepath);
+        parseXmsoInFile(optionsfile);
+        parseXmsoInEnv("JAVA_TOOL_OPTIONS");
+        parseXmsoInEnv("OPENJ9_JAVA_OPTIONS");
+        parseXmsoInEnv("IBM_JAVA_OPTIONS");
     }
 
     /* Parse command line options; if the return value of
@@ -832,14 +873,22 @@ AddOption(char *str, void *info)
     options[numOptions++].extraInfo = info;
 
     /* In OpenJ9 -Xmso is used to set native stack size instead of -Xss. -Xss is used to
-     * set Java thread size only, which is handled in the JVM code.
+     * set Java thread size only, which is handled in the JVM code. Check for -Xmso in any
+     * -Xoptionsfile= and on the command line itself. The default.options file and relevent
+     * environment variables are checked earlier.
      */
+    if (JLI_StrCCmp(str, "-Xoptionsfile=") == 0) {
+        parseXmsoInFile(str + 14);
+    }
     if (JLI_StrCCmp(str, "-Xmso") == 0) {
         jlong tmp;
         if (parse_size(str + 5, &tmp)) {
             threadStackSize = tmp;
             if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
                 threadStackSize = STACK_SIZE_MINIMUM;
+            }
+            if (JLI_IsTraceLauncher()) {
+                printf("Set -Xmso%ld from command line\n", (long)threadStackSize);
             }
         }
     }
