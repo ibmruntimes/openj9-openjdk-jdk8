@@ -50,19 +50,10 @@ fi
 declare -A j9repos
 declare -A branches
 declare -A default_j9repos=( [openj9]=eclipse-openj9/openj9 [omr]=eclipse-openj9/openj9-omr )
-declare -A default_branches
+declare -A default_branches=( [openj9]=v0.41.0-release [omr]=v0.41.0-release )
 declare -A commands
 declare -A shas
 declare -A references
-
-currentbranch=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$currentbranch" =~ v[0-9]+\.[0-9]+(\.[0-9]+)?-release ]] ; then
-	default_branches[openj9]=$currentbranch
-	default_branches[omr]=$currentbranch
-else
-	default_branches[openj9]=master
-	default_branches[omr]=openj9
-fi
 
 pflag="false"
 base_git_url=https://github.com
