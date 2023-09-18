@@ -132,4 +132,6 @@ char *JLI_List_combine(JLI_List sl);
 
 jboolean JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name);
 
+JLI_List JLI_ParseOpenJ9ArgsFile(const char *filename);
+
 #endif  /* _JLI_UTIL_H */

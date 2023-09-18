@@ -29,8 +29,8 @@ SUNWprivate_1.1 {
 		Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate;
 		Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAndReset;
 		Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset;
-		Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext;
-		Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContext;
+		Java_jdk_crypto_jniprovider_NativeCrypto_CreateContext;
+		Java_jdk_crypto_jniprovider_NativeCrypto_DestroyContext;
 		Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit;
 		Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate;
 		Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt;

@@ -25,19 +25,26 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
 package com.sun.crypto.provider;
 
-import java.util.Arrays;
-import java.io.*;
-import java.security.*;
-import javax.crypto.*;
-import com.sun.crypto.provider.*;
+import com.sun.crypto.provider.AESCrypt;
 import static com.sun.crypto.provider.AESConstants.AES_BLOCK_SIZE;
+
+import java.io.ByteArrayOutputStream;
+import java.security.InvalidKeyException;
+import java.security.ProviderException;
+
+import javax.crypto.AEADBadTagException;
+import javax.crypto.ShortBufferException;
+import javax.crypto.IllegalBlockSizeException;
+
 import jdk.crypto.jniprovider.NativeCrypto;
+
+import sun.misc.Cleaner;
 
 /**
  * This class represents ciphers in GaloisCounter (GCM) mode.
@@ -54,9 +61,11 @@ import jdk.crypto.jniprovider.NativeCrypto;
  */
 final class NativeGaloisCounterMode extends FeedbackCipher {
 
+    private static final byte[] EMPTY_BUF = new byte[0];
+
     private byte[] key;
     private boolean decrypting;
-    private static final byte[] emptyAAD = new byte[0];
+    private final long context;
 
     static int DEFAULT_TAG_LEN = AES_BLOCK_SIZE;
     static int DEFAULT_IV_LEN = 12; // in bytes
@@ -98,10 +107,33 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
     private byte[] ibufferSave_enc = null;
     private int processedSave = 0;
 
-    private static NativeCrypto nativeCrypto;
+    private byte[] lastKey = EMPTY_BUF;
+    private byte[] lastIv = EMPTY_BUF;
 
-    static {
-        nativeCrypto = NativeCrypto.getNativeCrypto();
+    private boolean newIVLen;
+    private boolean newKeyLen;
+
+    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
+
+    private static final class GCMCleanerRunnable implements Runnable {
+        private final long nativeContext;
+
+        public GCMCleanerRunnable(long nativeContext) {
+            this.nativeContext = nativeContext;
+        }
+
+        @Override
+        public void run() {
+            /*
+             * Release the GCM context.
+             */
+            synchronized (NativeGaloisCounterMode.class) {
+                long ret = nativeCrypto.DestroyContext(nativeContext);
+                if (ret == -1) {
+                    throw new ProviderException("Error in destroying context in NativeGaloisCounterMode.");
+                }
+            }
+        }
     }
 
     // value must be 16-byte long; used by GCTR and GHASH as well
@@ -203,6 +235,12 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
     NativeGaloisCounterMode(SymmetricCipher embeddedCipher) {
         super(embeddedCipher);
         aadBuffer = new ByteArrayOutputStream();
+
+        context = nativeCrypto.CreateContext();
+        if (context == -1) {
+            throw new ProviderException("Error in creating context for NativeGaloisCounterMode.");
+        }
+        Cleaner.create(this, new GCMCleanerRunnable(context));
     }
 
     /**
@@ -355,6 +393,22 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
             } else {
                 ibuffer_enc = new ByteArrayOutputStream();
             }
+
+            /*
+             * Check whether cipher and IV need to be set,
+             * whether because something changed here or
+             * a call to set them in context hasn't been
+             * made yet.
+             */
+            if (lastIv.length != this.iv.length) {
+                newIVLen = true;
+            }
+            if (lastKey.length != this.key.length) {
+                newKeyLen = true;
+            }
+
+            lastKey = keyValue;
+            lastIv = iv;
         }
     }
 
@@ -465,17 +519,25 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
                 throw new ShortBufferException("Output buffer too small");
             }
 
-            byte[] aad = (((aadBuffer == null) || (aadBuffer.size() == 0)) ? emptyAAD : aadBuffer.toByteArray());
+            byte[] aad = (((aadBuffer == null) || (aadBuffer.size() == 0)) ? EMPTY_BUF : aadBuffer.toByteArray());
 
-            ret = nativeCrypto.GCMEncrypt(key, key.length,
+            ret = nativeCrypto.GCMEncrypt(context,
+                    key, key.length,
                     iv, iv.length,
                     in, inOfs, len,
                     out, outOfs,
-                    aad, aad.length, localTagLenBytes);
+                    aad, aad.length,
+                    localTagLenBytes,
+                    newIVLen,
+                    newKeyLen);
         }
         if (ret == -1) {
             throw new ProviderException("Error in Native GaloisCounterMode");
         }
+
+        /* Cipher and IV length were set, since call to GCMEncrypt succeeded. */
+        newKeyLen = false;
+        newIVLen = false;
 
         return (len + localTagLenBytes);
     }
@@ -552,7 +614,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
             }
 
             byte[] aad = (((aadBuffer == null) || (aadBuffer.size() == 0)) ?
-                    emptyAAD : aadBuffer.toByteArray());
+                    EMPTY_BUF : aadBuffer.toByteArray());
 
             aadBuffer = null;
 
@@ -566,11 +628,15 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
             len = in.length;
             ibuffer.reset();
 
-            ret = nativeCrypto.GCMDecrypt(key, key.length,
+            ret = nativeCrypto.GCMDecrypt(context,
+                    key, key.length,
                     iv, iv.length,
                     in, inOfs, len,
                     out, outOfs,
-                    aad, aad.length, tagLenBytes);
+                    aad, aad.length,
+                    tagLenBytes,
+                    newIVLen,
+                    newKeyLen);
         }
 
         if (ret == -2) {
@@ -579,6 +645,9 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
             throw new ProviderException("Error in Native GaloisCounterMode");
         }
 
+        /* Cipher and IV length were set, since call to GCMDecrypt succeeded. */
+        newKeyLen = false;
+        newIVLen = false;
 
         return ret;
     }
