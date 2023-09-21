@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -553,11 +553,34 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
              *     o          $JVMPATH (directory portion only)
              *     o          $JRE/lib/$LIBARCHNAME
              *     o          $JRE/../lib/$LIBARCHNAME
-             *     o          ZLIBNX_PATH (for AIX P9 or newer systems with NX)
+             *     o          ZLIBNX_PATH (for AIX P9 or newer systems with NX, unless -XX:-UseZlibNX is set)
              *
              * followed by the user's previous effective LD_LIBRARY_PATH, if
              * any.
              */
+
+#ifdef AIX
+        int aixargc = *pargc - 1; // skip the launcher name
+        char **aixargv = *pargv + 1;
+        const char *aixarg = NULL;
+        jboolean useZlibNX = JNI_TRUE;
+        while (aixargc > 0 && *(aixarg = *aixargv) == '-') {
+            if (JLI_StrCmp(aixarg, "-XX:+UseZlibNX") == 0) {
+                useZlibNX = JNI_TRUE;
+            } else if (JLI_StrCmp(aixarg, "-XX:-UseZlibNX") == 0) {
+                useZlibNX = JNI_FALSE;
+            }
+            aixargc--;
+            aixargv++;
+        }
+        useZlibNX = useZlibNX && power_9_andup() && power_nx_gzip();
+        if (JLI_IsTraceLauncher()) {
+            printf("Add " ZLIBNX_PATH " to the LIBPATH: %s P9+ %s NX %s\n",
+                useZlibNX ? "TRUE" : "FALSE",
+                power_9_andup() ? "TRUE" : "FALSE",
+                power_nx_gzip() ? "TRUE" : "FALSE");
+        }
+#endif
 
 #ifdef __solaris__
             /*
@@ -633,8 +656,8 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
 #ifdef AIX
                     /* On AIX we additionally need 'jli' in the path because ld doesn't support $ORIGIN. */
                     JLI_StrLen(jrepath) + JLI_StrLen(arch) + JLI_StrLen("/lib//jli:") +
-                    /* On AIX P9 or newer with NX accelerator enabled, add the accelerated zlibNX to LIBPATH */
-                    ((power_9_andup() && power_nx_gzip()) ? JLI_StrLen(":" ZLIBNX_PATH) : 0) +
+                    /* On AIX P9 or newer with NX accelerator enabled, add the accelerated zlibNX to LIBPATH. */
+                    (useZlibNX ? JLI_StrLen(":" ZLIBNX_PATH) : 0) +
 #endif
                     JLI_StrLen(jvmpath) + 52;
             new_runpath = JLI_MemAlloc(new_runpath_size);
@@ -673,7 +696,7 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                         jrepath, arch
 #endif /* DUAL_MODE */
 #ifdef AIX
-                        , ((power_9_andup() && power_nx_gzip()) ? (":" ZLIBNX_PATH) : "")
+                        , (useZlibNX ? (":" ZLIBNX_PATH) : "")
 #endif
                         );
 
