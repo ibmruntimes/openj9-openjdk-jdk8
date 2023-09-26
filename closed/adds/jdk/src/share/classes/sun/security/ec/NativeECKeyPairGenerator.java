@@ -39,6 +39,7 @@ import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGeneratorSpi;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -56,6 +57,7 @@ import jdk.crypto.jniprovider.NativeCrypto;
 
 import sun.security.ec.point.*;
 import sun.security.jca.JCAUtil;
+import sun.security.provider.Sun;
 import sun.security.util.ECUtil;
 
 import static sun.security.ec.ECOperations.IntermediateValueException;
@@ -97,6 +99,28 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
 
     @Override
     public void initialize(int keySize, SecureRandom random) {
+        if (random == null) {
+            if (nativeCryptTrace) {
+                System.err.println("No SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else if ((random.getProvider() instanceof Sun)
+            && ("NativePRNG".equals(random.getAlgorithm()) || "DRBG".equals(random.getAlgorithm()))
+        ) {
+            if (nativeCryptTrace) {
+                System.err.println("Default SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else {
+            if (nativeCryptTrace) {
+                System.err.println("SecureRandom implementation was provided during"
+                        + " initialization. Using Java implementation instead of OpenSSL.");
+            }
+            this.javaImplementation = new ECKeyPairGenerator();
+            this.javaImplementation.initialize(keySize, random);
+            return;
+        }
+
         if (keySize < KEY_SIZE_MIN) {
             throw new InvalidParameterException
                 ("Key size must be at least " + KEY_SIZE_MIN + " bits");
@@ -125,6 +149,28 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
     @Override
     public void initialize(AlgorithmParameterSpec params, SecureRandom random)
             throws InvalidAlgorithmParameterException {
+        if (random == null) {
+            if (nativeCryptTrace) {
+                System.err.println("No SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else if ((random.getProvider() instanceof Sun)
+            && ("NativePRNG".equals(random.getAlgorithm()) || "DRBG".equals(random.getAlgorithm()))
+        ) {
+            if (nativeCryptTrace) {
+                System.err.println("Default SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else {
+            if (nativeCryptTrace) {
+                System.err.println("SecureRandom implementation was provided during"
+                        + " initialization. Using Java implementation instead of OpenSSL.");
+            }
+            this.javaImplementation = new ECKeyPairGenerator();
+            this.javaImplementation.initialize(params, random);
+            return;
+        }
+
         ECParameterSpec ecSpec = null;
 
         if (params instanceof ECParameterSpec) {
