@@ -168,17 +168,13 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
             return this.javaImplementation.generateKeyPair();
         }
 
-        boolean absent;
         long nativePointer = NativeECUtil.encodeGroup(this.params);
 
         if (nativePointer == -1) {
-            absent = NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
-            if (!absent) {
-                throw new ProviderException("Could not encode group");
-            }
+            NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
             if (nativeCryptTrace) {
-                System.err.println(this.curve +
-                        " is not supported by OpenSSL, using Java crypto implementation.");
+                System.err.println("Could not encode group for curve " + this.curve
+                        + " in OpenSSL, using Java crypto implementation.");
             }
             try {
                 this.initializeJavaImplementation();
@@ -195,13 +191,10 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
         } else if (field instanceof ECFieldF2m) {
             fieldType = NativeCrypto.ECField_F2m;
         } else {
-            absent = NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
-            if (!absent) {
-                throw new ProviderException("Field type not supported");
-            }
+            NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
             if (nativeCryptTrace) {
-                System.err.println(this.curve +
-                        " is not supported by OpenSSL, using Java crypto implementation.");
+                System.err.println("Field type not supported for curve " + this.curve
+                        + " by OpenSSL, using Java crypto implementation.");
             }
             try {
                 this.initializeJavaImplementation();
@@ -226,13 +219,10 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
                                                  fieldType);
 
         if (ret == -1) {
-            absent = NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
-            if (!absent) {
-                throw new ProviderException("Could not generate key pair");
-            }
+            NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
             if (nativeCryptTrace) {
-                System.err.println(this.curve +
-                        " is not supported by OpenSSL, using Java crypto implementation for key generation.");
+                System.err.println("Could not generate key pair for curve " + this.curve
+                        + " using OpenSSL, using Java crypto implementation for key generation.");
             }
             try {
                 this.initializeJavaImplementation();
