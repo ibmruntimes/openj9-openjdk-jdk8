@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+ /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package java.lang.reflect;
 
@@ -1152,8 +1157,7 @@ class Field extends AccessibleObject implements Member {
                     } else {
                         declAnnos = AnnotationParser.parseAnnotations(
                                 annotations,
-                                sun.misc.SharedSecrets.getJavaLangAccess()
-                                        .getConstantPool(getDeclaringClass()),
+                                com.ibm.oti.vm.VM.getConstantPoolFromAnnotationBytes(getDeclaringClass(), annotations),
                                 getDeclaringClass());
                     }
                     declaredAnnotations = declAnnos;
