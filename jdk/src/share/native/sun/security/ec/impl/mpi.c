@@ -37,6 +37,12 @@
  * Last Modified Date from the Original Code: Nov 2019
  *********************************************************************** */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 /*  Arbitrary precision integer arithmetic library */
 
 #include "mpi-priv.h"
@@ -1725,17 +1731,28 @@ int    mp_cmp_mag(mp_int *a, mp_int *b)
  */
 int    mp_cmp_int(const mp_int *a, long z, int kmflag)
 {
-  mp_int  tmp;
-  int     out;
+  mp_sign signz = z < 0 ? NEG : ZPOS;
 
   ARGCHK(a != NULL, MP_EQ);
 
-  mp_init(&tmp, kmflag); mp_set_int(&tmp, z);
-  out = mp_cmp(a, &tmp);
-  mp_clear(&tmp);
+  if(SIGN(a) == signz) {
+    unsigned long v = labs(z);
 
-  return out;
+    if(USED(a) > 1)
+      return signz == ZPOS ? MP_GT : MP_LT;
 
+    if(DIGIT(a, 0) == v)
+      return MP_EQ;
+    if(DIGIT(a, 0) > v) {
+      return signz == ZPOS ? MP_GT : MP_LT;
+    } else {
+      return signz == ZPOS ? MP_LT : MP_GT;
+    }
+  } else if(SIGN(a) == ZPOS) {
+    return MP_GT;
+  } else {
+    return MP_LT;
+  }
 } /* end mp_cmp_int() */
 
 /* }}} */
