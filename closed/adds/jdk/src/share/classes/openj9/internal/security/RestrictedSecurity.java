@@ -33,12 +33,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import sun.security.util.Debug;
 
@@ -51,41 +55,104 @@ public final class RestrictedSecurity {
 
     // Restricted security mode enable check, only supported on Linux x64.
     private static final boolean userEnabledFIPS;
-    private static final boolean userEnabledSecurity;
-    private static final boolean isSecuritySupported;
+    private static boolean isFIPSSupported;
+    private static boolean isFIPSEnabled;
+
+    private static final boolean isNSSSupported;
+    private static final boolean isOpenJCEPlusSupported;
+
+    private static final boolean userSetProfile;
     private static final boolean shouldEnableSecurity;
-    private static final String userSecuritySetting;
+    private static String selectedProfile;
+    private static String profileID;
 
     private static boolean securityEnabled;
 
-    private static int userSecurityNum;
-    private static boolean userSecurityTrace;
-    private static boolean userSecurityAudit;
-    private static boolean userSecurityHelp;
+    private static String userSecurityID;
 
     private static RestrictedSecurityProperties restricts;
 
-    private static final List<String> supportPlatforms = Arrays.asList("amd64", "ppc64le", "s390x");
+    private static final Map<String, List<String>> supportedPlatformsNSS = new HashMap<>();
+    private static final Map<String, List<String>> supportedPlatformsOpenJCEPlus = new HashMap<>();
 
     static {
+        supportedPlatformsNSS.put("Arch", Arrays.asList("amd64", "ppc64le", "s390x"));
+        supportedPlatformsNSS.put("OS", Arrays.asList("Linux"));
+
+        supportedPlatformsOpenJCEPlus.put("Arch", Arrays.asList("amd64", "ppc64"));
+        supportedPlatformsOpenJCEPlus.put("OS", Arrays.asList("Linux", "AIX", "Windows"));
+
         @SuppressWarnings("removal")
         String[] props = AccessController.doPrivileged(
                 new PrivilegedAction<String[]>() {
                     @Override
                     public String[] run() {
                         return new String[] { System.getProperty("semeru.fips"),
-                                System.getProperty("semeru.restrictedsecurity"),
+                                System.getProperty("semeru.customprofile"),
                                 System.getProperty("os.name"),
                                 System.getProperty("os.arch") };
                     }
                 });
+
+        boolean isOsSupported, isArchSupported;
+        // Check whether the NSS FIPS solution is supported.
+        isOsSupported = false;
+        for (String os: supportedPlatformsNSS.get("OS")) {
+            if (props[2].contains(os)) {
+                isOsSupported = true;
+            }
+        }
+        isArchSupported = false;
+        for (String arch: supportedPlatformsNSS.get("Arch")) {
+            if (props[3].contains(arch)) {
+                isArchSupported = true;
+            }
+        }
+        isNSSSupported = isOsSupported && isArchSupported;
+
+        // Check whether the OpenJCEPlus FIPS solution is supported.
+        isOsSupported = false;
+        for (String os: supportedPlatformsOpenJCEPlus.get("OS")) {
+            if (props[2].contains(os)) {
+                isOsSupported = true;
+            }
+        }
+        isArchSupported = false;
+        for (String arch: supportedPlatformsOpenJCEPlus.get("Arch")) {
+            if (props[3].contains(arch)) {
+                isArchSupported = true;
+            }
+        }
+        isOpenJCEPlusSupported = isOsSupported && isArchSupported;
+
+        // Check the default solution to see if FIPS is supported.
+        isFIPSSupported = isNSSSupported;
+
         userEnabledFIPS = Boolean.parseBoolean(props[0]);
-        // If semeru.fips is true, then ignore semeru.restrictedsecurity, use userSecurityNum 1.
-        userSecuritySetting = userEnabledFIPS ? "1" : props[1];
-        userEnabledSecurity = !isNullOrBlank(userSecuritySetting);
-        isSecuritySupported = "Linux".equalsIgnoreCase(props[2])
-                && supportPlatforms.contains(props[3]);
-        shouldEnableSecurity = (userEnabledFIPS || userEnabledSecurity) && isSecuritySupported;
+
+        if (userEnabledFIPS) {
+            if (isFIPSSupported) {
+                // Set to default profile for the default FIPS solution.
+                selectedProfile = "NSS.140-2";
+            }
+        }
+
+        // If user has specified a profile, use that
+        if (props[1] != null) {
+            selectedProfile = props[1];
+            userSetProfile = true;
+        } else {
+            userSetProfile = false;
+        }
+
+        // Check if FIPS is supported on this platform without explicitly setting a profile.
+        if (userEnabledFIPS && !isFIPSSupported && !userSetProfile) {
+            printStackTraceAndExit("FIPS mode is not supported on this platform by default.\n"
+                    + " Use the semeru.customprofile system property to use an available FIPS-compliant profile.\n"
+                    + " Note: Not all platforms support FIPS at the moment.");
+        }
+
+        shouldEnableSecurity = (userEnabledFIPS && isFIPSSupported) || userSetProfile;
     }
 
     private RestrictedSecurity() {
@@ -96,8 +163,9 @@ public final class RestrictedSecurity {
      * Check if restricted security mode is enabled.
      *
      * Restricted security mode is enabled when, on supported platforms,
-     * the semeru.restrictedsecurity system property is set or the system
-     * property semeru.fips is true.
+     * the semeru.customprofile system property is used to set a
+     * specific security profile or the semeru.fips system property is
+     * set to true.
      *
      * @return true if restricted security mode is enabled
      */
@@ -124,13 +192,16 @@ public final class RestrictedSecurity {
     /**
      * Check if the FIPS mode is enabled.
      *
-     * FIPS mode will be enabled when the semeru.fips system property is true,
-     * or semeru.restrictedsecurity system property is set by using FIPS policy.
+     * FIPS mode will be enabled when the semeru.fips system property is
+     * true, and the RestrictedSecurity mode has been successfully initialized.
      *
      * @return true if FIPS is enabled
      */
     public static boolean isFIPSEnabled() {
-        return securityEnabled && (userSecurityNum == 1);
+        if (securityEnabled) {
+            return isFIPSEnabled;
+        }
+        return false;
     }
 
     /**
@@ -184,6 +255,106 @@ public final class RestrictedSecurity {
     }
 
     /**
+     * Figure out the full profile ID.
+     *
+     * Use the default or user selected profile and attempt to find
+     * an appropriate entry in the java.security properties.
+     *
+     * If a profile cannot be found, or multiple defaults are discovered
+     * for a single profile, an appropriate message is printed and the
+     * system exits.
+     *
+     * @param props the java.security properties
+     */
+    private static void getProfileID(Properties props) {
+        String potentialProfileID = "RestrictedSecurity." + selectedProfile;
+
+        if (selectedProfile.indexOf(".") != -1) {
+            /* The default profile is used, or the user specified the
+             * full <profile.version>.
+             */
+            if (debug != null) {
+                debug.println("Profile specified using full name (i.e., <profile.version>): "
+                        + selectedProfile);
+            }
+            for (Object keyObject : props.keySet()) {
+                if (keyObject instanceof String) {
+                    String key = (String) keyObject;
+                    if (key.startsWith(potentialProfileID)) {
+                        profileID = potentialProfileID;
+                        return;
+                    }
+                }
+            }
+            printStackTraceAndExit(selectedProfile + " is not present in the java.security file.");
+        } else {
+            /* The user specified the only the <profile> without
+             * indicating the <version> part.
+             */
+            if (debug != null) {
+                debug.println("Profile specified without version (i.e., <profile>): "
+                        + selectedProfile);
+            }
+            String defaultMatch = null;
+            for (Object keyObject : props.keySet()) {
+                if (keyObject instanceof String) {
+                    String key = (String) keyObject;
+                    if (key.startsWith(potentialProfileID) && key.endsWith(".desc.default")) {
+                        // Check if property is set to true.
+                        if (Boolean.parseBoolean(props.getProperty(key))) {
+                            // Check if multiple defaults exist and act accordingly.
+                            if (defaultMatch == null) {
+                                defaultMatch = key.split("\\.desc")[0];
+                            } else {
+                                printStackTraceAndExit("Multiple default RestrictedSecurity"
+                                        + " profiles for " + selectedProfile);
+                            }
+                        }
+                    }
+                }
+            }
+            if (defaultMatch == null) {
+                printStackTraceAndExit("No default RestrictedSecurity profile was found for "
+                        + selectedProfile);
+            } else {
+                profileID = defaultMatch;
+            }
+        }
+    }
+
+    private static void checkIfKnownProfileSupported() {
+        if (profileID.contains("NSS") && !isNSSSupported) {
+            printStackTraceAndExit("NSS RestrictedSecurity profiles are not supported"
+                    + " on this platform.");
+        }
+
+        if (profileID.contains("OpenJCEPlus") && !isOpenJCEPlusSupported) {
+            printStackTraceAndExit("OpenJCEPlus RestrictedSecurity profiles are not supported"
+                    + " on this platform.");
+        }
+
+        if (debug != null) {
+            debug.println("RestrictedSecurity profile " + profileID
+                    + " is supported on this platform.");
+        }
+    }
+
+    private static void checkFIPSCompatibility(Properties props) {
+        boolean isFIPSProfile = Boolean.parseBoolean(props.getProperty(profileID + ".desc.fips"));
+        if (isFIPSProfile) {
+            if (debug != null) {
+                debug.println("RestrictedSecurity profile " + profileID
+                        + " is specified as FIPS compliant.");
+            }
+            isFIPSEnabled = true;
+        } else {
+            printStackTraceAndExit("RestrictedSecurity profile " + profileID
+                    + " is not specified as FIPS compliant, but the semeru.fips"
+                    + " system property is set to true.");
+        }
+    }
+
+    /**
      * Remove the security providers and only add restricted security providers.
      *
      * @param props the java.security properties
@@ -195,23 +366,22 @@ public final class RestrictedSecurity {
             printStackTraceAndExit("Restricted security mode is already initialized, it can't be initialized twice.");
         }
 
-        // Check if restricted security is supported on this platform.
-        if ((userEnabledFIPS || userEnabledSecurity) && !isSecuritySupported) {
-            printStackTraceAndExit("Restricted security mode is not supported on this platform.");
-        }
-
         try {
             if (shouldEnableSecurity) {
                 if (debug != null) {
-                    debug.println("Restricted security mode detected, loading...");
+                    debug.println("Restricted security mode is being enabled...");
                 }
 
-                // Read and set user restricted security settings.
-                initUserSetting();
+                getProfileID(props);
+                checkIfKnownProfileSupported();
+
+                // If user enabled FIPS, check whether chosen profile is applicable.
+                if (userEnabledFIPS) {
+                    checkFIPSCompatibility(props);
+                }
 
                 // Initialize restricted security properties from java.security file.
-                restricts = new RestrictedSecurityProperties(userSecurityNum,
-                        props, userSecurityTrace, userSecurityAudit, userSecurityHelp);
+                restricts = new RestrictedSecurityProperties(profileID, props);
 
                 // Restricted security properties checks.
                 restrictsCheck();
@@ -234,11 +404,6 @@ public final class RestrictedSecurity {
                 // Add restricted security Properties.
                 setProperties(props);
 
-                // Print out the Trace info.
-                if (userSecurityTrace) {
-                    restricts.listTrace();
-                }
-
                 if (debug != null) {
                     debug.println("Restricted security mode loaded.");
                     debug.println("Restricted security mode properties: " + props.toString());
@@ -253,46 +418,6 @@ public final class RestrictedSecurity {
             printStackTraceAndExit(e);
         }
         return securityEnabled;
-    }
-
-    /**
-     * Load user restricted security settings from system property.
-     */
-    private static void initUserSetting() {
-        if (debug != null) {
-            debug.println("Loading user restricted security settings.");
-        }
-
-        String[] inputs = userSecuritySetting.split(",");
-
-        // For input ",,"
-        if (inputs.length == 0) {
-            printStackTraceAndExit("User restricted security setting " + userSecuritySetting + " incorrect.");
-        }
-
-        for (String input : inputs) {
-            String in = input.trim();
-            if (in.equalsIgnoreCase("audit")) {
-                userSecurityAudit = true;
-            } else if (in.equalsIgnoreCase("help")) {
-                userSecurityHelp = true;
-            } else if (in.equalsIgnoreCase("trace")) {
-                userSecurityTrace = true;
-            } else {
-                try {
-                    userSecurityNum = Integer.parseInt(in);
-                } catch (NumberFormatException e) {
-                    printStackTraceAndExit("User restricted security setting " + userSecuritySetting + " incorrect.");
-                }
-            }
-        }
-
-        if (debug != null) {
-            debug.println("Loaded user restricted security settings, with userSecurityNum: " + userSecurityNum
-                    + " userSecurityTrace: " + userSecurityTrace
-                    + " userSecurityAudit: " + userSecurityAudit
-                    + " userSecurityHelp: " + userSecurityHelp);
-        }
     }
 
     /**
@@ -434,6 +559,8 @@ public final class RestrictedSecurity {
     private static final class RestrictedSecurityProperties {
 
         private String descName;
+        private boolean descIsDefault;
+        private boolean descIsFIPS;
         private String descNumber;
         private String descPolicy;
         private String descSunsetDate;
@@ -458,34 +585,24 @@ public final class RestrictedSecurity {
         // The map is keyed by provider name.
         private final Map<String, Constraint[]> providerConstraints;
 
-        private final int userSecurityNum;
-        private final boolean userSecurityTrace;
-        private final boolean userSecurityAudit;
-        private final boolean userSecurityHelp;
-
-        private final String propsPrefix;
+        private final String profileID;
 
         // The java.security properties.
         private final Properties securityProps;
 
         /**
          *
-         * @param num   the restricted security setting number
+         * @param id    the restricted security custom profile ID
          * @param props the java.security properties
          * @param trace the user security trace
          * @param audit the user security audit
          * @param help  the user security help
          */
-        private RestrictedSecurityProperties(int num, Properties props, boolean trace, boolean audit, boolean help) {
+        private RestrictedSecurityProperties(String id, Properties props) {
             Objects.requireNonNull(props);
 
-            userSecurityNum = num;
-            userSecurityTrace = trace;
-            userSecurityAudit = audit;
-            userSecurityHelp = help;
+            profileID = id;
             securityProps = props;
-
-            propsPrefix = "RestrictedSecurity" + userSecurityNum;
 
             providers = new ArrayList<>();
             providersSimpleName = new ArrayList<>();
@@ -504,42 +621,27 @@ public final class RestrictedSecurity {
             }
 
             try {
-                // Print out the Help and Audit info.
-                if (userSecurityHelp || userSecurityAudit || userSecurityTrace) {
-                    if (userSecurityHelp) {
-                        printHelp();
-                    }
-                    if (userSecurityAudit) {
-                        listAudit();
-                    }
-                    if (userSecurityNum == 0) {
-                        if (userSecurityTrace) {
-                            printStackTraceAndExit(
-                                    "Unable to list the trace info without specify the security policy number.");
-                        } else {
-                            if (debug != null) {
-                                debug.println("Print out the info and exit.");
-                            }
-                            System.exit(0);
-                        }
-                    }
-                }
-
                 // Load restricted security providers from java.security properties.
                 initProviders();
                 // Load restricted security properties from java.security properties.
                 initProperties();
                 // Load restricted security provider constraints from java.security properties.
                 initConstraints();
-
-                if (debug != null) {
-                    debug.println("Initialized restricted security mode.");
-                }
             } catch (Exception e) {
                 if (debug != null) {
                     debug.println("Unable to initialize restricted security mode.");
                 }
                 printStackTraceAndExit(e);
+            }
+
+            if (debug != null) {
+                debug.println("Initialization of restricted security mode completed.");
+
+                // Print all available restricted security profiles.
+                listAvailableProfiles();
+
+                // Print information of utilized security profile.
+                listUsedProfile();
             }
         }
 
@@ -548,12 +650,12 @@ public final class RestrictedSecurity {
          */
         private void initProviders() {
             if (debug != null) {
-                debug.println("Loading restricted security providers.");
+                debug.println("\tLoading providers of restricted security profile.");
             }
 
             for (int pNum = 1;; ++pNum) {
                 String providerInfo = securityProps
-                        .getProperty(propsPrefix + ".jce.provider." + pNum);
+                        .getProperty(profileID + ".jce.provider." + pNum);
 
                 if ((providerInfo == null) || providerInfo.trim().isEmpty()) {
                     break;
@@ -571,17 +673,15 @@ public final class RestrictedSecurity {
                 // Provider name defined in provider construction method.
                 providerName = getProvidersSimpleName(providerName);
                 providersSimpleName.add(pNum - 1, providerName);
-
-                if (debug != null) {
-                    debug.println(
-                            "Loaded restricted security provider: " + providers.get(pNum - 1)
-                                    + " with simple name: " + providerName);
-                }
             }
 
             if (providers.isEmpty()) {
                 printStackTraceAndExit(
-                        "Restricted security mode provider list empty, or no such restricted security policy in java.security file.");
+                        "No providers are specified as part of the Restricted Security profile.");
+            }
+
+            if (debug != null) {
+                debug.println("\tProviders of restricted security profile successfully loaded.");
             }
         }
 
@@ -590,36 +690,38 @@ public final class RestrictedSecurity {
          */
         private void initProperties() {
             if (debug != null) {
-                debug.println("Loading restricted security properties.");
+                debug.println("\tLoading properties of restricted security profile.");
             }
 
-            descName = parseProperty(securityProps.getProperty(propsPrefix + ".desc.name"));
-            descNumber = parseProperty(securityProps.getProperty(propsPrefix + ".desc.number"));
-            descPolicy = parseProperty(securityProps.getProperty(propsPrefix + ".desc.policy"));
-            descSunsetDate = parseProperty(securityProps.getProperty(propsPrefix + ".desc.sunsetDate"));
+            descName = parseProperty(securityProps.getProperty(profileID + ".desc.name"));
+            descIsDefault = Boolean.parseBoolean(parseProperty(securityProps.getProperty(profileID + ".desc.default")));
+            descIsFIPS = Boolean.parseBoolean(parseProperty(securityProps.getProperty(profileID + ".desc.fips")));
+            descNumber = parseProperty(securityProps.getProperty(profileID + ".desc.number"));
+            descPolicy = parseProperty(securityProps.getProperty(profileID + ".desc.policy"));
+            descSunsetDate = parseProperty(securityProps.getProperty(profileID + ".desc.sunsetDate"));
 
             jdkTlsDisabledNamedCurves = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".tls.disabledNamedCurves"));
+                    securityProps.getProperty(profileID + ".tls.disabledNamedCurves"));
             jdkTlsDisabledAlgorithms = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".tls.disabledAlgorithms"));
+                    securityProps.getProperty(profileID + ".tls.disabledAlgorithms"));
             jdkTlsDphemeralDHKeySize = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".tls.ephemeralDHKeySize"));
+                    securityProps.getProperty(profileID + ".tls.ephemeralDHKeySize"));
             jdkTlsLegacyAlgorithms = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".tls.legacyAlgorithms"));
+                    securityProps.getProperty(profileID + ".tls.legacyAlgorithms"));
             jdkCertpathDisabledAlgorithms = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".jce.certpath.disabledAlgorithms"));
+                    securityProps.getProperty(profileID + ".jce.certpath.disabledAlgorithms"));
             jdkSecurityLegacyAlgorithm = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".jce.legacyAlgorithms"));
+                    securityProps.getProperty(profileID + ".jce.legacyAlgorithms"));
             keyStoreType = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".keystore.type"));
+                    securityProps.getProperty(profileID + ".keystore.type"));
             keyStore = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".javax.net.ssl.keyStore"));
+                    securityProps.getProperty(profileID + ".javax.net.ssl.keyStore"));
 
             jdkSecureRandomAlgorithm = parseProperty(
-                    securityProps.getProperty(propsPrefix + ".securerandom.algorithm"));
+                    securityProps.getProperty(profileID + ".securerandom.algorithm"));
 
             if (debug != null) {
-                debug.println("Loaded restricted security properties.");
+                debug.println("\tProperties of restricted security profile successfully loaded.");
             }
         }
 
@@ -631,19 +733,23 @@ public final class RestrictedSecurity {
          * {Policy, JavaPolicy, *}, {CertPathValidator, *, *}].
          */
         private void initConstraints() {
+            if (debug != null) {
+                debug.println("\tLoading constraints of restricted security profile.");
+            }
+
             for (int pNum = 1; pNum <= providersSimpleName.size(); pNum++) {
                 String providerName = providersSimpleName.get(pNum - 1);
                 String providerInfo = securityProps
-                        .getProperty(propsPrefix + ".jce.provider." + pNum);
+                        .getProperty(profileID + ".jce.provider." + pNum);
 
                 if (debug != null) {
-                    debug.println("Loading constraints for security provider: " + providerName);
+                    debug.println("\t\tLoading constraints for security provider: " + providerName);
                 }
 
                 // Check if the provider has constraints.
                 if (providerInfo.indexOf('[') < 0) {
                     if (debug != null) {
-                        debug.println("No constraints for security provider: " + providerName);
+                        debug.println("\t\t\tNo constraints for security provider: " + providerName);
                     }
                     providerConstraints.put(providerName, new Constraint[0]);
                     continue;
@@ -699,21 +805,25 @@ public final class RestrictedSecurity {
                         Constraint constraint = new Constraint(inType, inAlgorithm, inAttributes);
 
                         if (debug != null) {
-                            debug.println("Loading constraints for security provider: " + providerName
-                                    + " with constraints type: " + inType
-                                    + " algorithm: " + inAlgorithm
-                                    + " attributes: " + inAttributes);
+                            debug.println("\t\t\tConstraint specified for security provider: " + providerName);
+                            debug.println("\t\t\t\twith type: " + inType);
+                            debug.println("\t\t\t\tfor algorithm: " + inAlgorithm);
+                            debug.println("\t\t\t\twith attributes: " + inAttributes);
                         }
                         constraints[cNum] = constraint;
                         cNum++;
                     }
                     providerConstraints.put(providerName, constraints);
                     if (debug != null) {
-                        debug.println("Loaded constraints for security provider: " + providerName);
+                        debug.println("\t\tSuccessfully loaded constraints for security provider: " + providerName);
                     }
                 } else {
                     printStackTraceAndExit("Constraint format is incorrect: " + providerInfo);
                 }
+            }
+
+            if (debug != null) {
+                debug.println("\tAll constraints of restricted security profile successfully loaded.");
             }
         }
 
@@ -882,101 +992,105 @@ public final class RestrictedSecurity {
         }
 
         /**
-         * List audit info if userSecurityAudit is true, default as false.
+         * List audit info of all available RestrictedSecurity profiles.
          */
-        private void listAudit() {
+        private void listAvailableProfiles() {
             System.out.println();
-            System.out.println("Restricted Security Audit Info:");
-            System.out.println("===============================");
+            System.out.println("Restricted Security Available Profiles' Info:");
+            System.out.println("=============================================");
 
-            for (int num = 1;; ++num) {
-                String desc = securityProps.getProperty("RestrictedSecurity" + num + ".desc.name");
-                if ((desc == null) || desc.trim().isEmpty()) {
-                    break;
+            Set<String> availableProfiles = new HashSet<>();
+            Pattern profileNamePattern = Pattern.compile("^(RestrictedSecurity\\.\\S+)\\.desc\\.name");
+            for(Object securityFileObject : securityProps.keySet()) {
+                if (securityFileObject instanceof String) {
+                    String key = (String) securityFileObject;
+                    Matcher profileMatcher = profileNamePattern.matcher(key);
+                    if (profileMatcher.matches()) {
+                        availableProfiles.add(profileMatcher.group(1));
+                    }
                 }
-                System.out.println("RestrictedSecurity" + num + ".desc.name: "
-                        + securityProps.getProperty("RestrictedSecurity" + num + ".desc.name"));
-                System.out.println("RestrictedSecurity" + num + ".desc.number: "
-                        + parseProperty(securityProps.getProperty("RestrictedSecurity" + num + ".desc.number")));
-                System.out.println("RestrictedSecurity" + num + ".desc.policy: "
-                        + parseProperty(securityProps.getProperty("RestrictedSecurity" + num + ".desc.policy")));
-                System.out.println("RestrictedSecurity" + num + ".desc.sunsetDate: "
-                        + parseProperty(securityProps.getProperty("RestrictedSecurity" + num + ".desc.sunsetDate")));
-                System.out.println();
+            }
+            System.out.println("The available Restricted Security profiles:\n");
+
+            for (String availableProfile : availableProfiles) {
+                printProfile(availableProfile);
             }
         }
 
         /**
-         * List trace info if userSecurityTrace is true, default as false.
+         * List the RestrictedSecurity profile currently used.
          */
-        void listTrace() {
+        private void listUsedProfile() {
             System.out.println();
-            System.out.println("Restricted Security Trace Info:");
-            System.out.println("===============================");
-            System.out.println(propsPrefix + ".desc.name: " + descName);
-            System.out.println(propsPrefix + ".desc.number: " + descNumber);
-            System.out.println(propsPrefix + ".desc.policy: " + descPolicy);
-            System.out.println(propsPrefix + ".desc.sunsetDate: " + descSunsetDate);
+            System.out.println("Utilized Restricted Security Profile Info:");
+            System.out.println("==========================================");
+            System.out.println("The Restricted Security profile used is: " + profileID);
             System.out.println();
+            printProfile(profileID);
+        }
 
-            // List restrictions.
-            System.out.println(propsPrefix + ".tls.disabledNamedCurves: "
-                    + parseProperty(securityProps.getProperty("jdk.tls.disabledNamedCurves")));
-            System.out.println(propsPrefix + ".tls.disabledAlgorithms: "
-                    + parseProperty(securityProps.getProperty("jdk.tls.disabledAlgorithms")));
-            System.out.println(propsPrefix + ".tls.ephemeralDHKeySize: "
-                    + parseProperty(securityProps.getProperty("jdk.tls.ephemeralDHKeySize")));
-            System.out.println(propsPrefix + ".tls.legacyAlgorithms: "
-                    + parseProperty(securityProps.getProperty("jdk.tls.legacyAlgorithms")));
-            System.out.println(propsPrefix + ".jce.certpath.disabledAlgorithms: "
-                    + parseProperty(securityProps.getProperty("jdk.certpath.disabledAlgorithms")));
-            System.out.println(propsPrefix + ".jce.legacyAlgorithms: "
-                    + parseProperty(securityProps.getProperty("jdk.security.legacyAlgorithm")));
+        private void printProfile(String profileToPrint) {
+            System.out.println(profileToPrint + " Profile Info:");
+            System.out.println("==========================================");
+            printProperty(profileToPrint + ".desc.name: ",
+                    securityProps.getProperty(profileToPrint + ".desc.name"));
+            printProperty(profileToPrint + ".desc.default: ",
+                    securityProps.getProperty(profileToPrint + ".desc.default"));
+            printProperty(profileToPrint + ".desc.fips: ",
+                    securityProps.getProperty(profileToPrint + ".desc.fips"));
+            printProperty(profileToPrint + ".desc.number: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".desc.number")));
+            printProperty(profileToPrint + ".desc.policy: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".desc.policy")));
+            printProperty(profileToPrint + ".desc.sunsetDate: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".desc.sunsetDate")));
             System.out.println();
-
-            System.out.println(propsPrefix + ".keystore.type: "
-                    + parseProperty(securityProps.getProperty("keystore.type")));
-            System.out.println(propsPrefix + ".javax.net.ssl.keyStore: "
-                    + keyStore);
-            System.out.println(propsPrefix + ".securerandom.algorithm: "
-                    + jdkSecureRandomAlgorithm);
 
             // List providers.
-            System.out.println();
-            for (int pNum = 1; pNum <= providers.size(); pNum++) {
-                System.out.println(propsPrefix + ".jce.provider." + pNum + ": "
-                        + providers.get(pNum - 1));
-            }
+            System.out.println(profileToPrint + " Profile Providers:");
+            System.out.println("===============================================");
+            for (int pNum = 1;; ++pNum) {
+            String providerInfo = securityProps
+                    .getProperty(profileToPrint + ".jce.provider." + pNum);
 
+                if ((providerInfo == null) || providerInfo.trim().isEmpty()) {
+                    break;
+                }
+                printProperty(profileToPrint + ".jce.provider." + pNum + ": ", providerInfo);
+            }
+            System.out.println();
+
+            // List profile restrictions.
+            System.out.println(profileToPrint + " Profile Restrictions:");
+            System.out.println("==================================================");
+            printProperty(profileToPrint + ".tls.disabledNamedCurves: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".tls.disabledNamedCurves")));
+            printProperty(profileToPrint + ".tls.disabledAlgorithms: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".tls.disabledAlgorithms")));
+            printProperty(profileToPrint + ".tls.ephemeralDHKeySize: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".tls.ephemeralDHKeySize")));
+            printProperty(profileToPrint + ".tls.legacyAlgorithms: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".tls.legacyAlgorithms")));
+            printProperty(profileToPrint + ".jce.certpath.disabledAlgorithms: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".jce.certpath.disabledAlgorithms")));
+            printProperty(profileToPrint + ".jce.legacyAlgorithms: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".jce.legacyAlgorithms")));
+            System.out.println();
+
+            printProperty(profileToPrint + ".keystore.type: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".keystore.type")));
+            printProperty(profileToPrint + ".javax.net.ssl.keyStore: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".javax.net.ssl.keyStore")));
+            printProperty(profileToPrint + ".securerandom.provider: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".securerandom.provider")));
+            printProperty(profileToPrint + ".securerandom.algorithm: ",
+                    parseProperty(securityProps.getProperty(profileToPrint + ".securerandom.algorithm")));
             System.out.println();
         }
 
-        /**
-         * Print help info if userSecurityHelp is ture, default as false.
-         */
-        private void printHelp() {
-            System.out.println();
-            System.out.println("Restricted Security Mode Usage:");
-            System.out.println("===============================");
-
-            System.out.println(
-                    "-Dsemeru.restrictedsecurity=<n>  This flag will select the settings for the user " +
-                            "specified restricted security policy.");
-            System.out.println(
-                    "-Dsemeru.restrictedsecurity=audit  This flag will list the name and number of all " +
-                            "configured restricted security policies.");
-            System.out.println(
-                    "-Dsemeru.restrictedsecurity=trace  This flag will list all properties relevant to " +
-                            "restricted security mode, including the existing default properties and " +
-                            "restricted security properties.");
-            System.out.println("-Dsemeru.restrictedsecurity=help  This flag will print help message.");
-
-            System.out.println();
-            System.out.println("e.g.");
-            System.out.println("    -Dsemeru.restrictedsecurity=1,trace,audit,help");
-            System.out.println("    -Dsemeru.restrictedsecurity=help");
-
-            System.out.println();
+        private void printProperty(String name, String value) {
+            String valueToPrint = (value.isEmpty()) ? "NOT AVAILABLE" : value;
+            System.out.println(name + valueToPrint);
         }
 
         /**
