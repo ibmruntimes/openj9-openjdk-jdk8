@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+ /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package java.lang.reflect;
 
@@ -79,8 +84,7 @@ public abstract class Executable extends AccessibleObject
     Annotation[][] parseParameterAnnotations(byte[] parameterAnnotations) {
         return AnnotationParser.parseParameterAnnotations(
                parameterAnnotations,
-               sun.misc.SharedSecrets.getJavaLangAccess().
-               getConstantPool(getDeclaringClass()),
+               com.ibm.oti.vm.VM.getConstantPoolFromAnnotationBytes(getDeclaringClass(), parameterAnnotations),
                getDeclaringClass());
     }
 
@@ -601,8 +605,7 @@ public abstract class Executable extends AccessibleObject
                     } else {
                         declAnnos = AnnotationParser.parseAnnotations(
                                 getAnnotationBytes(),
-                                sun.misc.SharedSecrets.getJavaLangAccess().
-                                        getConstantPool(getDeclaringClass()),
+                                com.ibm.oti.vm.VM.getConstantPoolFromAnnotationBytes(getDeclaringClass(), getAnnotationBytes()),
                                 getDeclaringClass()
                         );
                     }
