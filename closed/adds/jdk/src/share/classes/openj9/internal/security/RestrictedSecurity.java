@@ -65,7 +65,7 @@ public final class RestrictedSecurity {
 
     private static RestrictedSecurityProperties restricts;
 
-    private static final List<String> supportPlatforms = Arrays.asList("amd64");
+    private static final List<String> supportPlatforms = Arrays.asList("amd64", "ppc64le", "s390x");
 
     static {
         @SuppressWarnings("removal")
