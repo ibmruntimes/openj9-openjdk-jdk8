@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package java.lang.invoke;
 
@@ -1183,6 +1188,10 @@ return mh1;
                 MethodHandle mh = unreflectForMH(m);
                 if (mh != null)  return mh;
             }
+
+            MethodHandle mh = MethodHandleResolver.maybeCreateAbstractMethodErrorThrower(m);
+            if (mh != null) return mh;
+
             MemberName method = new MemberName(m);
             byte refKind = method.getReferenceKind();
             if (refKind == REF_invokeSpecial)
