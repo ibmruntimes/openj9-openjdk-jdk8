@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -31,9 +31,9 @@ $(JDK_OUTPUTDIR)/include/ibmjvmti.h: $(SRC_ROOT)/openj9/runtime/include/ibmjvmti
 
 COPY_FILES += $(JDK_OUTPUTDIR)/include/ibmjvmti.h
 
-# Copy the nss.fips.cfg only on x86 linux
+# Copy the nss.fips.cfg only on x86/p/z linux
 
-ifeq ($(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU_ARCH), linux-x86)
+ifneq ($(filter linux-x86_64 linux-ppc64le linux-s390x, $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU)), )
   NSS_FIPS_CFG_SRC := $(TOPDIR)/closed/adds/jdk/src/share/lib/security/nss.fips.cfg
   NSS_FIPS_CFG_DST := $(JDK_OUTPUTDIR)/lib/security/nss.fips.cfg
 
