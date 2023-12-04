@@ -336,6 +336,8 @@ public final class ServiceLoader<S>
         Enumeration<URL> configs = null;
         Iterator<String> pending = null;
         String nextName = null;
+        Class<?> nextClass = null;
+        boolean nextNotFound = false;
 
         private LazyIterator(Class<S> service, ClassLoader loader) {
             this.service = service;
@@ -357,31 +359,39 @@ public final class ServiceLoader<S>
                     fail(service, "Error locating configuration files", x);
                 }
             }
-            while ((pending == null) || !pending.hasNext()) {
-                if (!configs.hasMoreElements()) {
-                    return false;
-                }
-                pending = parse(service, configs.nextElement());
-
-                // In restricted security mode, get each provider class without
-                // initializing and only add the allowed ones.
-                if (RestrictedSecurity.isEnabled()) {
-                    ArrayList<String> provNames = new ArrayList<>();
-                    while (pending.hasNext()) {
-                        String className = pending.next();
-                        try {
-                            Class<?> clazz = Class.forName(className, false, loader);
-                            if (RestrictedSecurity.isProviderAllowed(clazz)) {
-                                provNames.add(className);
-                            }
-                        } catch (ClassNotFoundException x) {
-                            // If class not found, then don't add it.
-                        }
+            nextClass = null;
+            nextNotFound = false;
+            for (;;) {
+                while ((pending == null) || !pending.hasNext()) {
+                    if (!configs.hasMoreElements()) {
+                        nextName = null;
+                        return false;
                     }
-                    pending = provNames.iterator();
+                    pending = parse(service, configs.nextElement());
+                }
+                nextName = pending.next();
+
+                if (!RestrictedSecurity.isEnabled()) {
+                    break;
+                }
+                /* In restricted security mode, get each provider class and, if an
+                 * allowed one is found, stop looking.
+                 */
+                try {
+                    nextClass = Class.forName(nextName, false, loader);
+                    if (RestrictedSecurity.isProviderAllowed(nextClass)) {
+                        break;
+                    }
+                } catch (ClassNotFoundException x) {
+                    /* If the class cannot be found, there is no way of knowing
+                     * if it is a subclass of java.security.Provider, but we
+                     * need to remember to fail.
+                     */
+                    nextClass = null;
+                    nextNotFound = true;
+                    break;
                 }
             }
-            nextName = pending.next();
             return true;
         }
 
@@ -390,12 +400,25 @@ public final class ServiceLoader<S>
                 throw new NoSuchElementException();
             String cn = nextName;
             nextName = null;
-            Class<?> c = null;
-            try {
-                c = Class.forName(cn, false, loader);
-            } catch (ClassNotFoundException x) {
+
+            if (nextNotFound) {
+                /* In restricted security mode, if loading the class failed,
+                 * fail in the expected way.
+                 */
                 fail(service,
                      "Provider " + cn + " not found");
+            }
+            Class<?> c = nextClass;
+            if (c == null) {
+                /* If not in restricted security mode, the class isn't
+                 * loaded, so try to load it here.
+                 */
+                try {
+                    c = Class.forName(cn, false, loader);
+                } catch (ClassNotFoundException x) {
+                    fail(service,
+                         "Provider " + cn + " not found");
+                }
             }
             if (!service.isAssignableFrom(c)) {
                 fail(service,
