@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -241,7 +247,7 @@ JNIEXPORT jobject JNICALL Java_sun_security_pkcs11_Secmod_nssGetModuleList
             if (jModule == NULL) {
                 return NULL;
             }
-            (*env)->CallVoidMethod(env, jList, jAdd, jModule);
+            (*env)->CallBooleanMethod(env, jList, jAdd, jModule);
             if ((*env)->ExceptionCheck(env)) {
                 return NULL;
             }
