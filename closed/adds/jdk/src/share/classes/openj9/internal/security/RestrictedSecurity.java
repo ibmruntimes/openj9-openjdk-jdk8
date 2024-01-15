@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -670,6 +670,19 @@ public final class RestrictedSecurity {
                 // Provider with argument (provider name + optional argument).
                 providers.add(pNum - 1, providerName);
 
+                // Remove the provider's optional arguments if present.
+                pos = providerName.indexOf(' ');
+                if (pos >= 0) {
+                    providerName = providerName.substring(0, pos);
+                }
+                providerName = providerName.trim();
+
+                // Remove argument, e.g. -NSS-FIPS, if present.
+                pos = providerName.indexOf('-');
+                if (pos >= 0) {
+                    providerName = providerName.substring(0, pos);
+                }
+
                 // Provider name defined in provider construction method.
                 providerName = getProvidersSimpleName(providerName);
                 providersSimpleName.add(pNum - 1, providerName);
@@ -935,6 +948,13 @@ public final class RestrictedSecurity {
                 debug.println("Checking the provider " + providerName + " in restricted security mode.");
             }
 
+            // Remove argument, e.g. -NSS-FIPS, if present.
+            int pos = providerName.indexOf('-');
+            if (pos >= 0) {
+                providerName = providerName.substring(0, pos);
+            }
+
+            // Provider name defined in provider construction method.
             providerName = getProvidersSimpleName(providerName);
 
             // Check if the provider is in restricted security provider list.
@@ -963,18 +983,10 @@ public final class RestrictedSecurity {
         /**
          * Get the provider name defined in provider construction method.
          *
-         * @param providerName provider name or provider with packages or arguments
+         * @param providerName provider name or provider with packages
          * @return provider name defined in provider construction method
          */
         private static String getProvidersSimpleName(String providerName) {
-            // Remove the provider's optional arguments if present.
-            int pos = providerName.indexOf(' ');
-            providerName = (pos < 0) ? providerName.trim() : providerName.substring(0, pos).trim();
-
-            // Remove argument, e.g. -NSS-FIPS, if present.
-            pos = providerName.indexOf('-');
-            providerName = (pos < 0) ? providerName : providerName.substring(0, pos);
-
             if (providerName.equals("com.sun.net.ssl.internal.ssl.Provider")) {
                 // In JDK 8, the main class for the SunJSSE provider is
                 // com.sun.net.ssl.internal.ssl.Provider
@@ -982,11 +994,16 @@ public final class RestrictedSecurity {
             } else if (providerName.equals("sun.security.provider.Sun")) {
                 // In JDK 8, the main class for the SUN provider is sun.security.provider.Sun
                 return "SUN";
+            } else if (providerName.equals("com.sun.security.sasl.Provider")) {
+                // The main class for the SunSASL provider is com.sun.security.sasl.Provider.
+                return "SunSASL";
             } else {
                 // Remove the provider's class package names if present.
-                pos = providerName.lastIndexOf('.');
-                providerName = (pos < 0) ? providerName : providerName.substring(pos + 1);
-                // Provider without arguments and package names.
+                int pos = providerName.lastIndexOf('.');
+                if (pos >= 0) {
+                    providerName = providerName.substring(pos + 1);
+                }
+                // Provider without package names.
                 return providerName;
             }
         }
