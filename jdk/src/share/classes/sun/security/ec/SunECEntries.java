@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -62,6 +62,11 @@ final class SunECEntries {
      * OpenSSL 1.1.0 or above is required for EC key generation support.
      */
     private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "SunEC");
+
+    /* The property 'jdk.nativeECDSA' is used to control enablement of the native
+     * ECDSA signature implementation.
+     */
+    private static final boolean useNativeECDSA = NativeCrypto.isAlgorithmEnabled("jdk.nativeECDSA", "SunEC");
 
     private SunECEntries() {
         // empty
@@ -128,32 +133,63 @@ final class SunECEntries {
         /*
          * Signature engines
          */
-        map.put("Signature.NONEwithECDSA",
-            "sun.security.ec.ECDSASignature$Raw");
-        map.put("Signature.SHA1withECDSA",
-            "sun.security.ec.ECDSASignature$SHA1");
-        map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.1", "SHA1withECDSA");
-        map.put("Alg.Alias.Signature.1.2.840.10045.4.1", "SHA1withECDSA");
+        if (useNativeECDSA
+            && (NativeCrypto.getVersion() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
+        ) {
+            map.put("Signature.NONEwithECDSA",
+                "sun.security.ec.NativeECDSASignature$Raw");
+            map.put("Signature.SHA1withECDSA",
+                "sun.security.ec.NativeECDSASignature$SHA1");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.1", "SHA1withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.1", "SHA1withECDSA");
 
-        map.put("Signature.SHA224withECDSA",
-            "sun.security.ec.ECDSASignature$SHA224");
-        map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.1", "SHA224withECDSA");
-        map.put("Alg.Alias.Signature.1.2.840.10045.4.3.1", "SHA224withECDSA");
+            map.put("Signature.SHA224withECDSA",
+                "sun.security.ec.NativeECDSASignature$SHA224");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.1", "SHA224withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.1", "SHA224withECDSA");
 
-        map.put("Signature.SHA256withECDSA",
-            "sun.security.ec.ECDSASignature$SHA256");
-        map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.2", "SHA256withECDSA");
-        map.put("Alg.Alias.Signature.1.2.840.10045.4.3.2", "SHA256withECDSA");
+            map.put("Signature.SHA256withECDSA",
+                "sun.security.ec.NativeECDSASignature$SHA256");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.2", "SHA256withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.2", "SHA256withECDSA");
 
-        map.put("Signature.SHA384withECDSA",
-            "sun.security.ec.ECDSASignature$SHA384");
-        map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.3", "SHA384withECDSA");
-        map.put("Alg.Alias.Signature.1.2.840.10045.4.3.3", "SHA384withECDSA");
+            map.put("Signature.SHA384withECDSA",
+                "sun.security.ec.NativeECDSASignature$SHA384");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.3", "SHA384withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.3", "SHA384withECDSA");
 
-        map.put("Signature.SHA512withECDSA",
-            "sun.security.ec.ECDSASignature$SHA512");
-        map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.4", "SHA512withECDSA");
-        map.put("Alg.Alias.Signature.1.2.840.10045.4.3.4", "SHA512withECDSA");
+            map.put("Signature.SHA512withECDSA",
+                "sun.security.ec.NativeECDSASignature$SHA512");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.4", "SHA512withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.4", "SHA512withECDSA");
+        } else {
+            map.put("Signature.NONEwithECDSA",
+                "sun.security.ec.ECDSASignature$Raw");
+            map.put("Signature.SHA1withECDSA",
+                "sun.security.ec.ECDSASignature$SHA1");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.1", "SHA1withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.1", "SHA1withECDSA");
+
+            map.put("Signature.SHA224withECDSA",
+                "sun.security.ec.ECDSASignature$SHA224");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.1", "SHA224withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.1", "SHA224withECDSA");
+
+            map.put("Signature.SHA256withECDSA",
+                "sun.security.ec.ECDSASignature$SHA256");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.2", "SHA256withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.2", "SHA256withECDSA");
+
+            map.put("Signature.SHA384withECDSA",
+                "sun.security.ec.ECDSASignature$SHA384");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.3", "SHA384withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.3", "SHA384withECDSA");
+
+            map.put("Signature.SHA512withECDSA",
+                "sun.security.ec.ECDSASignature$SHA512");
+            map.put("Alg.Alias.Signature.OID.1.2.840.10045.4.3.4", "SHA512withECDSA");
+            map.put("Alg.Alias.Signature.1.2.840.10045.4.3.4", "SHA512withECDSA");
+        }
 
         String ecKeyClasses = "java.security.interfaces.ECPublicKey" +
                 "|java.security.interfaces.ECPrivateKey";
