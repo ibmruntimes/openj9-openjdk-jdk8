@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,7 +21,6 @@
  *
  * ===========================================================================
  */
-
 package jdk.crypto.jniprovider;
 
 import java.security.*;
@@ -60,46 +59,82 @@ public class NativeCrypto {
     private static final boolean traceEnabled = Boolean.parseBoolean(
             GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace", "false"));
 
+    private static final class InstanceHolder {
+        static final NativeCrypto instance = new NativeCrypto();
+    }
+
     //ossl_ver will be either:
     // -1 : library load failed
     // or one of the OPENSSL_VERSION_x_x_x constants
-    private static final long ossl_ver = AccessController.doPrivileged(
-            (PrivilegedAction<Long>) () -> {
-            long osslVersion;
-            try {
-                System.loadLibrary("jncrypto"); // check for native library
-                // load OpenSSL crypto library dynamically.
-                osslVersion = loadCrypto(traceEnabled);
-                if (traceEnabled && (osslVersion != -1)) {
+    private final long ossl_ver;
+
+    private final boolean isOpenSSLFIPS;
+
+    @SuppressWarnings("restricted")
+    private static long loadCryptoLibraries() {
+        long osslVersion;
+
+        try {
+            // Load jncrypto JNI library.
+            System.loadLibrary("jncrypto");
+
+            // Get user-specified OpenSSL library to use, if available.
+            String nativeLibName =
+                    GetPropertyAction.privilegedGetProperty("jdk.native.openssl.lib", "");
+
+            // Get the JDK location.
+            String javaHome = System.getProperty("java.home");
+
+            // Load OpenSSL crypto library dynamically.
+            osslVersion = loadCrypto(traceEnabled, nativeLibName, javaHome);
+            if (osslVersion != -1) {
+                if (traceEnabled) {
                     System.err.println("Native crypto library load succeeded - using native crypto library.");
                 }
-            } catch (UnsatisfiedLinkError usle) {
-                if (traceEnabled) {
-                    System.err.println("UnsatisfiedLinkError: Failure attempting to load jncrypto JNI library");
-                    System.err.println("Warning: Native crypto library load failed." +
-                            " Using Java crypto implementation.");
+            } else {
+                if (!nativeLibName.isEmpty()) {
+                    throw new RuntimeException(nativeLibName + " is not available, crypto libraries are not loaded");
                 }
-                 // signal load failure
-                osslVersion = -1;
             }
-
-            return osslVersion;
-        }).longValue();
-
-    private static final boolean isOpenSSLFIPS = (ossl_ver != -1) && isOpenSSLFIPS();
-
-    /**
-     * Return the OpenSSL version. It will return -1 if the library isn't
-     * successfully loaded.
-     *
-     * @return the OpenSSL library version or -1, if not loaded.
-     */
-    public static final long getVersion() {
-        return ossl_ver;
+        } catch (UnsatisfiedLinkError usle) {
+            if (traceEnabled) {
+                System.err.println("UnsatisfiedLinkError: Failure attempting to load jncrypto JNI library");
+                System.err.println("Warning: Native crypto library load failed." +
+                        " Using Java crypto implementation.");
+            }
+            // Signal load failure.
+            osslVersion = -1;
+        }
+        return osslVersion;
     }
 
-    public static final boolean isLoaded() {
-        return getVersion() >= 0;
+    @SuppressWarnings("removal")
+    private NativeCrypto() {
+        ossl_ver = AccessController.doPrivileged((PrivilegedAction<Long>) () -> loadCryptoLibraries()).longValue();
+        if (ossl_ver != -1) {
+            isOpenSSLFIPS = isOpenSSLFIPS();
+        } else {
+            isOpenSSLFIPS = false;
+        }
+    }
+
+    /**
+     * Check whether the native crypto libraries are loaded successfully.
+     *
+     * @return whether the native crypto libraries have been loaded successfully
+     */
+    public static final boolean isAllowedAndLoaded() {
+        return getVersionIfAvailable() >= 0;
+    }
+
+    /**
+     * Return the OpenSSL version.
+     * The libraries are to be loaded for the first reference of InstanceHolder.instance.
+     *
+     * @return the OpenSSL library version if it is available
+     */
+    public static final long getVersionIfAvailable() {
+        return InstanceHolder.instance.ossl_ver;
     }
 
     /**
@@ -152,7 +187,7 @@ public class NativeCrypto {
              * native crypto library is loaded successfully. Otherwise, issue a warning
              * message and fall back to the built-in java crypto implementation.
              */
-            if (isLoaded()) {
+            if (isAllowedAndLoaded()) {
                 if (satisfied) {
                     if (traceEnabled) {
                         System.err.println(name + " - using native crypto library.");
@@ -188,8 +223,8 @@ public class NativeCrypto {
         return traceEnabled;
     }
 
-    private NativeCrypto() {
-        //empty
+    public static final boolean isOpenSSLFIPSVersion() {
+        return InstanceHolder.instance.isOpenSSLFIPS;
     }
 
     /**
@@ -202,8 +237,8 @@ public class NativeCrypto {
      */
     public static final boolean isAlgorithmAvailable(String algorithm) {
         boolean isAlgorithmAvailable = false;
-        if (isLoaded()) {
-            if (isOpenSSLFIPS) {
+        if (isAllowedAndLoaded()) {
+            if (isOpenSSLFIPSVersion()) {
                 switch (algorithm) {
                 case "MD5":
                     // not available
@@ -237,13 +272,13 @@ public class NativeCrypto {
 
     @CallerSensitive
     public static NativeCrypto getNativeCrypto() {
-
         ClassLoader callerClassLoader = Reflection.getCallerClass().getClassLoader();
 
-        if ((callerClassLoader != null) && (callerClassLoader != VM.getVMLangAccess().getExtClassLoader())) {
-            throw new SecurityException("NativeCrypto");
+        if ((callerClassLoader == null) || (callerClassLoader == VM.getVMLangAccess().getExtClassLoader())) {
+            return InstanceHolder.instance;
         }
-        return new NativeCrypto();
+
+        throw new SecurityException("NativeCrypto");
     }
 
     public void createECKeyCleaner(Object owner, long key) {
@@ -255,13 +290,17 @@ public class NativeCrypto {
         });
     }
 
-    /* Native digest interfaces */
+    /* OpenSSL utility interfaces. */
 
-    private static final native long loadCrypto(boolean trace);
+    private static final native long loadCrypto(boolean trace,
+                                                String libName,
+                                                String javaHome);
 
     public static final native boolean isMD5Available();
 
     private static final native boolean isOpenSSLFIPS();
+
+    /* Native digest interfaces. */
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
@@ -311,7 +350,7 @@ public class NativeCrypto {
                                             byte[] output,
                                             int outputOffset);
 
-    /* Native GCM interfaces */
+    /* Native GCM interfaces. */
 
     public final native int GCMEncrypt(long context,
                                        byte[] key,
@@ -345,7 +384,7 @@ public class NativeCrypto {
                                        boolean newIVLen,
                                        boolean newKeyLen);
 
-    /* Native RSA interfaces */
+    /* Native RSA interfaces. */
     public final native long createRSAPublicKey(byte[] n,
                                                 int nLen,
                                                 byte[] e,
@@ -381,7 +420,7 @@ public class NativeCrypto {
                                   byte[] m,
                                   long RSAPublicKey);
 
-    /* Native EC interfaces */
+    /* Native EC interfaces. */
     public final native int ECGenerateKeyPair(long key,
                                               byte[] x,
                                               int xLen,

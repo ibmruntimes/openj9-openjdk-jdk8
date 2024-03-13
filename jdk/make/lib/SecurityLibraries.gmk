@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 #
 
@@ -315,8 +315,7 @@ ifeq ($(WITH_OPENSSL), yes)
     $(eval $(call SetupNativeCompilation,BUILD_JNCRYPTO, \
         LIBRARY := jncrypto, \
         OUTPUT_DIR := $(INSTALL_LIBRARIES_HERE), \
-        SRC := $(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider \
-               $(SRC_ROOT)/closed/adds/jdk/src/$(OPENJDK_TARGET_OS_API_DIR)/native/jdk/crypto/jniprovider, \
+        SRC := $(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider, \
         LANG := C, \
         OPTIMIZATION := LOW, \
         CFLAGS := $(CFLAGS_JDKLIB) \
