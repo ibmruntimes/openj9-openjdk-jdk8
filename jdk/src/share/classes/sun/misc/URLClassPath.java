@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 1997, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 1997, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -81,6 +81,7 @@ public class URLClassPath {
     private static final boolean DISABLE_ACC_CHECKING;
     private static final boolean DISABLE_CP_URL_CHECK;
     private static final boolean DEBUG_CP_URL_CHECK;
+    private static final boolean DISABLE_JAR_INDEX;    //OpenJ9-shared_classes_misc
 
     static {
         JAVA_VERSION = java.security.AccessController.doPrivileged(
@@ -103,6 +104,10 @@ public class URLClassPath {
 
         DISABLE_CP_URL_CHECK = p != null ? p.equals("true") || p.isEmpty() : false;
         DEBUG_CP_URL_CHECK = "debug".equals(p);
+
+        p = AccessController.doPrivileged(                                          //OpenJ9-shared_classes_misc
+            new GetPropertyAction("com.ibm.oti.shared.disableJarIndex"));           //OpenJ9-shared_classes_misc
+        DISABLE_JAR_INDEX = p != null ? p.equals("true") || p.isEmpty() : false;    //OpenJ9-shared_classes_misc
     }
 
     /* The original search path of URLs. */
@@ -1322,6 +1327,39 @@ public class URLClassPath {
             }
 
             ensureOpen();
+
+            if (usingSharedClasses && !DISABLE_JAR_INDEX) {                                               //OpenJ9-shared_classes_misc
+                /* If usingSharedClasses is true, ensureOpen() does not use and set jar index.            //OpenJ9-shared_classes_misc
+                 * If usingSharedClasses is false, ensureOpen() uses and sets jar index (if it exists).   //OpenJ9-shared_classes_misc
+                 * Go through jar index here so that class path in jar index is searched.                 //OpenJ9-shared_classes_misc
+                 */                                                                                       //OpenJ9-shared_classes_misc
+                JarIndex localIndex = JarIndex.getJarIndex(jar, metaIndex);                               //OpenJ9-shared_classes_misc
+                if (localIndex != null) {                                                                 //OpenJ9-shared_classes_misc
+                    String[] jarfiles = localIndex.getJarFiles();                                         //OpenJ9-shared_classes_misc
+                    URL[] urls = new URL[jarfiles.length];                                                //OpenJ9-shared_classes_misc
+                    int count = 0;                                                                        //OpenJ9-shared_classes_misc
+                    for (int i = 0; i < jarfiles.length; i++) {                                           //OpenJ9-shared_classes_misc
+                        try {                                                                             //OpenJ9-shared_classes_misc
+                            URL jarURL = new URL(csu, jarfiles[i]);                                       //OpenJ9-shared_classes_misc
+                            urls[count] = jarURL;                                                         //OpenJ9-shared_classes_misc
+                            count++;                                                                      //OpenJ9-shared_classes_misc
+                        } catch (MalformedURLException e) {                                               //OpenJ9-shared_classes_misc
+                            continue;                                                                     //OpenJ9-shared_classes_misc
+                        }                                                                                 //OpenJ9-shared_classes_misc
+                    }                                                                                     //OpenJ9-shared_classes_misc
+                    if (count > 0) {                                                                      //OpenJ9-shared_classes_misc
+                        urls = Arrays.copyOf(urls, count);                                                //OpenJ9-shared_classes_misc
+                    } else {                                                                              //OpenJ9-shared_classes_misc
+                        urls = null;                                                                      //OpenJ9-shared_classes_misc
+                    }                                                                                     //OpenJ9-shared_classes_misc
+                    /*                                                                                    //OpenJ9-shared_classes_misc
+                     * If jar index exists, class path in manifest is ignored, directly return here.      //OpenJ9-shared_classes_misc
+                     * (See the check of index != null at the beginning of this function)                 //OpenJ9-shared_classes_misc
+                     */                                                                                   //OpenJ9-shared_classes_misc
+                    return urls;                                                                          //OpenJ9-shared_classes_misc
+                }                                                                                         //OpenJ9-shared_classes_misc
+            }                                                                                             //OpenJ9-shared_classes_misc
+
             parseExtensionsDependencies();
 
             if (SharedSecrets.javaUtilJarAccess().jarFileHasClassPathAttribute(jar)) { // Only get manifest when necessary
