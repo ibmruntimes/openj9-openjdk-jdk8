@@ -900,6 +900,7 @@ WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
+OPENJ9_ENABLE_JFR
 HEALTHCENTER_JAR
 OPENJ9_ENABLE_DEMOS
 OPENJ9_ENABLE_DDR
@@ -1056,6 +1057,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -1099,6 +1101,7 @@ enable_cuda
 enable_ddr
 enable_demos
 with_healthcenter
+enable_jfr
 enable_jitserver
 enable_openjdk_methodhandles
 enable_warnings_as_errors_omr
@@ -1122,7 +1125,6 @@ enable_headful
 enable_hotspot_test_in_build
 with_cacerts_file
 enable_unlimited_crypto
-enable_jfr
 with_milestone
 with_update_version
 with_user_release_suffix
@@ -1329,6 +1331,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1581,6 +1584,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1718,7 +1730,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1871,6 +1883,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1917,6 +1930,7 @@ Optional Features:
   --enable-cuda           enable CUDA support [disabled]
   --enable-ddr            enable DDR support [disabled]
   --enable-demos          include demos in jdk image [disabled]
+  --enable-jfr            enable JFR support [platform dependent]
   --enable-jitserver      enable JITServer support [disabled]
   --enable-openjdk-methodhandles
                           enable support for OpenJDK MethodHandles [disabled]
@@ -4558,7 +4572,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -4615,6 +4629,8 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4625,7 +4641,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1709065899
+DATE_WHEN_GENERATED=1711570237
 
 ###############################################################################
 #
@@ -16641,6 +16657,39 @@ $as_echo "$with_healthcenter [$healthcenter_jar]" >&6; }
 
 fi
 
+
+
+
+  # Check whether --enable-jfr was given.
+if test "${enable_jfr+set}" = set; then :
+  enableval=$enable_jfr;
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jfr" >&5
+$as_echo_n "checking for jfr... " >&6; }
+  OPENJ9_ENABLE_JFR=false
+  if test "x$enable_jfr" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_JFR=true
+  elif test "x$enable_jfr" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_jfr" = x ; then
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
+$as_echo "yes (default)" >&6; }
+        OPENJ9_ENABLE_JFR=true
+        ;;
+      *)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+        ;;
+    esac
+  else
+    as_fn_error $? "--enable-jfr accepts no argument" "$LINENO" 5
+  fi
 
 
 

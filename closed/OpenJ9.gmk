@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -180,6 +180,13 @@ else
   SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
 endif
 
+# Adjust JFR enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_JFR))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_jfr)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_jfr)
+endif
+
 # Adjust JITServer enablement flags.
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
   FEATURE_SED_SCRIPT += $(call SedEnable,opt_jitserver)
@@ -348,6 +355,12 @@ ifneq (,$(CCACHE))
   CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
   CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
 endif # CCACHE
+
+ifeq (true,$(OPENJ9_ENABLE_JFR))
+  CMAKE_ARGS += -DJ9VM_OPT_JFR=ON
+else # OPENJ9_ENABLE_JFR
+  CMAKE_ARGS += -DJ9VM_OPT_JFR=OFF
+endif # OPENJ9_ENABLE_JFR
 
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
   CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=ON
