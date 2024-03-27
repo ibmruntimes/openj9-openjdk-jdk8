@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -45,6 +45,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_DEMOS
   OPENJ9_CONFIGURE_HEALTHCENTER
+  OPENJ9_CONFIGURE_JFR
   OPENJ9_CONFIGURE_JITSERVER
   OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
   OPENJ9_CONFIGURE_WARNINGS
@@ -289,6 +290,32 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
       ;;
   esac
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_JFR],
+[
+  AC_ARG_ENABLE([jfr], [AS_HELP_STRING([--enable-jfr], [enable JFR support @<:@platform dependent@:>@])])
+  AC_MSG_CHECKING([for jfr])
+  OPENJ9_ENABLE_JFR=false
+  if test "x$enable_jfr" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_JFR=true
+  elif test "x$enable_jfr" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_jfr" = x ; then
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64)
+        AC_MSG_RESULT([yes (default)])
+        OPENJ9_ENABLE_JFR=true
+        ;;
+      *)
+        AC_MSG_RESULT([no (default)])
+        ;;
+    esac
+  else
+    AC_MSG_ERROR([--enable-jfr accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_JFR)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],

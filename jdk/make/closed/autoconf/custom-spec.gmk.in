@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -59,6 +59,7 @@ OPENJ9_ENABLE_CRIU_SUPPORT          := @OPENJ9_ENABLE_CRIU_SUPPORT@
 OPENJ9_ENABLE_DDR                   := @OPENJ9_ENABLE_DDR@
 OPENJ9_ENABLE_DEMOS                 := @OPENJ9_ENABLE_DEMOS@
 OPENJ9_ENABLE_INLINE_TYPES          := @OPENJ9_ENABLE_INLINE_TYPES@
+OPENJ9_ENABLE_JFR                   := @OPENJ9_ENABLE_JFR@
 OPENJ9_ENABLE_JITSERVER             := @OPENJ9_ENABLE_JITSERVER@
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES := @OPENJ9_ENABLE_OPENJDK_METHODHANDLES@
 
