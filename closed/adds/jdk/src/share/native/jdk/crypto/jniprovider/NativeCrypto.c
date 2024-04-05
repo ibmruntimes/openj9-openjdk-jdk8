@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -172,6 +172,7 @@ static OSSL_CRYPTO_THREADID_set_callback_t* OSSL_CRYPTO_THREADID_set_callback = 
 static OSSL_CRYPTO_set_locking_callback_t* OSSL_CRYPTO_set_locking_callback = NULL;
 
 /* Define pointers for OpenSSL functions to handle Message Digest algorithms. */
+OSSL_sha_t* OSSL_md5;
 OSSL_sha_t* OSSL_sha1;
 OSSL_sha_t* OSSL_sha256;
 OSSL_sha_t* OSSL_sha224;
@@ -397,6 +398,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     }
 
     /* Load the function symbols for OpenSSL Message Digest algorithms. */
+    OSSL_md5 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_md5");
     OSSL_sha1 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha1");
     OSSL_sha256 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha256");
     OSSL_sha224 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha224");
@@ -745,6 +747,18 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM * vm, void * reserved)
     crypto_library = NULL;
 }
 
+/* Check whether MD5 is available.
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    isMD5Available
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_isMD5Available
+  (JNIEnv *env, jclass thisClass)
+{
+    return (NULL != OSSL_md5) ? JNI_TRUE : JNI_FALSE;
+}
+
 /* Create Digest context
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
@@ -759,6 +773,9 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
     OpenSSLMDContext *context = NULL;
 
     switch (algoIdx) {
+        case jdk_crypto_jniprovider_NativeCrypto_MD5:
+            digestAlg = (*OSSL_md5)();
+            break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA1_160:
             digestAlg = (*OSSL_sha1)();
             break;
