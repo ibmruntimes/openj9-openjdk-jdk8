@@ -322,10 +322,19 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
 [
   AC_ARG_ENABLE([jitserver], [AS_HELP_STRING([--enable-jitserver], [enable JITServer support @<:@disabled@:>@])])
 
+  case "$OPENJ9_PLATFORM_CODE" in
+    xa64|xl64|xr64|xz64)
+      jitserver_supported=yes
+      ;;
+    *)
+      jitserver_supported=no
+      ;;
+  esac
+
   AC_MSG_CHECKING([for jitserver])
   OPENJ9_ENABLE_JITSERVER=false
   if test "x$enable_jitserver" = xyes ; then
-    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+    if test "x$jitserver_supported" = xyes ; then
       AC_MSG_RESULT([yes (explicitly enabled)])
       OPENJ9_ENABLE_JITSERVER=true
     else
@@ -335,15 +344,10 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
   elif test "x$enable_jitserver" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_jitserver" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xr64|xz64)
-        AC_MSG_RESULT([yes (default)])
-        OPENJ9_ENABLE_JITSERVER=true
-        ;;
-      *)
-        AC_MSG_RESULT([no (default)])
-        ;;
-    esac
+    if test "x$jitserver_supported" = xyes ; then
+      OPENJ9_ENABLE_JITSERVER=true
+    fi
+    AC_MSG_RESULT([$jitserver_supported (default)])
   else
     AC_MSG_ERROR([--enable-jitserver accepts no argument])
   fi

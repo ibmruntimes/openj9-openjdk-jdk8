@@ -4641,7 +4641,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1711570237
+DATE_WHEN_GENERATED=1712682033
 
 ###############################################################################
 #
@@ -16699,11 +16699,20 @@ if test "${enable_jitserver+set}" = set; then :
 fi
 
 
+  case "$OPENJ9_PLATFORM_CODE" in
+    xa64|xl64|xr64|xz64)
+      jitserver_supported=yes
+      ;;
+    *)
+      jitserver_supported=no
+      ;;
+  esac
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jitserver" >&5
 $as_echo_n "checking for jitserver... " >&6; }
   OPENJ9_ENABLE_JITSERVER=false
   if test "x$enable_jitserver" = xyes ; then
-    if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+    if test "x$jitserver_supported" = xyes ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
 $as_echo "yes (explicitly enabled)" >&6; }
       OPENJ9_ENABLE_JITSERVER=true
@@ -16716,17 +16725,11 @@ $as_echo "no (unsupported platform)" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
 $as_echo "no (explicitly disabled)" >&6; }
   elif test "x$enable_jitserver" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xr64|xz64)
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (default)" >&5
-$as_echo "yes (default)" >&6; }
-        OPENJ9_ENABLE_JITSERVER=true
-        ;;
-      *)
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
-$as_echo "no (default)" >&6; }
-        ;;
-    esac
+    if test "x$jitserver_supported" = xyes ; then
+      OPENJ9_ENABLE_JITSERVER=true
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $jitserver_supported (default)" >&5
+$as_echo "$jitserver_supported (default)" >&6; }
   else
     as_fn_error $? "--enable-jitserver accepts no argument" "$LINENO" 5
   fi
