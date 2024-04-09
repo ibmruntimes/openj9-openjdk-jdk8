@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,6 +43,7 @@ public class NativeCrypto {
     public static final int SHA2_256 = 2;
     public static final int SHA5_384 = 3;
     public static final int SHA5_512 = 4;
+    public static final int MD5 = 5;
 
     /* Define constants for the EC field types. */
     public static final int ECField_Fp = 0;
@@ -211,6 +212,8 @@ public class NativeCrypto {
     /* Native digest interfaces */
 
     private static final native long loadCrypto(boolean trace);
+
+    public static final native boolean isMD5Available();
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
