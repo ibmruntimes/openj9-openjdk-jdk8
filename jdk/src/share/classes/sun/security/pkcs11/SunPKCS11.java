@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -989,6 +989,10 @@ public final class SunPKCS11 extends AuthProvider {
                 m(CKM_SSL3_MASTER_KEY_DERIVE, CKM_TLS_MASTER_KEY_DERIVE,
                     CKM_SSL3_MASTER_KEY_DERIVE_DH,
                     CKM_TLS_MASTER_KEY_DERIVE_DH));
+        d(KG, "SunTlsExtendedMasterSecret",
+                    "sun.security.pkcs11.P11TlsMasterSecretGenerator",
+                m(CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE,
+                    CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH));
         d(KG, "SunTls12MasterSecret",
                 "sun.security.pkcs11.P11TlsMasterSecretGenerator",
             m(CKM_TLS12_MASTER_KEY_DERIVE, CKM_TLS12_MASTER_KEY_DERIVE_DH));
@@ -1303,7 +1307,8 @@ public final class SunPKCS11 extends AuthProvider {
                     return new P11TlsRsaPremasterSecretGenerator(
                         token, algorithm, mechanism);
                 } else if (algorithm == "SunTlsMasterSecret"
-                        || algorithm == "SunTls12MasterSecret") {
+                        || algorithm == "SunTls12MasterSecret"
+                        || algorithm == "SunTlsExtendedMasterSecret") {
                     return new P11TlsMasterSecretGenerator(
                         token, algorithm, mechanism);
                 } else if (algorithm == "SunTlsKeyMaterial"

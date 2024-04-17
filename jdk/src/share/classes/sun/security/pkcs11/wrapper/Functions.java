@@ -45,6 +45,12 @@
  *  POSSIBILITY  OF SUCH DAMAGE.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11.wrapper;
 
 import java.math.BigInteger;
@@ -1098,6 +1104,10 @@ public class Functions {
         addMech(CKM_VENDOR_DEFINED,             "CKM_VENDOR_DEFINED");
 
         addMech(CKM_NSS_TLS_PRF_GENERAL,        "CKM_NSS_TLS_PRF_GENERAL");
+        addMech(CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE,
+                                    "CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE");
+        addMech(CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH,
+                                    "CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH");
 
         addMech(PCKM_SECURERANDOM,              "SecureRandom");
         addMech(PCKM_KEYSTORE,                  "KeyStore");
