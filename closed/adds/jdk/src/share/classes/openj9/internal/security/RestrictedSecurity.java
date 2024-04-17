@@ -53,10 +53,12 @@ public final class RestrictedSecurity {
 
     private static final Debug debug = Debug.getInstance("semerufips");
 
-    // Restricted security mode enable check, only supported on Linux x64.
+    // Restricted security mode enable check.
     private static final boolean userEnabledFIPS;
     private static boolean isFIPSSupported;
     private static boolean isFIPSEnabled;
+
+    private static final boolean allowSetProperties;
 
     private static final boolean isNSSSupported;
     private static final boolean isOpenJCEPlusSupported;
@@ -71,6 +73,8 @@ public final class RestrictedSecurity {
     private static String userSecurityID;
 
     private static RestrictedSecurityProperties restricts;
+
+    private static final Set<String> unmodifiableProperties = new HashSet<>();
 
     private static final Map<String, List<String>> supportedPlatformsNSS = new HashMap<>();
     private static final Map<String, List<String>> supportedPlatformsOpenJCEPlus = new HashMap<>();
@@ -90,7 +94,8 @@ public final class RestrictedSecurity {
                         return new String[] { System.getProperty("semeru.fips"),
                                 System.getProperty("semeru.customprofile"),
                                 System.getProperty("os.name"),
-                                System.getProperty("os.arch") };
+                                System.getProperty("os.arch"),
+                                System.getProperty("semeru.fips.allowsetproperties") };
                     }
                 });
 
@@ -129,6 +134,7 @@ public final class RestrictedSecurity {
         isFIPSSupported = isNSSSupported;
 
         userEnabledFIPS = Boolean.parseBoolean(props[0]);
+        allowSetProperties = Boolean.parseBoolean(props[4]);
 
         if (userEnabledFIPS) {
             if (isFIPSSupported) {
@@ -355,6 +361,53 @@ public final class RestrictedSecurity {
     }
 
     /**
+     * Check whether a security property can be set.
+     *
+     * A security property that is set by a RestrictedSecurity profile,
+     * while FIPS security mode is enabled, cannot be reset programmatically.
+     *
+     * Every time an attempt to set a security property is made, a check is
+     * performed. If the above scenario holds true, a SecurityException is
+     * thrown.
+     *
+     * One can override this behaviour and allow the user to set any security
+     * property through the use of {@code -Dsemeru.fips.allowsetproperties=true}.
+     *
+     * @param key the security property that the user wants to set
+     * @throws SecurityException
+     *         if the security property is set by the profile and cannot
+     *         be altered
+     */
+    public static void checkSetSecurityProperty(String key) {
+        if (debug != null) {
+            debug.println("RestrictedSecurity: Checking whether property '"
+                    + key + "' can be set.");
+        }
+
+        /*
+         * Only disallow setting of security properties that are set by the active profile,
+         * if FIPS has been enabled.
+         *
+         * Allow any change, if the 'semeru.fips.allowsetproperties' flag is set to true.
+         */
+        if (unmodifiableProperties.contains(key)) {
+            if (debug != null) {
+                debug.println("RestrictedSecurity: Property '" + key + "' cannot be set.");
+                debug.println("If you want to override the check and allow all security"
+                        + "properties to be set, use '-Dsemeru.fips.allowsetproperties=true'.");
+                debug.println("BEWARE: You might not be FIPS compliant if you select to override!");
+            }
+            throw new SecurityException("FIPS mode: User-specified '" + key
+                    + "' cannot override profile definition.");
+        }
+
+        if (debug != null) {
+            debug.println("RestrictedSecurity: Property '"
+                    + key + "' can be set without issue.");
+        }
+    }
+
+    /**
      * Remove the security providers and only add restricted security providers.
      *
      * @param props the java.security properties
@@ -455,10 +508,10 @@ public final class RestrictedSecurity {
         // JDK properties name as key, restricted security properties value as value.
         propsMapping.put("jdk.tls.disabledNamedCurves", restricts.jdkTlsDisabledNamedCurves);
         propsMapping.put("jdk.tls.disabledAlgorithms", restricts.jdkTlsDisabledAlgorithms);
-        propsMapping.put("jdk.tls.ephemeralDHKeySize", restricts.jdkTlsDphemeralDHKeySize);
+        propsMapping.put("jdk.tls.ephemeralDHKeySize", restricts.jdkTlsEphemeralDHKeySize);
         propsMapping.put("jdk.tls.legacyAlgorithms", restricts.jdkTlsLegacyAlgorithms);
         propsMapping.put("jdk.certpath.disabledAlgorithms", restricts.jdkCertpathDisabledAlgorithms);
-        propsMapping.put("jdk.security.legacyAlgorithm", restricts.jdkSecurityLegacyAlgorithm);
+        propsMapping.put("jdk.security.legacyAlgorithms", restricts.jdkSecurityLegacyAlgorithms);
 
         for (Map.Entry<String, String> entry : propsMapping.entrySet()) {
             String jdkPropsName = entry.getKey();
@@ -467,6 +520,11 @@ public final class RestrictedSecurity {
             String propsOldValue = props.getProperty(jdkPropsName);
             if (isNullOrBlank(propsOldValue)) {
                 propsOldValue = "";
+            }
+
+            if ((propsNewValue != null) && userEnabledFIPS && !allowSetProperties) {
+                // Add to set of properties set by the active profile.
+                unmodifiableProperties.add(jdkPropsName);
             }
 
             if (!isNullOrBlank(propsNewValue)) {
@@ -568,10 +626,10 @@ public final class RestrictedSecurity {
         // Security properties.
         private String jdkTlsDisabledNamedCurves;
         private String jdkTlsDisabledAlgorithms;
-        private String jdkTlsDphemeralDHKeySize;
+        private String jdkTlsEphemeralDHKeySize;
         private String jdkTlsLegacyAlgorithms;
         private String jdkCertpathDisabledAlgorithms;
-        private String jdkSecurityLegacyAlgorithm;
+        private String jdkSecurityLegacyAlgorithms;
         private String keyStoreType;
         private String keyStore;
 
@@ -717,13 +775,13 @@ public final class RestrictedSecurity {
                     securityProps.getProperty(profileID + ".tls.disabledNamedCurves"));
             jdkTlsDisabledAlgorithms = parseProperty(
                     securityProps.getProperty(profileID + ".tls.disabledAlgorithms"));
-            jdkTlsDphemeralDHKeySize = parseProperty(
+            jdkTlsEphemeralDHKeySize = parseProperty(
                     securityProps.getProperty(profileID + ".tls.ephemeralDHKeySize"));
             jdkTlsLegacyAlgorithms = parseProperty(
                     securityProps.getProperty(profileID + ".tls.legacyAlgorithms"));
             jdkCertpathDisabledAlgorithms = parseProperty(
                     securityProps.getProperty(profileID + ".jce.certpath.disabledAlgorithms"));
-            jdkSecurityLegacyAlgorithm = parseProperty(
+            jdkSecurityLegacyAlgorithms = parseProperty(
                     securityProps.getProperty(profileID + ".jce.legacyAlgorithms"));
             keyStoreType = parseProperty(
                     securityProps.getProperty(profileID + ".keystore.type"));
@@ -1111,13 +1169,17 @@ public final class RestrictedSecurity {
         }
 
         /**
-         * Check if the input string is null. If null return "".
+         * Trim input string if not null.
          *
          * @param string the input string
-         * @return "" if the string is null
+         * @return the string trimmed or null
          */
         private static String parseProperty(String string) {
-            return (string != null) ? string.trim() : "";
+            if (string != null) {
+                string = string.trim();
+            }
+
+            return string;
         }
 
         /**
