@@ -46,6 +46,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * pkcs11wrapper.c
  * 18.05.2001
  *
@@ -604,6 +610,73 @@ jTls12MasterKeyDeriveParamToCKTls12MasterKeyDeriveParamPtr(JNIEnv *env,
     }
     return ckParamPtr;
 cleanup:
+    free(ckParamPtr);
+    return NULL;
+}
+
+/*
+ * Converts the Java CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS object to a
+ * CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS pointer.
+ *
+ * @param env - used to call JNI functions to get the Java classes and objects
+ * @param jParam - the Java CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS object to convert
+ * @param pLength - length of the allocated memory of the returned pointer
+ * @return pointer to the new CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS structure
+ */
+CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS_PTR
+jTlsExtendedMasterKeyDeriveParamToCKTlsExtendedMasterKeyDeriveParamPtr(JNIEnv *env,
+        jobject jParam, CK_ULONG *pLength)
+{
+    CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS_PTR ckParamPtr = NULL;
+    jclass jTlsExtendedMasterKeyDeriveParamsClass = NULL;
+    jfieldID fieldID = NULL;
+    jlong prfHashMechanism = 0L;
+    jobject pSessionHash = NULL;
+    if (NULL != pLength) {
+        *pLength = 0L;
+    }
+
+    // retrieve java values
+    jTlsExtendedMasterKeyDeriveParamsClass =
+            (*env)->FindClass(env, CLASS_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS);
+    if (NULL == jTlsExtendedMasterKeyDeriveParamsClass) {
+        return NULL;
+    }
+    fieldID = (*env)->GetFieldID(env,
+            jTlsExtendedMasterKeyDeriveParamsClass, "prfHashMechanism", "J");
+    if (NULL == fieldID) {
+        return NULL;
+    }
+    prfHashMechanism = (*env)->GetLongField(env, jParam, fieldID);
+    fieldID = (*env)->GetFieldID(env,
+            jTlsExtendedMasterKeyDeriveParamsClass, "pSessionHash", "[B");
+    if (NULL == fieldID) {
+        return NULL;
+    }
+    pSessionHash = (*env)->GetObjectField(env, jParam, fieldID);
+
+    // allocate memory for CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS pointer
+    ckParamPtr = calloc(1, sizeof(CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS));
+    if (NULL == ckParamPtr) {
+        throwOutOfMemoryError(env, 0);
+        return NULL;
+    }
+
+    // populate using java values
+    jByteArrayToCKByteArray(env, pSessionHash, &(ckParamPtr->pSessionHash),
+            &(ckParamPtr->ulSessionHashLen));
+    if ((*env)->ExceptionCheck(env)) {
+        goto cleanup;
+    }
+
+    ckParamPtr->prfHashMechanism = (CK_MECHANISM_TYPE) prfHashMechanism;
+
+    if (NULL != pLength) {
+        *pLength = sizeof(CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS);
+    }
+    return ckParamPtr;
+cleanup:
+    free(ckParamPtr->pSessionHash);
     free(ckParamPtr);
     return NULL;
 }
@@ -1417,6 +1490,11 @@ CK_VOID_PTR jMechParamToCKMechParamPtrSlow(JNIEnv *env, jobject jParam,
         case CKM_TLS12_MASTER_KEY_DERIVE_DH:
             ckpParamPtr = jTls12MasterKeyDeriveParamToCKTls12MasterKeyDeriveParamPtr(env, jParam,
                     ckpLength);
+            break;
+        case CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE:
+        case CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH:
+            ckpParamPtr = jTlsExtendedMasterKeyDeriveParamToCKTlsExtendedMasterKeyDeriveParamPtr(
+                    env, jParam, ckpLength);
             break;
         case CKM_TLS_PRF:
         case CKM_NSS_TLS_PRF_GENERAL:

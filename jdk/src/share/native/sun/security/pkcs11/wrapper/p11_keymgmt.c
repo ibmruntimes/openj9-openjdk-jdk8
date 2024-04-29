@@ -45,6 +45,12 @@
  *  POSSIBILITY  OF SUCH DAMAGE.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "pkcs11wrapper.h"
 
 #include <stdio.h>
@@ -895,6 +901,9 @@ JNIEXPORT jlong JNICALL Java_sun_security_pkcs11_wrapper_PKCS11_C_1DeriveKey
     case CKM_TLS12_MASTER_KEY_DERIVE:
         tls12CopyBackClientVersion(env, ckpMechanism, jMechanism);
         break;
+    case CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE:
+        tlsEmsCopyBackClientVersion(env, ckpMechanism, jMechanism);
+        break;
     case CKM_SSL3_KEY_AND_MAC_DERIVE:
     case CKM_TLS_KEY_AND_MAC_DERIVE:
         /* we must copy back the unwrapped key info to the jMechanism object */
@@ -1011,6 +1020,24 @@ void tls12CopyBackClientVersion(JNIEnv *env, CK_MECHANISM_PTR ckpMechanism,
         copyBackClientVersion(env, ckpMechanism, jMechanism,
                 ckTLS12MasterKeyDeriveParams->pVersion,
                 CLASS_TLS12_MASTER_KEY_DERIVE_PARAMS);
+    }
+}
+
+/*
+ * Copy back the client version information from the native
+ * structure to the Java object. This is only used for
+ * CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE mechanism when used
+ * for deriving a key.
+ */
+void tlsEmsCopyBackClientVersion(JNIEnv *env, CK_MECHANISM_PTR ckpMechanism,
+        jobject jMechanism)
+{
+    CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS *ckTLSEmsMasterKeyDeriveParams
+            = (CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS *)ckpMechanism->pParameter;
+    if (NULL_PTR != ckTLSEmsMasterKeyDeriveParams) {
+        copyBackClientVersion(env, ckpMechanism, jMechanism,
+                ckTLSEmsMasterKeyDeriveParams->pVersion,
+                CLASS_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS);
     }
 }
 

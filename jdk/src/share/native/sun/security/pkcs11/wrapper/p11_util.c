@@ -45,6 +45,12 @@
  *  POSSIBILITY  OF SUCH DAMAGE.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "pkcs11wrapper.h"
 
 #include <stdio.h>
@@ -300,6 +306,7 @@ void freeCKMechanismPtr(CK_MECHANISM_PTR mechPtr) {
      CK_SSL3_KEY_MAT_PARAMS* sslKmTmp;
      CK_TLS12_MASTER_KEY_DERIVE_PARAMS *tlsMkdTmp;
      CK_TLS12_KEY_MAT_PARAMS* tlsKmTmp;
+     CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS *tlsEmkdTmp = NULL;
 
      if (mechPtr != NULL) {
          TRACE2("DEBUG freeCKMechanismPtr: free pMech %p (mech 0x%lX)\n",
@@ -360,6 +367,13 @@ void freeCKMechanismPtr(CK_MECHANISM_PTR mechPtr) {
                      free(tlsMkdTmp->RandomInfo.pClientRandom);
                      free(tlsMkdTmp->RandomInfo.pServerRandom);
                      free(tlsMkdTmp->pVersion);
+                     break;
+                 case CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE:
+                 case CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH:
+                     tlsEmkdTmp = tmp;
+                     TRACE0("[ CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS ]\n");
+                     free(tlsEmkdTmp->pSessionHash);
+                     free(tlsEmkdTmp->pVersion);
                      break;
                  case CKM_TLS12_KEY_AND_MAC_DERIVE:
                      tlsKmTmp = tmp;
