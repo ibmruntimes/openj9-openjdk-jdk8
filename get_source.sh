@@ -136,6 +136,31 @@ process_options() {
 	local version=""
 
 	for arg in "$@" ; do
+		# temporarily handle openssl options that don't follow the general pattern
+		case "$arg" in
+			--openssl-repo=*)
+				# remove leading '-'
+				arg="${arg/--/-}"
+				;;
+			--openssl-version=*)
+				# map to -openssl-branch
+				version="${arg#*=}"
+				case "$version" in
+					1.0.2* | 1.1.*)
+						version="OpenSSL_${version//./_}"
+						;;
+					3.*)
+						version="openssl-$version"
+						;;
+					*)
+						;;
+				esac
+				arg=-openssl-branch=$version
+				;;
+			*)
+				;;
+		esac
+
 		if [[ "$arg" =~ -([A-Za-z0-9]+)-(branch|reference|repo|sha)=.* ]] ; then
 			local key="${BASH_REMATCH[1]}"
 			if [ -z "${source_folder[${key}]}" ] ; then
