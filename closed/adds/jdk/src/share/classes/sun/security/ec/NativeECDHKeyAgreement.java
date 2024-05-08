@@ -25,26 +25,23 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
 package sun.security.ec;
 
-import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.ProviderException;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,8 +51,6 @@ import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
 import jdk.crypto.jniprovider.NativeCrypto;
-
-import sun.security.util.NamedCurve;
 
 /**
  * Native KeyAgreement implementation for ECDH.
@@ -89,9 +84,11 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
     public NativeECDHKeyAgreement() {
     }
 
-    @Override
-    protected void engineInit(Key key, SecureRandom random)
-            throws InvalidKeyException {
+    private void init(Key key)
+            throws InvalidKeyException, InvalidAlgorithmParameterException {
+        this.privateKey = null;
+        this.publicKey = null;
+
         if (!(key instanceof PrivateKey)) {
             throw new InvalidKeyException
                 ("Key must be an instance of PrivateKey");
@@ -100,14 +97,13 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         ECKey ecKey = ECKeyFactory.toECKey(key);
         if (ecKey instanceof ECPrivateKeyImpl) {
             this.privateKey = (ECPrivateKeyImpl) ecKey;
-            this.publicKey = null;
 
             ECParameterSpec params = this.privateKey.getParams();
             this.curve = NativeECUtil.getCurveName(params);
             if ((this.curve != null) && NativeECUtil.isCurveSupported(this.curve, params)) {
                 this.javaImplementation = null;
             } else {
-                this.initializeJavaImplementation(key, random);
+                this.initializeJavaImplementation(key);
             }
         } else {
             boolean absent = NativeECUtil.putCurveIfAbsent("ECKeyImpl", Boolean.FALSE);
@@ -117,7 +113,17 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                         " are supported by the native implementation, " +
                         "using Java crypto implementation for key agreement.");
             }
-            this.initializeJavaImplementation(key, random);
+            this.initializeJavaImplementation(key);
+        }
+    }
+
+    @Override
+    protected void engineInit(Key key, SecureRandom random)
+            throws InvalidKeyException {
+        try {
+            init(key);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidKeyException(e);
         }
     }
 
@@ -128,7 +134,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
             throw new InvalidAlgorithmParameterException
                         ("Parameters not supported");
         }
-        engineInit(key, random);
+        init(key);
     }
 
     @Override
@@ -147,14 +153,13 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
             throw new IllegalStateException
                 ("Only two party agreement supported, lastPhase must be true");
         }
-        if (!(key instanceof PublicKey)) {
+        if (!(key instanceof ECPublicKey)) {
             throw new InvalidKeyException
-                ("Key must be an instance of PublicKey");
+                ("Key must be a PublicKey with algorithm EC");
         }
-        /* attempt to translate the key if it is not an ECKey */
-        ECKey ecKey = ECKeyFactory.toECKey(key);
-        if (ecKey instanceof ECPublicKeyImpl) {
-            this.publicKey = (ECPublicKeyImpl) ecKey;
+
+        if (key instanceof ECPublicKeyImpl) {
+            this.publicKey = (ECPublicKeyImpl) key;
 
             int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
             this.secretLen = (keyLenBits + 7) >> 3;
@@ -168,7 +173,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                         " are supported by the native implementation, " +
                         "using Java crypto implementation for key agreement.");
             }
-            this.initializeJavaImplementation(this.privateKey, null);
+            this.initializeJavaImplementation(this.privateKey);
             return this.javaImplementation.engineDoPhase(key, lastPhase);
         }
     }
@@ -217,7 +222,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                         " is not supported by OpenSSL, using Java crypto implementation for preparing agreement.");
             }
             try {
-                this.initializeJavaImplementation(this.privateKey, null);
+                this.initializeJavaImplementation(this.privateKey);
                 this.javaImplementation.engineDoPhase(this.publicKey, true);
             } catch (InvalidKeyException e) {
                 /* should not happen */
@@ -263,10 +268,9 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
      * Initializes the java implementation.
      *
      * @param key the private key
-     * @param random source of randomness
      */
-    private void initializeJavaImplementation(Key key, SecureRandom random) throws InvalidKeyException {
+    private void initializeJavaImplementation(Key key) throws InvalidKeyException {
         this.javaImplementation = new ECDHKeyAgreement();
-        this.javaImplementation.engineInit(key, random);
+        this.javaImplementation.engineInit(key, null);
     }
 }
