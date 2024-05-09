@@ -51,6 +51,7 @@ public class NativeCrypto {
 
     public static final long OPENSSL_VERSION_1_0_0 = 0x1_00_00_000L;
     public static final long OPENSSL_VERSION_1_1_0 = 0x1_01_00_000L;
+    public static final long OPENSSL_VERSION_1_1_1 = 0x1_01_01_000L;
     public static final long OPENSSL_VERSION_3_0_0 = 0x3_00_00_000L;
 
     private static final boolean useNativeCrypto = Boolean.parseBoolean(
@@ -390,4 +391,16 @@ public class NativeCrypto {
                                       int id,
                                       int hashAlgorithm);
 
+    /* Native ECDSA interfaces. */
+    public final native int ECDSASign(long key,
+                                      byte[] digest,
+                                      int digestLen,
+                                      byte[] signature,
+                                      int sigLen);
+
+    public final native int ECDSAVerify(long key,
+                                        byte[] digest,
+                                        int digestLen,
+                                        byte[] signature,
+                                        int sigLen);
 }
