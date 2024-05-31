@@ -39,6 +39,7 @@ import java.security.PrivateKey;
 import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECParameterSpec;
@@ -64,10 +65,16 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
     private static final Map<String, Boolean> curveSupported = new ConcurrentHashMap<>();
 
     /* private key, if initialized */
-    private ECPrivateKeyImpl privateKey;
+    private ECPrivateKey privateKey;
+
+    /* pointer to native private key, if initialized */
+    private long nativePrivateKey;
 
     /* public key, non-null between doPhase() & generateSecret() only */
-    private ECPublicKeyImpl publicKey;
+    private ECPublicKey publicKey;
+
+    /* pointer to native public key, if initialized */
+    private long nativePublicKey;
 
     /* the type of EC curve */
     private String curve;
@@ -95,8 +102,18 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         }
         /* attempt to translate the key if it is not an ECKey */
         ECKey ecKey = ECKeyFactory.toECKey(key);
-        if (ecKey instanceof ECPrivateKeyImpl) {
-            this.privateKey = (ECPrivateKeyImpl) ecKey;
+        if (ecKey instanceof ECPrivateKey) {
+            ECPrivateKey ecPrivateKey = (ECPrivateKey) ecKey;
+            this.privateKey = ecPrivateKey;
+            this.nativePrivateKey = NativeECUtil.getPrivateKeyNativePtr(ecPrivateKey);
+            if (this.nativePrivateKey == -1) {
+                if (nativeCryptTrace) {
+                    System.err.println("Init: Could not create a pointer to a native private key."
+                            + " Using Java implementation.");
+                }
+                this.initializeJavaImplementation(key);
+                return;
+            }
 
             ECParameterSpec params = this.privateKey.getParams();
             this.curve = NativeECUtil.getCurveName(params);
@@ -109,8 +126,8 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
             boolean absent = NativeECUtil.putCurveIfAbsent("ECKeyImpl", Boolean.FALSE);
             /* only print the first time a curve is used */
             if (absent && nativeCryptTrace) {
-                System.err.println("Only ECPrivateKeyImpl and ECPublicKeyImpl" +
-                        " are supported by the native implementation, " +
+                System.err.println("Only ECPrivateKey" +
+                        " is supported by the native implementation, " +
                         "using Java crypto implementation for key agreement.");
             }
             this.initializeJavaImplementation(key);
@@ -158,24 +175,27 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 ("Key must be a PublicKey with algorithm EC");
         }
 
-        if (key instanceof ECPublicKeyImpl) {
-            this.publicKey = (ECPublicKeyImpl) key;
-
-            int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
-            this.secretLen = (keyLenBits + 7) >> 3;
-
-            return null;
-        } else {
-            boolean absent = NativeECUtil.putCurveIfAbsent("ECKeyImpl", Boolean.FALSE);
-            /* only print the first time a curve is used */
-            if (absent && nativeCryptTrace) {
-                System.err.println("Only ECPrivateKeyImpl and ECPublicKeyImpl" +
-                        " are supported by the native implementation, " +
-                        "using Java crypto implementation for key agreement.");
+        ECPublicKey ecKey = (ECPublicKey) key;
+        this.publicKey = ecKey;
+        this.nativePublicKey = NativeECUtil.getPublicKeyNativePtr(ecKey);
+        if (this.nativePublicKey == -1) {
+            if (nativeCryptTrace) {
+                System.err.println("DoPhase: Could not create a pointer to a native public key."
+                        + " Using Java implementation.");
             }
-            this.initializeJavaImplementation(this.privateKey);
-            return this.javaImplementation.engineDoPhase(key, lastPhase);
+            try {
+                this.initializeJavaImplementation(this.privateKey);
+                this.javaImplementation.engineDoPhase(ecKey, true);
+            } catch (InvalidKeyException e) {
+                /* should not happen */
+                throw new InternalError(e);
+            }
         }
+
+        int keyLenBits = this.publicKey.getParams().getCurve().getField().getFieldSize();
+        this.secretLen = (keyLenBits + 7) >> 3;
+
+        return null;
     }
 
     @Override
@@ -209,27 +229,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         if ((this.privateKey == null) || (this.publicKey == null)) {
             throw new IllegalStateException("Not initialized correctly");
         }
-        long nativePublicKey = this.publicKey.getNativePtr();
-        long nativePrivateKey = this.privateKey.getNativePtr();
-        if ((nativePublicKey == -1) || (nativePrivateKey == -1)) {
-            absent = NativeECUtil.putCurveIfAbsent(this.curve, Boolean.FALSE);
-            if (!absent) {
-                throw new ProviderException("Could not convert keys to native format");
-            }
-            /* only print the first time a curve is used */
-            if (nativeCryptTrace) {
-                System.err.println(this.curve +
-                        " is not supported by OpenSSL, using Java crypto implementation for preparing agreement.");
-            }
-            try {
-                this.initializeJavaImplementation(this.privateKey);
-                this.javaImplementation.engineDoPhase(this.publicKey, true);
-            } catch (InvalidKeyException e) {
-                /* should not happen */
-                throw new InternalError(e);
-            }
-            return this.javaImplementation.engineGenerateSecret(sharedSecret, offset);
-        }
+
         absent = NativeECUtil.putCurveIfAbsent(this.curve, Boolean.TRUE);
         if (absent && nativeCryptTrace) {
             System.err.println(this.curve +
