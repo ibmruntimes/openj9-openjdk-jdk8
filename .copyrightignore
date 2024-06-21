@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -31,16 +31,17 @@
 # 8. *job* # all things at contains characters in between stars
 # ===========================================================================
 
-src/bsd/doc
-src/jdk.crypto.ec/share/native/libsunec/impl
-src/linux/doc
-src/share/lib/security/java.policy
-src/share/lib/security/java.security-*
-src/solaris/doc
-/test
+/jdk/src/bsd/doc/
+/jdk/src/linux/doc/
+/jdk/src/share/lib/security/java.policy
+/jdk/src/share/lib/security/java.security-*
+/jdk/src/share/native/sun/security/ec/impl/
+/jdk/src/solaris/doc/
+/jdk/test/
+/test/
 
-/*LICENSE
-/*README
+.copyrightignore
+/LICENSE
 **/autoconf/generated-configure.sh
 
 *.bmp
@@ -50,4 +51,5 @@ src/solaris/doc
 *.ini
 *.jpg
 *.md
+*.project
 *.wav
