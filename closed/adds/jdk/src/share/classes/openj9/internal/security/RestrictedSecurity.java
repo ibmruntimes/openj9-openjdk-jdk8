@@ -28,6 +28,7 @@ import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
+import java.security.Provider;
 import java.security.Provider.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -252,6 +253,12 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(String providerName) {
         if (securityEnabled) {
+            // Remove argument, e.g. -NSS-FIPS, if present.
+            int pos = providerName.indexOf('-');
+            if (pos >= 0) {
+                providerName = providerName.substring(0, pos);
+            }
+
             return restricts.isRestrictedProviderAllowed(providerName);
         }
         return true;
@@ -265,17 +272,17 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(Class<?> providerClazz) {
         if (securityEnabled) {
-            String providerName = providerClazz.getName();
+            String providerClassName = providerClazz.getName();
 
             // Check if the specified class extends java.security.Provider.
             if (java.security.Provider.class.isAssignableFrom(providerClazz)) {
-                return restricts.isRestrictedProviderAllowed(providerName);
+                return restricts.isRestrictedProviderAllowed(providerClassName);
             }
 
             // For a class that doesn't extend java.security.Provider, no need to
             // check allowed or not allowed, always return true to load it.
             if (debug != null) {
-                debug.println("The provider class " + providerName + " does not extend java.security.Provider.");
+                debug.println("The provider class " + providerClassName + " does not extend java.security.Provider.");
             }
         }
         return true;
@@ -650,27 +657,6 @@ public final class RestrictedSecurity {
     }
 
     /**
-     * Get the provider name defined in provider construction method.
-     *
-     * @param providerName provider name or provider with packages
-     * @return provider name defined in provider construction method
-     */
-    private static String getProvidersSimpleName(String providerName) {
-        if (providerName.equals("com.sun.security.sasl.Provider")) {
-            // The main class for the SunSASL provider is com.sun.security.sasl.Provider.
-            return "SunSASL";
-        } else {
-            // Remove the provider's class package names if present.
-            int pos = providerName.lastIndexOf('.');
-            if (pos >= 0) {
-                providerName = providerName.substring(pos + 1);
-            }
-            // Provider without package names.
-            return providerName;
-        }
-    }
-
-    /**
      * This class is used to save and operate on restricted security
      * properties which are loaded from the java.security file.
      */
@@ -702,7 +688,7 @@ public final class RestrictedSecurity {
         // Provider with argument (provider name + optional argument).
         private final List<String> providers;
         // Provider without argument.
-        private final List<String> providersSimpleName;
+        private final List<String> providersFullyQualifiedClassName;
         // The map is keyed by provider name.
         private final Map<String, Constraint[]> providerConstraints;
 
@@ -733,7 +719,7 @@ public final class RestrictedSecurity {
             this.jdkFipsMode = parser.getProperty("jdkFipsMode");
 
             this.providers = new ArrayList<>(parser.providers);
-            this.providersSimpleName = new ArrayList<>(parser.providersSimpleName);
+            this.providersFullyQualifiedClassName = new ArrayList<>(parser.providersFullyQualifiedClassName);
             this.providerConstraints = parser.providerConstraints
                                              .entrySet()
                                              .stream()
@@ -755,30 +741,26 @@ public final class RestrictedSecurity {
          * @return true if the Service is allowed
          */
         boolean isRestrictedServiceAllowed(Service service) {
-            String providerName = service.getProvider().getName();
+            Provider provider = service.getProvider();
+            String providerClassName = provider.getClass().getName();
 
             if (debug != null) {
-                debug.println("Checking service " + service.toString() + " offered by provider " + providerName + ".");
+                debug.println("Checking service " + service.toString() + " offered by provider " + providerClassName + ".");
             }
 
-            // Provider with argument, remove argument.
-            // e.g. SunPKCS11-NSS-FIPS, remove argument -NSS-FIPS.
-            int pos = providerName.indexOf('-');
-            providerName = (pos < 0) ? providerName : providerName.substring(0, pos);
-
-            Constraint[] constraints = providerConstraints.get(providerName);
+            Constraint[] constraints = providerConstraints.get(providerClassName);
 
             if (constraints == null) {
                 // Disallow unknown providers.
                 if (debug != null) {
                     debug.println("Security constraints check."
-                            + " Disallow unknown provider: " + providerName);
+                            + " Disallow unknown provider: " + providerClassName);
                 }
                 return false;
             } else if (constraints.length == 0) {
                 // Allow this provider with no constraints.
                 if (debug != null) {
-                    debug.println("No constraints for provider " + providerName + ".");
+                    debug.println("No constraints for provider " + providerClassName + ".");
                 }
                 return true;
             }
@@ -822,7 +804,7 @@ public final class RestrictedSecurity {
                         debug.println("The following service:"
                                 + "\n\tService type: " + type
                                 + "\n\tAlgorithm: " + algorithm
-                                + "\nis allowed in provider: " + providerName);
+                                + "\nis allowed in provider: " + providerClassName);
                     }
                     return true;
                 }
@@ -852,7 +834,7 @@ public final class RestrictedSecurity {
                                         + "\n\tService type: " + type
                                         + "\n\tAlgorithm: " + algorithm
                                         + "\n\tAttribute: " + cAttribute
-                                        + "\nis NOT allowed in provider: " + providerName);
+                                        + "\nis NOT allowed in provider: " + providerClassName);
                         }
                         return false;
                     }
@@ -866,7 +848,7 @@ public final class RestrictedSecurity {
                                 + "\n\tService type: " + type
                                 + "\n\tAlgorithm: " + algorithm
                                 + "\n\tAttribute: " + cAttribute
-                                + "\nis allowed in provider: " + providerName);
+                                + "\nis allowed in provider: " + providerClassName);
                 }
                 return true;
             }
@@ -877,7 +859,7 @@ public final class RestrictedSecurity {
                 debug.println("The following service:"
                             + "\n\tService type: " + type
                             + "\n\tAlgorithm: " + algorithm
-                            + "\nis NOT allowed in provider: " + providerName);
+                            + "\nis NOT allowed in provider: " + providerClassName);
             }
             return false;
         }
@@ -885,34 +867,25 @@ public final class RestrictedSecurity {
         /**
          * Check if the provider is allowed in restricted security mode.
          *
-         * @param providerName the provider to check
+         * @param providerClassName the provider to check
          * @return true if the provider is allowed
          */
-        boolean isRestrictedProviderAllowed(String providerName) {
+        boolean isRestrictedProviderAllowed(String providerClassName) {
             if (debug != null) {
-                debug.println("Checking the provider " + providerName + " in restricted security mode.");
+                debug.println("Checking the provider " + providerClassName + " in restricted security mode.");
             }
 
-            // Remove argument, e.g. -NSS-FIPS, if present.
-            int pos = providerName.indexOf('-');
-            if (pos >= 0) {
-                providerName = providerName.substring(0, pos);
-            }
-
-            // Provider name defined in provider construction method.
-            providerName = getProvidersSimpleName(providerName);
-
-            // Check if the provider is in restricted security provider list.
-            // If not, the provider won't be registered.
-            if (providersSimpleName.contains(providerName)) {
+            // Check if the provider fully-qualified cLass name is in restricted
+            // security provider list. If not, the provider won't be registered.
+            if (providersFullyQualifiedClassName.contains(providerClassName)) {
                 if (debug != null) {
-                    debug.println("The provider " + providerName + " is allowed in restricted security mode.");
+                    debug.println("The provider " + providerClassName + " is allowed in restricted security mode.");
                 }
                 return true;
             }
 
             if (debug != null) {
-                debug.println("The provider " + providerName + " is not allowed in restricted security mode.");
+                debug.println("The provider " + providerClassName + " is not allowed in restricted security mode.");
 
                 debug.println("Stack trace:");
                 StackTraceElement[] elements = Thread.currentThread().getStackTrace();
@@ -951,8 +924,8 @@ public final class RestrictedSecurity {
             for (int providerPosition = 0; providerPosition < providers.size(); providerPosition++) {
                 printProperty(profileID + ".jce.provider." + (providerPosition + 1) + ": ",
                         providers.get(providerPosition));
-                String providerSimpleName = providersSimpleName.get(providerPosition);
-                for (Constraint providerConstraint : providerConstraints.get(providerSimpleName)) {
+                String providerFullyQualifiedClassName = providersFullyQualifiedClassName.get(providerPosition);
+                for (Constraint providerConstraint : providerConstraints.get(providerFullyQualifiedClassName)) {
                     System.out.println("\t" + providerConstraint.toString());
                 }
             }
@@ -994,7 +967,7 @@ public final class RestrictedSecurity {
         // Provider with argument (provider name + optional argument).
         private final List<String> providers;
         // Provider without argument.
-        private final List<String> providersSimpleName;
+        private final List<String> providersFullyQualifiedClassName;
         // The map is keyed by provider name.
         private final Map<String, List<Constraint>> providerConstraints;
 
@@ -1022,7 +995,7 @@ public final class RestrictedSecurity {
             profileProperties = new HashMap<>();
 
             providers = new ArrayList<>();
-            providersSimpleName = new ArrayList<>();
+            providersFullyQualifiedClassName = new ArrayList<>();
             providerConstraints = new HashMap<>();
 
             profilesHashes = new HashMap<>();
@@ -1183,21 +1156,13 @@ public final class RestrictedSecurity {
             }
             providerName = providerName.trim();
 
-            // Remove argument, e.g. -NSS-FIPS, if present.
-            pos = providerName.indexOf('-');
-            if (pos >= 0) {
-                providerName = providerName.substring(0, pos);
-            }
-
-            // Provider name defined in provider construction method.
-            providerName = getProvidersSimpleName(providerName);
             boolean providerChanged = false;
             if (update) {
-                String previousProviderName = providersSimpleName.get(providerPos - 1);
+                String previousProviderName = providersFullyQualifiedClassName.get(providerPos - 1);
                 providerChanged = !previousProviderName.equals(providerName);
-                providersSimpleName.set(providerPos - 1, providerName);
+                providersFullyQualifiedClassName.set(providerPos - 1, providerName);
             } else {
-                providersSimpleName.add(providerPos - 1, providerName);
+                providersFullyQualifiedClassName.add(providerPos - 1, providerName);
             }
 
             if (debug != null) {
@@ -1213,14 +1178,14 @@ public final class RestrictedSecurity {
                 debug.println("\t\tRemoving provider in position " + providerPos);
             }
 
-            int numOfExistingProviders = providersSimpleName.size();
+            int numOfExistingProviders = providersFullyQualifiedClassName.size();
 
             // If this is the last provider, remove from all lists.
             if (providerPos == numOfExistingProviders) {
                 if (debug != null) {
                     debug.println("\t\t\tLast provider. Only one to be removed.");
                 }
-                String providerRemoved = providersSimpleName.remove(providerPos - 1);
+                String providerRemoved = providersFullyQualifiedClassName.remove(providerPos - 1);
                 providers.remove(providerPos - 1);
                 providerConstraints.remove(providerRemoved);
 
@@ -1244,7 +1209,7 @@ public final class RestrictedSecurity {
                 }
 
                 // Remove all of the providers that are set to empty.
-                String providerRemoved = providersSimpleName.remove(i - 1);
+                String providerRemoved = providersFullyQualifiedClassName.remove(i - 1);
                 providers.remove(i - 1);
                 providerConstraints.remove(providerRemoved);
 
@@ -1293,7 +1258,7 @@ public final class RestrictedSecurity {
 
         private void updateProviders(String profileExtensionId, List<String> allInfo) {
             boolean removedProvider = false;
-            int numOfExistingProviders = providersSimpleName.size();
+            int numOfExistingProviders = providersFullyQualifiedClassName.size();
             // Deal with update of existing providers.
             for (int i = 1; i <= numOfExistingProviders; i++) {
                 String property = profileExtensionId + ".jce.provider." + i;
