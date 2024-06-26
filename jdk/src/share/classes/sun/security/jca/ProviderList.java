@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -102,13 +102,12 @@ public final class ProviderList {
 
     public static ProviderList insertAt(ProviderList providerList, Provider p,
             int position) {
-        String providerName = p.getName();
-        if (providerList.getProvider(providerName) != null) {
-            return providerList;
-        }
-        if (!RestrictedSecurity.isProviderAllowed(providerName)) {
+        if (!RestrictedSecurity.isProviderAllowed(p.getClass())) {
             // We're in restricted security mode which does not allow this provider,
             // return without adding.
+            return providerList;
+        }
+        if (providerList.getProvider(p.getName()) != null) {
             return providerList;
         }
         List<ProviderConfig> list = new ArrayList<>
@@ -143,7 +142,7 @@ public final class ProviderList {
         if (RestrictedSecurity.isEnabled()) {
             List<Provider> allowedProviders = new ArrayList<>();
             for (Provider p : providers) {
-                if (RestrictedSecurity.isProviderAllowed(p.getName())) {
+                if (RestrictedSecurity.isProviderAllowed(p.getClass())) {
                     // This provider is allowed, add it the list.
                     allowedProviders.add(p);
                 }

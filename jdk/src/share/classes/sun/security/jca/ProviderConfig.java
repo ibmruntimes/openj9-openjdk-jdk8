@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -172,17 +172,20 @@ final class ProviderConfig {
      * Get the provider object. Loads the provider if it is not already loaded.
      */
     synchronized Provider getProvider() {
-        if (!RestrictedSecurity.isProviderAllowed(className)) {
-            // We're in restricted security mode which does not allow this provider,
-            // return without loading.
-            return null;
-        }
         // volatile variable load
         Provider p = provider;
+        // There is RestrictedSecurity check in the ServiceLoader before the
+        // provider is initialized. So the check has already occurred for the
+        // provider where provider != null.
         if (p != null) {
             return p;
         }
         if (shouldLoad() == false) {
+            return null;
+        }
+        if (!RestrictedSecurity.isProviderAllowed(className)) {
+            // We're in restricted security mode which does not allow this provider,
+            // return without loading.
             return null;
         }
         if (isLoading) {
