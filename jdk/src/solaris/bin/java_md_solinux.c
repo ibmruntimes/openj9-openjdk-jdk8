@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -392,6 +392,11 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
     const char *mallocOptionsValue = "multiheap,considersize";
     if (setenv(mallocOptionsName, mallocOptionsValue, 0) != 0) {
         fprintf(stderr, "setenv('MALLOCOPTIONS=multiheap,considersize') failed: performance may be affected\n");
+    }
+    const char * ldrCntrlName = "LDR_CNTRL";
+    const char *ldrCntrlValue = "TEXTPSIZE=64K@DATAPSIZE=64K@STACKPSIZE=64K@SHMPSIZE=64K";
+    if (setenv(ldrCntrlName, ldrCntrlValue, 0) != 0) {
+        fprintf(stderr, "setenv('LDR_CNTRL=TEXTPSIZE=64K@DATAPSIZE=64K@STACKPSIZE=64K@SHMPSIZE=64K') failed: performance may be affected\n");
     }
 #endif
 #ifdef SETENV_REQUIRED
