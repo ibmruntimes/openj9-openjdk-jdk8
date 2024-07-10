@@ -99,6 +99,20 @@ public class Providers {
         BACKUP_PROVIDER_CLASSNAME,
     };
 
+    // Hardcoded fully-qualified class names of providers to use for JAR
+    // verification when RestrictedSecurity is enabled (similar to
+    // jarVerificationProviders array).
+    //
+    // MUST NOT be on the bootclasspath and not in signed JAR files.
+    private static final String[] restrictedJarVerificationProviders = {
+        "sun.security.provider.Sun",
+        "sun.security.rsa.SunRsaSign",
+        // Note: when SunEC is in a signed JAR file, it's not signed
+        // by EC algorithms. So it's still safe to be listed here.
+        "sun.security.ec.SunEC",
+        "com.sun.crypto.provider.SunJCE",
+    };
+
     // Return to Sun provider or its backup.
     // This method should only be called by
     // sun.security.util.ManifestEntryVerifier and java.security.SecureRandom.
@@ -124,7 +138,10 @@ public class Providers {
      */
     public static Object startJarVerification() {
         ProviderList currentList = getProviderList();
-        ProviderList jarList = currentList.getJarList(jarVerificationProviders);
+        ProviderList jarList = currentList.getJarList(
+                RestrictedSecurity.isEnabled()
+                        ? restrictedJarVerificationProviders
+                        : jarVerificationProviders);
         // return the old thread-local provider list, usually null
         return beginThreadProviderList(jarList);
     }
