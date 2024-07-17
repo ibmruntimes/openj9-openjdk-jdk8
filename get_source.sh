@@ -70,21 +70,10 @@ add_source() {
 # Configure the known source repositories.
 #
 configure_defaults() {
-	local current_branch="$(git rev-parse --abbrev-ref HEAD)"
-	local openj9_branch=master
-	local omr_branch=openj9
-
-	# If this repository is on a release branch, use the same branch names
-	# for OpenJ9 and OMR.
-	if [[ "$current_branch" =~ (ibm-)?(v[0-9]+\.[0-9]+(\.[0-9]+)?-release) ]] ; then
-		openj9_branch="${BASH_REMATCH[2]}"
-		omr_branch="${BASH_REMATCH[2]}"
-	fi
-
 	#          folder       URL                                               branch          options
 	#          ------       ---                                               ------          -------
-	add_source openj9       https://github.com/eclipse-openj9/openj9.git      $openj9_branch
-	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  $omr_branch
+	add_source openj9       https://github.com/eclipse-openj9/openj9.git      v0.46.0-release
+	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  v0.46.0-release
 
 	add_source openssl      https://github.com/openssl/openssl.git            ""              "--depth=1"
 }
