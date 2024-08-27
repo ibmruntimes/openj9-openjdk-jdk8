@@ -72,8 +72,8 @@ add_source() {
 configure_defaults() {
 	#          folder       URL                                               branch          options
 	#          ------       ---                                               ------          -------
-	add_source openj9       https://github.com/eclipse-openj9/openj9.git      v0.46.0-release
-	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  v0.46.0-release
+	add_source openj9       https://github.com/eclipse-openj9/openj9.git      v0.46.1-release
+	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  v0.46.1-release
 
 	add_source openssl      https://github.com/openssl/openssl.git            ""              "--depth=1"
 }
