@@ -1322,6 +1322,48 @@ public final class RestrictedSecurity {
             }
         }
 
+        private String getExistingValue(String property) {
+            if (debug != null) {
+                debug.println("\tGetting previous value of property: " + property);
+            }
+
+            // Look for values from profiles that this one extends.
+            String existingValue = profileProperties.get(property);
+            String debugMessage = "\t\tPrevious value from extended profile: ";
+
+            // If there is no value, look for non-profile values in java.security file.
+            if (existingValue == null) {
+                debugMessage = "\t\tPrevious value from java.security file: ";
+                String propertyKey;
+                switch (property) {
+                case "jdkCertpathDisabledAlgorithms":
+                    propertyKey = "jdk.certpath.disabledAlgorithms";
+                    break;
+                case "jdkSecurityLegacyAlgorithms":
+                    propertyKey = "jdk.security.legacyAlgorithms";
+                    break;
+                case "jdkTlsDisabledAlgorithms":
+                    propertyKey = "jdk.tls.disabledAlgorithms";
+                    break;
+                case "jdkTlsDisabledNamedCurves":
+                    propertyKey = "jdk.tls.disabledNamedCurves";
+                    break;
+                case "jdkTlsLegacyAlgorithms":
+                    propertyKey = "jdk.tls.legacyAlgorithms";
+                    break;
+                default:
+                    return null;
+                }
+                existingValue = securityProps.getProperty(propertyKey);
+            }
+
+            if ((debug != null) && (existingValue != null)) {
+                debug.println(debugMessage + existingValue);
+            }
+
+            return existingValue;
+        }
+
         /**
          * Load restricted security properties.
          */
@@ -1592,7 +1634,7 @@ public final class RestrictedSecurity {
                 allInfo.add(propertyKey + "=" + value);
 
                 // Check if property overrides, adds to or removes from previous value.
-                String existingValue = profileProperties.get(property);
+                String existingValue = getExistingValue(property);
                 if (value.startsWith("+")) {
                     if (!isPropertyAppendable(property)) {
                         printStackTraceAndExit("Property '" + property + "' is not appendable.");
@@ -1602,7 +1644,8 @@ public final class RestrictedSecurity {
 
                         // Take existing value of property into account, if applicable.
                         if (existingValue == null) {
-                            printStackTraceAndExit("Property '" + property + "' does not exist in parent profile. Cannot append.");
+                            printStackTraceAndExit("Property '" + property + "' does not exist in"
+                                    + " parent profile or java.security file. Cannot append.");
                         } else if (isBlank(existingValue)) {
                             newValue = value;
                         } else {
@@ -1616,6 +1659,10 @@ public final class RestrictedSecurity {
                         // Remove values from property.
                         value = value.substring(1).trim();
                         if (!isBlank(value)) {
+                            if (existingValue == null) {
+                                printStackTraceAndExit("Property '" + property + "' does not exist in"
+                                    + " parent profile or java.security file. Cannot remove.");
+                            }
                             List<String> existingValues = Stream.of(existingValue.split(","))
                                                                 .map(v -> v.trim())
                                                                 .collect(Collectors.toList());
@@ -1629,7 +1676,8 @@ public final class RestrictedSecurity {
                         } else {
                             // Nothing to do. Use existing value of property into account, if available.
                             if (existingValue == null) {
-                                printStackTraceAndExit("Property '" + property + "' does not exist in parent profile. Cannot remove.");
+                                printStackTraceAndExit("Property '" + property + "' does not exist in"
+                                    + " parent profile or java.security file. Cannot remove.");
                             } else if (isBlank(existingValue)) {
                                 newValue = value;
                             } else {
