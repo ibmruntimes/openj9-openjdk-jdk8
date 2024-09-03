@@ -327,7 +327,6 @@ static void *crypto_library = NULL;
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
   (JNIEnv *env, jclass thisObj, jboolean traceEnabled)
 {
-
     typedef const char* OSSL_version_t(int);
 
     /* Determine the version of OpenSSL. */
@@ -2471,10 +2470,6 @@ Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGF
     BIGNUM *yBN = NULL;
     BIGNUM *nBN = NULL;
     BIGNUM *hBN = NULL;
-    EC_GROUP *group = NULL;
-    EC_POINT *generator = NULL;
-    BN_CTX *ctx = NULL;
-    int ret = 0;
 
     nativeA = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, a, 0));
     if (NULL == nativeA) {
