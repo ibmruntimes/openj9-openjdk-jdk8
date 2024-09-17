@@ -55,14 +55,6 @@ public class Providers {
     // Note volatile immutable object, so no synchronization needed.
     private static volatile ProviderList providerList;
 
-    static {
-        // set providerList to empty list first in case initialization somehow
-        // triggers a getInstance() call (although that should not happen)
-        providerList = ProviderList.EMPTY;
-        providerList = ProviderList.fromSecurityProperties();
-        RestrictedSecurity.checkHashValues();
-    }
-
     private Providers() {
         // empty
     }
@@ -98,6 +90,14 @@ public class Providers {
         "com.sun.crypto.provider.SunJCE",
         BACKUP_PROVIDER_CLASSNAME,
     };
+
+    static {
+        // set providerList to empty list first in case initialization somehow
+        // triggers a getInstance() call (although that should not happen)
+        providerList = ProviderList.EMPTY;
+        providerList = ProviderList.fromSecurityProperties();
+        RestrictedSecurity.checkHashValues();
+    }
 
     // Return to Sun provider or its backup.
     // This method should only be called by
