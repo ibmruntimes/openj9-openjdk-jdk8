@@ -87,12 +87,9 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   FixPath = $(shell $(CYGPATH) -m $1)
   # convert windows path to unix path
   UnixPath = $(shell $(CYGPATH) -u $1)
-  # set Visual Studio environment
-  EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE="$(INCLUDE)" LIB="$(LIB)"
 else
   FixPath = $1
   UnixPath = $1
-  EXPORT_MSVS_ENV_VARS :=
 endif
 
 .PHONY : \
@@ -414,7 +411,7 @@ endif
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-	cd $(@D) && $(EXPORT_MSVS_ENV_VARS) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUT_ROOT)/vm/cmake.stamp
@@ -440,7 +437,7 @@ endif # OPENJ9_ENABLE_JITSERVER
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	@$(MKDIR) -p $(J9TOOLS_DIR)
-	+$(EXPORT_MSVS_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+	+OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
 			BOOT_JDK=$(BOOT_JDK) \
 			BUILD_ID=$(BUILD_ID) \
@@ -472,7 +469,7 @@ endif
 build-j9vm : run-preprocessors-j9
 	@$(ECHO) "Compiling OpenJ9 in $(OUTPUT_ROOT)/vm"
 	$(call ShowVersions)
-	+export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	+export OPENJ9_BUILD=true $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE_VM) $(MAKE_ARGS) -C $(OUTPUT_ROOT)/vm JAVA_VERSION=80 VERSION_MAJOR=8 all
 	@$(ECHO) OpenJ9 compile complete
 
