@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -63,7 +63,11 @@ endif # windows
 # Identify the desired openssl target configuration.
 OPENSSL_TARGET :=
 ifeq ($(OPENJDK_TARGET_OS), aix)
-  OPENSSL_TARGET := aix64-cc
+  ifeq ($(TOOLCHAIN_TYPE), clang)
+    OPENSSL_TARGET := aix64-clang
+  else ifeq ($(TOOLCHAIN_TYPE), xlc)
+    OPENSSL_TARGET := aix64-cc
+  endif
 else ifeq ($(OPENJDK_TARGET_OS), linux)
   ifneq (,$(filter aarch64 ppc64le x86_64, $(OPENJDK_TARGET_CPU)))
     OPENSSL_TARGET := linux-$(OPENJDK_TARGET_CPU)
