@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -553,7 +553,7 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
              *     o          $JVMPATH (directory portion only)
              *     o          $JRE/lib/$LIBARCHNAME
              *     o          $JRE/../lib/$LIBARCHNAME
-             *     o          ZLIBNX_PATH (for AIX P9 or newer systems with NX, unless -XX:-UseZlibNX is set)
+             *     o          ZLIBNX_PATH (for AIX P9 or newer systems with NX, when enabled)
              *
              * followed by the user's previous effective LD_LIBRARY_PATH, if
              * any.
@@ -563,7 +563,7 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
         int aixargc = *pargc - 1; // skip the launcher name
         char **aixargv = *pargv + 1;
         const char *aixarg = NULL;
-        jboolean useZlibNX = JNI_TRUE;
+        jboolean useZlibNX = JNI_FALSE;
         while (aixargc > 0 && *(aixarg = *aixargv) == '-') {
             if (JLI_StrCmp(aixarg, "-XX:+UseZlibNX") == 0) {
                 useZlibNX = JNI_TRUE;
