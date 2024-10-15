@@ -902,6 +902,7 @@ CONF_NAME
 SPEC
 WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
+OPENJ9_ENABLE_SNAPSHOTS
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 OPENJ9_ENABLE_JITSERVER
 OPENJ9_ENABLE_JFR
@@ -1107,6 +1108,7 @@ with_healthcenter
 enable_jfr
 enable_jitserver
 enable_openjdk_methodhandles
+enable_snapshots
 enable_warnings_as_errors_omr
 enable_warnings_as_errors_openj9
 with_conf_name
@@ -1926,6 +1928,7 @@ Optional Features:
   --enable-jitserver      enable JITServer support [disabled]
   --enable-openjdk-methodhandles
                           enable support for OpenJDK MethodHandles [disabled]
+  --enable-snapshots      enable RAM persistence snapshots [disabled]
   --disable-warnings-as-errors-omr
                           do not consider OMR compile warnings to be errors
                           [enabled]
@@ -4619,6 +4622,8 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 
+
+
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4629,7 +4634,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1724410208
+DATE_WHEN_GENERATED=1729527382
 
 ###############################################################################
 #
@@ -16748,6 +16753,30 @@ $as_echo "no (default)" >&6; }
     as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
   fi
 
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for snapshot support" >&5
+$as_echo_n "checking for snapshot support... " >&6; }
+  # Check whether --enable-snapshots was given.
+if test "${enable_snapshots+set}" = set; then :
+  enableval=$enable_snapshots;
+fi
+
+  OPENJ9_ENABLE_SNAPSHOTS=false
+  if test "x$enable_snapshots" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_SNAPSHOTS=true
+  elif test "x$enable_snapshots" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicit)" >&5
+$as_echo "no (explicit)" >&6; }
+  elif test "x$enable_snapshots" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-snapshots accepts no argument" "$LINENO" 5
+  fi
 
 
 
