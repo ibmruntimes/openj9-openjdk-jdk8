@@ -90,10 +90,49 @@ final class SunEntries {
         Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty
             ("jdk.security.legacyDSAKeyPairGenerator"));
 
-    /* The property 'jdk.nativeDigest' is used to control enablement of the native
-     * digest implementation.
-     */
-    private static final boolean useNativeDigest = NativeCrypto.isAlgorithmEnabled("jdk.nativeDigest", "MessageDigest");
+    private static final boolean useNativeMD5;
+    private static final boolean useNativeSHA;
+    private static final boolean useNativeSHA224;
+    private static final boolean useNativeSHA256;
+    private static final boolean useNativeSHA384;
+    private static final boolean useNativeSHA512;
+
+    static {
+        /* The property 'jdk.nativeDigest' is used to control enablement of all native
+         * digest implementations.
+         */
+        boolean useNativeDigest = NativeCrypto.isAlgorithmEnabled("jdk.nativeDigest", "MessageDigest");
+
+        /* The property 'jdk.nativeMD5' is used to control enablement of the native
+         * MD5 implementation.
+         */
+        useNativeMD5 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeMD5", "MD5");
+
+        /* The property 'jdk.nativeSHA' is used to control enablement of the native
+         * SHA implementation.
+         */
+        useNativeSHA = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA", "SHA");
+
+        /* The property 'jdk.nativeSHA224' is used to control enablement of the native
+         * SHA-224 implementation.
+         */
+        useNativeSHA224 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA224", "SHA-224");
+
+        /* The property 'jdk.nativeSHA256' is used to control enablement of the native
+         * SHA-256 implementation.
+         */
+        useNativeSHA256 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA256", "SHA-256");
+
+        /* The property 'jdk.nativeSHA384' is used to control enablement of the native
+         * SHA-384 implementation.
+         */
+        useNativeSHA384 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA384", "SHA-384");
+
+        /* The property 'jdk.nativeSHA512' is used to control enablement of the native
+         * SHA-512 implementation.
+         */
+        useNativeSHA512 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512", "SHA-512");
+    }
 
     // Flag indicating whether the operating system is AIX.
     private static final boolean isAIX = "AIX".equals(GetPropertyAction.privilegedGetProperty("os.name"));
@@ -248,7 +287,7 @@ final class SunEntries {
          * enabled or not.
          */
         /* Don't use native MD5 on AIX due to an observed performance regression. */
-        if (useNativeDigest
+        if (useNativeMD5
             && NativeCrypto.isMD5Available()
             && !isAIX
         ) {
@@ -257,17 +296,33 @@ final class SunEntries {
             providerMD5 = "sun.security.provider.MD5";
         }
 
-        if (useNativeDigest) {
+        if (useNativeSHA) {
             providerSHA = "sun.security.provider.NativeSHA";
-            providerSHA224 = "sun.security.provider.NativeSHA2$SHA224";
-            providerSHA256 = "sun.security.provider.NativeSHA2$SHA256";
-            providerSHA384 = "sun.security.provider.NativeSHA5$SHA384";
-            providerSHA512 = "sun.security.provider.NativeSHA5$SHA512";
         } else {
             providerSHA = "sun.security.provider.SHA";
+        }
+
+        if (useNativeSHA224) {
+            providerSHA224 = "sun.security.provider.NativeSHA2$SHA224";
+        } else {
             providerSHA224 = "sun.security.provider.SHA2$SHA224";
+        }
+
+        if (useNativeSHA256) {
+            providerSHA256 = "sun.security.provider.NativeSHA2$SHA256";
+        } else {
             providerSHA256 = "sun.security.provider.SHA2$SHA256";
+        }
+
+        if (useNativeSHA384) {
+            providerSHA384 = "sun.security.provider.NativeSHA5$SHA384";
+        } else {
             providerSHA384 = "sun.security.provider.SHA5$SHA384";
+        }
+
+        if (useNativeSHA512) {
+            providerSHA512 = "sun.security.provider.NativeSHA5$SHA512";
+        } else {
             providerSHA512 = "sun.security.provider.SHA5$SHA512";
         }
 
