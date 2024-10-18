@@ -903,6 +903,7 @@ SPEC
 WARNINGS_AS_ERRORS_OPENJ9
 WARNINGS_AS_ERRORS_OMR
 OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+OPENJ9_ENABLE_SNAPSHOTS
 OPENJ9_ENABLE_JITSERVER
 OPENJ9_ENABLE_JFR
 HEALTHCENTER_JAR
@@ -1107,6 +1108,7 @@ with_healthcenter
 enable_jfr
 enable_jitserver
 enable_openjdk_methodhandles
+enable_snapshots
 enable_warnings_as_errors_omr
 enable_warnings_as_errors_openj9
 with_conf_name
@@ -16748,7 +16750,28 @@ $as_echo "no (default)" >&6; }
     as_fn_error $? "--enable-openjdk-methodhandles accepts no argument" "$LINENO" 5
   fi
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for snapshots support" >&5
+$as_echo_n "checking for snapshots... " >&6; }
+  # Check whether --enable-snapshots was given.
+if test "${enable_snapshots+set}" = set; then :
+  enableval=$enable_snapshots;
+fi
 
+  OPENJ9_ENABLE_SNAPSHOTS=false
+
+  if test "x$enable_snapshots" = xyes ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (explicitly enabled)" >&5
+$as_echo "yes (explicitly enabled)" >&6; }
+    OPENJ9_ENABLE_SNAPSHOTS=true
+  elif test "x$enable_snapshots" = xno ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
+  elif test "x$enable_snapshots" = x ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
+$as_echo "no (default)" >&6; }
+  else
+    as_fn_error $? "--enable-snapshots accepts no argument" "$LINENO" 5
+  fi
 
 
   # Check whether --enable-warnings-as-errors-omr was given.

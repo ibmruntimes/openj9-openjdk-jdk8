@@ -210,6 +210,15 @@ else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_openjdkMethodhandle)
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
+# Adjust snapshots enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_snapshots)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_snapshots)
+else # OPENJ9_ENABLE_SNAPSHOTS
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_snashots)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_snapshots)
+endif # OPENJ9_ENABLE_SNAPSHOTS
+
 # openj9_stage_buildspec_file
 # ---------------------------
 # param 1 = The simple name of the file to copy.
@@ -390,6 +399,12 @@ else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
   CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=ON
   CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
+ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
+    CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=ON
+  else # OPENJ9_ENABLE_SNAPSHOTS
+    CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=OFF
+  endif # OPENJ9_ENABLE_SNAPSHOTS
 
 ifneq (,$(filter debug trace, $(LOG_LEVEL)))
   # The user said LOG=debug or LOG=trace, so tell cmake to echo commands.
