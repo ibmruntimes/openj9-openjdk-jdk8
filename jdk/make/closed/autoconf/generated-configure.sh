@@ -4634,7 +4634,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1729527382
+DATE_WHEN_GENERATED=1730147490
 
 ###############################################################################
 #
@@ -16769,8 +16769,8 @@ fi
 $as_echo "yes (explicitly enabled)" >&6; }
     OPENJ9_ENABLE_SNAPSHOTS=true
   elif test "x$enable_snapshots" = xno ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicit)" >&5
-$as_echo "no (explicit)" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (explicitly disabled)" >&5
+$as_echo "no (explicitly disabled)" >&6; }
   elif test "x$enable_snapshots" = x ; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (default)" >&5
 $as_echo "no (default)" >&6; }
