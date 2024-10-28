@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <windows.h>
 #include <winsock2.h>
 #include <ctype.h>
@@ -33,6 +39,8 @@
 #include "sun_nio_ch_SocketDispatcher.h"
 #include "nio.h"
 #include "nio_util.h"
+
+#include "ut_jcl_nio.h"
 
 
 /**************************************************************
@@ -282,6 +290,7 @@ Java_sun_nio_ch_SocketDispatcher_close0(JNIEnv *env, jclass clazz,
                                          jobject fdo)
 {
     jint fd = fdval(env, fdo);
+    Trc_nio_ch_SocketDispatcher_close(fd);
     if (closesocket(fd) == SOCKET_ERROR) {
         JNU_ThrowIOExceptionWithLastError(env, "Socket close failed");
     }

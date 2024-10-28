@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# ===========================================================================
+
 LIBNET_SRC_DIRS := $(JDK_TOPDIR)/src/share/native/java/net \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/java/net \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/sun/net/ \
@@ -36,6 +40,33 @@ else
 endif
 
 LIBNET_CFLAGS := $(foreach dir, $(LIBNET_SRC_DIRS), -I$(dir))
+
+BUILD_LIBNET_aix_close.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_bsd_close.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_DualStackPlainSocketImpl.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_linux_close.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_net_util.c_CFLAGS := \
+    -I$(OPENJ9_TOPDIR)/runtime/include \
+    -I$(OPENJ9_TOPDIR)/runtime/oti \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR) \
+    -I$(OPENJ9_TOPDIR)/runtime/jcl \
+    -I$(OPENJ9_TOPDIR)/runtime/util \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_PlainSocketImpl.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNET_TwoStacksPlainSocketImpl.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
 
 LIBNET_EXCLUDE_FILES :=
 ifneq ($(OPENJDK_TARGET_OS), linux)

@@ -23,12 +23,20 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
+#include <stdio.h>
 #include <sys/poll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 #include "jni.h"
 #include "jni_util.h"
@@ -44,6 +52,8 @@
 #ifdef _AIX
 #include <sys/utsname.h>
 #endif
+
+#include "ut_jcl_nio.h"
 
 /**
  * IP_MULTICAST_ALL supported since 2.6.31 but may not be available at
@@ -337,6 +347,7 @@ Java_sun_nio_ch_Net_connect0(JNIEnv *env, jclass clazz, jboolean preferIPv6,
     SOCKADDR sa;
     int sa_len = SOCKADDR_LEN;
     int rv;
+    int fd;
 
     if (NET_InetAddressToSockaddr(env, iao, port, (struct sockaddr *) &sa,
                                   &sa_len, preferIPv6) != 0)
@@ -344,7 +355,16 @@ Java_sun_nio_ch_Net_connect0(JNIEnv *env, jclass clazz, jboolean preferIPv6,
       return IOS_THROWN;
     }
 
-    rv = connect(fdval(env, fdo), (struct sockaddr *)&sa, sa_len);
+    fd = fdval(env, fdo);
+    if (AF_INET == sa.him4.sin_family) {
+        char buf[INET_ADDRSTRLEN];
+        Trc_nio_ch_Net_connect4((jlong)fd, inet_ntop(AF_INET, &sa.him4.sin_addr, buf, sizeof(buf)), port, sa_len);
+    } else if (AF_INET6 == sa.him6.sin6_family) {
+        char buf[INET6_ADDRSTRLEN];
+        Trc_nio_ch_Net_connect6((jlong)fd, inet_ntop(AF_INET6, &sa.him6.sin6_addr, buf, sizeof(buf)), port, ntohl(sa.him6.sin6_scope_id), sa_len);
+    }
+
+    rv = connect(fd, (struct sockaddr *)&sa, sa_len);
     if (rv != 0) {
         if (errno == EINPROGRESS) {
             return IOS_UNAVAILABLE;

@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <windows.h>
 #include "jni.h"
 #include "jni_util.h"
@@ -33,6 +39,8 @@
 #include "nio.h"
 #include "nio_util.h"
 #include "jlong.h"
+
+#include "ut_jcl_nio.h"
 
 
 /**************************************************************
@@ -469,6 +477,7 @@ Java_sun_nio_ch_FileDispatcherImpl_release0(JNIEnv *env, jobject this,
 static void closeFile(JNIEnv *env, jlong fd) {
     HANDLE h = (HANDLE)fd;
     if (h != INVALID_HANDLE_VALUE) {
+        Trc_nio_ch_FileDispatcherImpl_close(fd);
         int result = CloseHandle(h);
         if (result < 0)
             JNU_ThrowIOExceptionWithLastError(env, "Close failed");

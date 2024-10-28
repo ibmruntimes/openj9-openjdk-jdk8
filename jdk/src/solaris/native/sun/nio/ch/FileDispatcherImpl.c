@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #if defined(__linux__)
 #define _FILE_OFFSET_BITS 64
 #endif
@@ -62,6 +68,8 @@
 #include "nio_util.h"
 #include "sun_nio_ch_FileDispatcherImpl.h"
 #include "java_lang_Long.h"
+
+#include "ut_jcl_nio.h"
 
 static int preCloseFD = -1;     /* File descriptor to which we dup other fd's
                                    before closing them for real */
@@ -284,6 +292,7 @@ Java_sun_nio_ch_FileDispatcherImpl_release0(JNIEnv *env, jobject this,
 
 static void closeFileDescriptor(JNIEnv *env, int fd) {
     if (fd != -1) {
+        Trc_nio_ch_FileDispatcherImpl_close(fd);
         int result = close(fd);
         if (result < 0)
             JNU_ThrowIOExceptionWithLastError(env, "Close failed");

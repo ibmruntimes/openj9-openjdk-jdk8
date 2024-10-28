@@ -23,8 +23,13 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# ===========================================================================
+
 BUILD_LIBNIO_SRC := \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/java/nio \
+    $(SRC_ROOT)/closed/adds/jdk/src/share/native/sun/nio/ch \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/sun/nio/ch \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/sun/nio/fs
 
@@ -33,6 +38,24 @@ BUILD_LIBNIO_CFLAGS := \
     -I$(JDK_TOPDIR)/src/share/native/java/io \
     -I$(JDK_TOPDIR)/src/share/native/java/net \
     -I$(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/java/net
+
+BUILD_LIBNIO_FileDispatcherImpl.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNIO_Net.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNIO_nio_util.c_CFLAGS := \
+    -I$(OPENJ9_TOPDIR)/runtime/include \
+    -I$(OPENJ9_TOPDIR)/runtime/oti \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR) \
+    -I$(OPENJ9_TOPDIR)/runtime/jcl \
+    -I$(OPENJ9_TOPDIR)/runtime/util \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBNIO_SocketDispatcher.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
 
 BUILD_LIBNIO_FILES := \
     DatagramChannelImpl.c \
@@ -43,6 +66,7 @@ BUILD_LIBNIO_FILES := \
     IOUtil.c \
     MappedByteBuffer.c \
     Net.c \
+    nio_util.c \
     ServerSocketChannelImpl.c \
     SocketChannelImpl.c \
     SocketDispatcher.c
