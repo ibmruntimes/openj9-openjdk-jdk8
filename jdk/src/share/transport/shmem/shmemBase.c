@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -223,7 +223,7 @@ createWithGeneratedName(char *prefix, char *nameBuffer, CreateFunc func, void *a
         strcpy(nameBuffer, prefix);
         if (i > 0) {
             char buf[10];
-            sprintf(buf, ".%d", i+1);
+            snprintf(buf, sizeof(buf), ".%d", i+1);
             strcat(nameBuffer, buf);
         }
         error = func(nameBuffer, arg);
@@ -402,14 +402,14 @@ createStream(char *name, Stream *stream)
     jint error;
     char prefix[MAX_IPC_PREFIX];
 
-    sprintf(prefix, "%s.mutex", name);
+    snprintf(prefix, sizeof(prefix), "%s.mutex", name);
     error = createWithGeneratedName(prefix, stream->shared->mutexName,
                                     createMutex, &stream->mutex);
     if (error != SYS_OK) {
         return error;
     }
 
-    sprintf(prefix, "%s.hasData", name);
+    snprintf(prefix, sizeof(prefix), "%s.hasData", name);
     error = createWithGeneratedName(prefix, stream->shared->hasDataEventName,
                                     createEvent, &stream->hasData);
     if (error != SYS_OK) {
@@ -417,7 +417,7 @@ createStream(char *name, Stream *stream)
         return error;
     }
 
-    sprintf(prefix, "%s.hasSpace", name);
+    snprintf(prefix, sizeof(prefix), "%s.hasSpace", name);
     error = createWithGeneratedName(prefix, stream->shared->hasSpaceEventName,
                                     createEvent, &stream->hasSpace);
     if (error != SYS_OK) {
@@ -537,7 +537,7 @@ openConnection(SharedMemoryTransport *transport, jlong otherPID,
         return SYS_NOMEM;
     }
 
-    sprintf(connection->name, "%s.%ld", transport->name, sysProcessGetID());
+    snprintf(connection->name, sizeof(connection->name), "%s.%ld", transport->name, sysProcessGetID());
     error = sysSharedMemOpen(connection->name, &connection->sharedMemory,
                              &connection->shared);
     if (error != SYS_OK) {
@@ -601,7 +601,7 @@ createConnection(SharedMemoryTransport *transport, jlong otherPID,
         return SYS_NOMEM;
     }
 
-    sprintf(connection->name, "%s.%ld", transport->name, otherPID);
+    snprintf(connection->name, sizeof(connection->name), "%s.%ld", transport->name, otherPID);
     error = sysSharedMemCreate(connection->name, sizeof(SharedMemory),
                                &connection->sharedMemory, &connection->shared);
     if (error != SYS_OK) {
@@ -696,7 +696,7 @@ openTransport(const char *address, SharedMemoryTransport **transportPtr)
 
     if (strlen(address) >= MAX_IPC_PREFIX) {
         char buf[128];
-        sprintf(buf, "Error: address strings longer than %d characters are invalid\n", MAX_IPC_PREFIX);
+        snprintf(buf, sizeof(buf), "Error: address strings longer than %d characters are invalid\n", MAX_IPC_PREFIX);
         setLastErrorMsg(buf);
         closeTransport(transport);
         return SYS_ERR;
@@ -762,7 +762,7 @@ createTransport(const char *address, SharedMemoryTransport **transportPtr)
     } else {
         if (strlen(address) >= MAX_IPC_PREFIX) {
             char buf[128];
-            sprintf(buf, "Error: address strings longer than %d characters are invalid\n", MAX_IPC_PREFIX);
+            snprintf(buf, sizeof(buf), "Error: address strings longer than %d characters are invalid\n", MAX_IPC_PREFIX);
             setLastErrorMsg(buf);
             closeTransport(transport);
             return SYS_ERR;
@@ -780,7 +780,7 @@ createTransport(const char *address, SharedMemoryTransport **transportPtr)
     memset(transport->shared, 0, sizeof(SharedListener));
     transport->shared->acceptingPID = sysProcessGetID();
 
-    sprintf(prefix, "%s.mutex", transport->name);
+    snprintf(prefix, sizeof(prefix), "%s.mutex", transport->name);
     error = createWithGeneratedName(prefix, transport->shared->mutexName,
                                     createMutex, &transport->mutex);
     if (error != SYS_OK) {
@@ -788,7 +788,7 @@ createTransport(const char *address, SharedMemoryTransport **transportPtr)
         return error;
     }
 
-    sprintf(prefix, "%s.accept", transport->name);
+    snprintf(prefix, sizeof(prefix), "%s.accept", transport->name);
     error = createWithGeneratedName(prefix, transport->shared->acceptEventName,
                                     createEvent, &transport->acceptEvent);
     if (error != SYS_OK) {
@@ -796,7 +796,7 @@ createTransport(const char *address, SharedMemoryTransport **transportPtr)
         return error;
     }
 
-    sprintf(prefix, "%s.attach", transport->name);
+    snprintf(prefix, sizeof(prefix), "%s.attach", transport->name);
     error = createWithGeneratedName(prefix, transport->shared->attachEventName,
                                     createEvent, &transport->attachEvent);
     if (error != SYS_OK) {
@@ -1167,7 +1167,7 @@ exitTransportWithError(char *message, char *fileName,
     jint error;
     char buffer[500];
 
-    sprintf(buffer, "Shared Memory Transport \"%s\" (%s), line %d: %s\n",
+    snprintf(buffer, sizeof(buffer), "Shared Memory Transport \"%s\" (%s), line %d: %s\n",
             fileName, date, lineNumber, message);
     error = (*jvm)->GetEnv(jvm, (void **)&env, JNI_VERSION_1_2);
     if (error != JNI_OK) {
