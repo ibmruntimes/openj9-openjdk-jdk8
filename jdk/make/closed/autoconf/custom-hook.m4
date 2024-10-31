@@ -386,7 +386,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_SNAPSHOTS],
     AC_MSG_RESULT([yes (explicitly enabled)])
     OPENJ9_ENABLE_SNAPSHOTS=true
   elif test "x$enable_snapshots" = xno ; then
-    AC_MSG_RESULT([no (explicit)])
+    AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_snapshots" = x ; then
     AC_MSG_RESULT([no (default)])
   else
