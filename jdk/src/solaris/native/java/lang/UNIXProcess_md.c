@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -293,6 +293,7 @@ throwIOException(JNIEnv *env, int errnum, const char *defaultDetail)
     static const char * const format = "error=%d, %s";
     const char *detail = defaultDetail;
     char *errmsg;
+    size_t fmtsize;
     char tmpbuf[1024];
     jstring s;
 
@@ -302,11 +303,12 @@ throwIOException(JNIEnv *env, int errnum, const char *defaultDetail)
             detail = tmpbuf;
     }
     /* ASCII Decimal representation uses 2.4 times as many bits as binary. */
-    errmsg = NEW(char, strlen(format) + strlen(detail) + 3 * sizeof(errnum));
+    fmtsize = strlen(format) + strlen(detail) + 3 * sizeof(errnum);
+    errmsg = NEW(char, fmtsize);
     if (errmsg == NULL)
         return;
 
-    sprintf(errmsg, format, errnum, detail);
+    snprintf(errmsg, fmtsize, format, errnum, detail);
     s = JNU_NewStringPlatform(env, errmsg);
     if (s != NULL) {
         jobject x = JNU_NewObjectByName(env, "java/io/IOException",

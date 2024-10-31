@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <windows.h>
 #include "jni.h"
@@ -214,7 +219,7 @@ Java_sun_net_spi_DefaultProxySelector_getSystemProxy(JNIEnv *env,
           type_proxy = (*env)->GetStaticObjectField(env, ptype_class, ptype_httpID);
         }
 
-        sprintf(pproto,"%s=", cproto);
+        snprintf(pproto, sizeof(pproto), "%s=", cproto);
         if (isCopy == JNI_TRUE)
           (*env)->ReleaseStringUTFChars(env, proto, cproto);
         /**

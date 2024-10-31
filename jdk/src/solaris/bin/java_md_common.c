@@ -22,6 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "java.h"
 
 /*
@@ -249,8 +255,9 @@ static char
     if (best == NULL)
         return (NULL);
     else {
-        ret_str = JLI_MemAlloc(JLI_StrLen(dirname) + JLI_StrLen(best) + 2);
-        sprintf(ret_str, "%s/%s", dirname, best);
+        size_t ret_str_size = JLI_StrLen(dirname) + JLI_StrLen(best) + 2;
+        ret_str = JLI_MemAlloc(ret_str_size);
+        snprintf(ret_str, ret_str_size, "%s/%s", dirname, best);
         JLI_MemFree(best);
         return (ret_str);
     }
@@ -283,9 +290,10 @@ LocateJRE(manifest_info* info)
         path = JLI_StringDup(path);
     } else {
         if ((home = getenv("HOME")) != NULL) {
-            path = (char *)JLI_MemAlloc(JLI_StrLen(home) + \
-                        JLI_StrLen(system_dir) + JLI_StrLen(user_dir) + 2);
-            sprintf(path, "%s%s:%s", home, user_dir, system_dir);
+            size_t path_size = JLI_StrLen(home) + \
+                        JLI_StrLen(system_dir) + JLI_StrLen(user_dir) + 2;
+            path = (char *)JLI_MemAlloc(path_size);
+            snprintf(path, path_size, "%s%s:%s", home, user_dir, system_dir);
         } else {
             path = JLI_StringDup(system_dir);
         }

@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <stdlib.h>
 #include <windows.h>
@@ -147,7 +152,7 @@ static int loadConfig(char *sl, char *ns) {
         while (curr != NULL) {
             char key[MAX_STR_LEN];
 
-            sprintf(key,
+            snprintf(key, sizeof(key),
                 "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\%s",
                 curr->AdapterName);
 
