@@ -22,6 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <windows.h>
 #include <Sddl.h>
 #include <string.h>
@@ -202,7 +208,7 @@ JNIEXPORT jlong JNICALL Java_sun_tools_attach_WindowsVirtualMachine_openProcess
             } else {
                 char err_mesg[255];
                 /* include the last error in the default detail message */
-                sprintf(err_mesg, "OpenProcess(pid=%d) failed; LastError=0x%x",
+                snprintf(err_mesg, sizeof(err_mesg), "OpenProcess(pid=%d) failed; LastError=0x%x",
                     (int)pid, (int)GetLastError());
                 JNU_ThrowIOExceptionWithLastError(env, err_mesg);
             }

@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <string.h>
 
@@ -48,7 +53,7 @@ static void get_thread_state_info(JNIEnv *env, jint state,
 
     values = (*GetThreadStateValues_fp)(env, state);
     if (values == NULL) {
-        sprintf(errmsg, "Mismatched VM version: Thread state (%d) "
+        snprintf(errmsg, sizeof(errmsg), "Mismatched VM version: Thread state (%d) "
                         "not supported", state);
         JNU_ThrowInternalError(env, errmsg);
         return;
@@ -58,7 +63,7 @@ static void get_thread_state_info(JNIEnv *env, jint state,
 
     names = (*GetThreadStateNames_fp)(env, state, values);
     if (names == NULL) {
-        sprintf(errmsg, "Mismatched VM version: Thread state (%d) "
+        snprintf(errmsg, sizeof(errmsg), "Mismatched VM version: Thread state (%d) "
                         "not supported", state);
         JNU_ThrowInternalError(env, errmsg);
         return;
@@ -78,7 +83,7 @@ Java_sun_misc_VM_getThreadStateValues(JNIEnv *env, jclass cls,
     jsize len1 = (*env)->GetArrayLength(env, values);
     jsize len2 = (*env)->GetArrayLength(env, names);
     if (len1 != JAVA_THREAD_STATE_COUNT || len2 != JAVA_THREAD_STATE_COUNT) {
-        sprintf(errmsg, "Mismatched VM version: JAVA_THREAD_STATE_COUNT = %d "
+        snprintf(errmsg, sizeof(errmsg), "Mismatched VM version: JAVA_THREAD_STATE_COUNT = %d "
                 " but JDK expects %d / %d",
                 JAVA_THREAD_STATE_COUNT, len1, len2);
         JNU_ThrowInternalError(env, errmsg);

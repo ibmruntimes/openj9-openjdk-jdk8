@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include "jni.h"
 #include "jvm.h"
@@ -33,7 +38,7 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     if (vm_version != JVM_INTERFACE_VERSION) {
         JNIEnv *env;
         char buf[128];
-        sprintf(buf, "JVM interface version mismatch: expecting %d, got %d.",
+        snprintf(buf, sizeof(buf), "JVM interface version mismatch: expecting %d, got %d.",
                 JVM_INTERFACE_VERSION, (int)vm_version);
         (*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_2);
         if (env) {
