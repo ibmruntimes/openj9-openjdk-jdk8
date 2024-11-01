@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -673,7 +673,7 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                 if (lastslash)
                     *lastslash = '\0';
 
-                sprintf(new_runpath, LD_LIBRARY_PATH "="
+                snprintf(new_runpath, new_runpath_size, LD_LIBRARY_PATH "="
                         "%s:"
                         "%s/lib/%s:"
 #ifdef AIX
@@ -780,11 +780,11 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                 char *oldexec = JLI_StrCpy(JLI_MemAlloc(JLI_StrLen(execname) + 1), execname);
                 char *olddir = oldexec;
                 char *oldbase = JLI_StrRChr(oldexec, '/');
+                size_t newexec_size = JLI_StrLen(execname) + 20;
 
-
-                newexec = JLI_MemAlloc(JLI_StrLen(execname) + 20);
+                newexec = JLI_MemAlloc(newexec_size);
                 *oldbase++ = 0;
-                sprintf(newexec, "%s/%s/%s", olddir,
+                snprintf(newexec, newexec_size, "%s/%s/%s", olddir,
                         ((wanted == 64) ? LIBARCH64NAME : ".."), oldbase);
                 argv[0] = newexec;
             }
@@ -1123,8 +1123,9 @@ void SetJavaLauncherPlatformProps() {
    /* Linux only */
 #ifdef __linux__
     const char *substr = "-Dsun.java.launcher.pid=";
-    char *pid_prop_str = (char *)JLI_MemAlloc(JLI_StrLen(substr) + MAX_PID_STR_SZ + 1);
-    sprintf(pid_prop_str, "%s%d", substr, getpid());
+    size_t pid_prop_str_size = JLI_StrLen(substr) + MAX_PID_STR_SZ + 1;
+    char *pid_prop_str = (char *)JLI_MemAlloc(pid_prop_str_size);
+    snprintf(pid_prop_str, pid_prop_str_size, "%s%d", substr, getpid());
     AddOption(pid_prop_str, NULL);
 #endif /* __linux__ */
 }

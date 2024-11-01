@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include "jni.h"
 #include "jni_util.h"
@@ -104,7 +109,7 @@ static pid_t getParent(pid_t pid) {
     /*
      * try to open /proc/%d/stat
      */
-    sprintf(fn, "/proc/%d/stat", pid);
+    snprintf(fn, sizeof(fn), "/proc/%d/stat", pid);
     fp = fopen(fn, "r");
     if (fp == NULL) {
         return -1;

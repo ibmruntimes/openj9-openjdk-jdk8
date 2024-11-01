@@ -213,9 +213,7 @@ endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 # Adjust snapshots enablement flags.
 ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
   FEATURE_SED_SCRIPT += $(call SedEnable,opt_snapshots)
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_snapshots)
 else # OPENJ9_ENABLE_SNAPSHOTS
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_snashots)
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_snapshots)
 endif # OPENJ9_ENABLE_SNAPSHOTS
 

@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include "jni.h"
 #include "jni_util.h"
@@ -40,7 +45,7 @@ static void setStaticIntField(JNIEnv* env, jclass cls, const char* name, jint va
     if (fid != 0) {
         (*env)->SetStaticIntField(env, cls, fid, value);
     } else {
-        sprintf(errmsg, "Static int field %s not found", name);
+        snprintf(errmsg, sizeof(errmsg), "Static int field %s not found", name);
         JNU_ThrowInternalError(env, errmsg);
     }
 }
@@ -53,7 +58,7 @@ static void setStaticBooleanField(JNIEnv* env, jclass cls, const char* name, jbo
     if (fid != 0) {
         (*env)->SetStaticBooleanField(env, cls, fid, value);
     } else {
-        sprintf(errmsg, "Static boolean field %s not found", name);
+        snprintf(errmsg, sizeof(errmsg), "Static boolean field %s not found", name);
         JNU_ThrowInternalError(env, errmsg);
     }
 }
@@ -66,7 +71,7 @@ static void setStaticStringField(JNIEnv* env, jclass cls, const char* name, jstr
     if (fid != 0) {
         (*env)->SetStaticObjectField(env, cls, fid, value);
     } else {
-        sprintf(errmsg, "Static String field %s not found", name);
+        snprintf(errmsg, sizeof(errmsg), "Static String field %s not found", name);
         JNU_ThrowInternalError(env, errmsg);
     }
 }

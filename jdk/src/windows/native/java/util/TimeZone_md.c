@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -136,7 +136,7 @@ getValueInRegistry(HKEY hKey,
 /*
  * Produces custom name "GMT+hh:mm" from the given bias in buffer.
  */
-static void customZoneName(LONG bias, char *buffer) {
+static void customZoneName(LONG bias, char *buffer, size_t bufSize) {
     LONG gmtOffset;
     int sign;
 
@@ -148,7 +148,7 @@ static void customZoneName(LONG bias, char *buffer) {
         sign = 1;
     }
     if (gmtOffset != 0) {
-        sprintf(buffer, "GMT%c%02d:%02d",
+        snprintf(buffer, bufSize, "GMT%c%02d:%02d",
                 ((sign >= 0) ? '+' : '-'),
                 gmtOffset / 60,
                 gmtOffset % 60);
@@ -187,7 +187,7 @@ static int getDynamicTimeZoneInfo(PDYNAMIC_TIME_ZONE_INFORMATION pdtzi) {
 /*
  * Gets the current time zone entry in the "Time Zones" registry.
  */
-static int getWinTimeZone(char *winZoneName, char *winMapID)
+static int getWinTimeZone(char *winZoneName, char *winMapID, size_t winZoneNameBufSize)
 {
     TIME_ZONE_INFORMATION tzi;
     OSVERSIONINFO ver;
@@ -235,7 +235,7 @@ static int getWinTimeZone(char *winZoneName, char *winMapID)
              */
             if (dtzi.TimeZoneKeyName[0] != 0) {
                 if (dtzi.DynamicDaylightTimeDisabled) {
-                    customZoneName(dtzi.Bias, winZoneName);
+                    customZoneName(dtzi.Bias, winZoneName, winZoneNameBufSize);
                     return VALUE_GMTOFFSET;
                 }
                 wcstombs(winZoneName, dtzi.TimeZoneKeyName, MAX_ZONE_CHAR);
@@ -268,7 +268,7 @@ static int getWinTimeZone(char *winZoneName, char *winMapID)
                  * adjustment is disabled.
                  */
                 if (val == 1) {
-                    customZoneName(dtzi.Bias, winZoneName);
+                    customZoneName(dtzi.Bias, winZoneName, winZoneNameBufSize);
                     (void) RegCloseKey(hKey);
                     return VALUE_GMTOFFSET;
                 }
@@ -322,7 +322,7 @@ static int getWinTimeZone(char *winZoneName, char *winMapID)
 
             if (daylightSavingsUpdateDisabled) {
                 (void) RegCloseKey(hKey);
-                customZoneName(tzi.Bias, winZoneName);
+                customZoneName(tzi.Bias, winZoneName, winZoneNameBufSize);
                 return VALUE_GMTOFFSET;
             }
         }
@@ -601,7 +601,7 @@ char *findJavaTZ_md(const char *java_home_dir)
     int  result;
 
     winMapID[0] = 0;
-    result = getWinTimeZone(winZoneName, winMapID);
+    result = getWinTimeZone(winZoneName, winMapID, sizeof(winZoneName));
 
     if (result != VALUE_UNKNOWN) {
         if (result == VALUE_GMTOFFSET) {
@@ -652,6 +652,6 @@ getGMTOffsetID()
         }
     }
 
-    customZoneName(bias, zonename);
+    customZoneName(bias, zonename, sizeof(zonename));
     return _strdup(zonename);
 }
