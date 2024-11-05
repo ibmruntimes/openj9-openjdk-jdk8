@@ -55,18 +55,18 @@ final class SunECEntries {
     /* The property 'jdk.nativeEC' is used to control enablement of the native
      * ECDH implementation.
      */
-    private static final boolean useNativeECDH = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "SunEC");
+    private static final boolean useNativeECDH = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "ECDH");
 
     /* The property 'jdk.nativeECKeyGen' is used to control enablement of the native
      * ECKeyGeneration implementation.
      * OpenSSL 1.1.0 or above is required for EC key generation support.
      */
-    private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "SunEC");
+    private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "ECKeyGen");
 
     /* The property 'jdk.nativeECDSA' is used to control enablement of the native
      * ECDSA signature implementation.
      */
-    private static final boolean useNativeECDSA = NativeCrypto.isAlgorithmEnabled("jdk.nativeECDSA", "SunEC");
+    private static final boolean useNativeECDSA = NativeCrypto.isAlgorithmEnabled("jdk.nativeECDSA", "ECDSA");
 
     private SunECEntries() {
         // empty
