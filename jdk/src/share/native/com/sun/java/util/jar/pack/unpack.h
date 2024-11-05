@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 // Global Structures
 struct jar;
 struct gunzip;
@@ -418,7 +423,7 @@ struct unpacker {
   void         saveTo(bytes& b, bytes& data) { saveTo(b, data.ptr, data.len); }
   void         saveTo(bytes& b, byte* ptr, size_t len); //{ b.ptr = U_NEW...}
   const char*  saveStr(const char* str) { bytes buf; saveTo(buf, str); return buf.strval(); }
-  const char*  saveIntStr(int num) { char buf[30]; sprintf(buf, "%d", num); return saveStr(buf); }
+  const char*  saveIntStr(int num) { char buf[30]; snprintf(buf, sizeof(buf), "%d", num); return saveStr(buf); }
 #ifndef PRODUCT
   int printcr_if_verbose(int level, const char* fmt,...);
 #endif
