@@ -86,6 +86,8 @@ public class NativeCrypto {
             return osslVersion;
         }).longValue();
 
+    private static final boolean isOpenSSLFIPS = (ossl_ver != -1) && isOpenSSLFIPS();
+
     /**
      * Return the OpenSSL version. It will return -1 if the library isn't
      * successfully loaded.
@@ -190,6 +192,49 @@ public class NativeCrypto {
         //empty
     }
 
+    /**
+     * Check whether a native implementation is available in the loaded OpenSSL library.
+     * Note that, an algorithm could be unavailable due to options used to build the
+     * OpenSSL version utilized, or using a FIPS version that doesn't allow it.
+     *
+     * @param algorithm the algorithm checked
+     * @return whether a native implementation of the given crypto algorithm is available
+     */
+    public static final boolean isAlgorithmAvailable(String algorithm) {
+        boolean isAlgorithmAvailable = false;
+        if (isLoaded()) {
+            if (isOpenSSLFIPS) {
+                switch (algorithm) {
+                case "MD5":
+                    // not available
+                    break;
+                default:
+                    isAlgorithmAvailable = true;
+                    break;
+                }
+            } else {
+                switch (algorithm) {
+                case "MD5":
+                    isAlgorithmAvailable = isMD5Available();
+                    break;
+                default:
+                    isAlgorithmAvailable = true;
+                    break;
+                }
+            }
+        }
+
+        // Issue a message indicating whether the crypto implementation is available.
+        if (traceEnabled) {
+            if (isAlgorithmAvailable) {
+                System.err.println(algorithm + " native crypto implementation is available.");
+            } else {
+                System.err.println(algorithm + " native crypto implementation is not available.");
+            }
+        }
+        return isAlgorithmAvailable;
+    }
+
     @CallerSensitive
     public static NativeCrypto getNativeCrypto() {
 
@@ -215,6 +260,8 @@ public class NativeCrypto {
     private static final native long loadCrypto(boolean trace);
 
     public static final native boolean isMD5Available();
+
+    private static final native boolean isOpenSSLFIPS();
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
