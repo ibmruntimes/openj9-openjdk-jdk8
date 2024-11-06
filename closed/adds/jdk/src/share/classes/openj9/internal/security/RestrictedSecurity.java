@@ -391,8 +391,8 @@ public final class RestrictedSecurity {
     /**
      * Check whether a security property can be set.
      *
-     * A security property that is set by a RestrictedSecurity profile,
-     * while FIPS security mode is enabled, cannot be reset programmatically.
+     * A security property that is FIPS-related and can be set by a RestrictedSecurity
+     * profile, while FIPS security mode is enabled, cannot be reset programmatically.
      *
      * Every time an attempt to set a security property is made, a check is
      * performed. If the above scenario holds true, a SecurityException is
@@ -413,7 +413,7 @@ public final class RestrictedSecurity {
         }
 
         /*
-         * Only disallow setting of security properties that are set by the active profile,
+         * Only disallow setting of security properties that are FIPS-related,
          * if FIPS has been enabled.
          *
          * Allow any change, if the 'semeru.fips.allowsetproperties' flag is set to true.
@@ -425,8 +425,8 @@ public final class RestrictedSecurity {
                         + "properties to be set, use '-Dsemeru.fips.allowsetproperties=true'.");
                 debug.println("BEWARE: You might not be FIPS compliant if you select to override!");
             }
-            throw new SecurityException("FIPS mode: User-specified '" + key
-                    + "' cannot override profile definition.");
+            throw new SecurityException("Property '" + key
+                    + "' cannot be set programmatically when in FIPS mode");
         }
 
         if (debug != null) {
@@ -537,14 +537,14 @@ public final class RestrictedSecurity {
         propsMapping.put("jdk.certpath.disabledAlgorithms", restricts.jdkCertpathDisabledAlgorithms);
         propsMapping.put("jdk.security.legacyAlgorithms", restricts.jdkSecurityLegacyAlgorithms);
 
+        if (userEnabledFIPS && !allowSetProperties) {
+            // Add all properties that cannot be modified.
+            unmodifiableProperties.addAll(propsMapping.keySet());
+        }
+
         for (Map.Entry<String, String> entry : propsMapping.entrySet()) {
             String jdkPropsName = entry.getKey();
             String propsNewValue = entry.getValue();
-
-            if ((propsNewValue != null) && userEnabledFIPS && !allowSetProperties) {
-                // Add to set of properties set by the active profile.
-                unmodifiableProperties.add(jdkPropsName);
-            }
 
             if (!isNullOrBlank(propsNewValue)) {
                 props.setProperty(jdkPropsName, propsNewValue);
