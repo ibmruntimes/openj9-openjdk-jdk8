@@ -52,6 +52,7 @@ SUNWprivate_1.1 {
 		Java_jdk_crypto_jniprovider_NativeCrypto_PBEDerive;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDSASign;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDSAVerify;
+		Java_jdk_crypto_jniprovider_NativeCrypto_isOpenSSLFIPS;
 	local:
 		*;
 };
