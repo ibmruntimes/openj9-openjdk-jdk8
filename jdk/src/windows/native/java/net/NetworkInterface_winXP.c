@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <stdlib.h>
 #include <windows.h>
@@ -314,10 +319,10 @@ int getAllInterfacesAndAddresses (JNIEnv *env, netif **netifPP)
                             goto err;
                         }
                         if (ptr->IfType == IF_TYPE_TUNNEL) {
-                                sprintf (newname, "tun%d", tun);
+                                snprintf (newname, sizeof(newname), "tun%d", tun);
                                 tun ++;
                         } else {
-                                sprintf (newname, "net%d", net);
+                                snprintf (newname, sizeof(newname), "net%d", net);
                                 net ++;
                         }
                         nif->name = malloc (strlen(newname)+1);
