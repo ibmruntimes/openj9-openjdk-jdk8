@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <errno.h>
 #include <netinet/in.h>
@@ -1657,7 +1662,7 @@ jobject getMulticastInterface(JNIEnv *env, jobject this, int fd, jint opt) {
                                                                    index);
             if (ni == NULL) {
                 char errmsg[255];
-                sprintf(errmsg,
+                snprintf(errmsg, sizeof(errmsg),
                         "IPV6_MULTICAST_IF returned index to unrecognized interface: %d",
                         index);
                 JNU_ThrowByName(env, JNU_JAVANETPKG "SocketException", errmsg);
