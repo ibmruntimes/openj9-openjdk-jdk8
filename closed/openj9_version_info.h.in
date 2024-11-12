@@ -1,8 +1,7 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
  * ===========================================================================
- *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
  * published by the Free Software Foundation.
@@ -39,5 +38,7 @@
 #define J9JDK_EXT_NAME            "@J9JDK_EXT_NAME@"
 #define JAVA_VENDOR               "@COMPANY_NAME@"
 #define JAVA_VENDOR_URL           "@VENDOR_URL@"
+
+#define JDK_DEBUG_LEVEL           "@DEBUG_LEVEL@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
