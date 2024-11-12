@@ -330,24 +330,30 @@ public final class RestrictedSecurity {
                         + selectedProfile);
             }
             String defaultMatch = null;
+            boolean profileExists = false;
             for (Object keyObject : props.keySet()) {
                 if (keyObject instanceof String) {
                     String key = (String) keyObject;
-                    if (key.startsWith(potentialProfileID) && key.endsWith(".desc.default")) {
-                        // Check if property is set to true.
-                        if (Boolean.parseBoolean(props.getProperty(key))) {
-                            // Check if multiple defaults exist and act accordingly.
-                            if (defaultMatch == null) {
-                                defaultMatch = key.split("\\.desc")[0];
-                            } else {
-                                printStackTraceAndExit("Multiple default RestrictedSecurity"
-                                        + " profiles for " + selectedProfile);
+                    if (key.startsWith(potentialProfileID)) {
+                        profileExists = true;
+                        if (key.endsWith(".desc.default")) {
+                            // Check if property is set to true.
+                            if (Boolean.parseBoolean(props.getProperty(key))) {
+                                // Check if multiple defaults exist and act accordingly.
+                                if (defaultMatch == null) {
+                                    defaultMatch = key.substring(0, key.length() - ".desc.default".length());
+                                } else {
+                                    printStackTraceAndExit("Multiple default RestrictedSecurity"
+                                            + " profiles for " + selectedProfile);
+                                }
                             }
                         }
                     }
                 }
             }
-            if (defaultMatch == null) {
+            if (!profileExists) {
+                printStackTraceAndExit(selectedProfile + " is not present in the java.security file.");
+            } else if (defaultMatch == null) {
                 printStackTraceAndExit("No default RestrictedSecurity profile was found for "
                         + selectedProfile);
             } else {
