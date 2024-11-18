@@ -1,0 +1,542 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
+RestrictedSecurity.TestBase.Version.desc.default = false
+RestrictedSecurity.TestBase.Version.desc.fips = true
+RestrictedSecurity.TestBase.Version.desc.hash = SHA-256:0ca32676ac2ae92d0469cbf293f3a69416c5d0312c80473319452f4d6995d234
+RestrictedSecurity.TestBase.Version.desc.number = Certificate #XXX
+RestrictedSecurity.TestBase.Version.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.TestBase.Version.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.TestBase.Version.fips.mode = 140-3
+
+RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =
+RestrictedSecurity.TestBase.Version.tls.disabledAlgorithms =
+RestrictedSecurity.TestBase.Version.tls.ephemeralDHKeySize =
+RestrictedSecurity.TestBase.Version.tls.legacyAlgorithms =
+
+RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
+RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
+RestrictedSecurity.TestBase.Version.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestBase.Version.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestBase.Version.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.TestBase.Version.javax.net.ssl.keyStore = NONE
+RestrictedSecurity.TestBase.Version.securerandom.algorithm = SHA512DRBG
+
+RestrictedSecurity.TestBase.Version-Extended.desc.name = Test Base Profile Extended
+RestrictedSecurity.TestBase.Version-Extended.desc.default = true
+RestrictedSecurity.TestBase.Version-Extended.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.TestBase.Version-Extended.tls.disabledAlgorithms =
+
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.2 = sun.security.rsa.SunRsaSign
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.3 = sun.security.ec.SunEC
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.5 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.6 = sun.security.jgss.SunProvider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.7 = com.sun.security.sasl.Provider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.8 = org.jcp.xml.dsig.internal.dom.XMLDSigRI
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.9 = sun.security.smartcardio.SunPCSC
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.10 = sun.security.provider.certpath.ldap.JdkLDAP
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.11 = com.sun.security.sasl.gsskerb.JdkSASL
+
+#
+# Test-Profile.Base
+# Test profile - base profile misspell properties
+#
+RestrictedSecurity.Test-Profile.Base.desc.name = Test-Profile.Base
+RestrictedSecurity.Test-Profile.Base.desc.default = true
+RestrictedSecurity.Test-Profile.Base.desc.fips = true
+RestrictedSecurity.Test-Profile.Base.desc.hash = SHA-256:4fab3014e91072587e76c6ebb393ceea710d76582069d46a70eab31c30f57e45
+RestrictedSecurity.Test-Profile.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile.Base.tls.disabledAlgorithmsWrongTypo =
+
+RestrictedSecurity.Test-Profile.Base.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.Test-Profile.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile.Extended_1
+# Test profile - extenstion profile misspell properties
+#
+RestrictedSecurity.Test-Profile.Extended_1.desc.nameWrongTypo = Test-Profile.Extended_1
+RestrictedSecurity.Test-Profile.Extended_1.desc.default = true
+RestrictedSecurity.Test-Profile.Extended_1.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Extended_1.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Extended_1.jce.providerWrongTypo = sun.security.rsa.SunRsaSign
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.4 = sun.security.ec.SunEC
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Extended_2
+# Test profile - extension profile from another extension profile misspell properties
+#
+RestrictedSecurity.Test-Profile.Extended_2.desc.name = Test-Profile.Extended_2
+RestrictedSecurity.Test-Profile.Extended_2.desc.default = false
+RestrictedSecurity.Test-Profile.Extended_2.extends = RestrictedSecurity.TestBase.Version-Extended
+RestrictedSecurity.Test-Profile.Extended_2.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_2.jce.providerWrongTypo = sun.security.pkcs11.SunPKCS11
+
+#
+# Test-Profile-NotExist.Base
+# Test profile - profile not exist
+#
+
+#
+# Test-Profile-MultiDefault.Base
+# Test profile - Multi Default Base profile
+#
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.name = Test-Profile-MultiDefault.Base
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.default = true
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.hash = SHA-256:adf136024d9c047f3ffb1dac41e5f553eee5e7b6dec13bfc13b431a2a8a2525d
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-MultiDefault.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-MultiDefault.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.Test-Profile-MultiDefault.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-MultiDefault.Extension
+# Test profile - Multi Default Extension profile
+#
+RestrictedSecurity.Test-Profile-MultiDefault.Extension.desc.name = Test-Profile-MultiDefault.Extension
+RestrictedSecurity.Test-Profile-MultiDefault.Extension.desc.default = true
+RestrictedSecurity.Test-Profile-MultiDefault.Extension.extends = RestrictedSecurity.Test-Profile-MultiDefault.Base
+RestrictedSecurity.Test-Profile-MultiDefault.Extension.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile-MultiDefault.Extension.jce.provider.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-NoDefault
+# Test profile - no default profile
+#
+RestrictedSecurity.Test-Profile-NoDefault.desc.name = Test-Profile-NoDefault
+RestrictedSecurity.Test-Profile-NoDefault.desc.default = false
+RestrictedSecurity.Test-Profile-NoDefault.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile-NoDefault.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile-NoDefault.jce.providerWrongTypo.1 = sun.security.provider.Sun
+
+#
+# Test-Profile.Extended_3
+# Test profile - base profile not exist
+#
+RestrictedSecurity.Test-Profile.Extended_3.desc.name = Test-Profile.Extended_3
+RestrictedSecurity.Test-Profile.Extended_3.desc.default = false
+RestrictedSecurity.Test-Profile.Extended_3.extends = RestrictedSecurity.Test-Profile.BaseNotExist
+RestrictedSecurity.Test-Profile.Extended_3.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_3.jce.providerWrongTypo.1 = sun.security.provider.Sun
+
+#
+# Test-Profile.Extended_4
+# Test profile - base profile not full profile name
+#
+RestrictedSecurity.Test-Profile.Extended_4.desc.name = Test-Profile.Extended_4
+RestrictedSecurity.Test-Profile.Extended_4.desc.default = false
+RestrictedSecurity.Test-Profile.Extended_4.extends = RestrictedSecurity.BaseNotFullProfileName
+RestrictedSecurity.Test-Profile.Extended_4.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_4.jce.providerWrongTypo.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-BaseWithoutHash
+# Test profile - base profile without hash value
+#
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.name = Test-Profile-BaseWithoutHash
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.default = true
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.fips = true
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-BaseWithoutHash.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-BaseWithoutHash.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-BaseWithoutHash.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-BaseWithoutHash.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-Hash_1
+# Test profile - incorrect definition of hash value
+#
+RestrictedSecurity.Test-Profile-Hash_1.desc.name = Test-Profile-Hash_1
+RestrictedSecurity.Test-Profile-Hash_1.desc.default = true
+RestrictedSecurity.Test-Profile-Hash_1.desc.fips = true
+RestrictedSecurity.Test-Profile-Hash_1.desc.hash = SHA-2564fab3014e91072587e76c6ebb393ceea710d76582069d46a70eab31c30f57e45
+RestrictedSecurity.Test-Profile-Hash_1.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Hash_1.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Hash_1.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Hash_1.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Hash_1.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-Hash_1.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-Hash_2
+# Test profile - incorrect hash value
+#
+RestrictedSecurity.Test-Profile-Hash_2.desc.name = Test-Profile-Hash_2
+RestrictedSecurity.Test-Profile-Hash_2.desc.default = true
+RestrictedSecurity.Test-Profile-Hash_2.desc.fips = true
+RestrictedSecurity.Test-Profile-Hash_2.desc.hash = SHA-256:4fab3014e91072587e76c6ebb393ceea710d76582069d46a70eab31c30f57e45
+RestrictedSecurity.Test-Profile-Hash_2.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Hash_2.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Hash_2.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Hash_2.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Hash_2.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-Hash_2.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-SetProperty.Base
+# Test profile set property base
+#
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.name = Test-Profile-SetProperty.Base
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.default = false
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.hash = SHA-256:c6348b840ab42f891e3bde552b8d908be37571804750312aabe8f17e48830564
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SetProperty.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SetProperty.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SetProperty.Base.tls.disabledAlgorithms = \
+    3DES_EDE_CBC, \
+    TLSv1, \
+    TLSv1.1, \
+    X25519, \
+    X448
+RestrictedSecurity.Test-Profile-SetProperty.Base.tls.ephemeralDHKeySize =
+
+RestrictedSecurity.Test-Profile-SetProperty.Base.jce.certpath.disabledAlgorithms =
+RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.Test-Profile-SetProperty.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-SetProperty.Extension_1
+# Test property - property not appendable
+#
+RestrictedSecurity.Test-Profile-SetProperty.Extension_1.desc.name = Test-Profile-SetProperty.Extension_1
+RestrictedSecurity.Test-Profile-SetProperty.Extension_1.desc.default = true
+RestrictedSecurity.Test-Profile-SetProperty.Extension_1.extends = RestrictedSecurity.Test-Profile-SetProperty.Base
+RestrictedSecurity.Test-Profile-SetProperty.Extension_1.securerandom.algorithm = + Sun
+
+RestrictedSecurity.Test-Profile-SetProperty.Extension_1.jce.provider.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-SetProperty.Extension_2
+# Test property - property does not exist in parent profile, cannot append
+#
+RestrictedSecurity.Test-Profile-SetProperty.Extension_2.desc.name = Test-Profile-SetProperty.Extension_2
+RestrictedSecurity.Test-Profile-SetProperty.Extension_2.desc.default = true
+RestrictedSecurity.Test-Profile-SetProperty.Extension_2.extends = RestrictedSecurity.Test-Profile-SetProperty.Base
+RestrictedSecurity.Test-Profile-SetProperty.Extension_2.tls.disabledNamedCurves = + TestNamedCurves
+
+RestrictedSecurity.Test-Profile-SetProperty.Extension_2.jce.provider.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-SetProperty.Extension_3
+# Test property - property value is not in existing values
+#
+RestrictedSecurity.Test-Profile-SetProperty.Extension_3.desc.name = Test-Profile-SetProperty.Extension_3
+RestrictedSecurity.Test-Profile-SetProperty.Extension_3.desc.default = true
+RestrictedSecurity.Test-Profile-SetProperty.Extension_3.extends = RestrictedSecurity.Test-Profile-SetProperty.Base
+RestrictedSecurity.Test-Profile-SetProperty.Extension_3.tls.disabledAlgorithms = - TestDisabledlgorithms
+
+RestrictedSecurity.Test-Profile-SetProperty.Extension_3.jce.provider.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-PolicySunset.Base
+# Test property - policy sunset
+#
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.name = Test-Profile-PolicySunset.Base
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.default = true
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-PolicySunset.Base.desc.sunsetDate = 2023-09-21
+RestrictedSecurity.Test-Profile-PolicySunset.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-PolicySunset.Base.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-PolicySunset.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-PolicySunsetFormat.Base
+# Test property - policy sunset format
+#
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.name = Test-Profile-PolicySunsetFormat.Base
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.default = true
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.desc.sunsetDate = 09-21-2024
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-PolicySunsetFormat.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-SecureRandomCheck_1
+# Test property - secure random check
+#
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.name = Test-Profile-SecureRandomCheck_1
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.default = true
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.fips = true
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-SecureRandomCheck_1.securerandom.algorithm =
+
+#
+# Test-Profile-SecureRandomCheck_2
+# Test property - secure random check
+#
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.name = Test-Profile-SecureRandomCheck_2
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.default = true
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.fips = true
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SecureRandomCheck_2.jce.provider.1 = sun.security.provider.Sun
+
+#
+# Test-Profile-Constraint_1
+# Test constraint - constraint check 1
+#
+RestrictedSecurity.Test-Profile-Constraint_1.desc.name = Test-Profile-Constraint_1
+RestrictedSecurity.Test-Profile-Constraint_1.desc.default = true
+RestrictedSecurity.Test-Profile-Constraint_1.desc.fips = true
+RestrictedSecurity.Test-Profile-Constraint_1.desc.hash = SHA-256:76dacdfdc5b5811d9b45e72b5b154de6419616556f8f7479819971bba89c41bb
+RestrictedSecurity.Test-Profile-Constraint_1.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Constraint_1.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Constraint_1.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Constraint_1.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Constraint_1.jce.provider.1 = com.sun.crypto.provider.SunJCE  \
+    {AlgorithmParameterGenerator, AESGCM, *}, \
+    {AlgorithmParameterGenerator, CCM, *}]
+
+RestrictedSecurity.Test-Profile-Constraint_1.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-Constraint_2
+# Test constraint - constraint check 2
+#
+RestrictedSecurity.Test-Profile-Constraint_2.desc.name = Test-Profile-Constraint_2
+RestrictedSecurity.Test-Profile-Constraint_2.desc.default = true
+RestrictedSecurity.Test-Profile-Constraint_2.desc.fips = true
+RestrictedSecurity.Test-Profile-Constraint_2.desc.hash = SHA-256:76dacdfdc5b5811d9b45e72b5b154de6419616556f8f7479819971bba89c41bb
+RestrictedSecurity.Test-Profile-Constraint_2.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Constraint_2.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Constraint_2.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Constraint_2.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Constraint_2.jce.provider.1 = com.sun.crypto.provider.SunJCE [ \
+    {AlgorithmParameterGenerator, AESGCM, *} \
+    {AlgorithmParameterGenerator, CCM, *}]
+
+RestrictedSecurity.Test-Profile-Constraint_2.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-Constraint_3
+# Test constraint - constraint check 3
+#
+RestrictedSecurity.Test-Profile-Constraint_3.desc.name = Test-Profile-Constraint_3
+RestrictedSecurity.Test-Profile-Constraint_3.desc.default = true
+RestrictedSecurity.Test-Profile-Constraint_3.desc.fips = true
+RestrictedSecurity.Test-Profile-Constraint_3.desc.hash = SHA-256:76dacdfdc5b5811d9b45e72b5b154de6419616556f8f7479819971bba89c41bb
+RestrictedSecurity.Test-Profile-Constraint_3.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Constraint_3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Constraint_3.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Constraint_3.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Constraint_3.jce.provider.1 = com.sun.crypto.provider.SunJCE [ {} ]
+
+RestrictedSecurity.Test-Profile-Constraint_3.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-Constraint_Attributes
+# Test constraint - constraint attributes check
+#
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.name = Test-Profile-Constraint_Attributes
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.default = true
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.fips = true
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.hash = SHA-256:76dacdfdc5b5811d9b45e72b5b154de6419616556f8f7479819971bba89c41bb
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-Constraint_Attributes.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-Constraint_Attributes.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-Constraint_Attributes.jce.provider.1 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-Constraint_Attributes.jce.provider.2 = sun.security.provider.Sun [ \
+    {CertificateFactory, X.509, ImplementedInSoftware}]
+
+RestrictedSecurity.Test-Profile-Constraint_Attributes.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-ConstraintChanged_1.Base
+# Test constraint - constraint changed 1 base
+#
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.name = Test-Profile-ConstraintChanged_1.Base
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.default = false
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.jce.provider.1 = com.sun.crypto.provider.SunJCE [ \
+    {AlgorithmParameterGenerator, AESGCM, *}, \
+    {AlgorithmParameterGenerator, CCM, *}]
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.jce.provider.2 = sun.security.provider.Sun [ \
+    {CertificateFactory, X.509, ImplementedIn=Software}]
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-ConstraintChanged_1.Extension
+# Test constraint - constraint changed 1 extension
+#
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Extension.desc.name = Test-Profile-ConstraintChanged_1.Extension
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Extension.desc.default = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Extension.extends = RestrictedSecurity.Test-Profile-ConstraintChanged_1.Base
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_1.Extension.jce.provider.1 = sun.security.provider.Sun [ + \
+    {CertificateFactory, X.509, ImplementedIn=Software}]
+
+#
+# Test-Profile-ConstraintChanged_2.Base
+# Test constraint - constraint changed 2 base
+#
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.name = Test-Profile-ConstraintChanged_2.Base
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.default = false
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.jce.provider.1 = com.sun.crypto.provider.SunJCE [ \
+    {AlgorithmParameterGenerator, AESGCM, *}, \
+    {AlgorithmParameterGenerator, CCM, *}]
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.jce.provider.2 = sun.security.provider.Sun [ \
+    {CertificateFactory, X.509, ImplementedIn=Software}]
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-ConstraintChanged_2.Extension
+# Test constraint - constraint changed 2 extension
+#
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Extension.desc.name = Test-Profile-ConstraintChanged_2.Extension
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Extension.desc.default = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Extension.extends = RestrictedSecurity.Test-Profile-ConstraintChanged_2.Base
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_2.Extension.jce.provider.2 = sun.security.provider.Sun [ - \
+    {CertStore, Collection, ImplementedIn=Software}]
+
+#
+# Test-Profile-ConstraintChanged_3.Base
+# Test constraint - constraint changed 3 base
+#
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.name = Test-Profile-ConstraintChanged_3.Base
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.default = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.fips = true
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.jce.provider.1 =  com.sun.crypto.provider.SunJCE [ + \
+    {AlgorithmParameterGenerator, AESGCM, *} \
+    {AlgorithmParameterGenerator, CCM, *}]
+
+RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-SameStartWithoutVersion
+# Test property - Same beginnings of the profile name without version
+#
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.name = Test-Profile-SameStartWithoutVersion
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.default = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.fips = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA-256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.securerandom.algorithm = SHA512DRBG
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.name = Test-Profile-SameStartWithoutVersionPart
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.default = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.fips = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.hash = SHA-256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.algorithm = SHA512DRBG
