@@ -1,0 +1,212 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
+RestrictedSecurity.TestBase.Version.desc.default = false
+RestrictedSecurity.TestBase.Version.desc.fips = true
+RestrictedSecurity.TestBase.Version.desc.hash = SHA-256:118ffaf1b30928785af1d4074272ec75724e4ba005ae5dd4ff728208044f62ff
+RestrictedSecurity.TestBase.Version.desc.number = Certificate #XXX
+RestrictedSecurity.TestBase.Version.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.TestBase.Version.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.TestBase.Version.fips.mode = 140-3
+
+RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =
+RestrictedSecurity.TestBase.Version.tls.disabledAlgorithms =
+RestrictedSecurity.TestBase.Version.tls.ephemeralDHKeySize =
+RestrictedSecurity.TestBase.Version.tls.legacyAlgorithms =
+
+RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
+RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
+RestrictedSecurity.TestBase.Version.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestBase.Version.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestBase.Version.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+RestrictedSecurity.TestBase.Version.javax.net.ssl.keyStore = NONE
+RestrictedSecurity.TestBase.Version.securerandom.algorithm = SHA512DRBG
+
+RestrictedSecurity.TestBase.Version-Extended.desc.name = Test Base Profile Extended
+RestrictedSecurity.TestBase.Version-Extended.desc.default = true
+RestrictedSecurity.TestBase.Version-Extended.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.TestBase.Version-Extended.tls.disabledAlgorithms =
+
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.2 = sun.security.rsa.SunRsaSign
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.3 = sun.security.ec.SunEC
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.5 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.6 = sun.security.jgss.SunProvider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.7 = com.sun.security.sasl.Provider
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.8 = org.jcp.xml.dsig.internal.dom.XMLDSigRI
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.9 = sun.security.smartcardio.SunPCSC
+
+#
+# Test-Profile.Updated_1
+# Test update provider list with value
+#
+RestrictedSecurity.Test-Profile.Updated_1.desc.name = Test Updated Profile 1
+RestrictedSecurity.Test-Profile.Updated_1.desc.default = true
+RestrictedSecurity.Test-Profile.Updated_1.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Updated_1.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Updated_1.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Updated_1.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Updated_1.jce.provider.3 = com.sun.security.sasl.Provider
+
+#
+# Test-Profile.Updated_2
+# Test update provider list with null
+#
+RestrictedSecurity.Test-Profile.Updated_2.desc.name = Test Updated Profile 2
+RestrictedSecurity.Test-Profile.Updated_2.desc.default = true
+RestrictedSecurity.Test-Profile.Updated_2.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Updated_2.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Updated_2.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Updated_2.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Updated_3
+# Test update provider list with empty, the empty is the last one in base profile
+#
+RestrictedSecurity.Test-Profile.Updated_3.desc.name = Test Updated Profile 3
+RestrictedSecurity.Test-Profile.Updated_3.desc.default = true
+RestrictedSecurity.Test-Profile.Updated_3.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Updated_3.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.3 =
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.4 = sun.security.ec.SunEC
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Updated_4
+# Test update provider list with empty, the empty is NOT the last one in base profile
+#
+RestrictedSecurity.Test-Profile.Updated_4.desc.name = Test Updated Profile 3
+RestrictedSecurity.Test-Profile.Updated_4.desc.default = true
+RestrictedSecurity.Test-Profile.Updated_4.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Updated_4.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Updated_4.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Updated_4.jce.provider.2 =
+RestrictedSecurity.Test-Profile.Updated_4.jce.provider.3 = sun.security.ec.SunEC
+RestrictedSecurity.Test-Profile.Updated_4.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Base
+# Test base profile - provider order numbers are not consecutive
+#
+RestrictedSecurity.Test-Profile.Base.desc.name = Test Base Profile
+RestrictedSecurity.Test-Profile.Base.desc.default = true
+RestrictedSecurity.Test-Profile.Base.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile.Base.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Base.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Base.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Extended_1
+# Test extended profile, provider order numbers are not consecutive
+#
+RestrictedSecurity.Test-Profile.Extended_1.desc.name = Test Extended_1
+RestrictedSecurity.Test-Profile.Extended_1.desc.default = true
+RestrictedSecurity.Test-Profile.Extended_1.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.Extended_1.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.3 = sun.security.rsa.SunRsaSign
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.Extended_2
+# Test extended profile from another extended profile, provider order numbers are not consecutive
+#
+RestrictedSecurity.Test-Profile.Extended_2.desc.name = Test Extended_2
+RestrictedSecurity.Test-Profile.Extended_2.desc.default = false
+RestrictedSecurity.Test-Profile.Extended_2.extends = RestrictedSecurity.TestBase.Version-Extended
+RestrictedSecurity.Test-Profile.Extended_2.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.Extended_2.jce.provider.14 = sun.security.pkcs11.SunPKCS11
+
+#
+# Test-Profile.BaseOneProviderEmpty
+# Test base profile - one of the provider in list empty
+#
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.desc.name = Test Base One Provider Empty
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.desc.default = true
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.3 =
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
+
+#
+# Test-Profile.ExtendedOneProviderEmpty
+# Test extended profile - one of the provider in list empty
+#
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.desc.name = Test Extended One Provider Empty
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.desc.default = true
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.extends = RestrictedSecurity.TestBase.Version
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.4 = sun.security.ec.SunEC
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.5 =
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.6 = sun.security.pkcs11.SunPKCS11
+
+#
+# Test-Profile.BaseNoProviderList
+# Test base profile - no provider list
+#
+RestrictedSecurity.Test-Profile.BaseNoProviderList.desc.name = Test Base Profile
+RestrictedSecurity.Test-Profile.BaseNoProviderList.desc.default = true
+RestrictedSecurity.Test-Profile.BaseNoProviderList.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile.BaseNoProviderList.tls.disabledAlgorithms =
+
+#
+# Test-Profile.ProviderClassName
+# Test profile - provider must be specified using the fully-qualified class name
+#
+RestrictedSecurity.Test-Profile.ProviderClassName.desc.name = Test Provider Class Name
+RestrictedSecurity.Test-Profile.ProviderClassName.desc.default = true
+RestrictedSecurity.Test-Profile.ProviderClassName.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile.ProviderClassName.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.ProviderClassName.jce.provider.1 = SunJCE
+
+#
+# Test-Profile.ProviderFormat
+# Test profile - provider format is incorrect
+#
+RestrictedSecurity.Test-Profile.ProviderFormat.desc.name = Test Provider Format
+RestrictedSecurity.Test-Profile.ProviderFormat.desc.default = true
+RestrictedSecurity.Test-Profile.ProviderFormat.desc.hash = SHA-256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.Test-Profile.ProviderFormat.tls.disabledAlgorithms =
+
+RestrictedSecurity.Test-Profile.ProviderFormat.jce.provider.1 = com.sun.crypto.provider.SunJCE [ \
+    {AlgorithmParameterGenerator, AESGCM, *), \
+    {Signature, SHA512withRSA, *}]
