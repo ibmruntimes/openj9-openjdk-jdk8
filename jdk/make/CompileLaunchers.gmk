@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 
 default: all
@@ -521,14 +521,12 @@ $(eval $(call SetupLauncher,traceformat, \
     -DEXPAND_CLASSPATH_WILDCARDS \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.TraceFormat" }'))
 
-ifneq ($(findstring $(OPENJDK_TARGET_OS),aix linux macosx),)
-  $(eval $(call SetupLauncher,jextract, \
+$(eval $(call SetupLauncher,jextract, \
     -DEXPAND_CLASSPATH_WILDCARDS \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main" }'))
-  $(eval $(call SetupLauncher,jpackcore, \
+$(eval $(call SetupLauncher,jpackcore, \
     -DEXPAND_CLASSPATH_WILDCARDS \
     -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "com.ibm.jvm.j9.dump.extract.Main" }'))
-endif
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
   $(eval $(call SetupLauncher,kinit, \
@@ -558,8 +556,8 @@ $(eval $(call SetupLauncher,jstack, \
     -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
 
 $(eval $(call SetupLauncher,jstat, \
-	    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jstat" }' \
-	    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
+    -DJAVA_ARGS='{ "-J-ms8m"$(COMMA) "openj9.tools.attach.diagnostics.tools.Jstat" }' \
+    -DAPP_CLASSPATH='{ "/lib/tools.jar" }'))
 
 ##########################################################################################
 # The order of the object files on the link command line affects the size of the resulting
