@@ -514,7 +514,7 @@ RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.securerandom.algorithm 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.name = Test-Profile-SameStartWithoutVersion
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.default = true
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.fips = true
-RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA-256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA-256:6c5546ec32c83192cf7d8bebfdf9c56049db1c957b5a69a71cb51ba8c1b23a38
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.number = Certificate #XXX
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.sunsetDate = 2026-09-21
