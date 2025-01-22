@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -70,7 +70,7 @@ USERNAME                := @USERNAME@
 include $(SRC_ROOT)/closed/openjdk-tag.gmk
 
 JDK_FIX_VERSION         := @JDK_FIX_VERSION@
-J9JDK_EXT_VERSION       := $(JDK_MINOR_VERSION).$(JDK_MICRO_VERSION).$(JDK_UPDATE_VERSION).$(JDK_FIX_VERSION)-ea
+J9JDK_EXT_VERSION       := $(JDK_MINOR_VERSION).$(JDK_MICRO_VERSION).$(JDK_UPDATE_VERSION).$(JDK_FIX_VERSION)
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by CMake
