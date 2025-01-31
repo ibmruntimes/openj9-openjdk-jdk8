@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -134,7 +134,7 @@ final class SunECEntries {
          * Signature engines
          */
         if (useNativeECDSA
-            && (NativeCrypto.getVersion() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
+            && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
         ) {
             map.put("Signature.NONEwithECDSA",
                 "sun.security.ec.NativeECDSASignature$Raw");
@@ -213,7 +213,7 @@ final class SunECEntries {
          *  Key Pair Generator engine
          */
         if (useNativeECKeyGen
-            && (NativeCrypto.getVersion() >= NativeCrypto.OPENSSL_VERSION_1_1_0)
+            && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_0)
             && !isAIX
         ) {
             map.put("KeyPairGenerator.EC", "sun.security.ec.NativeECKeyPairGenerator");
