@@ -892,7 +892,6 @@ CHECK_GMAKE
 PKGHANDLER
 DEVKIT_LIB_DIR
 NASM
-FREEMARKER_JAR
 VS_LIB
 VS_INCLUDE
 VS_PATH
@@ -917,7 +916,6 @@ OPENJ9_DEVELOPER_DIR
 OPENJ9_CXX
 OPENJ9_CC
 OPENJ9_CLANG
-OPENJ9_ENABLE_CMAKE
 CMAKE
 USERNAME
 JDK_FIX_VERSION
@@ -1094,7 +1092,6 @@ enable_debug
 with_debug_level
 with_noncompressedrefs
 with_mixedrefs
-with_cmake
 with_openj9_cc
 with_openj9_cxx
 with_openj9_developer_dir
@@ -1113,7 +1110,6 @@ enable_warnings_as_errors_omr
 enable_warnings_as_errors_openj9
 with_conf_name
 with_toolchain_version
-with_freemarker_jar
 with_devkit
 with_sys_root
 with_sysroot
@@ -1976,7 +1972,6 @@ Optional Packages:
                           build non-compressedrefs vm (large heap)
   --with-mixedrefs        build mixedrefs vm (--with-mixedrefs=static or
                           --with-mixedrefs=dynamic)
-  --with-cmake            enable building openJ9 with CMake
   --with-openj9-cc        build OpenJ9 with a specific C compiler
   --with-openj9-cxx       build OpenJ9 with a specific C++ compiler
   --with-openj9-developer-dir
@@ -1990,8 +1985,6 @@ Optional Packages:
                           the version of the toolchain to look for, use
                           '--help' to show possible values [platform
                           dependent]
-  --with-freemarker-jar   path to freemarker.jar (used to build OpenJ9 build
-                          tools)
   --with-devkit           use this devkit for compilers, tools and resources
   --with-sys-root         alias for --with-sysroot for backwards compatability
   --with-sysroot          use this directory as sysroot)
@@ -4563,7 +4556,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 # definitions. It is replaced with custom functionality when building
 # custom sources.
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -4622,8 +4615,6 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 
-
-
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
 # OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
@@ -4634,7 +4625,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1730492081
+DATE_WHEN_GENERATED=1738614730
 
 ###############################################################################
 #
@@ -15608,32 +15599,6 @@ fi
 
 
 
-# Check whether --with-cmake was given.
-if test "${with_cmake+set}" = set; then :
-  withval=$with_cmake;
-      if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
-        with_cmake=cmake
-      fi
-
-else
-
-      with_cmake=cmake
-
-fi
-
-  # at this point with_cmake should either be no, or the name of the cmake command
-  if test "x$with_cmake" = xno ; then
-    OPENJ9_ENABLE_CMAKE=false
-    # Currently, mixedrefs mode is only available with CMake enabled
-    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
-      as_fn_error $? "--with-mixedrefs=[static|dynamic] requires --with-cmake" "$LINENO" 5
-    fi
-  else
-    OPENJ9_ENABLE_CMAKE=true
-    if as_fn_executable_p "$with_cmake" ; then
-      CMAKE="$with_cmake"
-    else
-
 
 
   # Publish this variable in the help.
@@ -15641,7 +15606,7 @@ fi
 
   if test "x$CMAKE" = x; then
     # The variable is not set by user, try to locate tool using the code snippet
-    for ac_prog in $with_cmake
+    for ac_prog in cmake
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -15699,7 +15664,7 @@ done
 $as_echo "$as_me: WARNING: Ignoring value of CMAKE from the environment. Use command line variables instead." >&2;}
       fi
       # Try to locate tool using the code snippet
-      for ac_prog in $with_cmake
+      for ac_prog in cmake
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -15823,10 +15788,6 @@ $as_echo "$tool_specified" >&6; }
 
   if test "x$CMAKE" = x; then
     as_fn_error $? "Could not find required tool for CMAKE" "$LINENO" 5
-  fi
-
-
-    fi
   fi
 
 
@@ -18036,54 +17997,6 @@ $as_echo "$as_me: or run \"bash.exe -l\" from a VS command prompt and then run c
   fi
 
   fi
-
-
-  # check 3rd party library requirement for UMA
-
-# Check whether --with-freemarker-jar was given.
-if test "${with_freemarker_jar+set}" = set; then :
-  withval=$with_freemarker_jar;
-fi
-
-
-  FREEMARKER_JAR=
-  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    if test "x$with_freemarker_jar" = x -o "x$with_freemarker_jar" = xno ; then
-      printf "\n"
-      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-      printf "and has to be provided during configure process.\n"
-      printf "\n"
-      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-      printf "\n"
-      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-      printf "\n"
-
-      as_fn_error $? "Cannot continue" "$LINENO" 5
-    fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking checking that '$with_freemarker_jar' exists" >&5
-$as_echo_n "checking checking that '$with_freemarker_jar' exists... " >&6; }
-    if test -f "$with_freemarker_jar" ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      as_fn_error $? "freemarker.jar not found at '$with_freemarker_jar'" "$LINENO" 5
-    fi
-
-    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-    else
-      FREEMARKER_JAR=$with_freemarker_jar
-    fi
-  fi
-
-
 
 
 
