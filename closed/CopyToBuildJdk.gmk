@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -216,12 +216,7 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
   $(OPENJ9_VM_BUILD_DIR)/j9ddr.dat : run-ddrgen
 
   run-ddrgen :
-    ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-	  $(EXPORT_MSVS_ENV_VARS) $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
-    else # OPENJ9_ENABLE_CMAKE
-	  CC="$(CC)" CXX="$(CXX)" VERSION_MAJOR=8 $(EXPORT_MSVS_ENV_VARS) \
-		$(MAKE) -C $(OPENJ9_VM_BUILD_DIR)/ddr -f run_omrddrgen.mk
-    endif # OPENJ9_ENABLE_CMAKE
+	$(EXPORT_MSVS_ENV_VARS) $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
 
   $(call openj9_copy_files,, \
 	$(addsuffix /j9ddr.dat, \
