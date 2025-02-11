@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
@@ -36,6 +42,7 @@
 #include <netinet/ip.h>
 #endif
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <stdlib.h>
 
 #ifdef __solaris__
@@ -51,6 +58,8 @@
 
 #include "java_net_SocketOptions.h"
 #include "java_net_PlainSocketImpl.h"
+
+#include "ut_jcl_net.h"
 
 /************************************************************************
  * PlainSocketImpl
@@ -362,6 +371,14 @@ Java_java_net_PlainSocketImpl_socketConnect(JNIEnv *env, jobject this,
          * established, fail, or timeout.
          */
         SET_NONBLOCKING(fd);
+
+        if (AF_INET == him.him4.sin_family) {
+            char buf[INET_ADDRSTRLEN];
+            Trc_PlainSocketImpl_socketConnect4("", fd, inet_ntop(AF_INET, &him.him4.sin_addr, buf, sizeof(buf)), port, len);
+        } else if (AF_INET6 == him.him6.sin6_family) {
+            char buf[INET6_ADDRSTRLEN];
+            Trc_PlainSocketImpl_socketConnect6("", fd, inet_ntop(AF_INET6, &him.him6.sin6_addr, buf, sizeof(buf)), port, ntohl(him.him6.sin6_scope_id), len);
+        }
 
         /* no need to use NET_Connect as non-blocking */
         connect_rv = connect(fd, (struct sockaddr *)&him, len);

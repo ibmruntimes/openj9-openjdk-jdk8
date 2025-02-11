@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
@@ -39,6 +45,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/poll.h>
+#include <arpa/inet.h>
+
+#include "ut_jcl_net.h"
 
 /*
  * Stack allocated by thread when doing blocking operation
@@ -341,6 +350,7 @@ int NET_Dup2(int fd, int fd2) {
  * preempted and the I/O system call will return -1/EBADF.
  */
 int NET_SocketClose(int fd) {
+    Trc_NET_SocketClose(fd);
     return closefd(-1, fd);
 }
 
@@ -407,6 +417,15 @@ int NET_Accept(int s, struct sockaddr *addr, int *addrlen) {
 }
 
 int NET_Connect(int s, struct sockaddr *addr, int addrlen) {
+    if (AF_INET == addr->sa_family) {
+        char buf[INET_ADDRSTRLEN];
+        struct sockaddr_in *sa = (struct sockaddr_in *)addr;
+        Trc_NET_Connect4(s, inet_ntop(AF_INET, &sa->sin_addr, buf, sizeof(buf)), ntohs(sa->sin_port), addrlen);
+    } else if (AF_INET6 == addr->sa_family) {
+        char buf[INET6_ADDRSTRLEN];
+        struct sockaddr_in6 *sa = (struct sockaddr_in6 *)addr;
+        Trc_NET_Connect6(s, inet_ntop(AF_INET6, &sa->sin6_addr, buf, sizeof(buf)), ntohs(sa->sin6_port), ntohl(sa->sin6_scope_id), addrlen);
+    }
     BLOCKING_IO_RETURN_INT( s, connect(s, addr, addrlen) );
 }
 

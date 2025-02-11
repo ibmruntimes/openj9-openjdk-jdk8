@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
 # ===========================================================================
 
 # Include custom extensions if available.
@@ -151,6 +151,21 @@ LIBJAVA_SRC_DIRS += $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/java/l
     $(JDK_TOPDIR)/src/share/native/java/util/concurrent/atomic \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/common \
     $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/java/util
+
+BUILD_LIBJAVA_check_version.c_CFLAGS := \
+    -I$(OPENJ9_TOPDIR)/runtime/include \
+    -I$(OPENJ9_TOPDIR)/runtime/oti \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR) \
+    -I$(OPENJ9_TOPDIR)/runtime/jcl \
+    -I$(OPENJ9_TOPDIR)/runtime/util \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBJAVA_io_util_md.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
+BUILD_LIBJAVA_UnixFileSystem_md.c_CFLAGS := \
+    -I$(OPENJ9OMR_TOPDIR)/include_core \
+    -I$(OPENJ9_VM_BUILD_DIR)/jcl
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
   LIBJAVA_SRC_DIRS += $(JDK_TOPDIR)/src/$(OPENJDK_TARGET_OS_API_DIR)/native/sun/util/locale/provider
