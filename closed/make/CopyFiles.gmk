@@ -1,10 +1,10 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
-# 
+#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
@@ -17,22 +17,30 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
 # ===========================================================================
 
-$(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties: $(J9JCL_SOURCES_DIR)/jdk/src/share/classes/com/ibm/oti/util/ExternalMessages.properties
+ExternalMessages := classes/com/ibm/oti/util/ExternalMessages.properties
+
+$(JDK_OUTPUTDIR)/$(ExternalMessages) : $(J9JCL_SOURCES_DIR)/jdk/src/share/$(ExternalMessages)
 	$(call install-file)
 
-COPY_FILES += $(JDK_OUTPUTDIR)/classes/com/ibm/oti/util/ExternalMessages.properties
+COPY_FILES += $(JDK_OUTPUTDIR)/$(ExternalMessages)
 
-# Copy ibmjvmti.h
-$(JDK_OUTPUTDIR)/include/ibmjvmti.h: $(SRC_ROOT)/openj9/runtime/include/ibmjvmti.h
+GPU_thresholds := classes/com/ibm/gpu/ibm_gpu_thresholds.properties
+
+$(JDK_OUTPUTDIR)/$(GPU_thresholds) : $(J9JCL_SOURCES_DIR)/jdk/src/share/$(GPU_thresholds)
 	$(call install-file)
 
-COPY_FILES += $(JDK_OUTPUTDIR)/include/ibmjvmti.h
+COPY_FILES += $(JDK_OUTPUTDIR)/$(GPU_thresholds)
 
-# Copy the nss.fips.cfg only on x86/p/z linux
+IBM_jvmti := include/ibmjvmti.h
 
+$(JDK_OUTPUTDIR)/$(IBM_jvmti) : $(OPENJ9_TOPDIR)/runtime/$(IBM_jvmti)
+	$(call install-file)
+
+COPY_FILES += $(JDK_OUTPUTDIR)/$(IBM_jvmti)
+
+# Copy the nss.fips.cfg only on x86/p/z linux.
 ifneq ($(filter linux-x86_64 linux-ppc64le linux-s390x, $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU)), )
   NSS_FIPS_CFG_SRC := $(TOPDIR)/closed/adds/jdk/src/share/lib/security/nss.fips.cfg
   NSS_FIPS_CFG_DST := $(JDK_OUTPUTDIR)/lib/security/nss.fips.cfg
