@@ -52,8 +52,8 @@ ifeq (true,$(ZIP_DEBUGINFO_FILES))
 # ----------------------
 # $1 - sequence of file paths
 openj9_copy_debuginfos = \
-	$(if $(call openj9_debuginfo_sources,$(word 1,$1)), \
-		$(eval $(call openj9_zip_files,$(dir $(word 1,$1)),$(call openj9_debuginfo_sources,$(word 1,$1)),$(basename $(word 2,$1)).diz)) \
+	$(if $(call openj9_debuginfo_sources,$(firstword $1)), \
+		$(eval $(call openj9_zip_files,$(dir $(firstword $1)),$(call openj9_debuginfo_sources,$(firstword $1)),$(basename $(word 2,$1)).diz)) \
 		$(if $(word 3,$1),$(call openj9_copy_files,,$(addsuffix .diz,$(basename $(wordlist 2,$(words $1),$1))))))
 
 # openj9_zip_files
@@ -74,7 +74,7 @@ else # ZIP_DEBUGINFO_FILES
 # ----------------------
 # $1 - sequence of file paths
 openj9_copy_debuginfos = \
-	$(foreach suffix, $(call openj9_debuginfo_suffixes,$(word 1,$1)), \
+	$(foreach suffix, $(call openj9_debuginfo_suffixes,$(firstword $1)), \
 		$(call openj9_copy_files,,$(addsuffix $(suffix),$(basename $1))))
 
 # openj9_debuginfo_suffixes
@@ -109,7 +109,7 @@ endef
 # $1 - suffix of install action macro ('only' or 'and_sign'; default is 'only')
 # $2 - sequence of file paths
 openj9_copy_files = \
-	$(eval $(call openj9_copy_rule,$(if $1,$(strip $1),only),$(word 1,$2),$(word 2,$2))) \
+	$(eval $(call openj9_copy_rule,$(if $1,$(strip $1),only),$(firstword $2),$(word 2,$2))) \
 	$(if $(word 3,$2),$(call openj9_copy_files,,$(wordlist 2,$(words $2),$2)))
 
 # openj9_copy_files_and_debuginfos
