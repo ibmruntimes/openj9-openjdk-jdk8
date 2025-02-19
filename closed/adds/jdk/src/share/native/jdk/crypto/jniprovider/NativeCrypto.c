@@ -603,9 +603,13 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
         "libcrypto.3.dylib",                /* 3.x library name */
         "libcrypto.1.1.dylib",              /* 1.1.x library name */
         "libcrypto.1.0.0.dylib",            /* 1.0.x library name */
-#elif defined(_WIN32) /* defined(__APPLE__) */
+#elif defined(_WIN64) /* defined(__APPLE__) */
         "libcrypto-3-x64.dll",              /* 3.x library name */
         "libcrypto-1_1-x64.dll",            /* 1.1.x library name */
+        "libeay32.dll",                     /* old library name */
+#elif defined(_WIN32) /* defined(_WIN64) */
+        "libcrypto-3.dll",                  /* 3.x library name */
+        "libcrypto-1_1.dll",                /* 1.1.x library name */
         "libeay32.dll",                     /* old library name */
 #else /* defined(_WIN32) */
         "libcrypto.so",                     /* general symlink library name */
