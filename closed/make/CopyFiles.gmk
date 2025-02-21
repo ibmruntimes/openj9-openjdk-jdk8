@@ -40,6 +40,14 @@ $(JDK_OUTPUTDIR)/$(IBM_jvmti) : $(OPENJ9_TOPDIR)/runtime/$(IBM_jvmti)
 
 COPY_FILES += $(JDK_OUTPUTDIR)/$(IBM_jvmti)
 
+GC_schema := schema.xsd
+GC_SCHEMA_DST := $(JDK_OUTPUTDIR)/lib/$(GC_schema)
+
+$(GC_SCHEMA_DST) : $(OPENJ9OMR_TOPDIR)/gc/verbose/$(GC_schema)
+	$(call install-file)
+
+COPY_FILES += $(GC_SCHEMA_DST)
+
 # Copy the nss.fips.cfg only on x86/p/z linux.
 ifneq ($(filter linux-x86_64 linux-ppc64le linux-s390x, $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU)), )
   NSS_FIPS_CFG_SRC := $(TOPDIR)/closed/adds/jdk/src/share/lib/security/nss.fips.cfg
