@@ -37,12 +37,14 @@ import sun.security.action.GetPropertyAction;
 public class NativeCrypto {
 
     /* Define constants for the native digest algorithm indices. */
-    public static final int SHA1_160 = 0;
-    public static final int SHA2_224 = 1;
-    public static final int SHA2_256 = 2;
-    public static final int SHA5_384 = 3;
-    public static final int SHA5_512 = 4;
-    public static final int MD5 = 5;
+    public static final int MD5 = 0;
+    public static final int SHA1_160 = 1;
+    public static final int SHA2_224 = 2;
+    public static final int SHA2_256 = 3;
+    public static final int SHA5_384 = 4;
+    public static final int SHA5_512 = 5;
+    public static final int SHA5_512_224 = 6;
+    public static final int SHA5_512_256 = 7;
 
     /* Define constants for the EC field types. */
     public static final int ECField_Fp = 0;
@@ -489,4 +491,11 @@ public class NativeCrypto {
                                         int digestLen,
                                         byte[] signature,
                                         int sigLen);
+
+    /* Password based key derivation functions (PBKDF). */
+    public final native byte[] PBKDF2Derive(byte[] password,
+                                            byte[] salt,
+                                            int iterations,
+                                            int keyLength,
+                                            int hashAlgorithm);
 }

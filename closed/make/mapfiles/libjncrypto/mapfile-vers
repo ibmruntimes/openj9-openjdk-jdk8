@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -50,6 +50,7 @@ SUNWprivate_1.1 {
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDeriveKey;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECNativeGF2m;
 		Java_jdk_crypto_jniprovider_NativeCrypto_PBEDerive;
+		Java_jdk_crypto_jniprovider_NativeCrypto_PBKDF2Derive;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDSASign;
 		Java_jdk_crypto_jniprovider_NativeCrypto_ECDSAVerify;
 		Java_jdk_crypto_jniprovider_NativeCrypto_isOpenSSLFIPS;

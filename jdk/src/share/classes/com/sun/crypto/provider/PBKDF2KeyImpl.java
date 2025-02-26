@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -45,7 +45,10 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.PBEKeySpec;
 
+import jdk.crypto.jniprovider.NativeCrypto;
+
 import openj9.internal.security.RestrictedSecurity;
+import sun.security.action.GetPropertyAction;
 
 /**
  * This class represents a PBE key derived using PBKDF2 defined
@@ -60,6 +63,11 @@ import openj9.internal.security.RestrictedSecurity;
 final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
 
     private static final long serialVersionUID = -2234868909660948157L;
+
+    private static final boolean useNativePBKDF2 = Boolean.getBoolean(
+            GetPropertyAction.privilegedGetProperty("jdk.nativePBKDF2"));
+    private static NativeCrypto nativeCrypto;
+    private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
 
     private char[] passwd;
     private final byte[] salt;
@@ -121,7 +129,52 @@ final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
             } else {
                 this.prf = Mac.getInstance(prfAlgo, SunJCE.getInstance());
             }
-            this.key = deriveKey(prf, passwdBytes, salt, iterCount, keyLength);
+            nativePBKDF2:
+            if (useNativePBKDF2
+                && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_3_0_0)
+            ) {
+                int hashIndex;
+                switch (prfAlgo) {
+                case "HmacSHA1":
+                    hashIndex = NativeCrypto.SHA1_160;
+                    break;
+                case "HmacSHA224":
+                    hashIndex = NativeCrypto.SHA2_224;
+                    break;
+                case "HmacSHA256":
+                    hashIndex = NativeCrypto.SHA2_256;
+                    break;
+                case "HmacSHA384":
+                    hashIndex = NativeCrypto.SHA5_384;
+                    break;
+                case "HmacSHA512":
+                    hashIndex = NativeCrypto.SHA5_512;
+                    break;
+                case "HmacSHA512/224":
+                    hashIndex = NativeCrypto.SHA5_512_224;
+                    break;
+                case "HmacSHA512/256":
+                    hashIndex = NativeCrypto.SHA5_512_256;
+                    break;
+                default:
+                    if (nativeCryptTrace) {
+                        System.err.println("The algorithm " + prfAlgo
+                                + " is not supported in native code, using Java implementation.");
+                    }
+                    break nativePBKDF2;
+                }
+                if (nativeCrypto == null) {
+                    nativeCrypto = NativeCrypto.getNativeCrypto();
+                }
+                key = nativeCrypto.PBKDF2Derive(passwdBytes, salt, iterCount, keyLength / 8, hashIndex);
+                if ((key == null) && nativeCryptTrace) {
+                    System.err.println("Native PBKDF2 failed for algorithm " + prfAlgo
+                            + ", using Java implementation.");
+                }
+            }
+            if (key == null) {
+                key = deriveKey(prf, passwdBytes, salt, iterCount, keyLength);
+            }
         } catch (NoSuchAlgorithmException nsae) {
             // not gonna happen; re-throw just in case
             InvalidKeySpecException ike = new InvalidKeySpecException();
