@@ -1091,7 +1091,6 @@ with_jvm_variants
 enable_debug
 with_debug_level
 with_noncompressedrefs
-with_mixedrefs
 with_openj9_cc
 with_openj9_cxx
 with_openj9_developer_dir
@@ -1970,8 +1969,6 @@ Optional Packages:
                           [release]
   --with-noncompressedrefs
                           build non-compressedrefs vm (large heap)
-  --with-mixedrefs        build mixedrefs vm (--with-mixedrefs=static or
-                          --with-mixedrefs=dynamic)
   --with-openj9-cc        build OpenJ9 with a specific C compiler
   --with-openj9-cxx       build OpenJ9 with a specific C++ compiler
   --with-openj9-developer-dir
@@ -4625,7 +4622,7 @@ VS_TOOLSET_SUPPORTED_2022=true
 
 
 # Do not change or remove the following line, it is needed for consistency checks:
-DATE_WHEN_GENERATED=1738614730
+DATE_WHEN_GENERATED=1744144118
 
 ###############################################################################
 #
@@ -15494,13 +15491,6 @@ fi
 
 
 
-# Check whether --with-mixedrefs was given.
-if test "${with_mixedrefs+set}" = set; then :
-  withval=$with_mixedrefs;
-fi
-
-
-
   # Convert openjdk cpu names to openj9 names
   case "$build_cpu" in
     x86_64)
@@ -15527,23 +15517,16 @@ fi
   # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
   OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
 
-  if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 -o "x$with_mixedrefs" = xno -o "x$COMPILE_TYPE" = xcross ; then
+  if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OMR_MIXED_REFERENCES_MODE=off
-    if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
-      OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
-      OPENJ9_LIBS_SUBDIR=default
-    else
-      OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
-      OPENJ9_LIBS_SUBDIR=compressedrefs
-    fi
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
+    OPENJ9_LIBS_SUBDIR=default
+  elif test "x$with_noncompressedrefs" = xno -o "x$COMPILE_TYPE" = xcross ; then
+    OMR_MIXED_REFERENCES_MODE=off
+    OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_cmprssptrs"
+    OPENJ9_LIBS_SUBDIR=compressedrefs
   else
-    if test "x$with_mixedrefs" = x -o "x$with_mixedrefs" = xyes -o "x$with_mixedrefs" = xstatic ; then
-      OMR_MIXED_REFERENCES_MODE=static
-    elif test "x$with_mixedrefs" = xdynamic ; then
-      OMR_MIXED_REFERENCES_MODE=dynamic
-    else
-      as_fn_error $? "OpenJ9 supports --with-mixedrefs=static and --with-mixedrefs=dynamic" "$LINENO" 5
-    fi
+    OMR_MIXED_REFERENCES_MODE=static
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}_mxdptrs"
     OPENJ9_LIBS_SUBDIR=default
   fi
@@ -15551,6 +15534,10 @@ fi
   if test "x$OPENJ9_CPU" = xx86-64 ; then
     if test "x$OPENJ9_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+        OPENJ9_PLATFORM_CODE=xi32
+        OPENJ9_BUILD_MODE_ARCH="x86"
+      fi
     elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
       OPENJ9_BUILD_OS=win
@@ -15575,6 +15562,10 @@ fi
     fi
   elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+      OPENJ9_PLATFORM_CODE=xz31
+      OPENJ9_BUILD_MODE_ARCH="390"
+    fi
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
