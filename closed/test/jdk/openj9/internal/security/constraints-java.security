@@ -21,7 +21,7 @@
 RestrictedSecurity.TestConstraints.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestConstraints.Version.desc.default = false
 RestrictedSecurity.TestConstraints.Version.desc.fips = false
-RestrictedSecurity.TestConstraints.Version.desc.hash = SHA-256:c961153e33a2b77a051f15ebfb6ea605395a4be82937fa7e8971b79afa4527a5
+RestrictedSecurity.TestConstraints.Version.desc.hash = SHA-256:33c0a7657be246ca6d6c39c42cac1d346d1a8f6e7a4fc2e0bc2d59c98efb1d77
 RestrictedSecurity.TestConstraints.Version.desc.number = Certificate #XXX
 RestrictedSecurity.TestConstraints.Version.desc.policy =
 RestrictedSecurity.TestConstraints.Version.fips.mode = test
@@ -34,11 +34,23 @@ RestrictedSecurity.TestConstraints.Version.jce.provider.1 = sun.security.provide
     {CertPathValidator, PKIX, *, FullClassName:TestConstraintsSuccess}, \
     {SecureRandom, SHA1PRNG, *, FullClassName:TestConstraintsSuccess}, \
     {MessageDigest, SHA, *}, \
+    {MessageDigest, MD5, *, FullClassName:NonExistingClass}, \
+    {MessageDigest, MD5, *, FullClassName:TestConstraintsSuccess}, \
+    {MessageDigest, MD5, *, FullClassName:AnotherNonExistingClass}, \
     {MessageDigest, SHA-256, *}, \
     {MessageDigest, SHA-512, *, FullClassName:TestConstraintsSuccess}, \
     {KeyStore, JKS, *, FullClassName:TestConstraintsSuccess}]
 RestrictedSecurity.TestConstraints.Version.jce.provider.2 = sun.security.ec.SunEC [ \
     {AlgorithmParameters, EC, *, FullClassName:TestConstraintsSuccess}, \
+    {Signature, SHA1withECDSA, ImplementedIn=Software: \
+        SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
+        KeySize=255, FullClassName:TestConstraintsSuccess}, \
+    {Signature, SHA1withECDSA, ImplementedIn=Software: \
+        SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
+        KeySize=256, FullClassName:TestConstraintsSuccess}, \
+    {Signature, SHA1withECDSA, ImplementedIn=Software: \
+        SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
+        KeySize=257, FullClassName:TestConstraintsSuccess}, \
     {Signature, SHA256withECDSA, *, FullClassName:TestConstraintsSuccess}, \
     {KeyPairGenerator, EC, *, FullClassName:TestConstraintsSuccess}, \
     {KeyAgreement, ECDH, *, FullClassName:TestConstraintsSuccess}, \

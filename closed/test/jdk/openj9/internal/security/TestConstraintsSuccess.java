@@ -72,6 +72,16 @@ public class TestConstraintsSuccess {
         KeyManagerFactory.getInstance("SunX509");
         TrustManagerFactory.getInstance("SunX509");
         SSLContext.getInstance("TLSv1.3");
+
+        // Since there are three constraints for MD5, with only the middle one
+        // allowing for use by this class, successfully getting the algorithm
+        // verifies that all constraints are checked.
+        MessageDigest.getInstance("MD5");
+
+        // Since there are three constraints for SHA1withECDSA, with only the
+        // middle one having the correct attributes, successfully getting the
+        // algorithm verifies that all constraints are checked.
+        Signature.getInstance("SHA1withECDSA");
     }
 
     @Test
