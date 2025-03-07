@@ -805,6 +805,7 @@ public final class RestrictedSecurity {
             if (debug != null) {
                 debug.println("Security constraints check of provider.");
             }
+            constraints:
             for (Constraint constraint : constraints) {
                 String cType = constraint.type;
                 String cAlgorithm = constraint.algorithm;
@@ -823,14 +824,14 @@ public final class RestrictedSecurity {
                     if (debug != null) {
                         debug.println("The constraint doesn't apply to the service type.");
                     }
-                    continue;
+                    continue constraints;
                 }
                 if (!isAsterisk(cAlgorithm) && !algorithm.equalsIgnoreCase(cAlgorithm)) {
                     // The constraint doesn't apply to the service algorithm.
                     if (debug != null) {
                         debug.println("The constraint doesn't apply to the service algorithm.");
                     }
-                    continue;
+                    continue constraints;
                 }
 
                 // For type and algorithm match, and attribute is not *.
@@ -852,7 +853,8 @@ public final class RestrictedSecurity {
                                     + "\nagainst the service attribute value: " + sValue);
                         }
                         if ((sValue == null) || !cValue.equalsIgnoreCase(sValue)) {
-                            // If any attribute doesn't match, return service is not allowed.
+                            // If any of the attributes don't match,
+                            // then this constraint doesn't match so move on.
                             if (debug != null) {
                                 debug.println("Attributes don't match!");
                                 debug.println("The following service:"
@@ -861,7 +863,7 @@ public final class RestrictedSecurity {
                                             + "\n\tAttribute: " + cAttribute
                                             + "\nis NOT allowed in provider: " + providerClassName);
                             }
-                            return false;
+                            continue constraints;
                         }
                         if (debug != null) {
                             debug.println("Attributes match!");
@@ -905,7 +907,7 @@ public final class RestrictedSecurity {
                     }
 
                     // If nothing matching the accepted uses is found in the call stack,
-                    // this service is not allowed.
+                    // then this constraint doesn't match so move on.
                     if (!found) {
                         if (debug != null) {
                             debug.println("Classes in call stack are not part of accepted uses!");
@@ -916,7 +918,7 @@ public final class RestrictedSecurity {
                                         + "\n\tAccepted uses: " + cAcceptedUses
                                         + "\nis NOT allowed in provider: " + providerClassName);
                         }
-                        return false;
+                        continue constraints;
                     }
                 }
 
