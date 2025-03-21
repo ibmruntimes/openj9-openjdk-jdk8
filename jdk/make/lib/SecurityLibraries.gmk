@@ -319,6 +319,7 @@ ifeq ($(WITH_OPENSSL), yes)
         LANG := C, \
         OPTIMIZATION := LOW, \
         CFLAGS := $(CFLAGS_JDKLIB) \
+            -DOPENJDK_TARGET_CPU_LIBDIR='"$(OPENJDK_TARGET_CPU_LIBDIR)"' \
             -I$(SRC_ROOT)/closed/adds/jdk/src/share/native/jdk/crypto/jniprovider \
             -c $(OPENSSL_CFLAGS), \
         MAPFILE := $(SRC_ROOT)/closed/make/mapfiles/libjncrypto/mapfile-vers, \

@@ -646,7 +646,7 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
 #if defined(_WIN32)
         static const char pathSuffix[] = "\\bin\\";
 #else /* defined(_WIN32) */
-        static const char pathSuffix[] = "/lib/";
+        static const char pathSuffix[] = "/lib" OPENJDK_TARGET_CPU_LIBDIR "/";
 #endif /* defined(_WIN32) */
 
         size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1;
