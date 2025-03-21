@@ -25,10 +25,10 @@
 /*
  * @test
  * @summary Test Restricted Security Mode Constraints
- * @library /test/lib
+ * @library /jdk/test/lib/testlibrary
  * @run junit TestConstraintsSuccess
  */
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.security.AlgorithmParameterGenerator;
 import java.security.KeyFactory;
@@ -50,8 +50,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
-import jdk.test.lib.process.OutputAnalyzer;
-import jdk.test.lib.process.ProcessTools;
+import jdk.testlibrary.OutputAnalyzer;
+import jdk.testlibrary.ProcessTools;
 
 public class TestConstraintsSuccess {
 
@@ -85,8 +85,9 @@ public class TestConstraintsSuccess {
     }
 
     @Test
-    public void runWithConstraints() throws Exception {
-        OutputAnalyzer outputAnalyzer = ProcessTools.executeTestJava(
+    public void runWithConstraints() throws Throwable {
+        OutputAnalyzer outputAnalyzer = ProcessTools.executeTestJvm(
+                "-cp", System.getProperty("test.classes"),
                 "-Dsemeru.customprofile=TestConstraints.Version",
                 "-Djava.security.properties=" + System.getProperty("test.src") + "/constraints-java.security",
                 "TestConstraintsSuccess"
