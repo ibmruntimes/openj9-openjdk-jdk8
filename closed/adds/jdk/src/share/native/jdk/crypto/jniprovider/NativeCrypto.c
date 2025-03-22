@@ -1057,7 +1057,6 @@ Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_EC_KEY_set_public_key) ||
         (NULL == OSSL_EC_KEY_check_key) ||
         (NULL == OSSL_PKCS12_key_gen) ||
-        (NULL == OSSL_PKCS5_PBKDF2_HMAC) ||
         /* Check symbols that are only available in OpenSSL 1.1.1 and above. */
         ((ossl_ver >= OPENSSL_VERSION_1_1_1) &&
             ((NULL == OSSL_ECDSA_do_sign) ||
@@ -1066,7 +1065,8 @@ Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
              (NULL == OSSL_ECDSA_SIG_free) ||
              (NULL == OSSL_ECDSA_SIG_get0_r) ||
              (NULL == OSSL_ECDSA_SIG_get0_s) ||
-             (NULL == OSSL_ECDSA_SIG_set0))) ||
+             (NULL == OSSL_ECDSA_SIG_set0) ||
+             (NULL == OSSL_PKCS5_PBKDF2_HMAC))) ||
         ((NULL == OSSL_CRYPTO_num_locks) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
         ((NULL == OSSL_CRYPTO_THREADID_set_numeric) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
         ((NULL == OSSL_OPENSSL_malloc) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||

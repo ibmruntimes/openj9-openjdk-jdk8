@@ -131,7 +131,7 @@ final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
             }
             nativePBKDF2:
             if (useNativePBKDF2
-                && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_3_0_0)
+                && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
             ) {
                 int hashIndex;
                 switch (prfAlgo) {
