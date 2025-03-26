@@ -574,29 +574,22 @@ load_crypto_library(jboolean traceEnabled, const char *libName)
 static void *
 find_crypto_library(jboolean traceEnabled, const char *chomepath)
 {
-    /* Library names for OpenSSL 1.1.1, 1.1.0 and symbolic links:
+    /* Library names for OpenSSL 3.x, 1.1.1, 1.1.0 and symbolic links:
      * It is important to preserve the order!!!
      *
-     * Since there is no indication of the version of a symlink,
-     * they have to be loaded first, so as to compare with other
-     * available options.
      * Note: On macOS 11 or later, loading the general symlink causes
      * a fatal warning and associated abort by default, so it is
      * omitted.
      *
-     * The rest of the libraries are listed in descending order,
+     * The libraries are listed in a specific order,
      * which allows us to do two things:
-     * - Stop if a general symlink is loaded and we then find a
-     *   specific version that is higher.
      * - Stop immediately if a specific version is loaded, as
-     *   anything after that will be a lower version.
+     *   anything after that will be a lower version or general symlink.
+     * - Allow the loading of a general symlink as a fallback
+     *   option, in case a versioned library is not discovered.
      */
     static const char * const libNames[] = {
 #if defined(_AIX)
-        "libcrypto.a(libcrypto64.so)",      /* general symlink library name from archive file */
-        "libcrypto64.so",                   /* general symlink library name */
-        "libcrypto.a(libcrypto.so)",        /* general symlink library name from archive file */
-        "libcrypto.so",                     /* general symlink library name */
         "libcrypto.a(libcrypto64.so.3)",    /* 3.x library name from archive file */
         "libcrypto64.so.3",                 /* 3.x library name */
         "libcrypto.a(libcrypto.so.3)",      /* 3.x library name from archive file */
@@ -605,6 +598,10 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
         "libcrypto.so.1.1",                 /* 1.1.x library name */
         "libcrypto.a(libcrypto.so.1.0.0)",  /* 1.0.x library name from archive file */
         "libcrypto.so.1.0.0",               /* 1.0.x library name */
+        "libcrypto.a(libcrypto64.so)",      /* general symlink library name from archive file */
+        "libcrypto64.so",                   /* general symlink library name */
+        "libcrypto.a(libcrypto.so)",        /* general symlink library name from archive file */
+        "libcrypto.so",                     /* general symlink library name */
 #elif defined(__APPLE__) /* defined(_AIX) */
         "libcrypto.3.dylib",                /* 3.x library name */
         "libcrypto.1.1.dylib",              /* 1.1.x library name */
@@ -618,28 +615,18 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
         "libcrypto-1_1.dll",                /* 1.1.x library name */
         "libeay32.dll",                     /* old library name */
 #else /* defined(_WIN32) */
-        "libcrypto.so",                     /* general symlink library name */
         "libcrypto.so.3",                   /* 3.x library name */
         "libcrypto.so.1.1",                 /* 1.1.x library name */
         "libcrypto.so.1.0.0",               /* 1.0.x library name */
         "libcrypto.so.10",                  /* old library name */
+        "libcrypto.so",                     /* general symlink library name */
 #endif /* defined(_AIX) */
     };
 
     const size_t numOfLibs = sizeof(libNames) / sizeof(libNames[0]);
-#if defined(_AIX)
-    const size_t num_of_generic = 4;
-#elif defined(__linux__) /* defined(_AIX) */
-    const size_t num_of_generic = 1;
-#else /* defined(__linux__) */
-    const size_t num_of_generic = 0;
-#endif /* defined(_AIX) */
-
     void *result = NULL;
-    void *prevResult = NULL;
     size_t i = 0;
     long tempVersion = 0;
-    long previousVersion = 0;
 
     /* If JAVA_HOME is not null or empty and no library has been loaded yet, try there. */
     if ((NULL != chomepath) && ('\0' != *chomepath) && (NULL == crypto_library)) {
@@ -710,7 +697,7 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
     }
 
     /* The attempt to load from property and OpenSSL bundled with JDK failed.
-     * Try loading the libraries in the order set out above, and retain the latest library.
+     * Try loading the libraries in the order set out above.
      */
     for (i = 0; i < numOfLibs; i++) {
         if (traceEnabled) {
@@ -725,35 +712,17 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
         /* Identify and load the latest version from the available libraries.
          * This logic depends upon the order in which libnames are defined.
          * It only loads the libraries which can possibly be the latest versions.
+         * Once any library is loaded, everything after it will probably be a
+         * lower version due to the order so we can stop.
          */
-        log_crypto_library_path(traceEnabled, result, "\tLibrary to be potentially used was loaded from");
         tempVersion = get_crypto_library_version(traceEnabled, result, "\tLoaded OpenSSL version");
-
-        if (tempVersion <= 0) {
-            continue;
-        }
-
-        if (tempVersion > previousVersion) {
-            if (0 != previousVersion) {
-                unload_crypto_library(prevResult);
-            }
-            previousVersion = tempVersion;
-            prevResult = result;
-        } else {
-            unload_crypto_library(result);
-        }
-
-        /* If library checked is not a generic one, there is no need to check further. */
-        if (i >= num_of_generic) {
-            break;
+        if (tempVersion > 0) {
+            return result;
         }
     }
 
-    /* If we reach here, it means that none of the non-generic libraries
-     * where found. However, a generic one might have been found in the
-     * process and, if so, it will be in the prevResult variable.
-     */
-    return prevResult;
+    /* If we reach here, it means that none of the libraries were found. */
+    return NULL;
 }
 
 /*
