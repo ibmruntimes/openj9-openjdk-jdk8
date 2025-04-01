@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -96,6 +96,8 @@ final class SunEntries {
     private static final boolean useNativeSHA256;
     private static final boolean useNativeSHA384;
     private static final boolean useNativeSHA512;
+    private static final boolean useNativeSHA512_224;
+    private static final boolean useNativeSHA512_256;
 
     static {
         /* The property 'jdk.nativeDigest' is used to control enablement of all native
@@ -132,6 +134,16 @@ final class SunEntries {
          * SHA-512 implementation.
          */
         useNativeSHA512 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512", "SHA-512");
+
+        /* The property 'jdk.nativeSHA512_224' is used to control enablement of the native
+         * SHA-512-224 implementation.
+         */
+        useNativeSHA512_224 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512_224", "SHA-512-224");
+
+        /* The property 'jdk.nativeSHA512_256' is used to control enablement of the native
+         * SHA-512-256 implementation.
+         */
+        useNativeSHA512_256 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512_256", "SHA-512-256");
     }
 
     // Flag indicating whether the operating system is AIX.
@@ -281,6 +293,8 @@ final class SunEntries {
         String providerSHA256;
         String providerSHA384;
         String providerSHA512;
+        String providerSHA512_224;
+        String providerSHA512_256;
 
         /*
          * Set the digest provider based on whether native crypto is
@@ -326,6 +340,18 @@ final class SunEntries {
             providerSHA512 = "sun.security.provider.SHA5$SHA512";
         }
 
+        if (useNativeSHA512_224) {
+            providerSHA512_224 = "sun.security.provider.NativeSHA5$SHA512_224";
+        } else {
+            providerSHA512_224 = "sun.security.provider.SHA5$SHA512_224";
+        }
+
+        if (useNativeSHA512_256) {
+            providerSHA512_256 = "sun.security.provider.NativeSHA5$SHA512_256";
+        } else {
+            providerSHA512_256 = "sun.security.provider.SHA5$SHA512_256";
+        }
+
         map.put("MessageDigest.MD2", "sun.security.provider.MD2");
         map.put("MessageDigest.MD5", providerMD5);
         map.put("MessageDigest.SHA", providerSHA);
@@ -352,11 +378,11 @@ final class SunEntries {
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.3", "SHA-512");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.3",
                 "SHA-512");
-        map.put("MessageDigest.SHA-512/224", "sun.security.provider.SHA5$SHA512_224");
+        map.put("MessageDigest.SHA-512/224", providerSHA512_224);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.5", "SHA-512/224");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.5",
                 "SHA-512/224");
-        map.put("MessageDigest.SHA-512/256", "sun.security.provider.SHA5$SHA512_256");
+        map.put("MessageDigest.SHA-512/256", providerSHA512_256);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.6", "SHA-512/256");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.6",
                 "SHA-512/256");
