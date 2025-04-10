@@ -416,7 +416,7 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
   # Default OPENJ9_BUILD_OS=OPENJDK_BUILD_OS, but override with OpenJ9 equivalent as appropriate
   OPENJ9_BUILD_OS="${OPENJDK_BUILD_OS}"
 
-  if test "x$with_noncompressedrefs" = xyes ; then
+  if test "x$with_noncompressedrefs" = xyes -o "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
     OMR_MIXED_REFERENCES_MODE=off
     OPENJ9_BUILD_MODE_ARCH="${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
@@ -433,6 +433,10 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
   if test "x$OPENJ9_CPU" = xx86-64 ; then
     if test "x$OPENJ9_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
+      if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+        OPENJ9_PLATFORM_CODE=xi32
+        OPENJ9_BUILD_MODE_ARCH="x86"
+      fi
     elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
       OPENJ9_BUILD_OS=win
@@ -457,6 +461,10 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     fi
   elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+      OPENJ9_PLATFORM_CODE=xz31
+      OPENJ9_BUILD_MODE_ARCH="390"
+    fi
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
