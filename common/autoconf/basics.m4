@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, 2018, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2011, 2024, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -972,4 +972,31 @@ AC_DEFUN_ONCE([BASIC_POST_CONFIG_OUTPUT],
 
   # Make the compare script executable
   $CHMOD +x $OUTPUT_ROOT/compare.sh
+])
+
+###############################################################################
+# Check if a list of space-separated words are selected only from a list of
+# space-separated legal words. Typical use is to see if a user-specified
+# set of words is selected from a set of legal words.
+#
+# Sets the specified variable to list of non-matching (offending) words, or to
+# the empty string if all words are matching the legal set.
+#
+# $1: result variable name
+# $2: list of values to check
+# $3: list of legal values
+AC_DEFUN([UTIL_GET_NON_MATCHING_VALUES],
+[
+  # grep filter function inspired by a comment to http://stackoverflow.com/a/1617326
+  # Notice that the original variant fails on SLES 10 and 11
+  # Some grep versions (at least bsd) behaves strangely on the base case with
+  # no legal_values, so make it explicit.
+  values_to_check=`$ECHO $2 | $TR ' ' '\n'`
+  legal_values=`$ECHO $3 | $TR ' ' '\n'`
+  if test -z "$legal_values"; then
+    $1="$2"
+  else
+    result=`$GREP -Fvx -- "$legal_values" <<< "$values_to_check" | $GREP -v '^$'`
+    $1=${result//$'\n'/ }
+  fi
 ])
