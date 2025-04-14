@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -82,6 +82,7 @@ $(foreach file, \
 		memorywatcher29 \
 		migration \
 		osmemory29 \
+		sharedClasses \
 		SharedClassesNativeAgent \
 		softmxtest \
 		testjvmtiA \
