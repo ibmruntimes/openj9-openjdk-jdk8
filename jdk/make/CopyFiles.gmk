@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 
 INCLUDEDIR = $(JDK_OUTPUTDIR)/include
@@ -244,9 +244,9 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   endif
 
   ifeq ($(OPENJDK_TARGET_OS), windows)
-    LIBCRYPTO_TARGET_LIB := $(JDK_OUTPUTDIR)/bin/$(notdir $(LIBCRYPTO_PATH))
+    LIBCRYPTO_TARGET_LIB := $(JDK_OUTPUTDIR)/bin/$(LIBRARY_PREFIX)crypto-semeru$(SHARED_LIBRARY_SUFFIX)
   else
-    LIBCRYPTO_TARGET_LIB := $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(notdir $(LIBCRYPTO_PATH))
+    LIBCRYPTO_TARGET_LIB := $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(LIBRARY_PREFIX)crypto-semeru$(SHARED_LIBRARY_SUFFIX)
   endif
 
   $(LIBCRYPTO_TARGET_LIB) : $(LIBCRYPTO_PATH)
@@ -267,7 +267,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
       LIBSSL_PATH := $(firstword $(wildcard $(addprefix $(OPENSSL_BUNDLE_LIB_PATH)/, $(LIBSSL_NAMES))))
 
       ifneq ($(LIBSSL_PATH), )
-        LIBSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(notdir $(LIBSSL_PATH))
+        LIBSSL_TARGET_LIB = $(JDK_OUTPUTDIR)/lib$(OPENJDK_TARGET_CPU_LIBDIR)/$(LIBRARY_PREFIX)ssl-semeru$(SHARED_LIBRARY_SUFFIX)
         TARGETS += $(LIBSSL_TARGET_LIB)
         $(LIBSSL_TARGET_LIB) : $(LIBSSL_PATH)
 			$(call install-file)

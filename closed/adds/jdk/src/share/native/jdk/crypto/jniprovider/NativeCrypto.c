@@ -623,6 +623,17 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
 #endif /* defined(_AIX) */
     };
 
+    /** OpenSSL library names associated with bundled library. */
+#if defined(_AIX)
+    static const char bundledLibName[] = "libcrypto-semeru.so";
+#elif defined(__APPLE__) /* defined(_AIX) */
+    static const char bundledLibName[] = "libcrypto-semeru.dylib";
+#elif defined(_WIN32) /* defined(__APPLE__) */
+    static const char bundledLibName[] = "crypto-semeru.dll";
+#else /* defined(_WIN32) */
+    static const char bundledLibName[] = "libcrypto-semeru.so";
+#endif /* defined(_AIX) */
+
     const size_t numOfLibs = sizeof(libNames) / sizeof(libNames[0]);
     void *result = NULL;
     size_t i = 0;
@@ -636,7 +647,7 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
         static const char pathSuffix[] = "/lib" OPENJDK_TARGET_CPU_LIBDIR "/";
 #endif /* defined(_WIN32) */
 
-        size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1;
+        size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1 + sizeof(bundledLibName) - 1;
         char *libPath = malloc(path_len + 1);
 
         if (NULL == libPath) {
@@ -654,33 +665,17 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
             fprintf(stdout, "Attempting to load library bundled with JDK from: %s\n", libPath);
         }
 
-        for (i = 0; i < numOfLibs; i++) {
-            size_t file_len = strlen(libNames[i]);
-            /* Allocate memory for the new file name with the path. */
-            char *libNameWithPath = (char *)malloc(path_len + file_len + 1);
+        strcat(libPath, bundledLibName);
 
-            if (NULL == libNameWithPath) {
-                if (traceEnabled) {
-                    fprintf(stderr, "\tFailed to allocate memory for file name with path.\n");
-                }
-                continue;
-            }
+        /* Load OpenSSL Crypto library bundled with JDK. */
+        if (traceEnabled) {
+            fprintf(stdout, "\tAttempting to load: %s\n", bundledLibName);
+        }
+        result = load_crypto_library(traceEnabled, libPath);
 
-            strcpy(libNameWithPath, libPath);
-            strcat(libNameWithPath, libNames[i]);
+        free(libPath);
 
-            /* Load OpenSSL Crypto library bundled with JDK. */
-            if (traceEnabled) {
-                fprintf(stdout, "\tAttempting to load: %s\n", libNames[i]);
-            }
-            result = load_crypto_library(traceEnabled, libNameWithPath);
-
-            free(libNameWithPath);
-
-            if (NULL == result) {
-                continue;
-            }
-
+        if (NULL != result) {
             /* Identify and load the latest version from the potential libraries.
              * This logic depends upon the order in which libnames are defined.
              * Libraries are listed in descending order w.r.t version.
@@ -689,11 +684,9 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
              */
             tempVersion = get_crypto_library_version(traceEnabled, result, "\t\tLoaded OpenSSL version");
             if (tempVersion > 0) {
-                free(libPath);
                 return result;
             }
         }
-        free(libPath);
     }
 
     /* The attempt to load from property and OpenSSL bundled with JDK failed.
