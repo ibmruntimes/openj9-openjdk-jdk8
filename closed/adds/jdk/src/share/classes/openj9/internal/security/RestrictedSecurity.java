@@ -80,6 +80,8 @@ public final class RestrictedSecurity {
 
     private static ProfileParser profileParser;
 
+    private static boolean enableCheckHashes;
+
     private static RestrictedSecurityProperties restricts;
 
     private static final Set<String> unmodifiableProperties = new HashSet<>();
@@ -94,7 +96,6 @@ public final class RestrictedSecurity {
         supportedPlatformsOpenJCEPlus.put("Arch", Arrays.asList("amd64", "ppc64"));
         supportedPlatformsOpenJCEPlus.put("OS", Arrays.asList("Linux", "AIX", "Windows"));
 
-        @SuppressWarnings("removal")
         String[] props = AccessController.doPrivileged(
                 new PrivilegedAction<String[]>() {
                     @Override
@@ -190,11 +191,20 @@ public final class RestrictedSecurity {
      * extending profiles, instead of altering them, a digest of the profile
      * is calculated and compared to the expected value.
      */
-    private static void checkHashValues() {
+    public static void checkHashValues() {
+        checkHashValues(true);
+    }
+
+    private static void checkHashValues(boolean fromProviders) {
         ProfileParser parser = profileParser;
-        if ((parser != null) && !isJarVerifierInStackTrace()) {
-            profileParser = null;
-            parser.checkHashValues();
+        if (parser != null) {
+            if (fromProviders) {
+                enableCheckHashes = true;
+            }
+            if (enableCheckHashes && !isJarVerifierInStackTrace()) {
+                profileParser = null;
+                parser.checkHashValues();
+            }
         }
     }
 
@@ -251,7 +261,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isServiceAllowed(Service service) {
         if (securityEnabled) {
-            checkHashValues();
+            checkHashValues(false);
             return restricts.isRestrictedServiceAllowed(service, true);
         }
         return true;
@@ -265,7 +275,7 @@ public final class RestrictedSecurity {
      */
     public static boolean canServiceBeRegistered(Service service) {
         if (securityEnabled) {
-            checkHashValues();
+            checkHashValues(false);
             return restricts.isRestrictedServiceAllowed(service, false);
         }
         return true;
@@ -279,7 +289,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(String providerName) {
         if (securityEnabled) {
-            checkHashValues();
+            checkHashValues(false);
             // Remove argument, e.g. -NSS-FIPS, if present.
             int pos = providerName.indexOf('-');
             if (pos >= 0) {
@@ -299,7 +309,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(Class<?> providerClazz) {
         if (securityEnabled) {
-            checkHashValues();
+            checkHashValues(false);
             String providerClassName = providerClazz.getName();
 
             // Check if the specified class extends java.security.Provider.
