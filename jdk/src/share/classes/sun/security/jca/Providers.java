@@ -96,6 +96,7 @@ public class Providers {
         // triggers a getInstance() call (although that should not happen)
         providerList = ProviderList.EMPTY;
         providerList = ProviderList.fromSecurityProperties();
+        RestrictedSecurity.checkHashValues();
     }
 
     // Return to Sun provider or its backup.
