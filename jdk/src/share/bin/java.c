@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -1483,7 +1483,7 @@ TranslateApplicationArgs(int jargc, const char **jargv, int *pargc, char ***parg
     for (i = 0; i < jargc; i++) {
         const char *arg = jargv[i];
         if (arg[0] == '-' && arg[1] == 'J') {
-            *nargv++ = ((arg + 2) == NULL) ? NULL : JLI_StringDup(arg + 2);
+            *nargv++ = (arg[2] == '\0') ? NULL : JLI_StringDup(arg + 2);
         }
     }
 
