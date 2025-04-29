@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# ===========================================================================
+
 # Support macro for PLATFORM_EXTRACT_TARGET_AND_BUILD.
 # Converts autoconf style CPU name to OpenJDK style, into
 # VAR_CPU, VAR_CPU_ARCH, VAR_CPU_BITS and VAR_CPU_ENDIAN.
@@ -204,6 +208,7 @@ AC_DEFUN([PLATFORM_EXTRACT_TARGET_AND_BUILD],
   OPENJDK_TARGET_CPU="$VAR_CPU"
   OPENJDK_TARGET_CPU_ARCH="$VAR_CPU_ARCH"
   OPENJDK_TARGET_CPU_BITS="$VAR_CPU_BITS"
+  OPENJDK_COMPILE_CPU_BITS="$VAR_CPU_BITS"
   OPENJDK_TARGET_CPU_ENDIAN="$VAR_CPU_ENDIAN"
   AC_SUBST(OPENJDK_TARGET_OS)
   AC_SUBST(OPENJDK_TARGET_OS_API)
@@ -246,12 +251,16 @@ AC_DEFUN([PLATFORM_SETUP_TARGET_CPU_BITS],
       # A reduced build is requested
       COMPILE_TYPE="reduced"
       OPENJDK_TARGET_CPU_BITS=32
+      OPENJDK_COMPILE_CPU_BITS=32
       if test "x$OPENJDK_TARGET_CPU_ARCH" = "xx86"; then
         OPENJDK_TARGET_CPU=x86
       elif test "x$OPENJDK_TARGET_CPU_ARCH" = "xsparc"; then
         OPENJDK_TARGET_CPU=sparc
+      elif test "x$OPENJDK_TARGET_CPU_ARCH" = "xs390"; then
+        OPENJDK_COMPILE_CPU_BITS=31
+        OPENJDK_TARGET_CPU=s390
       else
-        AC_MSG_ERROR([Reduced build (--with-target-bits=32) is only supported on x86_64 and sparcv9])
+        AC_MSG_ERROR([Reduced build (--with-target-bits=32) $OPENJDK_TARGET_CPU_ARCH is only supported on x86_64, 390-64 and sparcv9])
       fi
     elif test "x$with_target_bits" = x64 && test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
       AC_MSG_ERROR([It is not possible to use --with-target-bits=64 on a 32 bit system. Use proper cross-compilation instead.])
@@ -460,9 +469,9 @@ AC_DEFUN([PLATFORM_SET_COMPILER_TARGET_BITS_FLAGS],
   # keep track of these additions in ADDED_CFLAGS etc. These
   # will later be checked to make sure only controlled additions
   # have been made to CFLAGS etc.
-  ADDED_CFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_TARGET_CPU_BITS}"
-  ADDED_CXXFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_TARGET_CPU_BITS}"
-  ADDED_LDFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_TARGET_CPU_BITS}"
+  ADDED_CFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_COMPILE_CPU_BITS}"
+  ADDED_CXXFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_COMPILE_CPU_BITS}"
+  ADDED_LDFLAGS=" ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_COMPILE_CPU_BITS}"
 
   CFLAGS="${CFLAGS}${ADDED_CFLAGS}"
   CXXFLAGS="${CXXFLAGS}${ADDED_CXXFLAGS}"
@@ -517,7 +526,7 @@ AC_DEFUN_ONCE([PLATFORM_SETUP_OPENJDK_TARGET_BITS],
       # This situation may happen on 64-bit platforms where the compiler by default only generates 32-bit objects
       # Let's try to implicitely set the compilers target architecture and retry the test
       AC_MSG_NOTICE([The tested number of bits in the target ($TESTED_TARGET_CPU_BITS) differs from the number of bits expected to be found in the target ($OPENJDK_TARGET_CPU_BITS).])
-      AC_MSG_NOTICE([I'll retry after setting the platforms compiler target bits flag to ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_TARGET_CPU_BITS}])
+      AC_MSG_NOTICE([I'll retry after setting the platforms compiler target bits flag to ${COMPILER_TARGET_BITS_FLAG}${OPENJDK_COMPILE_CPU_BITS}])
       PLATFORM_SET_COMPILER_TARGET_BITS_FLAGS
 
       # We have to unset 'ac_cv_sizeof_int_p' first, otherwise AC_CHECK_SIZEOF will use the previously cached value!
