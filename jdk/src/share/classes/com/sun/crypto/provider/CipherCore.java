@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -395,6 +395,20 @@ final class CipherCore {
     }
 
     /**
+     * Get appropriate sized local working buffer. An additional block size is added
+     * for operations that will use the NativeCipherBlockChaining cipher.
+     *
+     * @see {@link NativeCipherBlockChaining#getOptionalLocalOpenSSLOutputBuffer(byte[], int, int)
+     */
+    private int getLocalWorkingBufferSize(int inputLen, boolean isDoFinal) {
+        int size = getOutputSizeByOperation(inputLen, isDoFinal);
+        if (cipher instanceof NativeCipherBlockChaining) {
+            size = Math.addExact(size, NativeCipherBlockChaining.OPENSSL_ENCRYPTION_RESIDUE);
+        }
+        return size;
+    }
+
+    /**
      * Returns the initialization vector (IV) in a new buffer.
      *
      * <p>This is useful in the case where a random IV has been created
@@ -710,7 +724,7 @@ final class CipherCore {
 
         byte[] output = null;
         try {
-            output = new byte[getOutputSizeByOperation(inputLen, false)];
+            output = new byte[getLocalWorkingBufferSize(inputLen, false)];
             int len = update(input, inputOffset, inputLen, output,
                              0);
             if (len == output.length) {
@@ -891,7 +905,7 @@ final class CipherCore {
         throws IllegalBlockSizeException, BadPaddingException {
         try {
             checkReinit();
-            byte[] output = new byte[getOutputSizeByOperation(inputLen, true)];
+            byte[] output = new byte[getLocalWorkingBufferSize(inputLen, true)];
             int outputOffset = 0;
             int outLen = 0;
 
