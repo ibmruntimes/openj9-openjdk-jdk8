@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -33,6 +33,8 @@ package com.sun.crypto.provider;
 
 import java.security.InvalidKeyException;
 import java.security.ProviderException;
+import java.util.Arrays;
+
 import com.sun.crypto.provider.AESCrypt;
 
 import java.util.ArrayDeque;
@@ -47,7 +49,6 @@ import sun.misc.Cleaner;
  * native implementation of CBC crypto.
  *
  */
-
 class NativeCipherBlockChaining extends FeedbackCipher  {
 
     protected final static int numContexts = 4096;
@@ -56,6 +57,12 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
     private static final NativeCrypto nativeCrypto;
     private int previousKeyLength = -1;
+
+    /**
+     * OpenSSL requires an additional block size for operations. This will be added
+     * to all calculated output buffer sizes whenever native CBC operations are enabled.
+     */
+    static final int OPENSSL_ENCRYPTION_RESIDUE = 16;
 
     /*
      * Initialize the CBC context.
@@ -99,6 +106,29 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
                 }
             }
         }
+    }
+
+    /**
+     * This method checks if there is enough space in the provided output buffer
+     * to accommodate encryption in OpenSSL. OpenSSL requires an extra full block size
+     * for its operations according to the documentation associated with EVP_CipherUpdate
+     * (EVP_EncryptUpdate).
+     *
+     * @param output the original output buffer
+     * @param outputOffset the current offset in the output buffer
+     * @param inputLen the length of the input data
+     * @return a new byte array that can hold the combined output and residue (extra block),
+     * or the original buffer if there is enough space in the output buffer {@code output}
+     */
+    private static byte[] getOptionalLocalOpenSSLOutputBuffer(byte[] output, int outputOffset, int inputLen) {
+        byte[] tmpOutputBuffer;
+        int extraLen = Math.addExact(inputLen, OPENSSL_ENCRYPTION_RESIDUE);
+        if (extraLen > (output.length - outputOffset)) {
+            tmpOutputBuffer = new byte[extraLen];
+        } else {
+            tmpOutputBuffer = output;
+        }
+        return tmpOutputBuffer;
     }
 
     /*
@@ -266,7 +296,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
             throw new ProviderException("Internal error in input buffering");
         }
 
-        /**
+        /*
          * OpenSSL doesn't support overlapping buffers, make a copy of plain.
          */
         if (plain == cipher) {
@@ -276,13 +306,32 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
             plainOffset = 0;
         }
 
+        /*
+         * Determine if our output buffer is big enough for OpenSSL operations. Allocate a new
+         * one if required.
+         */
+        byte[] tmpOutputBuffer = getOptionalLocalOpenSSLOutputBuffer(cipher, cipherOffset, plainLen);
+
         int ret;
         synchronized (this) {
-            ret = nativeCrypto.CBCUpdate(nativeContext, plain, plainOffset,
-                    plainLen, cipher, cipherOffset);
+            ret = nativeCrypto.CBCUpdate(nativeContext,
+                                         plain,
+                                         plainOffset,
+                                         plainLen,
+                                         tmpOutputBuffer,
+                                         (cipher == tmpOutputBuffer) ? cipherOffset : 0);
         }
         if (ret == -1) {
             throw new ProviderException("Error in Native CipherBlockChaining");
+        }
+
+        /*
+         * If a larger output buffer was required for OpenSSL operations then copy back the results
+         * into the callers output buffer.
+         */
+        if (cipher != tmpOutputBuffer) {
+            System.arraycopy(tmpOutputBuffer, 0, cipher, cipherOffset, ret);
+            Arrays.fill(tmpOutputBuffer, (byte)0x00);
         }
 
         // saving current running state
@@ -341,14 +390,37 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         int ret;
 
+        /*
+         * Determine if our output buffer is big enough for OpenSSL operations. Allocate a new
+         * one if required.
+         */
+        byte[] tmpOutputBuffer = getOptionalLocalOpenSSLOutputBuffer(cipher, cipherOffset, plainLen);
+
         synchronized (this) {
             if (plain == cipher) {
-                ret = nativeCrypto.CBCFinalEncrypt(nativeContext, plain.clone(),
-                        plainOffset, plainLen, cipher, cipherOffset);
+                ret = nativeCrypto.CBCFinalEncrypt(nativeContext,
+                                                   plain.clone(),
+                                                   plainOffset,
+                                                   plainLen,
+                                                   tmpOutputBuffer,
+                                                   (cipher == tmpOutputBuffer) ? cipherOffset : 0);
             } else {
-                ret = nativeCrypto.CBCFinalEncrypt(nativeContext, plain, plainOffset,
-                        plainLen, cipher, cipherOffset);
+                ret = nativeCrypto.CBCFinalEncrypt(nativeContext,
+                                                   plain,
+                                                   plainOffset,
+                                                   plainLen,
+                                                   tmpOutputBuffer,
+                                                   (cipher == tmpOutputBuffer) ? cipherOffset : 0);
             }
+        }
+
+        /*
+         * If a larger output buffer was required for OpenSSL operations then copy back the results
+         * into the callers output buffer.
+         */
+        if (cipher != tmpOutputBuffer) {
+            System.arraycopy(tmpOutputBuffer, 0, cipher, cipherOffset, ret);
+            Arrays.fill(tmpOutputBuffer, (byte)0x00);
         }
 
         if (ret == -1) {
