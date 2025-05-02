@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([FLAGS_SETUP_INIT_FLAGS],
@@ -41,7 +41,7 @@ AC_DEFUN_ONCE([FLAGS_SETUP_INIT_FLAGS],
   if test "x$OPENJDK_TARGET_OS" = xmacosx; then
     ARFLAGS="-r"
   elif test "x$OPENJDK_TARGET_OS" = xaix; then
-    ARFLAGS="-X64"
+    ARFLAGS="-X$OPENJDK_TARGET_CPU_BITS"
   elif test "x$OPENJDK_TARGET_OS" = xwindows; then
     # lib.exe is used as AR to create static libraries.
     ARFLAGS="-nologo -NODEFAULTLIB:MSVCRT"
@@ -440,9 +440,9 @@ AC_DEFUN_ONCE([FLAGS_SETUP_COMPILER_FLAGS_FOR_JDK],
       CXXFLAGS_JDKLIB_EXTRA="${CXXFLAGS_JDKLIB_EXTRA} -xregs=no%appl"
     fi
   elif test "x$TOOLCHAIN_TYPE" = xxlc; then
-    LDFLAGS_JDK="${LDFLAGS_JDK} -q64 -brtl -bnolibpath -liconv -bexpall -brwexec_must"
-    CFLAGS_JDK="${CFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt -qstackprotect"
-    CXXFLAGS_JDK="${CXXFLAGS_JDK} -qchars=signed -q64 -qfullpath -qsaveopt -qstackprotect"
+    LDFLAGS_JDK="${LDFLAGS_JDK} -q$OPENJDK_TARGET_CPU_BITS -brtl -bnolibpath -liconv -bexpall -brwexec_must"
+    CFLAGS_JDK="${CFLAGS_JDK} -qchars=signed -q$OPENJDK_TARGET_CPU_BITS -qfullpath -qsaveopt -qstackprotect"
+    CXXFLAGS_JDK="${CXXFLAGS_JDK} -qchars=signed -q$OPENJDK_TARGET_CPU_BITS -qfullpath -qsaveopt -qstackprotect"
   elif test "x$TOOLCHAIN_TYPE" = xgcc; then
     LEGACY_HOST_CFLAGS="$LEGACY_HOST_CFLAGS -fstack-protector"
     LEGACY_TARGET_CFLAGS="$LEGACY_TARGET_CFLAGS -fstack-protector"

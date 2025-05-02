@@ -256,11 +256,13 @@ AC_DEFUN([PLATFORM_SETUP_TARGET_CPU_BITS],
         OPENJDK_TARGET_CPU=x86
       elif test "x$OPENJDK_TARGET_CPU_ARCH" = "xsparc"; then
         OPENJDK_TARGET_CPU=sparc
+      elif test "x$OPENJDK_TARGET_CPU_ARCH" = "xppc"; then
+        OPENJDK_TARGET_CPU=ppc
       elif test "x$OPENJDK_TARGET_CPU_ARCH" = "xs390"; then
         OPENJDK_COMPILE_CPU_BITS=31
         OPENJDK_TARGET_CPU=s390
       else
-        AC_MSG_ERROR([Reduced build (--with-target-bits=32) $OPENJDK_TARGET_CPU_ARCH is only supported on x86_64, 390-64 and sparcv9])
+        AC_MSG_ERROR([Reduced build (--with-target-bits=32) $OPENJDK_TARGET_CPU_ARCH is only supported on x86_64, 390, ppc and sparcv9])
       fi
     elif test "x$with_target_bits" = x64 && test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
       AC_MSG_ERROR([It is not possible to use --with-target-bits=64 on a 32 bit system. Use proper cross-compilation instead.])
