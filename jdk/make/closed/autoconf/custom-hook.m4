@@ -467,6 +467,10 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     fi
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+      OPENJ9_PLATFORM_CODE=ap32
+      OPENJ9_BUILD_MODE_ARCH="ppc"
+    fi
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
     OPENJ9_PLATFORM_CODE=xr64
   else
@@ -735,6 +739,14 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         AC_MSG_ERROR([Unable to find openssl in specified location $OPENSSL_DIR])
       fi
       AC_MSG_RESULT([yes])
+    fi
+
+    if test "x$WITH_OPENSSL" = xyes ; then
+      if test "x$with_target_bits" = x32 ; then
+        if test "x$OPENJDK_BUILD_OS" != xwindows ; then
+           AC_MSG_ERROR([openssl is not supported on 32-bit platforms other than Windows])
+        fi
+      fi
     fi
 
     AC_MSG_CHECKING([if we should bundle openssl])

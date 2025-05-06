@@ -23,6 +23,11 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
 
 #ifndef MLIB_TYPES_H
 #define MLIB_TYPES_H
@@ -73,7 +78,7 @@ typedef unsigned long      mlib_u64;
 #define MLIB_S64_CONST(x)  x##L
 #define MLIB_U64_CONST(x)  x##UL
 
-#elif (__STDC__ - 0 == 0) || defined(__GNUC__)
+#elif (__STDC__ - 0 == 0) || defined(__GNUC__) || defined(_AIX)
 
 #if defined(_NO_LONGLONG)
 
