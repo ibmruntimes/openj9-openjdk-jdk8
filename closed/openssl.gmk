@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -92,6 +92,11 @@ ifeq (,$(OPENSSL_TARGET))
   $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
 endif # OPENSSL_TARGET
 
+OPENSSL_CFLAGS :=
+ifeq ($(OPENJDK_TARGET_CPU), s390x)
+  OPENSSL_CFLAGS := -march=z10
+endif
+
 ifneq (,$(CCACHE))
   # If ccache is enabled and the environment contains either CC or CXX, their
   # values (as defined in this make) are propagated to the instance of make
@@ -101,8 +106,8 @@ ifneq (,$(CCACHE))
 endif # CCACHE
 
 build_openssl :
-	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)
-	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_TARGET) shared )
+	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET) with additional CFLAGS $(OPENSSL_CFLAGS)
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CFLAGS) $(OPENSSL_TARGET) shared )
 	$(OPENSSL_PATCH)
 	( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 
