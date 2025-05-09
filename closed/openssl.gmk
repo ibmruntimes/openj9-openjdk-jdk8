@@ -92,9 +92,10 @@ ifeq (,$(OPENSSL_TARGET))
   $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
 endif # OPENSSL_TARGET
 
-OPENSSL_CFLAGS :=
 ifeq ($(OPENJDK_TARGET_CPU), s390x)
-  OPENSSL_CFLAGS := -march=z10
+  OPENSSL_CONFIG_CFLAGS := -march=z10
+else
+  OPENSSL_CONFIG_CFLAGS :=
 endif
 
 ifneq (,$(CCACHE))
@@ -106,8 +107,8 @@ ifneq (,$(CCACHE))
 endif # CCACHE
 
 build_openssl :
-	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET) with additional CFLAGS $(OPENSSL_CFLAGS)
-	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CFLAGS) $(OPENSSL_TARGET) shared )
+	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)$(if $(OPENSSL_CONFIG_CFLAGS), with additional CFLAGS $(OPENSSL_CONFIG_CFLAGS))
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) shared )
 	$(OPENSSL_PATCH)
 	( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 
