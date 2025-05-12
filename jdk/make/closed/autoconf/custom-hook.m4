@@ -536,34 +536,7 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 
   CONFIGURE_OPENSSL
 
-  COMPILER=$CXX
-  if test "x$OPENJDK_TARGET_OS" = xaix ; then
-    # xlc -qversion output typically looks like
-    #     IBM XL C/C++ for AIX, V11.1 (5724-X13)
-    #     Version: 11.01.0000.0015
-    COMPILER_VERSION_OUTPUT=`$COMPILER -qversion 2>&1`
-    # Collapse compiler output into a single line
-    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  elif test "x$OPENJDK_TARGET_OS" = xwindows ; then
-    # There is no specific version flag, but all output starts with a version string.
-    # First line typically looks something like:
-    # Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 16.00.40219.01 for 80x86
-    COMPILER_VERSION_OUTPUT=`$COMPILER 2>&1 | $HEAD -n 1 | $TR -d '\r'`
-    # Collapse compiler output into a single line
-    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT`
-  else
-    # gcc --version output typically looks like
-    #     gcc (Ubuntu/Linaro 4.8.1-10ubuntu9) 4.8.1
-    #     Copyright (C) 2013 Free Software Foundation, Inc.
-    #     This is free software; see the source for copying conditions.  There is NO
-    #     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    COMPILER_VERSION_OUTPUT=`$COMPILER --version 2>&1`
-    # Remove Copyright and legalese from version string, and
-    # collapse into a single line
-    COMPILER_VERSION_STRING=`$ECHO $COMPILER_VERSION_OUTPUT | \
-        $SED -e 's/ *Copyright .*//'`
-  fi
-  AC_SUBST(COMPILER_VERSION_STRING)
+  AC_SUBST(CXX_VERSION_STRING)
 
   CLOSED_AUTOCONF_DIR="$SRC_ROOT/jdk/make/closed/autoconf"
 
