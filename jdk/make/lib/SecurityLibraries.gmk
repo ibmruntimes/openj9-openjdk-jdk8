@@ -311,7 +311,7 @@ endif
 
 ##########################################################################################
 
-ifeq ($(WITH_OPENSSL), yes)
+ifeq ($(WITH_OPENSSL), true)
     $(eval $(call SetupNativeCompilation,BUILD_JNCRYPTO, \
         LIBRARY := jncrypto, \
         OUTPUT_DIR := $(INSTALL_LIBRARIES_HERE), \
