@@ -104,7 +104,7 @@ public class NativeCrypto {
                     System.err.println("Native crypto library load succeeded - using native crypto library.");
                 }
             } else {
-                if (!nativeLibName.isEmpty()) {
+                if ((nativeLibName != null) && !nativeLibName.isEmpty()) {
                     throw new RuntimeException(nativeLibName + " is not available, crypto libraries are not loaded");
                 }
             }
