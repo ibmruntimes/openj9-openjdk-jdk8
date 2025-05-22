@@ -196,6 +196,9 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
      */
     void init(boolean decrypting, String algorithm, byte[] key, byte[] iv)
             throws InvalidKeyException {
+        if (!algorithm.equalsIgnoreCase("AES") && !algorithm.equalsIgnoreCase("Rijndael")) {
+            throw new InvalidKeyException("Wrong algorithm: AES or Rijndael required");
+        }
 
         if ((key == null) || (iv == null) || (iv.length != blockSize)) {
             throw new InvalidKeyException("Internal error");
