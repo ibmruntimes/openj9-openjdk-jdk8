@@ -21,6 +21,7 @@
 # Remove -R from MAKE settings as some built-in rules are needed for OMR.
 MAKE := $(filter-out -R,$(MAKE))
 
+CLOSEDJ9_TOPDIR         := @CLOSEDJ9_TOPDIR@
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
 
