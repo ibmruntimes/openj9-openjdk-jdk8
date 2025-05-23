@@ -586,37 +586,29 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 [
   AC_ARG_WITH(openssl, [AS_HELP_STRING([--with-openssl],
     [Use either fetched | system | <path to openssl version 1.0.2 or later>])])
-
   AC_ARG_ENABLE(openssl-bundling, [AS_HELP_STRING([--enable-openssl-bundling],
     [enable bundling of the openssl crypto library with the jdk build])])
-
-  WITH_OPENSSL=yes
-
-  if test "x$with_openssl" = x ; then
-    # User doesn't want to build with OpenSSL. No need to build openssl libraries
-    WITH_OPENSSL=no
+  BUILD_OPENSSL=false
+  OPENSSL_BUNDLE_LIB_PATH=
+  WITH_OPENSSL=true
+  if test "x$with_openssl" = x || test "x$with_openssl" = xno ; then
+    # User doesn't want to build with OpenSSL. No need to build openssl libraries.
+    WITH_OPENSSL=false
   else
     AC_MSG_CHECKING([for OPENSSL])
-    BUNDLE_OPENSSL="$enable_openssl_bundling"
-    BUILD_OPENSSL=no
-
     # If not specified, default is to not bundle openssl
-    if test "x$BUNDLE_OPENSSL" = x ; then
-      BUNDLE_OPENSSL=no
+    if test "x$enable_openssl_bundling" != xyes ; then
+      enable_openssl_bundling=no
     fi
-
     # Process --with-openssl=fetched
     if test "x$with_openssl" = xfetched ; then
       if test -d "$SRC_ROOT/openssl" ; then
         OPENSSL_DIR="$SRC_ROOT/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        if test "x$BUNDLE_OPENSSL" != x ; then
-          if ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-            BUILD_OPENSSL=yes
-          fi
+        if ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+          BUILD_OPENSSL=true
         fi
-
-        if test "x$BUNDLE_OPENSSL" = xyes ; then
+        if test "x$enable_openssl_bundling" = xyes ; then
           OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR"
         fi
         AC_MSG_RESULT([yes])
@@ -629,7 +621,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-
     # Process --with-openssl=system
     elif test "x$with_openssl" = xsystem ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
@@ -637,23 +628,19 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         printf "On Windows, value of \"system\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-
       # We can use the system installed openssl only when it is package installed.
       # If not package installed, fail with an error message.
       # PKG_CHECK_MODULES will setup the variable OPENSSL_CFLAGS and OPENSSL_LIB when successful.
       PKG_CHECK_MODULES(OPENSSL, openssl >= 1.0.2, [FOUND_OPENSSL=yes], [FOUND_OPENSSL=no])
-
-      if test "x$FOUND_OPENSSL" != xyes; then
+      if test "x$FOUND_OPENSSL" != xyes ; then
         AC_MSG_ERROR([Unable to find openssl 1.0.2(and above) installed on System. Please use other options for '--with-openssl'])
       fi
-
       # The crypto library bundling option is not available when --with-openssl=system.
-      if test "x$BUNDLE_OPENSSL" = xyes ; then
+      if test "x$enable_openssl_bundling" = xyes ; then
         AC_MSG_RESULT([no])
-        printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl path to bundle crypto library\n"
+        printf "The option --enable-openssl-bundling is not available with --with-openssl=system. Use option fetched or openssl-custom-path to bundle crypto library\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-
     # Process --with-openssl=/custom/path/where/openssl/is/present
     # As the value is not fetched or system, assume user specified the
     # path where openssl is installed
@@ -662,7 +649,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       BASIC_FIXUP_PATH(OPENSSL_DIR)
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        if test "x$BUNDLE_OPENSSL" = xyes ; then
+        if test "x$enable_openssl_bundling" = xyes ; then
           if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
             if test -d "$OPENSSL_DIR/bin" ; then
               OPENSSL_BUNDLE_LIB_PATH="$OPENSSL_DIR/bin"
@@ -671,7 +658,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
             fi
           else
             if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-              if test "x$BUNDLE_OPENSSL" = xyes ; then
+              if test "x$enable_openssl_bundling" = xyes ; then
                 # On Mac OSX, create local copy of the crypto library to update @rpath
                 # as the default is /usr/local/lib.
                 if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
@@ -686,7 +673,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 fi
               fi
             elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-              if test "x$BUNDLE_OPENSSL" = xyes ; then
+              if test "x$enable_openssl_bundling" = xyes ; then
                 # On Mac OSX, create local copy of the crypto library to update @rpath
                 # as the default is /usr/local/lib.
                 if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
@@ -714,7 +701,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       AC_MSG_RESULT([yes])
     fi
 
-    if test "x$WITH_OPENSSL" = xyes ; then
+    if test "x$WITH_OPENSSL" = xtrue ; then
       if test "x$with_target_bits" = x32 ; then
         if test "x$OPENJDK_BUILD_OS" != xwindows ; then
            AC_MSG_ERROR([openssl is not supported on 32-bit platforms other than Windows])
@@ -723,7 +710,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     fi
 
     AC_MSG_CHECKING([if we should bundle openssl])
-    AC_MSG_RESULT([$BUNDLE_OPENSSL])
+    AC_MSG_RESULT([$enable_openssl_bundling])
   fi
 
   AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)

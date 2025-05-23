@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -44,7 +44,7 @@ endef
 jdk : build-j9vm
 
 build-j9vm : start-make
-  ifeq ($(BUILD_OPENSSL),yes)
+  ifeq ($(BUILD_OPENSSL), true)
 	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/openssl.gmk
   endif # BUILD_OPENSSL
 	@+$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/closed/OpenJ9.gmk build-j9vm
