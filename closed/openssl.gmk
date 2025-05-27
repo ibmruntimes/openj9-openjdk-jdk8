@@ -108,7 +108,7 @@ endif # CCACHE
 
 build_openssl :
 	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)$(if $(OPENSSL_CONFIG_CFLAGS), with additional CFLAGS $(OPENSSL_CONFIG_CFLAGS))
-	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend shared )
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend no-tests shared )
 	$(OPENSSL_PATCH)
 	+ ( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 
