@@ -36,6 +36,7 @@
 #define OPENJ9_TAG                "@OPENJ9_TAG@"
 #define J9JDK_EXT_VERSION         "@J9JDK_EXT_VERSION@"
 #define J9JDK_EXT_NAME            "@J9JDK_EXT_NAME@"
+#define VENDOR_SHA                "@CLOSEDJ9_SHA@"
 #define JAVA_VENDOR               "@COMPANY_NAME@"
 #define JAVA_VENDOR_URL           "@VENDOR_URL@"
 
