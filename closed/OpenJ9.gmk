@@ -366,8 +366,6 @@ $(J9JCL_SOURCES_DONEFILE) : \
 	$(call RunJPP, GENERIC, $(TOPDIR)/closed/adds/jdk/src/share/classes, $(JPP_DEST)) \
 		$(IncludeIfUnsure)
 	$(call RunJPP, SIDECAR18-SE-OPENJ9, $(OPENJ9_TOPDIR)/jcl, $(JPP_DEST))
-	@$(ECHO) Generating J9JCL tools
-	$(call RunJPP, SIDECAR18-TOOLS-OPENJ9, $(OPENJ9_TOPDIR)/jcl, $(JPP_DEST))
   ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Generating DDR_VM sources
 	$(call RunJPP, GENERIC, $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, $(J9JCL_SOURCES_DIR)/ddr) \
