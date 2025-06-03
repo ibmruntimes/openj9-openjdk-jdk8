@@ -62,7 +62,7 @@ $(call GetVersion, openjdk,  OPENJDK_SHA,   $(TOPDIR),           required)
 $(call GetVersion, openj9,   OPENJ9_SHA,    $(OPENJ9_TOPDIR),    required)
 $(call GetVersion, omr,      OPENJ9OMR_SHA, $(OPENJ9OMR_TOPDIR), required)
 $(call GetVersion, openssl,  OPENSSL_SHA,   $(OPENSSL_DIR))
-$(call GetVersion, closedj9, CLOSEDJ9_SHA,  $(CLOSEDJ9_TOPDIR))
+$(call GetVersion, vendor,   VENDOR_SHA,    $(VENDOR_TOPDIR))
 
 # Find OpenJ9 tag associated with current commit (suppressing stderr in case there is no such tag).
 OPENJ9_TAG := $(shell $(GIT) -C $(OPENJ9_TOPDIR) describe --exact-match HEAD 2>/dev/null)
@@ -114,7 +114,6 @@ $(foreach file, \
 J9TOOLS_DIR := $(JDK_OUTPUTDIR)/j9tools
 
 OPENJ9_VERSION_VARS := \
-	CLOSEDJ9_SHA \
 	COMPANY_NAME \
 	CXX_VERSION_STRING \
 	DEBUG_LEVEL \
@@ -131,11 +130,12 @@ OPENJ9_VERSION_VARS := \
 	PRODUCT_NAME \
 	PRODUCT_SUFFIX \
 	USERNAME \
+	VENDOR_SHA \
 	VENDOR_URL \
 	#
 
 OPENJ9_VERSION_SCRIPT := \
-	$(if $(CLOSEDJ9_SHA),,-e '/ VENDOR_SHA /d') \
+	$(if $(VENDOR_SHA),,-e '/ VENDOR_SHA /d') \
 	$(foreach var,$(OPENJ9_VERSION_VARS),-e 's|@$(var)@|$(value $(var))|g')
 
 # create_or_update
@@ -193,8 +193,8 @@ CMAKE_ARGS := \
 	-DOPENJ9_SHA=$(OPENJ9_SHA) \
 	#
 
-ifneq (,$(CLOSEDJ9_SHA))
-  CMAKE_ARGS += -DJ9VM_VENDOR_DIR=$(CLOSEDJ9_TOPDIR)
+ifneq (,$(VENDOR_TOPDIR))
+  CMAKE_ARGS += -DJ9VM_VENDOR_DIR=$(VENDOR_TOPDIR)
 else
   CMAKE_ARGS += -DOPENJ9_BUILD=true
 endif

@@ -21,21 +21,30 @@
 AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
 [
   # Where are the OpenJ9 sources.
-  CLOSEDJ9_TOPDIR="$TOPDIR/closedj9"
   OPENJ9OMR_TOPDIR="$SRC_ROOT/omr"
   OPENJ9_TOPDIR="$SRC_ROOT/openj9"
 
+  AC_ARG_WITH(vendor-source, [AS_HELP_STRING([--with-vendor-source], [set the vendor source directory])])
+  if test "x$with_vendor_source" = x || test "x$with_vendor_source" = xno ; then
+    VENDOR_TOPDIR=
+  else
+    VENDOR_TOPDIR="$TOPDIR/$with_vendor_source"
+    if ! test -d "$VENDOR_TOPDIR" ; then
+      AC_MSG_ERROR(["Cannot locate vendor sources: $VENDOR_TOPDIR! Try 'bash get_source.sh' and restart configure."])
+    fi
+  fi
+
   if ! test -d "$OPENJ9_TOPDIR" ; then
-    AC_MSG_ERROR(["Cannot locate the path to OpenJ9 sources: $OPENJ9_TOPDIR! Try 'bash get_source.sh' and restart configure"])
+    AC_MSG_ERROR(["Cannot locate OpenJ9 sources: $OPENJ9_TOPDIR! Try 'bash get_source.sh' and restart configure."])
   fi
 
   if ! test -d "$OPENJ9OMR_TOPDIR" ; then
-    AC_MSG_ERROR(["Cannot locate the path to OMR sources: $OPENJ9OMR_TOPDIR! Try 'bash get_source.sh' and restart configure"])
+    AC_MSG_ERROR(["Cannot locate OMR sources: $OPENJ9OMR_TOPDIR! Try 'bash get_source.sh' and restart configure."])
   fi
 
-  AC_SUBST(CLOSEDJ9_TOPDIR)
   AC_SUBST(OPENJ9OMR_TOPDIR)
   AC_SUBST(OPENJ9_TOPDIR)
+  AC_SUBST(VENDOR_TOPDIR)
 
   OPENJ9_PLATFORM_SETUP
   OPENJDK_VERSION_DETAILS
