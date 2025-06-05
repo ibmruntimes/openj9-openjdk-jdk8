@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -87,6 +87,7 @@ configure_defaults() {
 	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  $omr_branch
 
 	add_source openssl      https://github.com/openssl/openssl.git            ""              "--depth=1"
+	add_source vendor
 }
 
 # Show the usage of a single option.
