@@ -24,22 +24,21 @@
 #define OPENJ9_VERSION_INFO_H
 
 #define J9COMPILER_VERSION_STRING "@CXX_VERSION_STRING@"
+#define J9JDK_EXT_NAME            "@J9JDK_EXT_NAME@"
+#define J9JDK_EXT_VERSION         "@J9JDK_EXT_VERSION@"
+#define J9JVM_VERSION_STRING      "@OPENJ9_VERSION_STRING@"
 #define J9PRODUCT_NAME            "@PRODUCT_NAME@ @PRODUCT_SUFFIX@"
 #define J9TARGET_CPU_BITS         "@OPENJDK_TARGET_CPU_BITS@"
 #define J9TARGET_CPU_OSARCH       "@OPENJDK_TARGET_CPU_OSARCH@"
 #define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
 #define J9USERNAME                "@USERNAME@"
 #define J9VERSION_STRING          "@JRE_RELEASE_VERSION@"
-#define OPENJDK_SHA               "@OPENJDK_SHA@"
-#define OPENJDK_TAG               "@OPENJDK_TAG@"
-#define J9JVM_VERSION_STRING      "@OPENJ9_VERSION_STRING@"
-#define OPENJ9_TAG                "@OPENJ9_TAG@"
-#define J9JDK_EXT_VERSION         "@J9JDK_EXT_VERSION@"
-#define J9JDK_EXT_NAME            "@J9JDK_EXT_NAME@"
-#define VENDOR_SHA                "@CLOSEDJ9_SHA@"
 #define JAVA_VENDOR               "@COMPANY_NAME@"
 #define JAVA_VENDOR_URL           "@VENDOR_URL@"
-
 #define JDK_DEBUG_LEVEL           "@DEBUG_LEVEL@"
+#define OPENJ9_TAG                "@OPENJ9_TAG@"
+#define OPENJDK_SHA               "@OPENJDK_SHA@"
+#define OPENJDK_TAG               "@OPENJDK_TAG@"
+#define VENDOR_SHA                "@VENDOR_SHA@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
