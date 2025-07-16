@@ -74,13 +74,6 @@ configure_defaults() {
 	local openj9_branch=v0.53.0-release
 	local omr_branch=v0.53.0-release
 
-	# If this repository is on a release branch, use the same branch names
-	# for OpenJ9 and OMR.
-	if [[ "$current_branch" =~ (ibm-)?(v[0-9]+\.[0-9]+(\.[0-9]+)?-release) ]] ; then
-		openj9_branch="${BASH_REMATCH[2]}"
-		omr_branch="${BASH_REMATCH[2]}"
-	fi
-
 	#          folder       URL                                               branch          options
 	#          ------       ---                                               ------          -------
 	add_source openj9       https://github.com/eclipse-openj9/openj9.git      $openj9_branch
