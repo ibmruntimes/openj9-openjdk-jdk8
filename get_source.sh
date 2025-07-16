@@ -71,8 +71,8 @@ add_source() {
 #
 configure_defaults() {
 	local current_branch="$(git rev-parse --abbrev-ref HEAD)"
-	local openj9_branch=master
-	local omr_branch=openj9
+	local openj9_branch=v0.53.0-release
+	local omr_branch=v0.53.0-release
 
 	# If this repository is on a release branch, use the same branch names
 	# for OpenJ9 and OMR.
