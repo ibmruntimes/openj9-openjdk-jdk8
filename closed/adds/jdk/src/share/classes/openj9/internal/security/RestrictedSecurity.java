@@ -67,7 +67,6 @@ public final class RestrictedSecurity {
     private static final boolean allowSetProperties;
 
     private static final boolean isNSSSupported;
-    private static final boolean isOpenJCEPlusSupported;
 
     private static final boolean userSetProfile;
     private static final boolean shouldEnableSecurity;
@@ -87,14 +86,10 @@ public final class RestrictedSecurity {
     private static final Set<String> unmodifiableProperties = new HashSet<>();
 
     private static final Map<String, List<String>> supportedPlatformsNSS = new HashMap<>();
-    private static final Map<String, List<String>> supportedPlatformsOpenJCEPlus = new HashMap<>();
 
     static {
         supportedPlatformsNSS.put("Arch", Arrays.asList("amd64", "ppc64le", "s390x"));
         supportedPlatformsNSS.put("OS", Arrays.asList("Linux"));
-
-        supportedPlatformsOpenJCEPlus.put("Arch", Arrays.asList("amd64", "ppc64"));
-        supportedPlatformsOpenJCEPlus.put("OS", Arrays.asList("Linux", "AIX", "Windows"));
 
         String[] props = AccessController.doPrivileged(
                 new PrivilegedAction<String[]>() {
@@ -123,21 +118,6 @@ public final class RestrictedSecurity {
             }
         }
         isNSSSupported = isOsSupported && isArchSupported;
-
-        // Check whether the OpenJCEPlus FIPS solution is supported.
-        isOsSupported = false;
-        for (String os: supportedPlatformsOpenJCEPlus.get("OS")) {
-            if (props[2].contains(os)) {
-                isOsSupported = true;
-            }
-        }
-        isArchSupported = false;
-        for (String arch: supportedPlatformsOpenJCEPlus.get("Arch")) {
-            if (props[3].contains(arch)) {
-                isArchSupported = true;
-            }
-        }
-        isOpenJCEPlusSupported = isOsSupported && isArchSupported;
 
         // Check the default solution to see if FIPS is supported.
         isFIPSSupported = isNSSSupported;
@@ -404,11 +384,6 @@ public final class RestrictedSecurity {
     private static void checkIfKnownProfileSupported() {
         if (profileID.contains("NSS") && !isNSSSupported) {
             printStackTraceAndExit("NSS RestrictedSecurity profiles are not supported"
-                    + " on this platform.");
-        }
-
-        if (profileID.contains("OpenJCEPlus") && !isOpenJCEPlusSupported) {
-            printStackTraceAndExit("OpenJCEPlus RestrictedSecurity profiles are not supported"
                     + " on this platform.");
         }
 
