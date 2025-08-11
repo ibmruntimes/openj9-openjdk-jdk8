@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -105,6 +105,10 @@ public final class ProviderList {
         if (!RestrictedSecurity.isProviderAllowed(p.getClass())) {
             // We're in restricted security mode which does not allow this provider,
             // return without adding.
+            if (debug != null) {
+                debug.println("In RestrictedSecurity mode. Provider " +
+                        p.getClass().getName() + " not allowed to be inserted.");
+            }
             return providerList;
         }
         if (providerList.getProvider(p.getName()) != null) {

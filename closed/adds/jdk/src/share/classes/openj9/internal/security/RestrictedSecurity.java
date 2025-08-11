@@ -1862,8 +1862,8 @@ public final class RestrictedSecurity {
 
                 String action = m.group(4);
                 if (!update && !isNullOrBlank(action)) {
-                    printStackTraceAndExit("You cannot add or remove to provider "
-                            + m.group(1) + ". This is the base profile.");
+                    printStackTraceAndExit("Constraints of provider not previously specified"
+                            + " cannot be modified: " + providerName);
                 }
             } else {
                 printStackTraceAndExit("Provider format is incorrect: " + providerInfo);
