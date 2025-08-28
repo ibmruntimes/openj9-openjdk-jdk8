@@ -928,7 +928,7 @@ public abstract class Provider extends Properties {
         for (Iterator<Map.Entry<ServiceKey, Service>> t =
                 map.entrySet().iterator(); t.hasNext(); ) {
             Service s = t.next().getValue();
-            if ((s.isValid() == false) || !RestrictedSecurity.isServiceAllowed(s)) {
+            if ((s.isValid() == false) || !RestrictedSecurity.canServiceBeRegistered(s)) {
                 t.remove();
             }
         }
@@ -1049,12 +1049,18 @@ public abstract class Provider extends Properties {
         }
         if (serviceMap != null) {
             Service service = serviceMap.get(key);
-            if (service != null) {
+            if ((service != null) && RestrictedSecurity.isServiceAllowed(service)) {
                 return service;
             }
         }
         ensureLegacyParsed();
-        return (legacyMap != null) ? legacyMap.get(key) : null;
+        if (legacyMap != null) {
+            Service service = legacyMap.get(key);
+            if ((service != null) && RestrictedSecurity.isServiceAllowed(service)) {
+                return service;
+            }
+        }
+        return null;
     }
 
     // ServiceKey from previous getService() call
@@ -1084,13 +1090,23 @@ public abstract class Provider extends Properties {
             ensureLegacyParsed();
             Set<Service> set = new LinkedHashSet<>();
             if (serviceMap != null) {
-                set.addAll(serviceMap.values());
+                serviceMap.values().forEach(service -> {
+                    if (RestrictedSecurity.isServiceAllowed(service)) {
+                        // If allowed by RestrictedSecurity, add it to set.
+                        set.add(service);
+                    }
+                });
             }
             if (legacyMap != null) {
-                set.addAll(legacyMap.values());
+                legacyMap.values().forEach(service -> {
+                    if (RestrictedSecurity.isServiceAllowed(service)) {
+                        // If allowed by RestrictedSecurity, add it to set.
+                        set.add(service);
+                    }
+                });
             }
             serviceSet = Collections.unmodifiableSet(set);
-            servicesChanged = false;
+            servicesChanged = RestrictedSecurity.isEnabled();
         }
         return serviceSet;
     }
