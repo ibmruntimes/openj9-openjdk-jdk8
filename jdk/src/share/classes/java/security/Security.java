@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -124,82 +124,129 @@ public final class Security {
         if ("true".equalsIgnoreCase(props.getProperty
                 ("security.overridePropertiesFile"))) {
 
-            String extraPropFile = System.getProperty
-                                        ("java.security.properties");
-            if (extraPropFile != null && extraPropFile.startsWith("=")) {
-                overrideAll = true;
-                extraPropFile = extraPropFile.substring(1);
-            }
+            String extraPropList = System.getProperty
+                                        ("java.security.propertiesList");
+            if ((extraPropList != null) && !extraPropList.isEmpty()) {
+                for (String file : extraPropList.split(File.pathSeparator)) {
+                    BufferedInputStream bis = null;
+                    try {
+                        if (file.startsWith("=")) {
+                            throw new IllegalArgumentException(
+                                    "java.security.propertiesList does not support '=' prefix: " + file);
+                        }
+                        URL propURL;
 
-            if (overrideAll) {
-                props = new Properties();
-                if (sdebug != null) {
-                    sdebug.println
-                        ("overriding other security properties files!");
-                }
-            }
+                        file = PropertyExpander.expand(file);
+                        propFile = new File(file);
+                        if (propFile.exists()) {
+                            propURL = new URL("file:" + propFile.getCanonicalPath());
+                        } else {
+                            propURL = new URL(file);
+                        }
+                        bis = new BufferedInputStream(propURL.openStream());
+                        props.load(bis);
+                        loadedProps = true;
 
-            // now load the user-specified file so its values
-            // will win if they conflict with the earlier values
-            if (extraPropFile != null) {
-                BufferedInputStream bis = null;
-                try {
-                    URL propURL;
-
-                    extraPropFile = PropertyExpander.expand(extraPropFile);
-                    propFile = new File(extraPropFile);
-                    if (propFile.exists()) {
-                        propURL = new URL
-                                ("file:" + propFile.getCanonicalPath());
-                    } else {
-                        propURL = new URL(extraPropFile);
-                    }
-                    bis = new BufferedInputStream(propURL.openStream());
-                    props.load(bis);
-                    loadedProps = true;
-
-                    if (sdebug != null) {
-                        sdebug.println("reading security properties file: " +
-                                        propURL);
-                        if (overrideAll) {
+                        if (sdebug != null) {
+                            sdebug.println("reading security properties file: " + file);
+                        }
+                    } catch (Exception e) {
+                        if (sdebug != null) {
                             sdebug.println
-                                ("overriding other security properties files!");
+                                    ("unable to load security properties from " + file);
+                            e.printStackTrace();
+                        }
+                        break;
+                    } finally {
+                        if (bis != null) {
+                            try {
+                                bis.close();
+                            } catch (IOException ioe) {
+                                if (sdebug != null) {
+                                    sdebug.println("unable to close input stream");
+                                }
+                            }
                         }
                     }
-                } catch (Exception e) {
+                }
+            } else {
+                String extraPropFile = System.getProperty
+                                            ("java.security.properties");
+                if (extraPropFile != null && extraPropFile.startsWith("=")) {
+                    overrideAll = true;
+                    extraPropFile = extraPropFile.substring(1);
+                }
+
+                if (overrideAll) {
+                    props = new Properties();
                     if (sdebug != null) {
                         sdebug.println
-                                ("unable to load security properties from " +
-                                extraPropFile);
-                        e.printStackTrace();
+                            ("overriding other security properties files!");
                     }
-                } finally {
-                    if (bis != null) {
-                        try {
-                            bis.close();
-                        } catch (IOException ioe) {
-                            if (sdebug != null) {
-                                sdebug.println("unable to close input stream");
+                }
+
+                // now load the user-specified file so its values
+                // will win if they conflict with the earlier values
+                if (extraPropFile != null) {
+                    BufferedInputStream bis = null;
+                    try {
+                        URL propURL;
+
+                        extraPropFile = PropertyExpander.expand(extraPropFile);
+                        propFile = new File(extraPropFile);
+                        if (propFile.exists()) {
+                            propURL = new URL
+                                    ("file:" + propFile.getCanonicalPath());
+                        } else {
+                            propURL = new URL(extraPropFile);
+                        }
+                        bis = new BufferedInputStream(propURL.openStream());
+                        props.load(bis);
+                        loadedProps = true;
+
+                        if (sdebug != null) {
+                            sdebug.println("reading security properties file: " +
+                                            propURL);
+                            if (overrideAll) {
+                                sdebug.println
+                                    ("overriding other security properties files!");
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (sdebug != null) {
+                            sdebug.println
+                                    ("unable to load security properties from " +
+                                    extraPropFile);
+                            e.printStackTrace();
+                        }
+                    } finally {
+                        if (bis != null) {
+                            try {
+                                bis.close();
+                            } catch (IOException ioe) {
+                                if (sdebug != null) {
+                                    sdebug.println("unable to close input stream");
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        if (!loadedProps) {
-            initializeStatic();
-            if (sdebug != null) {
-                sdebug.println("unable to load security properties " +
-                        "-- using defaults");
+            if (!loadedProps) {
+                initializeStatic();
+                if (sdebug != null) {
+                    sdebug.println("unable to load security properties " +
+                            "-- using defaults");
+                }
             }
-        }
 
-        // Load restricted security mode properties.
-        boolean restrictedSecurityEnabled = RestrictedSecurity.configure(props);
-        if (sdebug != null) {
-            sdebug.println(restrictedSecurityEnabled ? "Restricted security mode enabled."
-                    : "Restricted security mode disabled.");
+            // Load restricted security mode properties.
+            boolean restrictedSecurityEnabled = RestrictedSecurity.configure(props);
+            if (sdebug != null) {
+                sdebug.println(restrictedSecurityEnabled ? "Restricted security mode enabled."
+                        : "Restricted security mode disabled.");
+            }
         }
     }
 
