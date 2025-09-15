@@ -332,6 +332,10 @@ ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
+ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
+  JPP_TAGS += RAM_CLASS_CACHE_SUPPORT
+endif # OPENJ9_ENABLE_SNAPSHOTS
+
 # invoke JPP to preprocess java source files
 # $1 - configuration
 # $2 - source directory
