@@ -20,6 +20,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
 
 /*
  * @bug     5086470  6358247
@@ -182,7 +187,7 @@ public class LockingThread extends Thread {
             throw new RuntimeException("LockName: " + lockName +
                 " class name not matched. Expected: " + waitingLockName);
         }
-        int i = Integer.parseInt(s[1], 16);
+        int i = Integer.parseUnsignedInt(s[1], 16);
         if (hcode != i) {
             throw new RuntimeException("LockName: " + lockName +
                 " IdentityHashCode not matched. Expected: " + hcode);
