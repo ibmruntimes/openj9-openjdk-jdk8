@@ -39,6 +39,7 @@
 #define OPENJ9_TAG                "@OPENJ9_TAG@"
 #define OPENJDK_SHA               "@OPENJDK_SHA@"
 #define OPENJDK_TAG               "@OPENJDK_TAG@"
+#define OPENJDK_VERSION_STRING    "@JRE_RELEASE_VERSION@"
 #define VENDOR_SHA                "@VENDOR_SHA@"
 
 #endif /* OPENJ9_VERSION_INFO_H */
