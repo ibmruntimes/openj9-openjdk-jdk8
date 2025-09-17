@@ -32,7 +32,6 @@
 #define J9TARGET_CPU_OSARCH       "@OPENJDK_TARGET_CPU_OSARCH@"
 #define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
 #define J9USERNAME                "@USERNAME@"
-#define J9VERSION_STRING          "@JRE_RELEASE_VERSION@"
 #define JAVA_VENDOR               "@COMPANY_NAME@"
 #define JAVA_VENDOR_URL           "@VENDOR_URL@"
 #define JDK_DEBUG_LEVEL           "@DEBUG_LEVEL@"
