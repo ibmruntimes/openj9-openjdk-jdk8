@@ -20,6 +20,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
 
 /**
  * @test
@@ -603,7 +608,7 @@ public class Arrrghs extends TestHelper {
         // command line, '% java -jar -W', note the bogus -W
         tr = doExec(javaCmd, "-jar", "-W");
         tr.checkNegative();
-        tr.contains("Unrecognized option: -W");
+        tr.contains("Command-line option unrecognised: -W");
         if (!tr.testStatus)
             System.out.println(tr);
     }
