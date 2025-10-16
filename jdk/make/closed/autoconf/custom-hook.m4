@@ -556,6 +556,45 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   # explicitly disable classlist generation
   ENABLE_GENERATE_CLASSLIST="false"
 
+  AC_MSG_CHECKING([whether to enable link-time optimization])
+  AC_ARG_ENABLE([lto], [AS_HELP_STRING([--enable-lto],
+    [enable link-time optimization, optionally just for jdk or vm binaries @<:@disabled@:>@])])
+
+  JDK_LTO_CFLAGS=
+  JDK_LTO_LDFLAGS=
+  OPENJ9_ENABLE_LINK_OPT=false
+  case "x$enable_lto" in
+    xjdk | xvm | xyes)
+      if test "x$TOOLCHAIN_TYPE" != "xgcc" ; then
+        AC_MSG_ERROR([Link-time optimization is only supported with gcc])
+      else
+        if test "x$enable_lto" = xyes ; then
+          AC_MSG_RESULT([yes])
+        fi
+        if test "x$enable_lto" = xjdk ; then
+          AC_MSG_RESULT([jdk only])
+        else
+          OPENJ9_ENABLE_LINK_OPT=true
+        fi
+        if test "x$enable_lto" = xvm ; then
+          AC_MSG_RESULT([vm only])
+        else
+          JDK_LTO_CFLAGS="-flto"
+          JDK_LTO_LDFLAGS="-flto"
+        fi
+      fi
+      ;;
+    x | xno)
+      AC_MSG_RESULT([no])
+      ;;
+    *)
+      AC_MSG_ERROR([Link-time optimization options are: jdk, vm, yes])
+      ;;
+  esac
+  AC_SUBST(JDK_LTO_CFLAGS)
+  AC_SUBST(JDK_LTO_LDFLAGS)
+  AC_SUBST(OPENJ9_ENABLE_LINK_OPT)
+
   if test "x$OPENJDK_BUILD_OS" = xwindows ; then
     OPENJ9_TOOL_DIR="$OUTPUT_ROOT/tools"
     AC_SUBST(OPENJ9_TOOL_DIR)

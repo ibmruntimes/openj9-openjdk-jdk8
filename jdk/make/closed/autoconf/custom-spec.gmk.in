@@ -29,6 +29,7 @@ VENDOR_TOPDIR           := @VENDOR_TOPDIR@
 OPENJ9_CC               := @OPENJ9_CC@
 OPENJ9_CXX              := @OPENJ9_CXX@
 OPENJ9_DEVELOPER_DIR    := @OPENJ9_DEVELOPER_DIR@
+OPENJ9_ENABLE_LINK_OPT  := @OPENJ9_ENABLE_LINK_OPT@
 NASM                    := @NASM@
 
 # treatment of warnings in native code
@@ -134,5 +135,17 @@ OPENJ9_VM_BUILD_DIR = $(OUTPUT_ROOT)/vm/runtime
 $(foreach var, \
 	CFLAGS_JDKEXE CFLAGS_JDKLIB CXXFLAGS_JDKEXE CXXFLAGS_JDKLIB, \
 	$(eval $(var) += -I$(JDK_OUTPUTDIR)/openj9_include))
+
+# Support link-time-optimization of JDK libraries and executables.
+ifneq (,@JDK_LTO_CFLAGS@)
+  $(foreach var, \
+	CFLAGS_JDKEXE CFLAGS_JDKLIB CXXFLAGS_JDKEXE CXXFLAGS_JDKLIB, \
+	$(eval $(var) += @JDK_LTO_CFLAGS@))
+endif
+ifneq (,@JDK_LTO_LDFLAGS@)
+  $(foreach var, \
+	LDFLAGS_JDKEXE LDFLAGS_JDKLIB, \
+	$(eval $(var) += @JDK_LTO_LDFLAGS@))
+endif
 
 J9JCL_SOURCES_DIR := $(JDK_OUTPUTDIR)/j9jcl
