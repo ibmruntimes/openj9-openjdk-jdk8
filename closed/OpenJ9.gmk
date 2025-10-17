@@ -73,6 +73,9 @@ else
   ifeq (,$(OPENJ9_BRANCH))
     $(error Could not determine OpenJ9 branch)
   endif
+  # Map characters in the branch name other than [A-Za-z0-9.] to '-' so the resulting
+  # version string is acceptable to Runtime.Version.parse().
+  OPENJ9_BRANCH := $(shell $(PRINTF) '%s' '$(OPENJ9_BRANCH)' | $(TR) -c 'A-Za-z0-9.' '-')
   OPENJ9_VERSION_STRING := $(OPENJ9_BRANCH)-$(OPENJ9_SHA)
 endif
 
