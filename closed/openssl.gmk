@@ -53,44 +53,26 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
 		&& $(MV) -f makefile makefile.orig \
 		&& $(SED) -e 's|\("$$(PERL)"\) \([A-Za-z0-9_/-]*\.pl\)|\1 "\2"|' < makefile.orig > makefile \
 	)
+  # convert unix path to windows path
+  MixedPath = $(shell $(CYGPATH) -m $1)
 else # windows
   OPENSSL_CONFIG_SETUP :=
   OPENSSL_MAKE := $(MAKE)
   OPENSSL_MAKE_SETUP :=
   OPENSSL_PATCH :=
+  MixedPath = $1
 endif # windows
 
 # Identify the desired openssl target configuration.
-OPENSSL_TARGET :=
-ifeq ($(OPENJDK_TARGET_OS), aix)
-  ifeq ($(TOOLCHAIN_TYPE), clang)
-    OPENSSL_TARGET := aix64-clang
-  else ifeq ($(TOOLCHAIN_TYPE), xlc)
-    OPENSSL_TARGET := aix64-cc
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), linux)
-  ifneq (,$(filter aarch64 ppc64le x86_64, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := linux-$(OPENJDK_TARGET_CPU)
-  else ifneq (,$(filter riscv64 s390x, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := linux64-$(OPENJDK_TARGET_CPU)
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), macosx)
-  ifneq (,$(filter arm64 x86_64, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := darwin64-$(OPENJDK_TARGET_CPU)-cc
-  else ifeq ($(OPENJDK_TARGET_CPU), aarch64)
-    OPENSSL_TARGET := darwin64-arm64-cc
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), windows)
-  ifeq ($(OPENJDK_TARGET_CPU), x86_64)
-    OPENSSL_TARGET := VC-WIN64A
-  else
-    OPENSSL_TARGET := VC-WIN32
-  endif
-endif # OPENJDK_TARGET_OS
+export OPENSSL_LOCAL_CONFIG_DIR := $(call MixedPath,$(TOPDIR)/closed/openssl-conf)
 
-ifeq (,$(OPENSSL_TARGET))
-  $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
-endif # OPENSSL_TARGET
+ifeq ($(OPENJDK_TARGET_OS)-$(TOOLCHAIN_TYPE), aix-clang)
+  OPENSSL_TARGET := semeru-$(OPENJ9_PLATFORM_CODE)-clang
+else ifeq ($(OPENJDK_TARGET_OS), windows)
+  OPENSSL_TARGET := VC-$(OPENJ9_PLATFORM_CODE)
+else
+  OPENSSL_TARGET := semeru-$(OPENJ9_PLATFORM_CODE)
+endif
 
 ifeq ($(OPENJDK_TARGET_CPU), s390x)
   OPENSSL_CONFIG_CFLAGS := -march=z10
@@ -108,7 +90,7 @@ endif # CCACHE
 
 build_openssl :
 	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)$(if $(OPENSSL_CONFIG_CFLAGS), with additional CFLAGS $(OPENSSL_CONFIG_CFLAGS))
-	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend no-tests shared )
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend no-tests no-winstore shared )
 	$(OPENSSL_PATCH)
 	+ ( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 
