@@ -23,7 +23,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2025 All Rights Reserved
 # ===========================================================================
 
 #############################################################################
@@ -54,7 +54,7 @@ ALL_EXISTING_SOURCE_DIRS := $(wildcard $(ALL_SOURCE_DIRS))
 
 #############################################################################
 # html page footer for the OpenJ9 extensions and overrides pages
-OPENJ9_BASE_URL := https://www.eclipse.org/openj9/
+OPENJ9_BASE_URL := https://eclipse.dev/openj9/
 OPENJ9_BUG_SUBMIT_URL := https://github.com/eclipse-openj9/openj9/issues
 OPENJ9_FULL_COMPANY_NAME := IBM Corp.
 OPENJ9_JAVADOC_BOTTOM = \
