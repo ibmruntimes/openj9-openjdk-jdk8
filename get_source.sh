@@ -39,9 +39,9 @@ fail() {
 
 # Define a single possible source repository.
 # $1 - The local working directory. The value converted to lowercase is used
-#      to form the related option names. For example, the key "OpenJCEPlus"
-#      means options "-openjceplus-repo=", "-openjceplus-branch=",
-#      "-openjceplus-sha=", and "-openjceplus-reference=" will be recognized.
+#      to form the related option names. For example, the key "openssl"
+#      means options "-openssl-repo=", "-openssl-branch=",
+#      "-openssl-sha=", and "-openssl-reference=" will be recognized.
 # $2 - The source URL; default empty.
 # $3 - The source branch or tag; default empty.
 # $4 - Extra options for git clone; default empty.
