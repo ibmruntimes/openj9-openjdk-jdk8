@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2025 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([LIB_SETUP_INIT],
@@ -670,8 +670,10 @@ AC_DEFUN_ONCE([LIB_SETUP_MISC_LIBS],
   DEFAULT_ZLIB=system
   if test "x$OPENJDK_TARGET_OS" = xwindows; then
     #
-    # On windows default is bundled...on others default is system.
+    # On Windows default is bundled.
     #
+    DEFAULT_ZLIB=bundled
+  elif test "x$OPENJDK_TARGET_OS" = xlinux -a "x$OPENJDK_TARGET_CPU" != xs390x; then
     DEFAULT_ZLIB=bundled
   fi
 
