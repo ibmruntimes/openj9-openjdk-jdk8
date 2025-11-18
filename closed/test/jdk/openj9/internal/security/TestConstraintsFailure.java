@@ -155,6 +155,17 @@ public class TestConstraintsFailure {
         } catch (NoSuchAlgorithmException nsae) {
             // Do nothing. This is expected.
         }
+        try {
+            Cipher.getInstance("PBEWithMD5AndDES");
+            throw new RuntimeException("A NoSuchAlgorithmException should have been thrown");
+        } catch (NoSuchAlgorithmException nsae) {
+            String msg = nsae.getMessage();
+            String expected = "Cannot find any provider supporting PBEWithMD5AndDES";
+            if (msg == null || !msg.contains(expected)) {
+                throw new RuntimeException(
+                        "\"" + expected + "\" is expected, but got: " + msg);
+            }
+        }
     }
 
     @Test
