@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2025 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([LIB_SETUP_INIT],
@@ -279,6 +279,7 @@ AC_DEFUN([LIB_CHECK_POTENTIAL_FREETYPE],
   if test "x$FOUND_FREETYPE" = "xyes"; then
     # Include file found, let's continue the sanity check.
     AC_MSG_NOTICE([Found freetype include files at $POTENTIAL_FREETYPE_INCLUDE_PATH using $METHOD])
+    FOUND_FREETYPE=yes
 
     FREETYPE_LIB_NAME="${LIBRARY_PREFIX}${FREETYPE_BASE_NAME}${SHARED_LIBRARY_SUFFIX}"
     if ! test -s "$POTENTIAL_FREETYPE_LIB_PATH/$FREETYPE_LIB_NAME"; then
@@ -318,16 +319,13 @@ AC_DEFUN_ONCE([LIB_SETUP_FREETYPE],
   # If they are not found, the configure "--with-freetype-*" options may be
   # used to fix that. If the preference is to bundle on these platforms then
   # use --with-freetype=bundled.
-
   FREETYPE_BASE_NAME=freetype
   FREETYPE_CFLAGS=
   FREETYPE_LIBS=
-
   if (test "x$with_freetype_include" = "x" && test "x$with_freetype_lib" != "x") || \
      (test "x$with_freetype_include" != "x" && test "x$with_freetype_lib" = "x"); then
     AC_MSG_ERROR([Must specify both or neither of --with-freetype-include and --with-freetype-lib])
   fi
-
   FREETYPE_TO_USE=bundled
   if test "x$OPENJDK_TARGET_OS" != "xwindows" && \
       test "x$OPENJDK_TARGET_OS" != "xmacosx" && \
@@ -378,7 +376,6 @@ AC_DEFUN_ONCE([LIB_SETUP_FREETYPE],
     else
       # User did not specify a location, but asked for system freetype.
       # Try to locate it.
-
       # If we have a sysroot, assume that's where we are supposed to look and
       # skip pkg-config.
       if test "x$SYSROOT" = "x" ; then
@@ -398,7 +395,6 @@ AC_DEFUN_ONCE([LIB_SETUP_FREETYPE],
       if test "x$FOUND_FREETYPE" != "xyes" ; then
         # Check in well-known locations
         FREETYPE_BASE_DIR="$SYSROOT/usr"
-
         if test "x$OPENJDK_TARGET_CPU_BITS" = "x64" ; then
           LIB_CHECK_POTENTIAL_FREETYPE([$FREETYPE_BASE_DIR/include],
               [$FREETYPE_BASE_DIR/lib/$OPENJDK_TARGET_CPU-linux-gnu], [well-known location])
@@ -670,8 +666,10 @@ AC_DEFUN_ONCE([LIB_SETUP_MISC_LIBS],
   DEFAULT_ZLIB=system
   if test "x$OPENJDK_TARGET_OS" = xwindows; then
     #
-    # On windows default is bundled...on others default is system.
+    # On Windows default is bundled.
     #
+    DEFAULT_ZLIB=bundled
+  elif test "x$OPENJDK_TARGET_OS" = xlinux -a "x$OPENJDK_TARGET_CPU" != xs390x; then
     DEFAULT_ZLIB=bundled
   fi
 
