@@ -1,0 +1,64 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+#
+# Test-Profile-PolicySunset-Expired
+#
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.name = Test-Profile-PolicySunset-Expired
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.default = true
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.fips = true
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.desc.sunsetDate = 2023-09-21
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.fips.mode = 140-2
+
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-PolicySunset-Expired.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-PolicySunset-ExpireSoon
+#
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.name = Test-Profile-PolicySunset-ExpireSoon
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.default = true
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.fips = true
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.desc.sunsetDate = 2023-09-21
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.fips.mode = 140-2
+
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-PolicySunset-ExpireSoon.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-PolicySunset-NotExpire
+#
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.name = Test-Profile-PolicySunset-NotExpire
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.default = true
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.fips = true
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.desc.sunsetDate = 2045-09-21
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.fips.mode = 140-2
+
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.jce.provider.1 = sun.security.provider.Sun
+
+RestrictedSecurity.Test-Profile-PolicySunset-NotExpire.securerandom.algorithm = SHA512DRBG
