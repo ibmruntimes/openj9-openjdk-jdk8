@@ -130,7 +130,7 @@ public class TestProperties {
             // 15 - Test property - policy sunset.
             {"Test-Profile-PolicySunset.Base",
                 System.getProperty("test.src") + "/property-java.security",
-                "Restricted security policy expired", 1},
+                "Use -Dsemeru.restrictedsecurity.ignoresunsetexpiration to allow Java to start while possibly using uncertified cryptograph", 1},
             // 16 - Test property - policy sunset format.
             {"Test-Profile-PolicySunsetFormat.Base",
                 System.getProperty("test.src") + "/property-java.security",
