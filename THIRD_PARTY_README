@@ -1028,13 +1028,17 @@ That's all there is to it!
 
 -------------------------------------------------------------------------------
 
-%% This notice is provided with respect to the FreeType 2 font engine,
-version 2.13.3, which may be included with JRE 8, and JDK 8, and OpenJDK 8.
+%% This notice is provided with respect to Freetype v2.13.3 which may be
+included with JRE 8, JDK 8, and OpenJDK 8.
 
 --- begin of LICENSE ---
 
-FreeType Notice
+## The FreeType Project: Freetype v2.13.3
 
+
+### FreeType Notice
+
+```
 FreeType comes with two licenses from which you can choose the one
 which fits your needs best.
 
@@ -1047,7 +1051,10 @@ which fits your needs best.
     projects which use the GPLv2 also, or which need a license
     compatible to the GPLv2.
 
-FreeType License
+```
+
+### FreeType License
+```
 
 Copyright (C) 1996-2024 by David Turner, Robert Wilhelm, and Werner Lemberg.
 Copyright (C) 2007-2024 by Dereg Clegg and Michael Toftdal.
@@ -1075,6 +1082,8 @@ Copyright (C) 2004-2024 by David Turner, Robert Wilhelm, Werner Lemberg, and Geo
 
                     Copyright 1996-2002, 2006 by
           David Turner, Robert Wilhelm, and Werner Lemberg
+
+
 
 Introduction
 ============
@@ -1110,15 +1119,19 @@ Introduction
   We  disclaim  all warranties  covering  The  FreeType Project  and
   assume no liability related to The FreeType Project.
 
+
   Finally,  many  people  asked  us  for  a  preferred  form  for  a
   credit/disclaimer to use in compliance with this license.  We thus
   encourage you to use the following text:
 
+   """
     Portions of this software are copyright © <year> The FreeType
     Project (www.freetype.org).  All rights reserved.
+   """
 
   Please replace <year> with the value from the FreeType version you
   actually use.
+
 
 Legal Terms
 ===========
@@ -1229,17 +1242,20 @@ Legal Terms
 
     https://www.freetype.org
 
-GPL v2
+```
 
-            GNU GENERAL PUBLIC LICENSE
-               Version 2, June 1991
+### GPL v2
+
+```
+		    GNU GENERAL PUBLIC LICENSE
+		       Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc.
      51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
-                Preamble
+			    Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -1288,8 +1304,8 @@ patent must be licensed for everyone's free use or not licensed at all.
 
   The precise terms and conditions for copying, distribution and
 modification follow.
-
-            GNU GENERAL PUBLIC LICENSE
+
+		    GNU GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License applies to any program or other work which contains
@@ -1343,7 +1359,7 @@ above, provided that you also meet all of these conditions:
     License.  (Exception: if the Program itself is interactive but
     does not normally print such an announcement, your work based on
     the Program is not required to print an announcement.)
-
+
 These requirements apply to the modified work as a whole.  If
 identifiable sections of that work are not derived from the Program,
 and can be reasonably considered independent and separate works in
@@ -1401,7 +1417,7 @@ access to copy from a designated place, then offering equivalent
 access to copy the source code from the same place counts as
 distribution of the source code, even though third parties are not
 compelled to copy the source along with the object code.
-
+
   4. You may not copy, modify, sublicense, or distribute the Program
 except as expressly provided under this License.  Any attempt
 otherwise to copy, modify, sublicense or distribute the Program is
@@ -1458,7 +1474,7 @@ impose that choice.
 
 This section is intended to make thoroughly clear what is believed to
 be a consequence of the rest of this License.
-
+
   8. If the distribution and/or use of the Program is restricted in
 certain countries either by patents or by copyrighted interfaces, the
 original copyright holder who places the Program under this License
@@ -1488,7 +1504,7 @@ make exceptions for this.  Our decision will be guided by the two goals
 of preserving the free status of all derivatives of our free software and
 of promoting the sharing and reuse of software generally.
 
-                NO WARRANTY
+			    NO WARRANTY
 
   11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
 FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
@@ -1510,9 +1526,9 @@ YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
 PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGES.
 
-             END OF TERMS AND CONDITIONS
-
-        How to Apply These Terms to Your New Programs
+		     END OF TERMS AND CONDITIONS
+
+	    How to Apply These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it
@@ -1539,6 +1555,7 @@ the "copyright" line and a pointer to where the full notice is found.
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 
 Also add information on how to contact you by electronic and paper mail.
 
@@ -1571,7 +1588,10 @@ consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
 
-Additional Freetype Attributions
+```
+
+### Additional Freetype Attributions
+```
 
 ---------------------------------
 The below applies to the following file(s):
@@ -1626,7 +1646,11 @@ have read and understood the terms and conditions of the
 FreeType Project License as well as those provided in this section,
 and you accept them fully.
 
-MIT License
+
+```
+
+### MIT License
+```
 
 ---------------------------------
 The below applies to the following file(s):
@@ -1655,6 +1679,9 @@ THE COMPUTING RESEARCH LAB OR NEW MEXICO STATE UNIVERSITY BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
 OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+```
 
 --- end of LICENSE ---
 
