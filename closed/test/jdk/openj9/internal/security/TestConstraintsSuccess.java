@@ -83,11 +83,10 @@ public class TestConstraintsSuccess {
         // algorithm verifies that all constraints are checked.
         Signature.getInstance("SHA1withECDSA");
 
-        // Request algorithm whose alias has been specified in the constraint.
-        // Ask for it using both its registered name and an alias (with some
-        // changes in capitalization to check case-insensitivity).
+        // Request algorithm whose alias (its OID) has been specified in the
+        // constraint. Ask for it using both its registered name and its OID.
         MessageDigest.getInstance("SHA-384");
-        MessageDigest.getInstance("Sha384");
+        MessageDigest.getInstance("2.16.840.1.101.3.4.2.2");
     }
 
     @Test
