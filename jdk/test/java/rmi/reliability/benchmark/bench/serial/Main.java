@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @summary The Serialization benchmark test. This java class is used to run the
  *          test under JTREG.
@@ -43,7 +49,7 @@
  * @build bench.serial.ReplaceTrees bench.serial.ShortArrays
  * @build bench.serial.Shorts bench.serial.SmallObjTrees
  * @build bench.serial.StreamBuffer bench.serial.Strings
- * @run main/othervm/timeout=1800 bench.serial.Main -c jtreg-config
+ * @run main/othervm/timeout=1800 -Xmso512k bench.serial.Main -c jtreg-config
  * @author Mike Warres, Nigel Daley
  */
 
