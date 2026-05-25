@@ -344,7 +344,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
 [
   AC_MSG_CHECKING([for openjdk-methodhandles])
   AC_ARG_ENABLE([openjdk-methodhandles], [AS_HELP_STRING([--enable-openjdk-methodhandles],
-      [enable support for OpenJDK MethodHandles @<:@enabled@:>@])])
+      [enable support for OpenJDK MethodHandles @<:@enabled, except on 32-bit platforms@:>@])])
   OPENJ9_ENABLE_OPENJDK_METHODHANDLES=true
 
   if test "x$enable_openjdk_methodhandles" = xyes ; then
@@ -353,7 +353,12 @@ AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
     AC_MSG_RESULT([no (explicitly disabled)])
     OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
   elif test "x$enable_openjdk_methodhandles" = x ; then
-    AC_MSG_RESULT([yes (default)])
+    if test "x$OPENJDK_TARGET_CPU_BITS" = x32 ; then
+      AC_MSG_RESULT([no (default for $OPENJ9_PLATFORM_CODE)])
+      OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
+    else
+      AC_MSG_RESULT([yes (default)])
+    fi
   else
     AC_MSG_ERROR([--enable-openjdk-methodhandles accepts no argument])
   fi
