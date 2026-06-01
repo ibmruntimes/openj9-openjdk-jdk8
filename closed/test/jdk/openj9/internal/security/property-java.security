@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2024, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -21,16 +21,14 @@
 RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestBase.Version.desc.default = false
 RestrictedSecurity.TestBase.Version.desc.fips = true
-RestrictedSecurity.TestBase.Version.desc.hash = SHA-256:0ca32676ac2ae92d0469cbf293f3a69416c5d0312c80473319452f4d6995d234
-RestrictedSecurity.TestBase.Version.desc.number = Certificate #XXX
-RestrictedSecurity.TestBase.Version.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
-RestrictedSecurity.TestBase.Version.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.TestBase.Version.desc.hash = SHA-256:bae5d6cc6a013ee158b8f5bb3540eff6a873d3ef530db14e9253be5d3359682e
 RestrictedSecurity.TestBase.Version.fips.mode = 140-3
 
 RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =
 RestrictedSecurity.TestBase.Version.tls.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.tls.ephemeralDHKeySize =
 RestrictedSecurity.TestBase.Version.tls.legacyAlgorithms =
+RestrictedSecurity.TestBase.Version.tls.namedGroups = secp256r1
 
 RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
