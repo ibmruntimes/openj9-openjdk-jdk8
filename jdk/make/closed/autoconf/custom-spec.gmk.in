@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -107,8 +107,8 @@ ifeq ($(OPENJDK_TARGET_OS), macosx)
   # is not applied.
   export MACOSX_DEPLOYMENT_TARGET := @MACOSX_VERSION_MIN@
 
-  # Set page zero size to 4KB for mapping memory below 4GB.
-  LDFLAGS_JDKEXE += -pagezero_size 0x1000
+  # Set page zero size to 16KB for mapping memory below 4GB.
+  LDFLAGS_JDKEXE += -pagezero_size 0x4000
 endif
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
