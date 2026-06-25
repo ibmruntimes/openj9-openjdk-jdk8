@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "jni.h"
 #include "jni_util.h"
 #include "jvm.h"
@@ -90,6 +96,9 @@ Java_sun_nio_ch_EPoll_epollWait(JNIEnv *env, jclass c,
     int res;
 
     RESTARTABLE(epoll_wait(epfd, events, numfds, -1), res);
+    if ((res < 0) && (EINVAL == errno)) {
+        RESTARTABLE(epoll_wait(epfd, events, numfds, -1), res);
+    }
     if (res < 0) {
         JNU_ThrowIOExceptionWithLastError(env, "epoll_wait failed");
     }
