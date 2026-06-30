@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -21,7 +21,7 @@
 RestrictedSecurity.TestConstraints.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestConstraints.Version.desc.default = false
 RestrictedSecurity.TestConstraints.Version.desc.fips = false
-RestrictedSecurity.TestConstraints.Version.desc.hash = SHA-256:33c0a7657be246ca6d6c39c42cac1d346d1a8f6e7a4fc2e0bc2d59c98efb1d77
+RestrictedSecurity.TestConstraints.Version.desc.hash = SHA-256:33eec895b275d46bedec86fdb68c072d202be30c3b3df9719bdf9a9b40f914f3
 RestrictedSecurity.TestConstraints.Version.desc.number = Certificate #XXX
 RestrictedSecurity.TestConstraints.Version.desc.policy =
 RestrictedSecurity.TestConstraints.Version.fips.mode = test
@@ -38,6 +38,7 @@ RestrictedSecurity.TestConstraints.Version.jce.provider.1 = sun.security.provide
     {MessageDigest, MD5, *, FullClassName:TestConstraintsSuccess}, \
     {MessageDigest, MD5, *, FullClassName:AnotherNonExistingClass}, \
     {MessageDigest, SHA-256, *}, \
+    {MessageDigest, sha384, *, FullClassName:TestConstraintsSuccess}, \
     {MessageDigest, SHA-512, *, FullClassName:TestConstraintsSuccess}, \
     {KeyStore, JKS, *, FullClassName:TestConstraintsSuccess}]
 RestrictedSecurity.TestConstraints.Version.jce.provider.2 = sun.security.ec.SunEC [ \
