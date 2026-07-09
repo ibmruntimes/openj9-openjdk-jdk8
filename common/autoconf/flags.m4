@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2026 All Rights Reserved
 # ===========================================================================
 
 AC_DEFUN_ONCE([FLAGS_SETUP_INIT_FLAGS],
@@ -513,6 +513,11 @@ AC_DEFUN_ONCE([FLAGS_SETUP_COMPILER_FLAGS_FOR_JDK],
     if test "x$TOOLCHAIN_TYPE" = xgcc; then
       TOOLCHAIN_CHECK_COMPILER_VERSION(6, FLAGS_SETUP_GCC6_COMPILER_FLAGS)
     fi
+
+    # Use '-std=c17' if the compiler supports that option. A significant
+    # set of source files will not compile if C23 is assumed.
+    FLAGS_C_COMPILER_CHECK_ARGUMENTS([-std=c17],
+                                     [CFLAGS_JDK="${CFLAGS_JDK} -std=c17"], [])
 
     # Check that the compiler supports -Wformat-overflow flag
     # Set USE_FORMAT_OVERFLOW to 1 if it does.
