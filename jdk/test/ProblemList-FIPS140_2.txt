@@ -449,6 +449,7 @@ java/security/KeyStore/PKCS12/EntryProtectionTest.java https://github.com/ibmrun
 java/security/KeyStore/PKCS12/MetadataEmptyTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
 java/security/KeyStore/PKCS12/MetadataStoreLoadTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
 java/security/KeyStore/PKCS12/ReadP12Test.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
+javax/rmi/ssl/SslRMIClientSocketFactoryPermissionTest.java https://github.com/eclipse-openj9/openj9/issues/23655 linux-ppc64le,linux-s390x,linux-x64
 sun/security/ec/TestEC.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/ec/ReadPKCS12.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs12/Bug6415637.java https://github.com/ibmruntimes/openj9-openjdk-jdk8/issues/611 linux-ppc64le,linux-s390x,linux-x64
