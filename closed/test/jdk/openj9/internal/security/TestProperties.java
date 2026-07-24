@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2024, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2024, 2026 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -181,12 +181,21 @@ public class TestProperties {
             // java.security profile, but propertyListB-java.security file is missing.
             {"Test-Profile-Property-List.B",
                 null, System.getProperty("test.src") + "/propertyListB-java.security",
-                "is not present in the java.security file or any appended files", 1}
+                "is not present in the java.security file or any appended files", 1},
             // 2 - The -Djava.security.propertiesList option does not support using
             // a leading '=' prefix.
             // {"Test-Profile-Property-List.A",
             //     null, "=" + System.getProperty("test.src") + "/propertyListA-java.security",
             //     "java.security.propertiesList does not support '=' prefix", 1}
+
+            // 1 - Test property - base profile with javax.net.ssl.keyStore loads successfully.
+            {"TestBase.Version",
+                System.getProperty("test.src") + "/property-java.security", null,
+                "javax\\.net\\.ssl\\.keyStore: NONE", 0},
+            // 2 - Test property - base profile with jdk.tls.namedGroups loads successfully.
+            {"TestBase.Version",
+                System.getProperty("test.src") + "/property-java.security", null,
+                "jdk\\.tls\\.namedGroups: secp256r1", 0}
         });
     }
 
@@ -211,6 +220,20 @@ public class TestProperties {
         outputAnalyzer.shouldHaveExitValue(expectedExitValue).shouldMatch(expected);
     }
 
+    private static void testSystemProperties() {
+        // Test javax.net.ssl.keyStore system property.
+        String keyStore = System.getProperty("javax.net.ssl.keyStore");
+        if (keyStore != null) {
+            System.out.println("javax.net.ssl.keyStore: " + keyStore);
+        }
+
+        // Test jdk.tls.namedGroups system property.
+        String namedGroups = System.getProperty("jdk.tls.namedGroups");
+        if (namedGroups != null) {
+            System.out.println("jdk.tls.namedGroups: " + namedGroups);
+        }
+    }
+
     public static void main(String[] args) {
         // Something to trigger "properties" debug output.
         try {
@@ -218,6 +241,7 @@ public class TestProperties {
                 System.out.println("Provider Name: " + provider.getName());
                 System.out.println("Provider Version: " + provider.getVersion());
             }
+            testSystemProperties();
         } catch (Exception e) {
             System.out.println(e);
         }
