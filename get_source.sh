@@ -71,8 +71,8 @@ add_source() {
 #
 configure_defaults() {
 	local current_branch="$(git rev-parse --abbrev-ref HEAD)"
-	local openj9_branch=v0.60.0-release
-	local omr_branch=v0.60.0-release
+	local openj9_branch=v0.61.0-release
+	local omr_branch=v0.61.0-release
 
 	#          folder       URL                                               branch          options
 	#          ------       ---                                               ------          -------
