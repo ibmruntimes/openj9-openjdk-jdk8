@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -82,6 +82,12 @@ public class TestConstraintsSuccess {
         // middle one having the correct attributes, successfully getting the
         // algorithm verifies that all constraints are checked.
         Signature.getInstance("SHA1withECDSA");
+
+        // Request algorithm whose alias has been specified in the constraint.
+        // Ask for it using both its registered name and an alias (with some
+        // changes in capitalization to check case-insensitivity).
+        MessageDigest.getInstance("SHA-384");
+        MessageDigest.getInstance("Sha384");
     }
 
     @Test

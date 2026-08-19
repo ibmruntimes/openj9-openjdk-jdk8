@@ -274,7 +274,7 @@ public final class RestrictedSecurity {
     public static boolean isServiceAllowed(Service service) {
         if (securityEnabled) {
             checkHashValues(false);
-            return restricts.isRestrictedServiceAllowed(service, true);
+            return restricts.isRestrictedServiceAllowed(service, true, null);
         }
         return true;
     }
@@ -283,12 +283,13 @@ public final class RestrictedSecurity {
      * Check if the service is allowed to be registered in restricted security mode.
      *
      * @param service the service to check
+     * @param aliases a list of aliases for the algorithm name of the service
      * @return true if the service is allowed to be registered
      */
-    public static boolean canServiceBeRegistered(Service service) {
+    public static boolean canServiceBeRegistered(Service service, List<String> aliases) {
         if (securityEnabled) {
             checkHashValues(false);
-            return restricts.isRestrictedServiceAllowed(service, false);
+            return restricts.isRestrictedServiceAllowed(service, false, aliases);
         }
         return true;
     }
@@ -851,9 +852,11 @@ public final class RestrictedSecurity {
          *
          * @param service   the Service to check
          * @param checkUse  should its attempted use be checked against the accepted
+         * @param aliases   a list of aliases for the algorithm name of the service
+         *                  (could be null if no aliases are available)
          * @return true if the Service is allowed
          */
-        boolean isRestrictedServiceAllowed(Service service, boolean checkUse) {
+        boolean isRestrictedServiceAllowed(Service service, boolean checkUse, List<String> aliases) {
             Provider provider = service.getProvider();
             String providerClassName = provider.getClass().getName();
 
@@ -907,11 +910,22 @@ public final class RestrictedSecurity {
                     continue constraints;
                 }
                 if (!isAsterisk(cAlgorithm) && !algorithm.equalsIgnoreCase(cAlgorithm)) {
-                    // The constraint doesn't apply to the service algorithm.
-                    if (debug != null) {
-                        debug.println("The constraint doesn't apply to the service algorithm.");
+                    // Check if the algorithm name in the constraint is an alias (case-insensitive).
+                    if ((aliases != null)
+                            && aliases.stream().anyMatch(cAlgorithm::equalsIgnoreCase)
+                    ) {
+                        // Fix the constraint to have the registered name.
+                        constraint.setAlgorithm(algorithm);
+                        if (debug != null) {
+                            debug.println("Constraint had an alias ('" + cAlgorithm + "'). Switching to registered ('" + algorithm + "').");
+                        }
+                    } else {
+                        // The constraint doesn't apply to the service algorithm.
+                        if (debug != null) {
+                            debug.println("The constraint doesn't apply to the service algorithm.");
+                        }
+                        continue constraints;
                     }
-                    continue constraints;
                 }
 
                 // For type and algorithm match, and attribute is not *.
@@ -1992,7 +2006,7 @@ public final class RestrictedSecurity {
      */
     private static final class Constraint {
         final String type;
-        final String algorithm;
+        String algorithm;
         final String attributes;
         final String acceptedUses;
 
@@ -2002,6 +2016,10 @@ public final class RestrictedSecurity {
             this.algorithm = algorithm;
             this.attributes = attributes;
             this.acceptedUses = acceptedUses;
+        }
+
+        void setAlgorithm(String algorithm) {
+            this.algorithm = algorithm;
         }
 
         @Override
