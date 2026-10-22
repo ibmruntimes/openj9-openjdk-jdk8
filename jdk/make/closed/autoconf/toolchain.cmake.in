@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,13 +18,12 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # =========================================================================
 
-
-# Setting CMAKE_SYSTEM_NAME forces CMake into cross-compile mode, so only set it if we need to
+# Setting CMAKE_SYSTEM_NAME forces CMake into cross-compile mode, so only set it if necessary.
 # Note: We consider Windows to be a cross-compile since CMake considers cygwin to be a different platform than Windows.
-if("@COMPILE_TYPE@" STREQUAL "cross" OR  "@OPENJDK_TARGET_OS@" STREQUAL "windows")
+if("@COMPILE_TYPE@" STREQUAL "cross" OR "@OPENJDK_TARGET_OS@" STREQUAL "windows")
 	# CMAKE_SYSTEM_NAME expects the system name to start with a capital.
 	set(temp_system_name "@OPENJDK_TARGET_OS@")
-	string(SUBSTRING "${temp_system_name}" 0  1 first_char)
+	string(SUBSTRING "${temp_system_name}" 0 1 first_char)
 	string(TOUPPER "${first_char}" first_char)
 	string(SUBSTRING "${temp_system_name}" 1 -1 CMAKE_SYSTEM_NAME)
 	set(CMAKE_SYSTEM_NAME "${first_char}${CMAKE_SYSTEM_NAME}")
@@ -55,11 +54,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	separate_arguments(FIXPATH UNIX_COMMAND "@FIXPATH@")
 	set(OMR_EXE_LAUNCHER "${FIXPATH}" CACHE STRING "")
 
-	# CMake will test to see if compiler works by getting it to compile files in
-	# /usr/lib, which fixpath wont translate
-	set(CMAKE_C_COMPILER_WORKS True CACHE BOOL "")
-	set(CMAKE_CXX_COMPILER_WORKS True CACHE BOOL "")
-
+	# CMake will test to see if compiler works by compiling files
+	# in /usr/lib, which fixpath won't translate.
+	set(CMAKE_C_COMPILER_WORKS TRUE CACHE BOOL "")
+	set(CMAKE_CXX_COMPILER_WORKS TRUE CACHE BOOL "")
 else()
 	if(NOT CMAKE_C_COMPILER)
 		set(CMAKE_C_COMPILER "@CC@")
