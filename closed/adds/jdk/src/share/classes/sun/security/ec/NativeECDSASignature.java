@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2024, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -158,7 +158,9 @@ abstract class NativeECDSASignature extends SignatureSpi {
             if (this.javaImplementation != null) {
                 this.javaImplementation.engineUpdate(b, off, len);
             } else {
-                if (offset >= precomputedDigest.length) {
+                // Check capacity. If precomputedDigest is already full, this
+                // condition effectively becomes 'len > -1' and will always be true
+                if (len > precomputedDigest.length - offset) {
                     offset = RAW_ECDSA_MAX + 1;
                     return;
                 }
@@ -177,7 +179,7 @@ abstract class NativeECDSASignature extends SignatureSpi {
                 if (len <= 0) {
                     return;
                 }
-                if (len >= (precomputedDigest.length - offset)) {
+                if (len > precomputedDigest.length - offset) {
                     offset = RAW_ECDSA_MAX + 1;
                     return;
                 }
