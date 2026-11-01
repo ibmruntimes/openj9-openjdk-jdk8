@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 8005471 8381379 8390388 8390380
+ * @bug 8005471 8381379 8390388 8390380 8392519 8392377 8393344 8393337
  * @run main/othervm -Djava.locale.providers=CLDR CLDRDisplayNamesTest
  * @summary Make sure that localized time zone names of CLDR are used
  * if specified.
@@ -86,6 +86,10 @@ public class CLDRDisplayNamesTest {
         {ZonedDateTime.of(2026, 7, 5, 0, 0, 0, 0, ZoneId.of("America/Edmonton")), "Mountain Daylight Time"},
         {ZonedDateTime.of(2026, 1, 5, 0, 0, 0, 0, ZoneId.of("America/Yellowknife")), "Mountain Standard Time"},
         {ZonedDateTime.of(2026, 7, 5, 0, 0, 0, 0, ZoneId.of("America/Yellowknife")), "Mountain Daylight Time"},
+        {ZonedDateTime.of(2026, 12, 5, 0, 0, 0, 0, ZoneId.of("America/Inuvik")), "Mountain Daylight Time"},
+        {ZonedDateTime.of(2026, 12, 5, 0, 0, 0, 0, ZoneId.of("America/Winnipeg")), "Central Daylight Time"},
+        {ZonedDateTime.of(2026, 12, 5, 0, 0, 0, 0, ZoneId.of("America/Rainy_River")), "Central Daylight Time"}
+
     };
 
     public static void main(String[] args) {
