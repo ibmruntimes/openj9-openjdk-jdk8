@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang.invoke;
 
 import sun.invoke.util.BytecodeDescriptor;
@@ -1080,6 +1086,13 @@ import java.util.Objects;
             for (int i = 0; i < length; i++)
                 buf[i] = new MemberName();
             return buf;
+        }
+    }
+
+    @Override
+    protected void finalize() {
+        if (null != clazz) {
+            MethodHandleNatives.markClassForMemberNamePruning(clazz);
         }
     }
 
