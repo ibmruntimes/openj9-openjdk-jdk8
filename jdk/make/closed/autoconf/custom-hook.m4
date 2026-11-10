@@ -343,16 +343,17 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
 AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
 [
   AC_MSG_CHECKING([for openjdk-methodhandles])
-  AC_ARG_ENABLE([openjdk-methodhandles], [AS_HELP_STRING([--enable-openjdk-methodhandles], [enable support for OpenJDK MethodHandles @<:@disabled@:>@])])
-  OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
+  AC_ARG_ENABLE([openjdk-methodhandles], [AS_HELP_STRING([--enable-openjdk-methodhandles],
+      [enable support for OpenJDK MethodHandles @<:@enabled@:>@])])
+  OPENJ9_ENABLE_OPENJDK_METHODHANDLES=true
 
   if test "x$enable_openjdk_methodhandles" = xyes ; then
     AC_MSG_RESULT([yes (explicitly enabled)])
-    OPENJ9_ENABLE_OPENJDK_METHODHANDLES=true
   elif test "x$enable_openjdk_methodhandles" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
+    OPENJ9_ENABLE_OPENJDK_METHODHANDLES=false
   elif test "x$enable_openjdk_methodhandles" = x ; then
-    AC_MSG_RESULT([no (default)])
+    AC_MSG_RESULT([yes (default)])
   else
     AC_MSG_ERROR([--enable-openjdk-methodhandles accepts no argument])
   fi
